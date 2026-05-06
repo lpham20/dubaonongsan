@@ -1,0 +1,15 @@
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    environment:
+      POSTGRES_DB: marketai
+      POSTGRES_USER: marketai
+      POSTGRES_PASSWORD: marketai
+    ports:
+      - "5432:5432"
+    volumes:
+      - marketai_timescale:/var/lib/postgresql/data
+
+volumes:
+  marketai_timescale:
+

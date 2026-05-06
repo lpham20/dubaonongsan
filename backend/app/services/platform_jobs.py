@@ -1,0 +1,317 @@
+from __future__ import annotations
+
+import json
+import logging
+import os
+from contextlib import contextmanager
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
+from apscheduler.executors.pool import ThreadPoolExecutor
+from apscheduler.schedulers.background import BackgroundScheduler as APBackgroundScheduler
+from sqlalchemy import desc, select
+from sqlalchemy.orm import Session
+
+from app.core.cache import invalidate_cache
+from app.core.config import get_settings
+from app.db import SessionLocal
+from app.ingestion.service import PriceIngestionService
+from app.ml_engine.evaluator import ForecastEvaluator
+from app.models import DailyMarketPrice, DurianVariety, ModelTrainingRun, PlatformJobRun, ProductionRegion
+from app.services.content_portal import ContentPortalService
+from app.services.crop_catalog import CROP_TYPES, ensure_crop_catalog
+from app.services.market_intelligence import MarketIntelligenceService
+from app.services.model_ready_backfill import ModelReadyBackfillService
+from app.services.public_price_calibration import PublicPriceCalibrationService
+
+
+logger = logging.getLogger(__name__)
+SCHEDULER_TZ = ZoneInfo("Asia/Ho_Chi_Minh")
+MODEL_READY_HISTORY_DAYS = 240
+
+
+class PlatformJobService:
+    def __init__(self, db: Session) -> None:
+        self.db = db
+
+    def run_scrape(self) -> dict:
+        with job_lock("scrape_prices"):
+            job = self._start_job("scrape_prices")
+            try:
+                catalog = ensure_crop_catalog(self.db)
+                scrape_results = PriceIngestionService(self.db).scrape_and_store(source=None)
+                backfills = [
+                    ModelReadyBackfillService(self.db, crop_type=crop, days=MODEL_READY_HISTORY_DAYS).backfill()
+                    for crop in CROP_TYPES
+                ]
+                calibrations = [
+                    PublicPriceCalibrationService(self.db, crop_type=crop, days=MODEL_READY_HISTORY_DAYS).calibrate()
+                    for crop in CROP_TYPES
+                ]
+                summary = {
+                    "catalog": catalog,
+                    "scrape": scrape_results,
+                    "backfill": backfills,
+                    "public_price_calibration": calibrations,
+                }
+                invalidate_cache()
+                self._finish_job(job, "thành công", summary)
+                return summary
+            except Exception as exc:
+                self._finish_job(job, "lỗi", None, str(exc))
+                raise
+
+    def run_news_scrape(self) -> dict:
+        with job_lock("scrape_news"):
+            job = self._start_job("scrape_news")
+            try:
+                summary = ContentPortalService(self.db).scrape_news()
+                invalidate_cache("news")
+                self._finish_job(job, "thành công", summary)
+                return summary
+            except Exception as exc:
+                self._finish_job(job, "lỗi", None, str(exc))
+                raise
+
+    def run_data_quality(self) -> dict:
+        with job_lock("data_quality_check"):
+            job = self._start_job("data_quality_check")
+            try:
+                summary = {
+                    "crops": [
+                        *(self._quality_summary(crop) for crop in CROP_TYPES),
+                    ]
+                }
+                self._finish_job(job, "thành công", summary)
+                return summary
+            except Exception as exc:
+                self._finish_job(job, "lỗi", None, str(exc))
+                raise
+
+    def run_retrain(self) -> dict:
+        with job_lock("retrain_models"):
+            job = self._start_job("retrain_models")
+            results = []
+            try:
+                ensure_crop_catalog(self.db)
+                for crop in CROP_TYPES:
+                    started = datetime.now(UTC)
+                    metrics = ForecastEvaluator(self.db, crop_type=crop).backtest()
+                    run = ModelTrainingRun(
+                        crop_type=crop,
+                        started_at=started,
+                        finished_at=datetime.now(UTC),
+                        status="thành công",
+                        rmse_vnd_per_kg=metrics.get("rmse_vnd_per_kg"),
+                        mae_vnd_per_kg=metrics.get("mae_vnd_per_kg"),
+                        backtest_samples=metrics.get("backtest_samples", 0),
+                        evaluated_series=metrics.get("evaluated_series", 0),
+                        note=metrics.get("note"),
+                    )
+                    self.db.add(run)
+                    results.append({"crop": crop, **metrics})
+                self.db.commit()
+                summary = {"models": results}
+                invalidate_cache()
+                self._finish_job(job, "thành công", summary)
+                return summary
+            except Exception as exc:
+                self._finish_job(job, "lỗi", None, str(exc))
+                raise
+
+    def latest_jobs(self, limit: int = 20) -> list[PlatformJobRun]:
+        return self.db.scalars(select(PlatformJobRun).order_by(desc(PlatformJobRun.started_at)).limit(limit)).all()
+
+    def latest_training_runs(self, limit: int = 10) -> list[ModelTrainingRun]:
+        return self.db.scalars(select(ModelTrainingRun).order_by(desc(ModelTrainingRun.started_at)).limit(limit)).all()
+
+    def _quality_summary(self, crop: str) -> dict:
+        service = MarketIntelligenceService(self.db)
+        varieties = self.db.scalars(
+            select(DurianVariety)
+            .where(DurianVariety.crop_type == crop)
+            .order_by(DurianVariety.variety_id)
+        ).all()
+        regions = self.db.scalars(
+            select(ProductionRegion)
+            .join(DailyMarketPrice, DailyMarketPrice.region_id == ProductionRegion.region_id)
+            .where(DailyMarketPrice.crop_type == crop)
+            .order_by(ProductionRegion.region_id)
+            .distinct()
+        ).all()
+        production_regions = [
+            region
+            for region in regions
+            if region.province is not None
+            and region.region_name not in {"Thị trường Việt Nam", "Chợ đầu mối TP.HCM"}
+        ]
+        scores: list[int] = []
+        weak_pairs = []
+        stale_pairs = []
+        missing_pairs = 0
+        quality_by_pair = service.data_quality_bulk(
+            crop,
+            region_ids=[region.region_id for region in production_regions],
+            variety_ids=[variety.variety_id for variety in varieties],
+        )
+        for region in production_regions:
+            for variety in varieties:
+                quality = quality_by_pair.get((region.region_id, variety.variety_id))
+                if not quality or not quality["history_points"]:
+                    missing_pairs += 1
+                    continue
+                scores.append(quality["score"])
+                pair = {
+                    "region_id": region.region_id,
+                    "province": region.province,
+                    "variety_id": variety.variety_id,
+                    "variety": variety.name,
+                    "score": quality["score"],
+                    "history_points": quality["history_points"],
+                    "observed_points": quality["observed_points"],
+                    "freshness_days": quality["freshness_days"],
+                    "risk_flags": quality["risk_flags"],
+                }
+                if quality["score"] < 80:
+                    weak_pairs.append(pair)
+                if quality["freshness_days"] is None or quality["freshness_days"] > 3:
+                    stale_pairs.append(pair)
+        return {
+            "crop": crop,
+            "pairs_checked": len(production_regions) * len(varieties),
+            "missing_pairs": missing_pairs,
+            "avg_score": round(sum(scores) / len(scores), 2) if scores else 0,
+            "min_score": min(scores) if scores else 0,
+            "weak_pairs": weak_pairs[:12],
+            "stale_pairs": stale_pairs[:12],
+        }
+
+    def _start_job(self, name: str) -> PlatformJobRun:
+        job = PlatformJobRun(job_name=name, started_at=datetime.now(UTC), status="đang chạy")
+        self.db.add(job)
+        self.db.commit()
+        self.db.refresh(job)
+        return job
+
+    def _finish_job(
+        self,
+        job: PlatformJobRun,
+        status: str,
+        summary: dict | None,
+        error_message: str | None = None,
+    ) -> None:
+        job.finished_at = datetime.now(UTC)
+        job.status = status
+        job.summary = json.dumps(summary, ensure_ascii=False, default=str) if summary is not None else None
+        job.error_message = error_message
+        self.db.add(job)
+        self.db.commit()
+
+
+class JobScheduler:
+    _scheduler: APBackgroundScheduler | None = None
+
+    @classmethod
+    def start_once(cls) -> None:
+        if cls._scheduler is not None:
+            return
+        settings = get_settings()
+        cls._scheduler = APBackgroundScheduler(
+            executors={"default": ThreadPoolExecutor(max_workers=2)},
+            job_defaults={
+                "coalesce": True,
+                "max_instances": 1,
+                "misfire_grace_time": 24 * 60 * 60,
+            },
+            timezone=SCHEDULER_TZ,
+        )
+        cls._scheduler.add_job(
+            cls._run_with_session,
+            "interval",
+            minutes=settings.scrape_interval_minutes,
+            args=["scrape"],
+            id="scrape_prices",
+            next_run_time=datetime.now(SCHEDULER_TZ) + timedelta(seconds=10),
+            replace_existing=True,
+        )
+        cls._scheduler.add_job(
+            cls._run_with_session,
+            "interval",
+            minutes=settings.news_scrape_interval_minutes,
+            args=["news"],
+            id="scrape_news_every_3h",
+            next_run_time=datetime.now(SCHEDULER_TZ) + timedelta(seconds=20),
+            replace_existing=True,
+        )
+        cls._scheduler.add_job(
+            cls._run_with_session,
+            "cron",
+            hour=settings.news_scrape_daily_hour,
+            minute=settings.news_scrape_daily_minute,
+            args=["news"],
+            id="scrape_news_daily_0700",
+            replace_existing=True,
+        )
+        cls._scheduler.add_job(
+            cls._run_with_session,
+            "interval",
+            minutes=settings.data_quality_interval_minutes,
+            args=["data_quality"],
+            id="data_quality",
+            next_run_time=datetime.now(SCHEDULER_TZ) + timedelta(minutes=settings.data_quality_interval_minutes),
+            replace_existing=True,
+        )
+        cls._scheduler.add_job(
+            cls._run_with_session,
+            "interval",
+            minutes=settings.retrain_interval_minutes,
+            args=["retrain"],
+            id="retrain",
+            next_run_time=datetime.now(SCHEDULER_TZ) + timedelta(minutes=settings.retrain_interval_minutes),
+            replace_existing=True,
+        )
+        cls._scheduler.start()
+
+    @classmethod
+    def shutdown(cls) -> None:
+        if cls._scheduler is not None:
+            cls._scheduler.shutdown(wait=True)
+            cls._scheduler = None
+
+    @staticmethod
+    def _run_with_session(job: str) -> None:
+        with SessionLocal() as db:
+            service = PlatformJobService(db)
+            try:
+                if job == "scrape":
+                    service.run_scrape()
+                elif job == "news":
+                    service.run_news_scrape()
+                elif job == "data_quality":
+                    service.run_data_quality()
+                elif job == "retrain":
+                    service.run_retrain()
+            except Exception:
+                logger.exception("Scheduled job %s failed", job)
+
+@contextmanager
+def job_lock(name: str):
+    lock_dir = Path(os.getenv("MARKETAI_JOB_LOCK_DIR", Path.cwd() / ".job_locks"))
+    lock_dir.mkdir(parents=True, exist_ok=True)
+    lock_path = lock_dir / f"{name}.lock"
+    handle = None
+    try:
+        handle = os.open(str(lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        os.write(handle, str(os.getpid()).encode("ascii"))
+        yield
+    except FileExistsError as exc:
+        raise RuntimeError(f"Job {name} đang chạy, bỏ qua lần chạy chồng.") from exc
+    finally:
+        if handle is not None:
+            os.close(handle)
+            try:
+                lock_path.unlink()
+            except FileNotFoundError:
+                pass
+

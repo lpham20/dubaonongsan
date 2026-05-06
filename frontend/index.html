@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <title>Dự báo nông sản - Dự báo giá nông sản Việt Nam</title>
+    <meta
+      name="description"
+      content="Theo dõi và dự báo giá sầu riêng, cà phê, hồ tiêu, lúa theo vùng trồng. Cập nhật tin thị trường, phân bón, chính sách và hướng dẫn kỹ thuật nông nghiệp."
+    />
+    <meta name="keywords" content="giá sầu riêng, giá cà phê, giá hồ tiêu, giá lúa, dự báo giá nông sản, dubaonongsan" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Dự báo nông sản" />
+    <link rel="canonical" href="https://dubaonongsan.com/" />
+    <link rel="alternate" hreflang="vi-VN" href="https://dubaonongsan.com/" />
+    <link rel="alternate" hreflang="x-default" href="https://dubaonongsan.com/" />
+    <link rel="alternate" type="application/rss+xml" title="Dự báo nông sản RSS" href="/api/v1/rss/news.xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="vi_VN" />
+    <meta property="og:site_name" content="Dự báo nông sản" />
+    <meta property="og:title" content="Dự báo giá nông sản Việt Nam" />
+    <meta property="og:description" content="Theo dõi giá sầu riêng, cà phê, hồ tiêu, lúa và dự báo 30 ngày theo vùng trồng." />
+    <meta property="og:url" content="https://dubaonongsan.com/" />
+    <meta property="og:image" content="https://dubaonongsan.com/og-cover.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Dự báo nông sản - Dự báo giá nông sản" />
+    <meta name="twitter:description" content="Dự báo giá nông sản Việt Nam, cập nhật hàng ngày." />
+    <meta name="twitter:image" content="https://dubaonongsan.com/og-cover.jpg" />
+
+    <link rel="preconnect" href="https://api.dubaonongsan.com" />
+    <link rel="dns-prefetch" href="https://api.dubaonongsan.com" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Dự báo nông sản",
+        "url": "https://dubaonongsan.com",
+        "logo": "https://dubaonongsan.com/logo.png",
+        "description": "Nền tảng tin tức, kỹ thuật canh tác và dự báo giá nông sản tại Việt Nam"
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Dự báo nông sản",
+        "url": "https://dubaonongsan.com",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://dubaonongsan.com/tin-tuc?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      (function () {
+        var id = window.DUBAONONGSAN_GA_ID;
+        if (!id) return;
+        var script = document.createElement("script");
+        script.async = true;
+        script.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(id);
+        document.head.appendChild(script);
+        gtag("js", new Date());
+        gtag("config", id);
+      })();
+    </script>
+  </head>
+  <body>
+    <noscript>Vui lòng bật JavaScript để xem giá nông sản, tin tức và dự báo.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

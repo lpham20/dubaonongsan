@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(.venv/Scripts/python.exe -c \"from app.main import app; print\\('OK', len\\(app.routes\\), 'routes'\\)\")",
+      "Bash(.venv/Scripts/python.exe -m pytest tests/ -x --tb=short)",
+      "Bash(.venv/Scripts/python.exe -m pytest tests/test_auth_security.py -x --tb=short)",
+      "Bash(python -c \"import os; files=[\\('public/coffee-hero.png','png'\\),\\('public/durian-hero.png','png'\\),\\('public/guide-fruit.png','png'\\),\\('public/durian-hero-photo.jpg','jpg'\\),\\('public/coffee-hero-photo.jpg','jpg'\\),\\('public/guide-fruit-optimized.jpg','jpg'\\),\\('public/guide-industrial-optimized.jpg','jpg'\\),\\('public/guide-food-crop-optimized.jpg','jpg'\\),\\('public/guide-other-optimized.jpg','jpg'\\),\\('public/og-cover.jpg','jpg'\\)]; [print\\(f'{f}: {os.path.getsize\\(f\\)//1024}KB'\\) for f,_ in files if os.path.exists\\(f\\)]\")"
+    ]
+  }
+}

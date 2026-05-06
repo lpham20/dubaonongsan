@@ -1,0 +1,31 @@
+{
+  "name": "marketai-durian-dashboard",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc && vite build && python ../scripts/prerender_seo.py",
+    "build:seo": "npm run build",
+    "build:app": "tsc && vite build",
+    "build:full": "npm run build",
+    "preview": "vite preview --host 127.0.0.1",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@phosphor-icons/react": "2.1.10",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "recharts": "2.13.3"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
+    "@vitejs/plugin-react": "4.3.4",
+    "typescript": "5.7.2",
+    "vite": "6.4.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

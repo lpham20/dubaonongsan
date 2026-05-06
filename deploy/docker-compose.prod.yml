@@ -1,0 +1,142 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    command: >
+      postgres
+      -c shared_buffers=128MB
+      -c effective_cache_size=512MB
+      -c maintenance_work_mem=64MB
+      -c work_mem=4MB
+      -c max_connections=40
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-marketai}
+      POSTGRES_USER: ${POSTGRES_USER:-marketai}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in deploy/.env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres-backup:/backups
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-marketai} -d ${POSTGRES_DB:-marketai}"]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+    shm_size: 256m
+    mem_limit: 512m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  api:
+    build:
+      context: ../backend
+    restart: unless-stopped
+    env_file:
+      - ../backend/.env.production
+    environment:
+      MARKETAI_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-marketai}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-marketai}
+      MARKETAI_ENVIRONMENT: production
+      MARKETAI_START_SCHEDULER_IN_API: "false"
+      MARKETAI_JOB_LOCK_DIR: /app/.job_locks
+    depends_on:
+      postgres:
+        condition: service_healthy
+    expose:
+      - "8010"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8010/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 650M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    mem_limit: 700m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  worker:
+    build:
+      context: ../backend
+    restart: unless-stopped
+    command: ["python", "-m", "app.worker"]
+    env_file:
+      - ../backend/.env.production
+    environment:
+      MARKETAI_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-marketai}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-marketai}
+      MARKETAI_ENVIRONMENT: production
+      MARKETAI_START_SCHEDULER_IN_API: "false"
+      MARKETAI_JOB_LOCK_DIR: /app/.job_locks
+    volumes:
+      - job_locks:/app/.job_locks
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 650M
+    mem_limit: 700m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      FRONTEND_DOMAIN: ${FRONTEND_DOMAIN:-dubaonongsan.com,www.dubaonongsan.com}
+      API_DOMAIN: ${API_DOMAIN:-api.dubaonongsan.com}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../frontend/dist:/var/www/frontend:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      - caddy_logs:/var/log/caddy
+    depends_on:
+      api:
+        condition: service_healthy
+    mem_limit: 160m
+
+  postgres-backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./postgres-backup:/backups
+    mem_limit: 128m
+    entrypoint: |
+      sh -c '
+      while true; do
+        DATE=$$(date +%Y%m%d-%H%M%S)
+        pg_dump -h postgres -U ${POSTGRES_USER:-marketai} -d ${POSTGRES_DB:-marketai} -Fc -f /backups/backup-$$DATE.dump
+        find /backups -name "backup-*.dump" -mtime +7 -delete
+        sleep 86400
+      done'
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
+  caddy_logs:
+  job_locks:

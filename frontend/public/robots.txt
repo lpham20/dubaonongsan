@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /*?utm_*
+Disallow: /*?fbclid=*
+
+User-agent: Googlebot-Image
+Allow: /
+
+Sitemap: https://dubaonongsan.com/sitemap.xml
+Crawl-delay: 1

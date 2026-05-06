@@ -1,0 +1,5 @@
+/tin-tuc/:slug /seo/news/:slug.html 200
+/huong-dan/:slug /seo/guides/:slug.html 200
+/du-bao-gia/:crop /seo/forecast/:crop.html 200
+/thuat-toan-du-bao /seo/methodology.html 200
+/* /index.html 200

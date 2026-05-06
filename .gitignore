@@ -1,0 +1,16 @@
+marketai.db
+*.log
+*.pid
+__pycache__/
+.pytest_cache/
+.venv/
+.job_locks/
+frontend/dist/
+frontend/node_modules/
+backend/.env
+backend/.env.production
+deploy/.env
+qa-*.png
+page.html
+bundle-hainong.js
+hainong-collected.json

@@ -1,0 +1,673 @@
+{
+  "report": {
+    "server_bad_count": 20,
+    "manual_bad_count": 68,
+    "term_bad_count": 7,
+    "unique_removed_urls": 90,
+    "removed_refs": 90,
+    "updated_posts": 68,
+    "remaining_image_refs": 176,
+    "remaining_unique_urls": 176,
+    "posts_with_images": 96,
+    "removed_indexes": [
+      1,
+      6,
+      8,
+      14,
+      15,
+      16,
+      19,
+      22,
+      23,
+      32,
+      33,
+      35,
+      36,
+      38,
+      44,
+      53,
+      54,
+      55,
+      58,
+      60,
+      62,
+      68,
+      70,
+      74,
+      77,
+      82,
+      84,
+      85,
+      99,
+      100,
+      101,
+      102,
+      104,
+      115,
+      117,
+      119,
+      120,
+      121,
+      127,
+      129,
+      132,
+      135,
+      140,
+      142,
+      144,
+      146,
+      148,
+      152,
+      159,
+      164,
+      187,
+      192,
+      193,
+      194,
+      196,
+      199,
+      201,
+      206,
+      207,
+      209,
+      211,
+      214,
+      216,
+      217,
+      219,
+      222,
+      224,
+      226,
+      228,
+      229,
+      230,
+      232,
+      235,
+      238,
+      240,
+      241,
+      243,
+      248,
+      249,
+      251,
+      253,
+      254,
+      255,
+      256,
+      258,
+      260,
+      262,
+      263,
+      264,
+      266
+    ]
+  },
+  "posts": [
+    {
+      "post_id": 4,
+      "slug": "hainong-huong-dan-cham-soc-mit-dat-nang-suat-1347",
+      "title": "Hướng dẫn chăm sóc mít đạt năng suất",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/29/2906-190833-84b3-screenshot-2025-06-29-at-19.06.45.png"
+      ]
+    },
+    {
+      "post_id": 5,
+      "slug": "hainong-huong-dan-chuan-bi-giong-va-dat-trong-mit-thai-1348",
+      "title": "Hướng dẫn chuẩn bị giống và đất trồng mít Thái",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/191055-image.png"
+      ]
+    },
+    {
+      "post_id": 6,
+      "slug": "hainong-phong-tru-hien-tuong-den-xo-tren-mit-1351",
+      "title": "Phòng trừ hiện tượng đen xơ trên mít",
+      "removed": [
+        "https://cdn.nhathuoclongchau.com.vn/unsafe/800x0/filters:quality(95)/https://cms-prod.s3-sgn09.fptcloud.com/mit_bi_xo_den_co_an_duoc_khong_5_b0ce15a279.jpg"
+      ]
+    },
+    {
+      "post_id": 9,
+      "slug": "hainong-phong-tru-benh-dom-den-ri-sat-ri-set-1355",
+      "title": "Phòng trừ bệnh đốm đen (rỉ sắt, rỉ sét) cho thanh long",
+      "removed": [
+        "https://knkn.baria-vungtau.gov.vn/documents/229829/1021117/Benh%20dom%20den%20tren%20cay%20thanh%20long.jpg?t=1702907884906"
+      ]
+    },
+    {
+      "post_id": 10,
+      "slug": "hainong-phong-tru-benh-than-thu-tren-thanh-long-1354",
+      "title": "Phòng trừ bệnh thán thư trên thanh long",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/29/2906-231125-e6b7-imgpsh-fullsize-anim.jpg",
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/231054-image.png"
+      ]
+    },
+    {
+      "post_id": 11,
+      "slug": "hainong-huong-dan-chon-giong-va-thoi-vu-trong-1340",
+      "title": "Hướng dẫn chọn giống và thời vụ trồng cho thanh long",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/175214-image.png"
+      ]
+    },
+    {
+      "post_id": 13,
+      "slug": "hainong-phong-tru-benh-thoi-qua-thanh-long-1356",
+      "title": "Phòng trừ bệnh thối quả thanh long",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/29/2906-232227-2736-hi-nh-1-be--nh-tho--i-tra-i-xua--t-hie--n-tre-n-bo-ng.-1-700x440.jpg",
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/232131-image.png"
+      ]
+    },
+    {
+      "post_id": 17,
+      "slug": "hainong-huong-dan-xu-ly-ra-hoa-nghich-vu-1345",
+      "title": "Hướng dẫn xử lý ra hoa nghịch vụ cho thanh long",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/29/2906-181745-d412-anh-chup-man-hinh-2023-12-29-120405.png",
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/181638-image.png"
+      ]
+    },
+    {
+      "post_id": 18,
+      "slug": "hainong-huong-dan-cham-soc-thanh-long-1346",
+      "title": "Hướng dẫn chăm sóc thanh long",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/181932-image.png",
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/181948-image.png"
+      ]
+    },
+    {
+      "post_id": 19,
+      "slug": "hainong-ky-thuat-thap-den-xu-ly-ra-hoa-nghich-vu-1361",
+      "title": "Kỹ thuật thắp đèn xử lý ra hoa nghịch vụ cho thanh long",
+      "removed": [
+        "https://rangdong.com.vn/uploads/news/tin-san-pham/Den%20nong%20nghiep/Den%20led%20thanh%20long/thanh%20long.jpg"
+      ]
+    },
+    {
+      "post_id": 22,
+      "slug": "hainong-cham-soc-cay-ca-phe-sau-tai-canh-1283",
+      "title": "Chăm sóc cây cà phê sau tái canh",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/28/2806-125320-1bac-cach-bon-phan-bo-sung-dinh-duong-cho-ca-phe.webp"
+      ]
+    },
+    {
+      "post_id": 25,
+      "slug": "hainong-huong-dan-phong-tru-oc-buou-vang-tren-dong-ruong-1209",
+      "title": "Hướng dẫn phòng trừ ốc bươu vàng trên đồng ruộng cho lúa",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202312/52/120510-qtkt6.png"
+      ]
+    },
+    {
+      "post_id": 26,
+      "slug": "hainong-chuyen-gia-chia-se-cach-khac-phuc-sau-benh-hai-lua-dong-xuan-khong-the-bo-qua-1112",
+      "title": "Chuyên gia chia sẻ cách khắc phục sâu bệnh hại lúa đông xuân không thể bỏ qua",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202301/01/03/102320-uploads-6233e4d3c1bc4-1647568083.png",
+        "https://lh4.googleusercontent.com/Ckj9jWI3ZarG09m2MPOn8G4gdPIjyi4tRaAu8zTJEjvD2xX8MTs8nbVbxd433ayUuu6DT08ZfDSBpR09ZSZLvqtV9F2R8JxPy7wKJTyAjXEDtaPhweNep5BrLUfw4H5KfEk3ylDK"
+      ]
+    },
+    {
+      "post_id": 27,
+      "slug": "hainong-huong-dan-phong-tru-sau-cuon-la-nho-tren-lua-1227",
+      "title": "Hướng dẫn phòng trừ sâu cuốn lá nhỏ trên lúa",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202411/45/111028-image.jpeg"
+      ]
+    },
+    {
+      "post_id": 28,
+      "slug": "hainong-huong-dan-phong-tru-benh-dom-van-tren-lua-1222",
+      "title": "Hướng dẫn phòng trừ bệnh đốm vằn trên lúa",
+      "removed": [
+        "https://vietthanghanoi.vn/wp-content/uploads/2022/05/benh-kho-van-dom-van-gay-hai-o-tren-cay-lua0011.jpg"
+      ]
+    },
+    {
+      "post_id": 29,
+      "slug": "hainong-huong-dan-phong-tru-nhen-gie-hai-lua-1232",
+      "title": "Hướng dẫn phòng trừ nhện gié hại lúa",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202411/45/110546-image.png"
+      ]
+    },
+    {
+      "post_id": 32,
+      "slug": "hainong-huong-dan-phong-tru-sau-duc-than-lua-2-cham-1230",
+      "title": "Hướng dẫn phòng trừ sâu đục thân lúa 2 chấm",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202411/45/08/0811-105602-4a06-article.jpg",
+        "https://s3.hainong.vn/2nong-main/uploads/202411/45/105428-image.jpeg"
+      ]
+    },
+    {
+      "post_id": 34,
+      "slug": "hainong-nhung-dau-hieu-benh-khi-lua-bi-vang-1228",
+      "title": "Những dấu hiệu bệnh khi lúa bị vàng",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202411/45/111253-image.png"
+      ]
+    },
+    {
+      "post_id": 35,
+      "slug": "hainong-huong-dan-phong-tru-benh-dao-on-1219",
+      "title": "Hướng dẫn phòng trừ bệnh đạo ôn cho lúa",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202410/40/153205-image.jpeg"
+      ]
+    },
+    {
+      "post_id": 37,
+      "slug": "hainong-huong-dan-lua-chon-giong-lua-vu-dong-xuan-1270",
+      "title": "Hướng dẫn lựa chọn giống lúa vụ Đông Xuân",
+      "removed": [
+        "https://lh7-rt.googleusercontent.com/docsz/AD_4nXcjw3irwSfObw8Kz6YmKZeziOiDbUXbugQ5tbTdqicgtIahTEj26dzq9zjyGXqn1VvmdFZO0ucCk1Ga7DXjBX73jLObdd6GWaJAmYc8zEbpURRfk27S8TvZfIH63KO1ExYQZaZ7xKGCo-UDt8_EnTuWxu9MHib7he18x58cfEoz9atY3BRflz0?key=uU-mDVNTqExIyH3fEPqplA"
+      ]
+    },
+    {
+      "post_id": 38,
+      "slug": "hainong-huong-dan-quan-ly-co-dai-tren-ruong-lua-1237",
+      "title": "Hướng dẫn quản lý cỏ dại trên ruộng lúa",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202411/45/132747-image.png",
+        "https://s3.hainong.vn/2nong-main/uploads/202411/45/132757-image.png"
+      ]
+    },
+    {
+      "post_id": 44,
+      "slug": "hainong-huong-dan-quan-ly-dich-hai-tong-hop-ipm-1273",
+      "title": "Hướng dẫn quản lý dịch hại tổng hợp IPM cho lúa",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/28/2806-102833-551a-cabi-socialmediaipm-18.03.2024-02.webp"
+      ]
+    },
+    {
+      "post_id": 45,
+      "slug": "hainong-huong-dan-phong-tru-benh-than-thu-1295",
+      "title": "Hướng dẫn phòng trừ bệnh thán thư cho tiêu",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/28/2806-164418-15db-tieu-bi-benh-than-thu-nhatnonggroup-com.jpg",
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/164107-image.png",
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/164134-image.png"
+      ]
+    },
+    {
+      "post_id": 46,
+      "slug": "hainong-huong-dan-phong-tru-bo-xit-luoi-ray-thanh-gia-1300",
+      "title": "Hướng dẫn phòng trừ bọ xít lưới (rầy thành giá) cho tiêu",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/170355-image.png"
+      ]
+    },
+    {
+      "post_id": 50,
+      "slug": "hainong-huong-dan-phong-tru-sau-duc-than-1301",
+      "title": "Hướng dẫn phòng trừ sâu đục thân cho tiêu",
+      "removed": [
+        "https://scontent.fsgn2-4.fna.fbcdn.net/v/t1.6435-9/44028187_2753882551518073_5598083940091953152_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeGSMyCZJPmx7wTzUo6-ydXPNIBWx-K2COs0gFbH4rYI68x3L79Ak5rCVLuXHDw1s78mX1c6vG7xt04PEvLKfWnA&_nc_ohc=ioVg2qOd8rEQ7kNvwF52iJN&_nc_oc=Adkm2G1C5adHZiSKE-LbkI9Nv_A77K8coi5xQeSqi6YmxTE_xsupsORqCd-LGqtNb8g&_nc_zt=23&_nc_ht=scontent.fsgn2-4.fna&_nc_gid=mh8Fc6Ft1HiiSUsmOBXJgQ&oh=00_AfMuIMmqEn-AEIscI8MKm-8SKvkaqPILnaknmOF4q3fJ4g&oe=68872B00"
+      ]
+    },
+    {
+      "post_id": 51,
+      "slug": "hainong-huong-dan-phong-tru-tuyen-trung-1297",
+      "title": "Hướng dẫn phòng trừ tuyến trùng cho tiêu",
+      "removed": [
+        "https://knkn.baria-vungtau.gov.vn/documents/229829/852606/%28246%29%20Hinh.jpg?t=1670595730806"
+      ]
+    },
+    {
+      "post_id": 52,
+      "slug": "hainong-phong-tru-benh-chet-cham-tren-ho-tieu-1293",
+      "title": "Phòng trừ bệnh chết chậm trên hồ tiêu",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/28/2806-135826-804d-screenshot-2025-06-28-at-13.58.14.png",
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/135109-image.png",
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/135750-image.png"
+      ]
+    },
+    {
+      "post_id": 54,
+      "slug": "hainong-huong-dan-phong-tru-benh-tao-do-dom-rong-1296",
+      "title": "Hướng dẫn phòng trừ bệnh Tảo đỏ (đốm rong) cho tiêu",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/164633-image.png"
+      ]
+    },
+    {
+      "post_id": 55,
+      "slug": "hainong-huong-dan-phong-tru-rep-sap-gia-van-1299",
+      "title": "Hướng dẫn phòng trừ rệp sáp giả vằn cho tiêu",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/170034-image.png"
+      ]
+    },
+    {
+      "post_id": 56,
+      "slug": "hainong-thiet-ke-he-thong-cay-chan-gio-che-bong-cho-cay-tieu-1289",
+      "title": "Thiết kế hệ thống cây chắn gió, che bóng cho cây tiêu",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/132659-image.png"
+      ]
+    },
+    {
+      "post_id": 57,
+      "slug": "hainong-ky-thuat-xuong-cay-ho-tieu-1287",
+      "title": "Kỹ thuật xuống cây hồ tiêu",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/133601-image.png"
+      ]
+    },
+    {
+      "post_id": 59,
+      "slug": "hainong-ky-thuat-tuoi-nuoc-cho-cay-ca-phe-con-khi-uom-1193",
+      "title": "Kỹ thuật tưới nước cho cây cà phê con khi ươm",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202310/43/134135-k--thu-t-t--i-n--c-cho-c-y-c--ph--con.png"
+      ]
+    },
+    {
+      "post_id": 60,
+      "slug": "hainong-ky-thuat-u-va-uom-hat-ca-phe-truc-tiep-vao-bau-dat-1196",
+      "title": "Kỹ thuật ủ và ươm hạt cà phê trực tiếp vào bầu đất",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202312/48/112959-4.png"
+      ]
+    },
+    {
+      "post_id": 61,
+      "slug": "hainong-quy-trinh-chuan-bi-dat-de-vao-bau-uom-giong-ca-phe-1195",
+      "title": "Quy trình chuẩn bị đất để vào bầu ươm giống cà phê",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202310/43/124640-chu-n-b----t.png"
+      ]
+    },
+    {
+      "post_id": 62,
+      "slug": "hainong-ky-thuat-tuoi-nuoc-cho-cay-ca-phe-theo-tung-giai-doan-1194",
+      "title": "Kỹ thuật tưới nước cho cây cà phê theo từng giai đoạn",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202312/48/113033-3.png"
+      ]
+    },
+    {
+      "post_id": 63,
+      "slug": "hainong-chuan-bi-ho-trong-ca-phe-1277",
+      "title": "Chuẩn bị hố trồng cà phê",
+      "removed": [
+        "https://viefarm.vn/luu-y-trong-ky-thuat-trong-va-cham-soc-cay-ca-phe-con-3.jpg.webp"
+      ]
+    },
+    {
+      "post_id": 65,
+      "slug": "hainong-chuan-bi-cay-giong-ca-phe-voi-1278",
+      "title": "Chuẩn bị cây giống cà phê vối",
+      "removed": [
+        "https://lh3.googleusercontent.com/proxy/IUnBwnBYR_CGvFkEFEMW_NwEFL0zpoqNdru6X-vstOhD_A1dJ0YK_l2mTX1PKDB-QU2XOFxfpTIab78L6uV-SsDqWllwhEN3Wa5TEgkReJs2so4qnudUaWMJ"
+      ]
+    },
+    {
+      "post_id": 68,
+      "slug": "hainong-phong-tru-rep-sap-hai-qua-ca-phe-1330",
+      "title": "Phòng trừ rệp sáp hại quả cà phê",
+      "removed": [
+        "https://knkn.baria-vungtau.gov.vn/documents/244737/305815/rep%20sap%20tren%20ca%20phe.jpg?t=1451959343045"
+      ]
+    },
+    {
+      "post_id": 70,
+      "slug": "hainong-phong-tru-benh-nam-hong-1338",
+      "title": "Phòng trừ bệnh nấm hồng cho cà phê",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/29/2906-160228-2e6b-c648cb78-bf0c-43af-82a8-796ea4273591.jpg"
+      ]
+    },
+    {
+      "post_id": 78,
+      "slug": "hainong-quan-ly-dich-hai-tong-hop-ipm-tren-cay-cam-1368",
+      "title": "Quản lý dịch hại tổng hợp IPM trên vườn Cam",
+      "removed": [
+        "https://image-ipm.ecotech2a.com/uploads/DEFAULT/images/8cca743c-7e83-4e75-ba92-f8dc2e1bcc55.png"
+      ]
+    },
+    {
+      "post_id": 80,
+      "slug": "hainong-phong-tru-ruoi-vang-duc-trai-1360",
+      "title": "Phòng trừ ruồi vàng đục trái cho xoài",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/235203-image.png",
+        "https://baonamdinh.vn/file/e7837c02816d130b0181a995d7ad7e96/082024/1_20240812081937.png"
+      ]
+    },
+    {
+      "post_id": 81,
+      "slug": "hainong-phong-tru-ray-bong-xoai-1359",
+      "title": "Phòng trừ rầy bông xoài",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/29/2906-234736-0ca8-screenhunter-221-aug--06-08-03.jpg",
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/234631-image.png"
+      ]
+    },
+    {
+      "post_id": 82,
+      "slug": "hainong-phong-tru-sau-duc-than-78c511cd-8ed2-4078-88f2-10f5d0fcf20f-1364",
+      "title": "Phòng trừ sâu đục thân (xén tóc) Xoài",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202512/49/083828-image.png"
+      ]
+    },
+    {
+      "post_id": 83,
+      "slug": "hainong-ky-thuat-tuoi-tieu-nuoc-tren-cay-cam-1367",
+      "title": "Kỹ thuật tưới, tiêu nước trên cây Cam",
+      "removed": [
+        "https://nghiadan.vn/uploads/anh_nghia_dan/cam%20he%20thong%20tuoi.jpg"
+      ]
+    },
+    {
+      "post_id": 85,
+      "slug": "hainong-ky-thuat-tia-canh-va-tao-tan-cho-cay-cam-1366",
+      "title": "Kỹ thuật tỉa cành và tạo tán cho cây Cam",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/26/101622-image.png",
+        "https://s3.hainong.vn/2nong-main/uploads/202506/26/101637-image.png"
+      ]
+    },
+    {
+      "post_id": 86,
+      "slug": "hainong-mot-so-bien-phap-chong-suong-qua-sau-rieng-1210",
+      "title": "Một số biện pháp chống sượng quả sầu riêng",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202312/52/131902-qtkt1.png"
+      ]
+    },
+    {
+      "post_id": 87,
+      "slug": "hainong-tuoi-nuoc-thoi-ky-kinh-doanh-1306",
+      "title": "Tưới nước thời kỳ kinh doanh cho sầu riêng",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/001555-image.png"
+      ]
+    },
+    {
+      "post_id": 88,
+      "slug": "hainong-giai-phap-ky-thuat-phuc-hoi-cay-sau-rieng-sau-han-man-1311",
+      "title": "Giải pháp kỹ thuật phục hồi cây sầu riêng sau hạn mặn",
+      "removed": [
+        "https://scontent.fsgn2-9.fna.fbcdn.net/v/t39.30808-6/480782444_954326053489452_4364763892931388351_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeG1QZ9c2pd0SqCQ6l9EDu6tO5ZLvjR-K1A7lku-NH4rUDuswwUqHXqmukChuF_LUtJlsWgj-JrDIz8ZykKQGsrf&_nc_ohc=9je-RRlDteYQ7kNvwHxnZBP&_nc_oc=Adn2bJAAIsohkmE5_jnPsWAYIBFAhKiN2yI-09v7Vx-haZQhbrqCykBc4s1ENsFhsis&_nc_zt=23&_nc_ht=scontent.fsgn2-9.fna&_nc_gid=mV3cvUeZnbYYjwDoBkYdHA&oh=00_AfPWeHEsAEFoFxvhoSM2MartTB29NbyTjbsyUWCRWY2LiQ&oe=6865F103"
+      ]
+    },
+    {
+      "post_id": 89,
+      "slug": "hainong-cham-soc-thoi-ky-kien-thiet-co-ban-1305",
+      "title": "Chăm sóc thời kỳ kiến thiêt cơ bản cho sầu riêng",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/234308-image.png",
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/235852-image.png"
+      ]
+    },
+    {
+      "post_id": 90,
+      "slug": "hainong-giai-phap-ky-thuat-canh-tac-cay-sau-rieng-ung-pho-voi-han-man-1310",
+      "title": "Giải pháp kỹ thuật canh tác cây sầu riêng ứng phó với hạn mặn",
+      "removed": [
+        "https://scontent.fsgn2-10.fna.fbcdn.net/v/t39.30808-6/475337819_937077095214348_346290239240015045_n.jpg?stp=dst-jpg_s1080x2048_tt6&_nc_cat=109&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeHdB6GNE4D1tKCTMnH1fwj-SDBGGK-6oZBIMEYYr7qhkLstZKAxcTQmvdqROfFmTKZpHtS7SY836PsYQLrDIqjB&_nc_ohc=pplrS3YbHWIQ7kNvwGBmG1t&_nc_oc=Adk_rRTcXNA0oAJlxVACj-T45ZcQopE617-3YRt7Nw5gf5Oz1xpR_smzpGOJFBEJ-HM&_nc_zt=23&_nc_ht=scontent.fsgn2-10.fna&_nc_gid=By1EC6xCpMWkNUluNB8wvQ&oh=00_AfMrJKz1-WNaDc-AN93ggXr9W7ZOdYvBiX4h1JkNtCuMFA&oe=6866097A"
+      ]
+    },
+    {
+      "post_id": 91,
+      "slug": "hainong-huong-dan-tia-hoa-tia-qua-va-thu-phan-bo-sung-1309",
+      "title": "Hướng dẫn tỉa hoa, tỉa quả và thụ phấn bổ sung cho sầu riêng",
+      "removed": [
+        "https://i.ytimg.com/vi/ZtiC5F9I5qw/maxresdefault.jpg"
+      ]
+    },
+    {
+      "post_id": 92,
+      "slug": "hainong-quy-trinh-phun-thuoc-cho-lua-giai-doan-gieo-sa-1190",
+      "title": "Quy trình phun thuốc cho lúa giai đoạn gieo sạ",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202309/39/150807-giai--o-n-gieo-s-.png"
+      ]
+    },
+    {
+      "post_id": 93,
+      "slug": "hainong-quy-trinh-phun-thuoc-cho-lua-giai-doan-tro-chin-1192",
+      "title": "Quy trình phun thuốc cho lúa giai đoạn trổ - chín",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202309/39/142720-giai--o-n-tr--ch-n.png"
+      ]
+    },
+    {
+      "post_id": 94,
+      "slug": "hainong-quy-trinh-phun-thuoc-cho-lua-giai-doan-de-nhanh-lam-dong-1191",
+      "title": "Quy trình phun thuốc cho lúa giai đoạn đẻ nhánh, làm đòng",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202309/39/151259-giai--o-n----nh-nh.png"
+      ]
+    },
+    {
+      "post_id": 95,
+      "slug": "hainong-loi-ich-khi-canh-tac-lua-1-phai-5-giam-1235",
+      "title": "Lợi ích khi canh tác lúa 1 phải 5 giảm",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202411/45/08/0811-132106-0d0c-0322-c203184b3ef8c6a69fe9.jpg",
+        "https://www.pvcfc.com.vn/Data/Sites/1/News/2030/ba-con-nong-dan-xa-thoi-lai-khao-sat-thuc-te-mo-hinh_web.jpg"
+      ]
+    },
+    {
+      "post_id": 96,
+      "slug": "hainong-huong-dan-thu-hoach-lua-hieu-qau-1274",
+      "title": "Hướng dẫn thu hoạch lúa hiệu qảu",
+      "removed": [
+        "https://lh7-rt.googleusercontent.com/docsz/AD_4nXcqsaIoNk2GhSxI7SO-CCuhW-GGPB-uHEErwP5AfaFJNP_twZM2EUgfod7Voq8w7a_n4AC80i5H1a6T2m7B_4BWFd38Bzs0t1CcneBFutzEL9c67FWz_Lr9d2Brlw8zrUm6QcQ3uK8JUZn71qHPxfA9dYOYK04uu1WlK_UKYL6dEO8xbfUIA3c?key=9_0jIDQwMnKYu8b_1yJI9Q"
+      ]
+    },
+    {
+      "post_id": 97,
+      "slug": "hainong-huong-dan-ky-thuat-lam-dat-trong-lua-1233",
+      "title": "Hướng dẫn kỹ thuật làm đất trồng lúa",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202411/45/111049-image.png"
+      ]
+    },
+    {
+      "post_id": 98,
+      "slug": "hainong-quy-trinh-ngam-u-hat-giong-lua-vu-dong-xuan-1234",
+      "title": "Quy trình ngâm, ủ hạt giống lúa vụ Đông Xuân",
+      "removed": [
+        "https://khuyennonghaiphong.gov.vn/Data/images/Ng%C3%A2m.png"
+      ]
+    },
+    {
+      "post_id": 99,
+      "slug": "hainong-huong-dan-ky-thuat-gieo-sa-lua-hien-nay-1239",
+      "title": "Hướng dẫn kỹ thuật gieo sạ lúa hiện nay",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202411/45/133417-image.png",
+        "https://s3.hainong.vn/2nong-main/uploads/202411/45/133408-image.png"
+      ]
+    },
+    {
+      "post_id": 100,
+      "slug": "hainong-huong-dan-ky-thuat-quan-ly-nuoc-trong-ruong-lua-1238",
+      "title": "Hướng dẫn kỹ thuật quản lý nước trong ruộng lúa",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202411/45/133102-image.png"
+      ]
+    },
+    {
+      "post_id": 102,
+      "slug": "hainong-huong-dan-phong-tru-ray-nau-1272",
+      "title": "Hướng dẫn phòng trừ rầy nâu cho lúa",
+      "removed": [
+        "https://lh7-rt.googleusercontent.com/docsz/AD_4nXeigXzTQGLT9jF2zcvqpIs6Z0eO0aUD8LJ9OJ-UXp6GGu-BZ0Kgy_bVb1AN7FubxhV3Qvs9IlmnlVEIKiWBtLPtt_3t5Hy5MEE6nH6spn8pjckBlCPtwH26nykoVSauZEbV889zGxvYJtn0DbbQLoxDl3dSBm4VRi1Ty0MNUQLMZJxcnfOEMA?key=sig3rd-tWnQ8j5VnGP0GVw",
+        "https://lh7-rt.googleusercontent.com/docsz/AD_4nXeVxJONlxmIM6OhbiZx1lBnXECZ4Gn_oa3tVc8Zyu_6LZQZrCwiPtykqtEaz2McZCgjJrd9eH4VAtcw_Kxc4p3wOV6QOzs0ldPFbC7BjVUJdq5Zm8FdHoS5r8R6pZtAkRVvraYPeAzr8z3obINbZaYP_G3Ca1JusKJmRRpNpSYaS3LV8H-woLg?key=sig3rd-tWnQ8j5VnGP0GVw"
+      ]
+    },
+    {
+      "post_id": 103,
+      "slug": "hainong-huong-dan-cham-soc-cay-xoai-thoi-ky-kinh-doanh-1358",
+      "title": "Hướng dẫn chăm sóc cây xoài thời kỳ kinh doanh",
+      "removed": [
+        "https://i.ex-cdn.com/nongnghiep.vn/files/content/2024/12/19/bon-phan-dau-trau-cho-xoai-nuoi-trai-chuan-bi-tet-at-ty-2025-113127_49-120907.jpg"
+      ]
+    },
+    {
+      "post_id": 104,
+      "slug": "hainong-giai-phap-ky-thuat-phuc-hoi-cay-xoai-sau-han-man-1363",
+      "title": "Giải pháp kỹ thuật phục hồi cây xoài sau hạn mặn",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/26/30/3006-095519-9a50-pic2-min.jpg",
+        "https://s3.hainong.vn/2nong-main/uploads/202506/26/095435-pic4-min.jpg"
+      ]
+    },
+    {
+      "post_id": 105,
+      "slug": "hainong-huong-dan-tuoi-tieu-nuoc-cho-cay-xoai-1362",
+      "title": "Hướng dẫn tưới tiêu nước cho cây Xoài",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/26/30/3006-093804-1706-bon-phan-dau-trau-cho-xoai-nuoi-trai-chuan-bi-tet-at-ty-2025-113127-49-120907.jpg",
+        "https://s3.hainong.vn/2nong-main/uploads/202506/26/093706-image.png"
+      ]
+    },
+    {
+      "post_id": 106,
+      "slug": "hainong-huong-dan-buoc-day-cho-ho-tieu-1291",
+      "title": "Hướng dẫn buộc dây cho hồ tiêu",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/133931-image.png"
+      ]
+    },
+    {
+      "post_id": 107,
+      "slug": "hainong-ky-thuat-tia-canh-cho-ho-tieu-thoi-ky-kinh-doanh-1290",
+      "title": "Kỹ thuật tỉa cành cho Hồ tiêu thời kỳ kinh doanh",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/133102-image.png"
+      ]
+    },
+    {
+      "post_id": 108,
+      "slug": "hainong-ky-thuat-tao-tan-cho-ho-tieu-thoi-ky-kien-thiet-co-ban-1292",
+      "title": "Kỹ thuật tạo tán cho hồ tiêu thời kỳ kiến thiết cơ bản",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/28/2806-134730-cffa-download.jpeg",
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/134533-image.png",
+        "https://s3.hainong.vn/2nong-main/uploads/202506/25/134549-image.png"
+      ]
+    },
+    {
+      "post_id": 109,
+      "slug": "hainong-kinh-nghiem-phong-tri-benh-heo-ru-tren-ot-1211",
+      "title": "Kinh nghiệm phòng trị bệnh héo rũ trên ớt",
+      "removed": [
+        "https://s3.hainong.vn/2nong-main/uploads/202312/52/141247-qtkt2.png"
+      ]
+    }
+  ]
+}

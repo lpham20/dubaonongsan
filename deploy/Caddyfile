@@ -1,0 +1,90 @@
+{
+	admin off
+	email dubaonongsan@gmail.com
+	servers {
+		max_header_size 16KB
+		timeouts {
+			read_body 30s
+			read_header 10s
+			write 30s
+			idle 120s
+		}
+	}
+}
+
+{$FRONTEND_DOMAIN} {
+	encode zstd gzip
+
+	@api {
+		path /api/*
+	}
+	reverse_proxy @api api:8010 {
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+
+	root * /var/www/frontend
+	file_server
+
+	@assets {
+		path /assets/*
+	}
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+
+	@html {
+		path *.html
+	}
+	header @html Cache-Control "public, max-age=300, must-revalidate"
+
+	@images {
+		path *.jpg *.jpeg *.png *.webp *.svg
+	}
+	header @images Cache-Control "public, max-age=604800"
+
+	header {
+		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	try_files {path} /index.html
+}
+
+{$API_DOMAIN} {
+	encode zstd gzip
+
+	request_body {
+		max_size 5MB
+	}
+
+	reverse_proxy api:8010 {
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+		health_uri /health
+		health_interval 30s
+		health_timeout 5s
+	}
+
+	header {
+		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+		Content-Security-Policy "default-src 'none'; frame-ancestors 'none'"
+		-Server
+		-X-Powered-By
+	}
+
+	log {
+		output file /var/log/caddy/api.log {
+			roll_size 100MB
+			roll_keep 7
+		}
+		format json
+		level INFO
+	}
+}
