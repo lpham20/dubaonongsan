@@ -118,6 +118,7 @@ const cropLabels: Record<CropType, string> = {
 type MainSection = "home" | "analytics" | "news" | "guides" | "fertilizer" | "fertilizerMethodology" | "methodology";
 type AnalyticsTab = "chart" | "analysis" | "technical" | "data";
 type NewsView = "latest" | "sau_rieng" | "ca_phe" | "ho_tieu";
+type PriceNewsView = Exclude<NewsView, "latest">;
 type InitialRoute = {
   section: MainSection;
   crop: CropType;
@@ -129,6 +130,14 @@ type InitialRoute = {
 const validSections: MainSection[] = ["home", "analytics", "news", "guides", "fertilizer", "fertilizerMethodology", "methodology"];
 const validCrops: CropType[] = ["sau_rieng", "ca_phe", "ho_tieu", "lua"];
 const validNewsViews: NewsView[] = ["latest", "sau_rieng", "ca_phe", "ho_tieu"];
+const newsViewPaths: Record<PriceNewsView, string> = {
+  sau_rieng: "gia-sau-rieng",
+  ca_phe: "gia-ca-phe",
+  ho_tieu: "gia-ho-tieu"
+};
+const newsPathViews: Record<string, PriceNewsView> = Object.fromEntries(
+  Object.entries(newsViewPaths).map(([view, path]) => [path, view])
+) as Record<string, PriceNewsView>;
 
 const mainSections: { value: MainSection; label: string; Icon: typeof Leaf }[] = [
   { value: "home", label: "Trang chủ", Icon: Home },
@@ -166,6 +175,9 @@ function getInitialRoute(pathnameInput = window.location.pathname, search = wind
   if (pathname === "/") return fallback;
   if (parts[0] === "tin-tuc") {
     if (parts[1] === "category") return { ...fallback, section: "news", newsView: "latest" };
+    if (parts[1] && newsPathViews[parts[1]]) {
+      return { ...fallback, section: "news", newsView: newsPathViews[parts[1]], newsSlug: "" };
+    }
     return { ...fallback, section: "news", newsView: "latest", newsSlug: parts[1] ?? "" };
   }
   if (parts[0] === "huong-dan") {
@@ -196,8 +208,11 @@ function routeToUrl(route: InitialRoute) {
   const params = new URLSearchParams();
   let path = "/";
   if (route.section === "news") {
-    path = route.newsSlug ? `/tin-tuc/${route.newsSlug}` : "/tin-tuc";
-    if (!route.newsSlug && route.newsView !== "latest") params.set("news", route.newsView);
+    path = route.newsSlug
+      ? `/tin-tuc/${route.newsSlug}`
+      : route.newsView === "latest"
+        ? "/tin-tuc"
+        : `/tin-tuc/${newsViewPaths[route.newsView as PriceNewsView]}`;
   } else if (route.section === "guides") {
     path = route.guideSlug ? `/huong-dan/${route.guideSlug}` : "/huong-dan";
   } else if (route.section === "analytics") {
@@ -556,7 +571,11 @@ function RoutedApp() {
     setSection("news");
     setNewsMenuOpen(false);
     setFertilizerMenuOpen(false);
-    navigate(nextView === "latest" ? "/tin-tuc" : `/tin-tuc?news=${nextView}`);
+    navigate(
+      nextView === "latest"
+        ? "/tin-tuc"
+        : `/tin-tuc/${newsViewPaths[nextView as PriceNewsView]}`
+    );
   }
 
   function changeSection(nextSection: MainSection) {
@@ -889,7 +908,7 @@ function RoutedApp() {
           busy={contentBusy}
           onScrape={() => void refreshNews()}
           activeView={newsView}
-          onViewChange={setNewsView}
+          onViewChange={openNews}
           onOpenAnalytics={openAnalytics}
         />
       ) : null}

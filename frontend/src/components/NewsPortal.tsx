@@ -273,38 +273,36 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
       <NewsPriceTicker items={tickerItems} />
 
       {activeView === "latest" ? (
-        <>
-          <div className="content-hero news-hero">
-            <div>
-              <span>
-                <Newspaper size={18} />
-                Tin tức nông nghiệp
-              </span>
-              <h1>Bản tin thị trường nông sản, phân bón và chính sách ngành</h1>
-            </div>
-            {canScrape ? (
-              <button type="button" className="news-refresh-button" onClick={onScrape} disabled={busy}>
-                <RefreshCw size={16} />
-                {busy ? "Đang lấy tin" : "Lấy tin mới"}
-              </button>
-            ) : null}
+        <div className="content-hero news-hero">
+          <div>
+            <span>
+              <Newspaper size={18} />
+              Tin tức nông nghiệp
+            </span>
+            <h1>Bản tin thị trường nông sản, phân bón và chính sách ngành</h1>
           </div>
-
-          <nav className="news-view-tabs" aria-label="Chọn chuyên mục tin tức">
-            {NEWS_VIEWS.map((view) => (
-              <button
-                type="button"
-                key={view.value}
-                className={activeView === view.value ? "active" : ""}
-                onClick={() => onViewChange(view.value)}
-              >
-                <strong>{view.label}</strong>
-                <span>{view.note}</span>
-              </button>
-            ))}
-          </nav>
-        </>
+          {canScrape ? (
+            <button type="button" className="news-refresh-button" onClick={onScrape} disabled={busy}>
+              <RefreshCw size={16} />
+              {busy ? "Đang lấy tin" : "Lấy tin mới"}
+            </button>
+          ) : null}
+        </div>
       ) : null}
+
+      <nav className="news-view-tabs" aria-label="Chọn chuyên mục tin tức">
+        {NEWS_VIEWS.map((view) => (
+          <button
+            type="button"
+            key={view.value}
+            className={activeView === view.value ? "active" : ""}
+            onClick={() => onViewChange(view.value)}
+          >
+            <strong>{view.label}</strong>
+            <span>{view.note}</span>
+          </button>
+        ))}
+      </nav>
 
       {activePriceCrop ? (
         <PriceBoardSection

@@ -8,6 +8,7 @@
   --news-card: #ffffff;
   display: grid;
   gap: 18px;
+  padding-top: 0;
   color: #111827;
   font-family: "Inter", "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
 }

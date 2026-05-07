@@ -874,8 +874,15 @@ select {
 }
 
 .error-banner {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 140;
+  width: min(520px, calc(100vw - 32px));
+  margin: 0;
   color: #8f1825;
   background: #ffecef;
+  box-shadow: 0 18px 42px rgba(31, 49, 39, 0.16);
 }
 
 .loading {
@@ -1033,4 +1040,3 @@ select {
   color: #53635b;
   font-weight: 700;
 }
-
