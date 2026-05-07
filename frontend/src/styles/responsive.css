@@ -537,11 +537,12 @@ body.mobile-drawer-locked {
     overflow: visible !important;
   }
 
-  .quote-side .icon-button {
+  .quote-side .icon-button,
+  .quote-side .quote-refresh-button {
     position: static;
     inset: auto;
     grid-row: span 2;
-    min-width: 48px;
+    min-width: 0;
     min-height: 56px;
   }
 
@@ -715,7 +716,21 @@ body.mobile-drawer-locked {
   }
 
   .site-footer-section > :not(summary) {
+    display: block;
     margin-top: 10px;
+  }
+
+  .site-footer-section > p,
+  .site-footer-section > a,
+  .site-footer-section > button {
+    display: block;
+    margin-top: 10px;
+  }
+
+  .site-footer-section button {
+    width: 100%;
+    min-height: 44px;
+    text-align: left;
   }
 
   .news-view-tabs {
@@ -787,5 +802,3 @@ body.mobile-drawer-locked {
     content-visibility: auto;
   }
 }
-
-

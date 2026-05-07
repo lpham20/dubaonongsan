@@ -12,6 +12,7 @@ import {
   Sprout
 } from "./icons";
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { SeoHead } from "./SeoHead";
 import type { GuidePost } from "../lib/api";
 import { guidePath } from "../lib/seo";
@@ -265,9 +266,9 @@ export function GuideLibrary({ guides }: Props) {
                     </div>
                     <h2>{selectedGuide.title}</h2>
                     <p>{selectedGuide.summary}</p>
-                    <a className="guide-canonical-link" href={guidePath(selectedGuide.slug)}>
+                    <Link className="guide-canonical-link" to={guidePath(selectedGuide.slug)}>
                       Mở trang riêng của bài hướng dẫn
-                    </a>
+                    </Link>
                     <div className="guide-meta-grid">
                       <small>
                         <Clock3 size={15} />
@@ -344,6 +345,7 @@ function GuideContent({ content, postId }: { content: string; postId: number }) 
                   src={guideImageUrl(postId, image.index)}
                   alt={block.heading}
                   loading="lazy"
+                  decoding="async"
                   width="420"
                   height="260"
                   key={image.index}
@@ -479,7 +481,7 @@ function GuideFamilyArt({ family }: { family: string }) {
   const image = familyImage(family);
   return (
     <div className={`guide-family-art ${familyClass(family)}`} aria-hidden="true">
-      {image ? <img src={image} alt={`Ảnh danh mục hướng dẫn ${family}`} loading="lazy" width="220" height="160" /> : null}
+      {image ? <img src={image} alt={`Ảnh danh mục hướng dẫn ${family}`} loading="lazy" decoding="async" width="220" height="160" /> : null}
     </div>
   );
 }

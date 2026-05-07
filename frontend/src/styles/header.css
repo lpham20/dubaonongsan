@@ -700,6 +700,12 @@
   gap: 12px;
 }
 
+.footer-brand-block > :not(summary),
+.footer-links > :not(summary),
+.footer-subscribe > :not(summary) {
+  display: block;
+}
+
 .footer-links h3,
 .footer-subscribe h3 {
   color: #ffffff;
@@ -709,6 +715,7 @@
 }
 
 .footer-links button {
+  display: block;
   width: fit-content;
   padding: 0;
   color: rgba(255, 255, 255, 0.78);
@@ -727,7 +734,7 @@
 }
 
 .footer-subscribe form {
-  display: grid;
+  display: block;
   gap: 8px;
 }
 
@@ -833,4 +840,3 @@
     grid-template-columns: 1fr;
   }
 }
-

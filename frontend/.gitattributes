@@ -1,0 +1,8 @@
+* text=auto eol=lf
+*.tsx       text working-tree-encoding=UTF-8
+*.ts        text working-tree-encoding=UTF-8
+*.css       text working-tree-encoding=UTF-8
+*.html      text working-tree-encoding=UTF-8
+*.json      text working-tree-encoding=UTF-8
+*.svg       text
+*.{png,jpg,jpeg,gif,webp,ico,woff,woff2} binary

@@ -58,7 +58,6 @@ services:
         reservations:
           cpus: "0.25"
           memory: 256M
-    mem_limit: 700m
     logging:
       driver: json-file
       options:
@@ -87,7 +86,6 @@ services:
         limits:
           cpus: "1.0"
           memory: 650M
-    mem_limit: 700m
     logging:
       driver: json-file
       options:

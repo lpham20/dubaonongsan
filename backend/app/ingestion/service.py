@@ -41,6 +41,17 @@ class PriceIngestionService:
                 run.records_found = len(result.observations)
                 run.records_inserted = inserted
                 run.records_updated = updated
+                if len(result.observations) == 0:
+                    logger.warning(
+                        "Scrape returned 0 records - possibly source HTML changed or no new prices: %s",
+                        scraper.source,
+                    )
+                if inserted == 0 and updated == 0 and len(result.observations) > 0:
+                    logger.warning(
+                        "Scrape parsed %d records but none persisted (all dedup): %s",
+                        len(result.observations),
+                        scraper.source,
+                    )
                 logger.info(
                     "Scrape success: %s found=%d inserted=%d updated=%d",
                     scraper.source,
@@ -53,12 +64,12 @@ class PriceIngestionService:
                 self.db.rollback()
                 run = self.db.get(ScrapeRun, run.id)
                 if run:
-                    run.status = "tháº¥t báº¡i"
+                    run.status = "thất bại"
                     run.error_message = str(exc)
                 failed_summary = {
                     "source": scraper.source,
                     "source_url": scraper.source_url,
-                    "status": "tháº¥t báº¡i",
+                    "status": "thất bại",
                     "error": str(exc),
                 }
             except Exception as exc:

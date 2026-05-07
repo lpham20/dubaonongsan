@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { canonicalUrl } from "../lib/seo";
 
 type Item = {
@@ -23,7 +24,7 @@ export function Breadcrumb({ items }: { items: Item[] }) {
         <ol>
           {items.map((item, index) => (
             <li key={`${item.label}-${index}`}>
-              {item.href ? <a href={item.href}>{item.label}</a> : <span>{item.label}</span>}
+              {item.href ? <Link to={item.href}>{item.label}</Link> : <span>{item.label}</span>}
             </li>
           ))}
         </ol>

@@ -151,10 +151,28 @@ def guides(
 @router.get("/content/guides/{slug}", response_model=GuidePostOut)
 @cached(prefix="guide-detail", ttl_seconds=1800)
 def guide_detail(slug: str, db: Session = Depends(get_db)) -> dict:
-    guide = db.scalar(select(GuidePost).where(GuidePost.slug.in_({slug, f"hainong-{slug}"})))
+    candidate_slugs = {slug, f"hainong-{slug}"}
+    guide = db.scalar(select(GuidePost).where(GuidePost.slug.in_(candidate_slugs)))
     if guide is None:
-        rows = db.scalars(select(GuidePost).limit(2500)).all()
-        guide = next((row for row in rows if _public_guide_slug(row.slug) == slug), None)
+        public_slug = _public_guide_slug(slug)
+        guide = db.scalar(select(GuidePost).where(GuidePost.slug.in_({public_slug, f"hainong-{public_slug}"})))
+    if guide is None:
+        id_match = re.match(r"^.*-(\d+)$", slug)
+        if id_match:
+            guide = db.scalar(select(GuidePost).where(GuidePost.post_id == int(id_match.group(1))))
+    if guide is None:
+        prefix = re.sub(r"-\d+$", "", _public_guide_slug(slug)).strip("-")
+        if prefix:
+            rows = db.scalars(select(GuidePost).limit(2500)).all()
+            guide = next(
+                (
+                    row
+                    for row in rows
+                    if _public_guide_slug(row.slug) == slug
+                    or _public_guide_slug(row.slug).startswith(f"{prefix}-")
+                ),
+                None,
+            )
     if guide is None:
         raise HTTPException(status_code=404, detail="Không tìm thấy bài hướng dẫn")
     return _guide_out(guide)

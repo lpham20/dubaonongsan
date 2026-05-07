@@ -1,4 +1,5 @@
-﻿import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { BrowserRouter, useLocation, useNavigate } from "react-router-dom";
 import {
   BookOpenCheck,
   Calculator,
@@ -136,27 +137,27 @@ const mainSections: { value: MainSection; label: string; Icon: typeof Leaf }[] =
   { value: "fertilizer", label: "Khuyến nghị bón phân", Icon: Calculator }
 ];
 
-function getInitialSection(): MainSection {
-  const section = new URLSearchParams(window.location.search).get("section");
+function getInitialSection(search = window.location.search): MainSection {
+  const section = new URLSearchParams(search).get("section");
   return validSections.includes(section as MainSection) ? (section as MainSection) : "home";
 }
 
-function getInitialCrop(): CropType {
-  const crop = new URLSearchParams(window.location.search).get("crop");
+function getInitialCrop(search = window.location.search): CropType {
+  const crop = new URLSearchParams(search).get("crop");
   return validCrops.includes(crop as CropType) ? (crop as CropType) : "sau_rieng";
 }
 
-function getInitialNewsView(): NewsView {
-  const newsView = new URLSearchParams(window.location.search).get("news");
+function getInitialNewsView(search = window.location.search): NewsView {
+  const newsView = new URLSearchParams(search).get("news");
   return validNewsViews.includes(newsView as NewsView) ? (newsView as NewsView) : "latest";
 }
 
-function getInitialRoute(): InitialRoute {
-  const pathname = decodeURIComponent(window.location.pathname).replace(/\/+$/, "") || "/";
+function getInitialRoute(pathnameInput = window.location.pathname, search = window.location.search): InitialRoute {
+  const pathname = decodeURIComponent(pathnameInput).replace(/\/+$/, "") || "/";
   const fallback: InitialRoute = {
-    section: getInitialSection(),
-    crop: getInitialCrop(),
-    newsView: getInitialNewsView(),
+    section: getInitialSection(search),
+    crop: getInitialCrop(search),
+    newsView: getInitialNewsView(search),
     newsSlug: "",
     guideSlug: "",
     notFound: false
@@ -170,9 +171,6 @@ function getInitialRoute(): InitialRoute {
   if (parts[0] === "huong-dan") {
     const rawGuideSlug = parts[1] ?? "";
     const cleanGuideSlug = publicGuideSlug(rawGuideSlug);
-    if (rawGuideSlug && cleanGuideSlug !== rawGuideSlug) {
-      window.history.replaceState(null, "", `/huong-dan/${cleanGuideSlug}`);
-    }
     return { ...fallback, section: "guides", guideSlug: cleanGuideSlug };
   }
   if (parts[0] === "du-bao-gia") {
@@ -186,7 +184,38 @@ function getInitialRoute(): InitialRoute {
 }
 
 export function App() {
-  const [initialRoute] = useState<InitialRoute>(getInitialRoute);
+  return (
+    <BrowserRouter>
+      <RoutedApp />
+    </BrowserRouter>
+  );
+}
+
+function routeToUrl(route: InitialRoute) {
+  if (route.notFound) return `${window.location.pathname}${window.location.search}`;
+  const params = new URLSearchParams();
+  let path = "/";
+  if (route.section === "news") {
+    path = route.newsSlug ? `/tin-tuc/${route.newsSlug}` : "/tin-tuc";
+    if (!route.newsSlug && route.newsView !== "latest") params.set("news", route.newsView);
+  } else if (route.section === "guides") {
+    path = route.guideSlug ? `/huong-dan/${route.guideSlug}` : "/huong-dan";
+  } else if (route.section === "analytics") {
+    path = forecastPath(route.crop);
+  } else if (route.section === "fertilizer") {
+    path = "/khuyen-nghi-bon-phan";
+  } else if (route.section === "fertilizerMethodology") {
+    path = "/khuyen-nghi-bon-phan/logic";
+  } else if (route.section === "methodology") {
+    path = "/thuat-toan-du-bao";
+  }
+  return params.toString() ? `${path}?${params}` : path;
+}
+
+function RoutedApp() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [initialRoute] = useState<InitialRoute>(() => getInitialRoute(location.pathname, location.search));
   const [crop, setCrop] = useState<CropType>(initialRoute.crop);
   const [regionId, setRegionId] = useState(1);
   const [varietyId, setVarietyId] = useState(1);
@@ -367,29 +396,34 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    if (notFound) return;
-    const params = new URLSearchParams();
-    let path = "/";
-    if (section === "news") {
-      path = newsSlug ? `/tin-tuc/${newsSlug}` : "/tin-tuc";
-      if (!newsSlug && newsView !== "latest") params.set("news", newsView);
-    } else if (section === "guides") {
-      path = guideSlug ? `/huong-dan/${guideSlug}` : "/huong-dan";
-    } else if (section === "analytics") {
-      path = forecastPath(crop);
-    } else if (section === "fertilizer") {
-      path = "/khuyen-nghi-bon-phan";
-    } else if (section === "fertilizerMethodology") {
-      path = "/khuyen-nghi-bon-phan/logic";
-    } else if (section === "methodology") {
-      path = "/thuat-toan-du-bao";
+    const route = getInitialRoute(location.pathname, location.search);
+    const canonicalUrl = routeToUrl(route);
+    const currentUrl = `${location.pathname}${location.search}`;
+    if (!route.notFound && canonicalUrl !== currentUrl) {
+      navigate(canonicalUrl, { replace: true });
+      return;
     }
-    const nextUrl = params.toString() ? `${path}?${params}` : path;
-    const currentUrl = `${window.location.pathname}${window.location.search}`;
-    if (nextUrl !== currentUrl) {
-      window.history.replaceState({}, "", nextUrl);
-    }
-  }, [section, crop, newsView, newsSlug, guideSlug, notFound]);
+    setSection(route.section);
+    setCrop(route.crop);
+    setNewsView(route.newsView);
+    setNewsSlug(route.newsSlug);
+    setGuideSlug(route.guideSlug);
+    setNotFound(route.notFound);
+  }, [location.pathname, location.search, navigate]);
+
+  useEffect(() => {
+    const onInternalLinkClick = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const target = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[href^="/"]') : null;
+      if (!target || target.target || target.hasAttribute("download")) return;
+      const url = new URL(target.href, window.location.origin);
+      if (url.origin !== window.location.origin) return;
+      event.preventDefault();
+      navigate(`${url.pathname}${url.search}${url.hash}`);
+    };
+    document.addEventListener("click", onInternalLinkClick);
+    return () => document.removeEventListener("click", onInternalLinkClick);
+  }, [navigate]);
 
   useEffect(() => {
     if (section !== "analytics") return;
@@ -448,6 +482,21 @@ export function App() {
     if (!first || !last) return 0;
     return ((last - first) / first) * 100;
   }, [visibleHistorical]);
+  const freshnessDays = quality?.freshness_days ?? null;
+  const freshnessLabel = useMemo(() => {
+    if (freshnessDays == null) return null;
+    if (freshnessDays <= 1) return "C\u1eadp nh\u1eadt h\u00f4m nay";
+    if (freshnessDays <= 3) return `C\u1eadp nh\u1eadt ${freshnessDays} ng\u00e0y tr\u01b0\u1edbc`;
+    if (freshnessDays <= 14) return `D\u1eef li\u1ec7u ${freshnessDays} ng\u00e0y tr\u01b0\u1edbc`;
+    return `D\u1eef li\u1ec7u c\u0169 ${freshnessDays} ng\u00e0y`;
+  }, [freshnessDays]);
+  const freshnessClass = freshnessDays == null
+    ? ""
+    : freshnessDays <= 3
+      ? "fresh"
+      : freshnessDays <= 14
+        ? "stale"
+        : "very-stale";
   const cropLabel = cropLabels[crop];
   const activeTab = tabs.find((tab) => tab.value === crop) ?? tabs[0];
   const ActiveIcon = activeTab.Icon;
@@ -484,6 +533,7 @@ export function App() {
     setCrop(nextCrop as CropType);
     setRegionId(Number(nextRegionId));
     setVarietyId(Number(nextVarietyId));
+    navigate(forecastPath(nextCrop as CropType));
   }
 
   function openAnalytics(nextCrop: CropType) {
@@ -495,6 +545,7 @@ export function App() {
     setAnalyticsTab("chart");
     setPriceMenuOpen(false);
     setFertilizerMenuOpen(false);
+    navigate(forecastPath(nextCrop));
   }
 
   function openNews(nextView: NewsView = "latest") {
@@ -505,6 +556,7 @@ export function App() {
     setSection("news");
     setNewsMenuOpen(false);
     setFertilizerMenuOpen(false);
+    navigate(nextView === "latest" ? "/tin-tuc" : `/tin-tuc?news=${nextView}`);
   }
 
   function changeSection(nextSection: MainSection) {
@@ -515,6 +567,7 @@ export function App() {
     setNewsMenuOpen(false);
     setPriceMenuOpen(false);
     setFertilizerMenuOpen(false);
+    navigate(routeToUrl({ section: nextSection, crop, newsView: "latest", newsSlug: "", guideSlug: "", notFound: false }));
   }
 
   async function handleAuth(mode: "login" | "register") {
@@ -643,9 +696,9 @@ export function App() {
               <div className="quote-title-row">
                 <ActiveIcon size={20} />
                 <h1>
-                  <span className="quote-h1-line1">Giá {cropLabel} hôm nay</span>
+                  <span className="quote-h1-line1">Giá {cropLabel} hôm nay{"\u00a0"}</span>
                   <span className="quote-h1-line2">
-                    {` Dự báo 30 ngày${selectedRegion?.province ? ` tại ${selectedRegion.province}` : ""}`}
+                    {`Dự báo 30 ngày${selectedRegion?.province ? ` tại ${selectedRegion.province}` : ""}`}
                   </span>
                 </h1>
               </div>
@@ -661,13 +714,23 @@ export function App() {
                   {quoteChangePct.toFixed(2)}%
                 </span>
                 <small>VND/kg · {selectedVariety?.name ?? "Giống"}</small>
+                {freshnessLabel ? (
+                  <small className={`freshness-badge ${freshnessClass}`}>{freshnessLabel}</small>
+                ) : null}
               </div>
               <p>Dữ liệu giá, dự báo và cảnh báo theo vùng trồng đang chọn.</p>
             </div>
 
             <div className="quote-side">
-              <button className="icon-button" onClick={() => void loadData()} title="Làm mới dữ liệu">
+              <button
+                type="button"
+                className="quote-refresh-button"
+                onClick={() => void loadData()}
+                disabled={loading}
+                aria-label="L\u00e0m m\u1edbi gi\u00e1"
+              >
                 <RefreshCw size={18} />
+                {loading ? "Đang làm mới..." : "Làm mới giá"}
               </button>
               <div className="quote-range">
                 <span>Khung dữ liệu</span>

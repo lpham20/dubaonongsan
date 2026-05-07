@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Dự báo nông sản" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
 
     <title>Dự báo nông sản - Dự báo giá nông sản Việt Nam</title>
@@ -28,12 +28,12 @@
     <meta property="og:title" content="Dự báo giá nông sản Việt Nam" />
     <meta property="og:description" content="Theo dõi giá sầu riêng, cà phê, hồ tiêu, lúa và dự báo 30 ngày theo vùng trồng." />
     <!-- og:url injected per route -->
+    <meta property="og:image" content="https://dubaonongsan.com/og-cover.webp" />
+    <meta property="og:image:type" content="image/webp" />
     <meta property="og:image" content="https://dubaonongsan.com/og-cover.jpg" />
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image" content="https://dubaonongsan.com/og-cover.webp" />
-    <meta property="og:image:type" content="image/webp" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Dự báo nông sản - Dự báo giá nông sản" />
@@ -78,6 +78,18 @@
         document.head.appendChild(script);
         gtag("js", new Date());
         gtag("config", id);
+      })();
+    </script>
+    <script>
+      (function () {
+        setTimeout(function () {
+          var root = document.getElementById("root");
+          var seo = document.getElementById("seo-prerender");
+          if (seo && root && root.children.length === 0) {
+            seo.removeAttribute("hidden");
+            seo.style.cssText = "max-width:760px;margin:24px auto;padding:0 16px;font-family:system-ui,sans-serif;line-height:1.6;color:#1a1a1a";
+          }
+        }, 3000);
       })();
     </script>
   </head>

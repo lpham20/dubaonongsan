@@ -14,6 +14,7 @@ import {
   TrendingUp
 } from "./icons";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { SeoHead } from "./SeoHead";
 import { fetchTickerPrices, type CropType, type GuidePost, type NewsArticle, type PricePoint } from "../lib/api";
 import { newsPath } from "../lib/seo";
@@ -313,7 +314,8 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
               <img
                 src={leadImageUrl}
                 alt={`Ảnh minh họa: ${lead.title}`}
-                loading="lazy"
+                fetchPriority="high"
+                decoding="async"
                 width="800"
                 height="450"
                 onError={(event) => {
@@ -334,10 +336,10 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
               <span>{formatDate(lead.published_at || lead.scraped_at)}</span>
               <span>{lead.source_name}</span>
             </div>
-            <a className="story-link" href={lead.source_url === "#" ? "/tin-tuc" : newsPath(lead)}>
+            <Link className="story-link" to={lead.source_url === "#" ? "/tin-tuc" : newsPath(lead)}>
               Đọc bản tin
               <ArrowRight size={16} />
-            </a>
+            </Link>
           </div>
         </article>
 
@@ -348,11 +350,11 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
           </div>
           <div className="alert-list">
             {marketAlerts.map((item) => (
-              <a href={item.source_url === "#" ? "/tin-tuc" : newsPath(item)} key={item.article_id}>
+              <Link to={item.source_url === "#" ? "/tin-tuc" : newsPath(item)} key={item.article_id}>
                 <span>{item.category || "Thị trường"}</span>
                 <strong>{displayTitle(item.title, 74)}</strong>
                 <small>{formatDate(item.published_at || item.scraped_at)}</small>
-              </a>
+              </Link>
             ))}
           </div>
           <button type="button" onClick={onOpenNews}>

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { ArrowRight, BarChart3, BookOpenCheck, Newspaper } from "./icons";
 import type { CropType } from "../lib/api";
 import { categoryPath, forecastPath } from "../lib/seo";
@@ -17,21 +18,21 @@ export function RelatedForecastWidget({ text }: { text: string }) {
   return (
     <aside className="related-forecast">
       <h3>Xem thêm</h3>
-      <a href={forecastPath(matched.crop)}>
+      <Link to={forecastPath(matched.crop)}>
         <BarChart3 size={16} />
         Giá {matched.label} hôm nay và dự báo 30 ngày
         <ArrowRight size={15} />
-      </a>
-      <a href={`/huong-dan?cay=${matched.crop}`}>
+      </Link>
+      <Link to={`/huong-dan?cay=${matched.crop}`}>
         <BookOpenCheck size={16} />
         Hướng dẫn kỹ thuật trồng {matched.label}
         <ArrowRight size={15} />
-      </a>
-      <a href={categoryPath(matched.label)}>
+      </Link>
+      <Link to={categoryPath(matched.label)}>
         <Newspaper size={16} />
         Tin tức {matched.label} mới nhất
         <ArrowRight size={15} />
-      </a>
+      </Link>
     </aside>
   );
 }

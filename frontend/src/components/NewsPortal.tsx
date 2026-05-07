@@ -11,6 +11,7 @@ import {
   TrendingUp
 } from "./icons";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import { SeoHead } from "./SeoHead";
 import {
   fetchAvailableVarieties,
@@ -204,14 +205,17 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
   }, [activeTopic, query, sortMode]);
 
   useEffect(() => {
-    const next = query.trim();
-    const url = new URL(window.location.href);
-    if (next) {
-      url.searchParams.set("q", next);
-    } else {
-      url.searchParams.delete("q");
-    }
-    window.history.replaceState({}, "", url.toString());
+    const timer = window.setTimeout(() => {
+      const next = query.trim();
+      const url = new URL(window.location.href);
+      if (next) {
+        url.searchParams.set("q", next);
+      } else {
+        url.searchParams.delete("q");
+      }
+      window.history.replaceState({}, "", url.toString());
+    }, 500);
+    return () => window.clearTimeout(timer);
   }, [query]);
 
   function reloadPriceBoard(cropToLoad: PriceNewsCrop, signal?: AbortSignal) {
@@ -379,7 +383,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
                 <h3>Tin ảnh hưởng giá</h3>
               </div>
               {quickReads.slice(0, 4).map(({ article, topic, impact }) => (
-                <a href={newsPath(article)} key={article.article_id}>
+                <Link to={newsPath(article)} key={article.article_id}>
                   <span>{topic}</span>
                   <div className="news-alert-title">
                     <strong>{displayTitle(article.title, 76)}</strong>
@@ -388,7 +392,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
                   <small>
                     {impact} · {formatDate(article.published_at ?? article.scraped_at)}
                   </small>
-                </a>
+                </Link>
               ))}
             </section>
 
@@ -439,10 +443,10 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
                 <div className="news-source-row">
                   <small>{article.source_name}</small>
                   <small>{formatDate(article.published_at ?? article.scraped_at)}</small>
-                  <a href={newsPath(article)}>
+                  <Link to={newsPath(article)}>
                     Xem chi tiết
                     <ExternalLink size={14} />
-                  </a>
+                  </Link>
                 </div>
               </div>
             </article>
@@ -799,10 +803,10 @@ function LeadNewsCard({ item }: { item: RankedArticle }) {
           </small>
           <small>{item.article.source_name}</small>
         </div>
-        <a href={newsPath(item.article)}>
+        <Link to={newsPath(item.article)}>
           Đọc bản tin
           <ExternalLink size={16} />
-        </a>
+        </Link>
       </div>
     </article>
   );
@@ -820,6 +824,7 @@ function NewsImage({ article }: { article: NewsArticle }) {
           src={article.image_url ?? ""}
           alt={`Ảnh minh họa: ${article.title}`}
           loading="lazy"
+          decoding="async"
           width="320"
           height="180"
           onError={() => setImageFailed(true)}
@@ -832,6 +837,7 @@ function NewsImage({ article }: { article: NewsArticle }) {
                 src={logoUrl}
                 alt={`Logo ${article.source_name}`}
                 loading="lazy"
+                decoding="async"
                 width="64"
                 height="64"
                 onError={(event) => {

@@ -18,6 +18,7 @@ API_BASE = (
 ).rstrip("/")
 SITE_BASE = os.environ.get("SITE_BASE", "https://dubaonongsan.com").rstrip("/")
 SITE_NAME = "Dự báo nông sản"
+INDEXNOW_KEY = os.environ.get("INDEXNOW_KEY", "")
 ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "frontend" / "dist"
 OUTPUT = DIST / "seo"
@@ -118,6 +119,7 @@ def _page(
     body: str,
     schema: dict | list[dict] | None = None,
     published_at: str | None = None,
+    news_keywords: str | None = None,
 ) -> str:
     escaped_title = html.escape(title)
     escaped_description = html.escape(description[:180])
@@ -125,7 +127,19 @@ def _page(
     article_meta = ""
     if published_at:
         article_meta = f'<meta property="article:published_time" content="{html.escape(published_at)}" />'
+    keyword_meta = ""
+    if news_keywords:
+        keyword_meta = f'<meta name="news_keywords" content="{html.escape(news_keywords[:240])}" />'
     asset_tags = _asset_tags()
+    fallback_script = (
+        "<script>(function(){setTimeout(function(){"
+        "var r=document.getElementById('root'),"
+        "s=document.getElementById('seo-prerender');"
+        "if(s&&r&&r.children.length===0){s.removeAttribute('hidden');"
+        "s.style.cssText='max-width:760px;margin:24px auto;padding:0 16px;"
+        "font-family:system-ui,sans-serif;line-height:1.6;color:#1a1a1a';"
+        "}},3000);})();</script>"
+    )
 
     return f"""<!doctype html>
 <html lang="vi">
@@ -136,6 +150,7 @@ def _page(
   <title>{escaped_title} | {SITE_NAME}</title>
   <meta name="description" content="{escaped_description}" />
   <meta name="robots" content="index, follow, max-image-preview:large" />
+  {keyword_meta}
   <link rel="canonical" href="{canonical}" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="manifest" href="/manifest.webmanifest" />
@@ -154,6 +169,7 @@ def _page(
   <meta name="twitter:card" content="summary_large_image" />
   {article_meta}
   {schema_markup}
+  {fallback_script}
   {asset_tags}
 </head>
 <body>
@@ -200,9 +216,12 @@ def render_news() -> list[tuple[str, str | None]]:
             "publisher": {
                 "@type": "Organization",
                 "name": SITE_NAME,
-                "logo": {"@type": "ImageObject", "url": f"{SITE_BASE}/og-cover.jpg"},
+                "url": SITE_BASE,
+                "logo": {"@type": "ImageObject", "url": f"{SITE_BASE}/og-cover.jpg", "width": 1200, "height": 630},
             },
-            "image": f"{SITE_BASE}/og-cover.jpg",
+            "image": {"@type": "ImageObject", "url": f"{SITE_BASE}/og-cover.jpg", "width": 1200, "height": 630},
+            "articleSection": article.get("category", "Nông sản"),
+            "inLanguage": "vi",
         }
         breadcrumb_schema = _breadcrumb(
             [
@@ -211,9 +230,22 @@ def render_news() -> list[tuple[str, str | None]]:
                 (title[:60], canonical),
             ]
         )
+        raw_keywords = article.get("keywords") or []
+        if isinstance(raw_keywords, str):
+            keyword_items = [item.strip() for item in raw_keywords.split(",") if item.strip()]
+        elif isinstance(raw_keywords, list):
+            keyword_items = [str(item).strip() for item in raw_keywords if str(item).strip()]
+        else:
+            keyword_items = []
+        keyword_items = keyword_items[:10] or [
+            "nông sản",
+            "giá nông sản",
+            str(article.get("category") or "").strip(),
+        ]
+        news_keywords = ", ".join(item for item in keyword_items if item)
         _write(
             OUTPUT / "news" / f"{slug}.html",
-            _page(title, summary, canonical, body, [article_schema, breadcrumb_schema], published_at),
+            _page(title, summary, canonical, body, [article_schema, breadcrumb_schema], published_at, news_keywords),
         )
         urls.append((canonical, _lastmod(published_at)))
     return urls
@@ -244,7 +276,14 @@ def render_guides() -> list[tuple[str, str | None]]:
             "mainEntityOfPage": {"@type": "WebPage", "@id": canonical},
             "datePublished": published_at,
             "dateModified": published_at,
-            "publisher": {"@type": "Organization", "name": SITE_NAME},
+            "image": {"@type": "ImageObject", "url": f"{SITE_BASE}/og-cover.jpg", "width": 1200, "height": 630},
+            "publisher": {
+                "@type": "Organization",
+                "name": SITE_NAME,
+                "url": SITE_BASE,
+                "logo": {"@type": "ImageObject", "url": f"{SITE_BASE}/og-cover.jpg", "width": 1200, "height": 630},
+            },
+            "inLanguage": "vi",
         }
         breadcrumb_schema = _breadcrumb(
             [
@@ -274,14 +313,41 @@ def render_static_pages() -> list[tuple[str, str | None]]:
         canonical = f"{SITE_BASE}/du-bao-gia/{crop}"
         title = f"Giá {label} hôm nay & dự báo 30 ngày"
         desc = f"Cập nhật giá {label} theo vùng trồng, giống, biểu đồ lịch sử và dự báo 30 ngày."
-        product_schema = {
+        dataset_schema = {
             "@context": "https://schema.org",
-            "@type": "Product",
-            "name": f"Giá {label}",
+            "@type": "Dataset",
+            "name": f"Giá {label} Việt Nam - chuỗi thời gian theo vùng trồng",
             "description": desc,
-            "category": f"Nông sản / {label}",
-            "offers": {"@type": "AggregateOffer", "priceCurrency": "VND", "offerCount": 1},
+            "url": canonical,
+            "keywords": [f"giá {label}", "nông sản", "Việt Nam", "dự báo giá", label],
+            "creator": {"@type": "Organization", "name": SITE_NAME, "url": SITE_BASE},
+            "license": "https://creativecommons.org/licenses/by/4.0/",
+            "isAccessibleForFree": True,
+            "spatialCoverage": {"@type": "Place", "name": "Việt Nam"},
+            "temporalCoverage": "2024-01-01/" + today,
+            "variableMeasured": [{"@type": "PropertyValue", "name": f"Giá {label}", "unitText": "VND/kg"}],
+            "distribution": [
+                {
+                    "@type": "DataDownload",
+                    "encodingFormat": "text/csv",
+                    "contentUrl": f"{SITE_BASE}/api/v1/analytics/export.csv?crop_type={crop}",
+                },
+                {
+                    "@type": "DataDownload",
+                    "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "contentUrl": f"{SITE_BASE}/api/v1/analytics/export.xlsx?crop_type={crop}",
+                },
+            ],
         }
+        web_page_schema = {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": title,
+            "description": desc,
+            "url": canonical,
+            "mainEntity": {"@id": canonical + "#dataset"},
+        }
+        dataset_schema["@id"] = canonical + "#dataset"
         breadcrumb_schema = _breadcrumb(
             [
                 ("Trang chủ", f"{SITE_BASE}/"),
@@ -290,7 +356,7 @@ def render_static_pages() -> list[tuple[str, str | None]]:
         )
         _write(
             OUTPUT / "forecast" / f"{crop}.html",
-            _page(title, desc, canonical, f"<main><h1>{html.escape(title)}</h1><p>{html.escape(desc)}</p></main>", [product_schema, breadcrumb_schema]),
+            _page(title, desc, canonical, f"<main><h1>{html.escape(title)}</h1><p>{html.escape(desc)}</p></main>", [dataset_schema, web_page_schema, breadcrumb_schema]),
         )
         urls.append((canonical, today))
 
@@ -304,7 +370,7 @@ def render_static_pages() -> list[tuple[str, str | None]]:
         ),
         (
             "fertilizer-methodology.html",
-            f"{SITE_BASE}/thuat-toan-bon-phan",
+            f"{SITE_BASE}/khuyen-nghi-bon-phan/logic",
             "Giải thích logic khuyến nghị bón phân",
             "Cách hệ thống tính nhu cầu N-P-K, quy đổi ra phân thương mại, chia lịch bón và cảnh báo an toàn.",
             "Thuật toán bón phân",
@@ -333,25 +399,65 @@ def render_static_pages() -> list[tuple[str, str | None]]:
 
 
 def write_sitemap(urls: list[tuple[str, str | None]]) -> None:
+    today = datetime.utcnow().date().isoformat()
     static_urls = [
-        (f"{SITE_BASE}/", None),
-        (f"{SITE_BASE}/tin-tuc", None),
-        (f"{SITE_BASE}/huong-dan", None),
-        (f"{SITE_BASE}/tin-tuc/category/ca-phe", None),
-        (f"{SITE_BASE}/tin-tuc/category/sau-rieng", None),
-        (f"{SITE_BASE}/tin-tuc/category/ho-tieu", None),
-        (f"{SITE_BASE}/tin-tuc/category/phan-bon-vat-tu", None),
+        (f"{SITE_BASE}/", today),
+        (f"{SITE_BASE}/tin-tuc", today),
+        (f"{SITE_BASE}/huong-dan", today),
+        (f"{SITE_BASE}/khuyen-nghi-bon-phan", today),
+        (f"{SITE_BASE}/khuyen-nghi-bon-phan/logic", today),
+        (f"{SITE_BASE}/tin-tuc/category/ca-phe", today),
+        (f"{SITE_BASE}/tin-tuc/category/sau-rieng", today),
+        (f"{SITE_BASE}/tin-tuc/category/ho-tieu", today),
+        (f"{SITE_BASE}/tin-tuc/category/phan-bon-vat-tu", today),
     ]
     all_urls = static_urls + urls
     lines = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for loc, lastmod in all_urls:
         lines.append("  <url>")
         lines.append(f"    <loc>{html.escape(loc)}</loc>")
-        if lastmod:
-            lines.append(f"    <lastmod>{html.escape(lastmod)}</lastmod>")
+        lines.append(f"    <lastmod>{html.escape(lastmod or today)}</lastmod>")
+        if loc == f"{SITE_BASE}/":
+            lines.append("    <priority>1.0</priority>")
+            lines.append("    <changefreq>daily</changefreq>")
+        elif "/du-bao-gia/" in loc:
+            lines.append("    <priority>0.9</priority>")
+            lines.append("    <changefreq>daily</changefreq>")
+        elif "/tin-tuc/" in loc and "category" not in loc and loc != f"{SITE_BASE}/tin-tuc":
+            lines.append("    <priority>0.7</priority>")
+            lines.append("    <changefreq>weekly</changefreq>")
+        elif "/huong-dan/" in loc and loc != f"{SITE_BASE}/huong-dan":
+            lines.append("    <priority>0.7</priority>")
+            lines.append("    <changefreq>monthly</changefreq>")
+        else:
+            lines.append("    <priority>0.6</priority>")
+            lines.append("    <changefreq>weekly</changefreq>")
         lines.append("  </url>")
     lines.append("</urlset>")
     _write(DIST / "sitemap.xml", "\n".join(lines))
+
+
+def ping_indexnow(urls: list[tuple[str, str | None]]) -> None:
+    if not INDEXNOW_KEY or not urls:
+        return
+    payload = json.dumps(
+        {
+            "host": "dubaonongsan.com",
+            "key": INDEXNOW_KEY,
+            "keyLocation": f"{SITE_BASE}/{INDEXNOW_KEY}.txt",
+            "urlList": [url for url, _ in urls[:1000]],
+        }
+    ).encode("utf-8")
+    try:
+        request = Request(
+            "https://api.indexnow.org/indexnow",
+            data=payload,
+            headers={"Content-Type": "application/json"},
+        )
+        with urlopen(request, timeout=20) as response:
+            print(f"IndexNow: HTTP {response.status}")
+    except Exception as exc:
+        print(f"IndexNow ping skipped: {exc}")
 
 
 if __name__ == "__main__":
@@ -361,4 +467,5 @@ if __name__ == "__main__":
     urls.extend(render_news())
     urls.extend(render_guides())
     write_sitemap(urls)
+    ping_indexnow(urls)
     print(f"SEO HTML generated in {OUTPUT}")

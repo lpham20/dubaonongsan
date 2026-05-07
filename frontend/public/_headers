@@ -3,34 +3,39 @@
   X-Frame-Options: SAMEORIGIN
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(), microphone=(), camera=()
+  Content-Language: vi
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
 /*.jpg
-  Cache-Control: public, max-age=604800
+  Cache-Control: public, max-age=31536000, immutable
 
 /*.jpeg
-  Cache-Control: public, max-age=604800
+  Cache-Control: public, max-age=31536000, immutable
 
 /*.png
-  Cache-Control: public, max-age=604800
+  Cache-Control: public, max-age=31536000, immutable
 
 /*.webp
-  Cache-Control: public, max-age=604800
+  Cache-Control: public, max-age=31536000, immutable
 
 /*.svg
-  Cache-Control: public, max-age=604800
+  Cache-Control: public, max-age=31536000, immutable
 
 /*.html
   Cache-Control: public, max-age=300, must-revalidate
 
 /seo/*
-  Cache-Control: public, max-age=300, must-revalidate
+  Cache-Control: public, max-age=300, s-maxage=600, stale-while-revalidate=86400
   X-Robots-Tag: index, follow
 
 /sitemap.xml
   Cache-Control: public, max-age=3600
+  X-Robots-Tag: index, follow
 
 /robots.txt
+  Cache-Control: public, max-age=86400
+
+/manifest.webmanifest
   Cache-Control: public, max-age=86400

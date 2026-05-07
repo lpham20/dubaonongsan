@@ -41,7 +41,7 @@
 	rewrite @seoMethodology /seo/methodology.html
 
 	@seoFertilizerMethodology {
-		path /thuat-toan-bon-phan
+		path /thuat-toan-bon-phan /khuyen-nghi-bon-phan/logic
 	}
 	rewrite @seoFertilizerMethodology /seo/fertilizer-methodology.html
 

@@ -170,11 +170,11 @@
 }
 
 .forecast-shell .quote-change.positive::before {
-  content: "â†—";
+  content: "\2197";
 }
 
 .forecast-shell .quote-change.negative::before {
-  content: "â†˜";
+  content: "\2198";
 }
 
 .forecast-shell .quote-main p {
@@ -186,13 +186,12 @@
 }
 
 .forecast-shell .quote-side {
-  grid-template-columns: 44px minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 12px 16px;
 }
 
-.forecast-shell .quote-side .icon-button {
-  width: 42px;
-  height: 42px;
+.forecast-shell .quote-side .quote-refresh-button {
+  min-height: 42px;
   color: var(--forecast-forest);
   background: #ffffff;
   border: 1px solid var(--forecast-line);
@@ -200,7 +199,7 @@
   box-shadow: none;
 }
 
-.forecast-shell .quote-side .icon-button svg {
+.forecast-shell .quote-side .quote-refresh-button svg {
   stroke-width: 1.8;
 }
 
@@ -612,4 +611,3 @@
 .method-page .method-sources a {
   color: var(--method-forest);
 }
-

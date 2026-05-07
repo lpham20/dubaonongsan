@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { CalendarClock, Gauge, Sprout } from "./icons";
 import { Breadcrumb } from "./Breadcrumb";
 import { RelatedForecastWidget } from "./RelatedForecastWidget";
@@ -12,44 +13,58 @@ export function GuideDetailPage({ slug }: { slug: string }) {
   const [guide, setGuide] = useState<GuidePost | null>(null);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 8000);
     setLoading(true);
     setFailed(false);
+    setGuide(null);
     fetchGuideDetail(slug, controller.signal)
       .then(setGuide)
-      .catch(() => {
+      .catch((err) => {
+        if (err?.name === "AbortError") {
+          if (!controller.signal.aborted) setFailed(true);
+          return;
+        }
+        console.error("[GuideDetailPage] fetch failed", { slug, err });
         if (!controller.signal.aborted) setFailed(true);
       })
       .finally(() => {
+        window.clearTimeout(timeoutId);
         if (!controller.signal.aborted) setLoading(false);
       });
-    return () => controller.abort();
-  }, [slug]);
-
-  useEffect(() => {
-    if (!guide) return;
-    const canonicalPath = guidePath(guide.slug);
-    if (window.location.pathname !== canonicalPath) {
-      window.history.replaceState(null, "", canonicalPath);
-    }
-  }, [guide]);
+    return () => {
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [slug, retryKey]);
 
   const schema = useMemo(() => (guide ? buildHowToSchema(guide) : undefined), [guide]);
 
   if (loading) {
-    return <section className="content-page detail-page"><div className="loading">Đang tải hướng dẫn kỹ thuật...</div></section>;
+    return (
+      <section className="content-page detail-page">
+        <Breadcrumb items={[{ label: "Trang chủ", href: "/" }, { label: "Hướng dẫn", href: "/huong-dan" }]} />
+        <div className="loading">Đang tải hướng dẫn kỹ thuật...</div>
+      </section>
+    );
   }
 
   if (failed || !guide) {
     return (
       <section className="content-page detail-page">
-        <SeoHead title="Không tìm thấy hướng dẫn" description="Bài hướng dẫn kỹ thuật không tồn tại hoặc đã được cập nhật." canonical="/huong-dan" />
-        <Breadcrumb items={[{ label: "Trang chủ", href: "/" }, { label: "Hướng dẫn", href: "/huong-dan" }, { label: "Không tìm thấy" }]} />
-        <h1>Không tìm thấy hướng dẫn</h1>
-        <p>Bài hướng dẫn có thể đã được đổi đường dẫn hoặc chưa có trong thư viện.</p>
-        <a className="detail-primary-link" href="/huong-dan">Quay lại thư viện hướng dẫn</a>
+        <SeoHead title="Không tải được hướng dẫn" description="Đường truyền yếu hoặc bài hướng dẫn tạm thời không khả dụng. Vui lòng thử lại." canonical={`/huong-dan/${slug}`} />
+        <Breadcrumb items={[{ label: "Trang chủ", href: "/" }, { label: "Hướng dẫn", href: "/huong-dan" }, { label: "Không tải được" }]} />
+        <h1>Không tải được hướng dẫn</h1>
+        <p>Mạng có thể đang chậm hoặc bài viết tạm thời chưa sẵn sàng. Bạn có thể thử lại sau vài giây.</p>
+        <div className="detail-error-actions">
+          <button type="button" className="detail-primary-link" onClick={() => setRetryKey((value) => value + 1)}>
+            Thử lại
+          </button>
+          <Link className="detail-secondary-link" to="/huong-dan">Quay lại thư viện hướng dẫn</Link>
+        </div>
       </section>
     );
   }
@@ -94,7 +109,7 @@ export function GuideDetailPage({ slug }: { slug: string }) {
 }
 
 function GuideArticleContent({ guide }: { guide: GuidePost }) {
-  const blocks = parseGuideBlocks(guide.content);
+  const blocks = safeParseGuideBlocks(guide);
   return (
     <div className="detail-body guide-detail-body">
       {blocks.map((block) => (
@@ -116,6 +131,7 @@ function GuideArticleContent({ guide }: { guide: GuidePost }) {
               src={`/api/v1/content/guide-images/${guide.post_id}/${image.index}`}
               alt={`Ảnh hướng dẫn: ${guide.title} - ${block.heading}`}
               loading="lazy"
+              decoding="async"
               width="860"
               height="480"
               onError={(event) => {
@@ -130,7 +146,7 @@ function GuideArticleContent({ guide }: { guide: GuidePost }) {
 }
 
 function buildHowToSchema(guide: GuidePost) {
-  const steps = parseGuideBlocks(guide.content)
+  const steps = safeParseGuideBlocks(guide)
     .filter((block) => block.body.length || block.bullets.length)
     .slice(0, 8)
     .map((block) => ({
@@ -150,6 +166,16 @@ function buildHowToSchema(guide: GuidePost) {
     supply: relatedSupplies(guide).map((name) => ({ "@type": "HowToSupply", name })),
     step: steps
   };
+}
+
+function safeParseGuideBlocks(guide: GuidePost) {
+  try {
+    const blocks = parseGuideBlocks(guide.content);
+    return blocks.length ? blocks : [{ heading: "Ghi chú kỹ thuật", body: [guide.summary], bullets: [], images: [] }];
+  } catch (err) {
+    console.error("[GuideDetailPage] parse failed", { slug: guide.slug, err });
+    return [{ heading: "Ghi chú kỹ thuật", body: [guide.summary || guide.title], bullets: [], images: [] }];
+  }
 }
 
 function parseGuideBlocks(content: string) {

@@ -41,12 +41,13 @@
 .quote-meta span + span::before {
   margin-right: 10px;
   color: #c7ccd1;
-  content: "â€¢";
+  content: "\2022";
 }
 
 .quote-price-row {
   display: flex;
   align-items: baseline;
+  flex-wrap: wrap;
   gap: var(--space-4);
   margin-top: var(--space-3);
 }
@@ -185,6 +186,54 @@
   border-radius: 0;
   color: #344054;
   background: #fff;
+}
+
+.quote-refresh-button {
+  grid-row: span 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 12px;
+  color: #ffffff;
+  background: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 80%, #ffffff 20%);
+  border-radius: 8px;
+  font-family: "Inter", "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.quote-refresh-button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.freshness-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.freshness-badge.fresh {
+  color: #065f46;
+  background: #d1fae5;
+}
+
+.freshness-badge.stale {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.freshness-badge.very-stale {
+  color: #991b1b;
+  background: #fee2e2;
 }
 
 .segmented button:last-child,
@@ -499,4 +548,3 @@
 .data-section {
   padding-top: var(--space-5);
 }
-

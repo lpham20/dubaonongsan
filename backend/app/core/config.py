@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     public_api_key: str = Field(default="", description="Required in production")
     iot_api_key: str = Field(default="", description="API key for IoT telemetry devices")
     start_scheduler_in_api: bool = True
-    scrape_interval_minutes: int = 60 * 24
+    scrape_interval_minutes: int = 60 * 2
     news_scrape_interval_minutes: int = 60 * 3
     news_scrape_daily_hour: int = 7
     news_scrape_daily_minute: int = 0

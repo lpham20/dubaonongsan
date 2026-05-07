@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { registerSW } from "virtual:pwa-register";
 import { App } from "./App";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -17,6 +18,18 @@ import "./styles/forecast.css";
 import "./styles/header.css";
 import "./styles/production.css";
 import "./styles/responsive.css";
+
+if (import.meta.env.PROD) {
+  registerSW({
+    immediate: true,
+    onNeedRefresh() {
+      console.info("Có phiên bản mới, hãy tải lại trang để cập nhật.");
+    },
+    onOfflineReady() {
+      console.info("Dự báo nông sản đã sẵn sàng dùng ở chế độ offline.");
+    }
+  });
+}
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
