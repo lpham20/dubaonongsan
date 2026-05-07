@@ -1,0 +1,587 @@
+/* Technical guide library: documentation-grade redesign */
+.guide-workspace {
+  --guide-forest: #1a4d2e;
+  --guide-forest-deep: #0b2f1d;
+  --guide-slate: #475569;
+  --guide-muted: #64748b;
+  --guide-line: #dbe4de;
+  --guide-soft: #f6f8f6;
+  color: #111827;
+  font-family: "Inter", "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+}
+
+.guide-workspace .content-hero.compact-guide-hero {
+  min-height: 116px;
+  padding: 26px 30px;
+  background: #ffffff;
+  border: 1px solid var(--guide-line);
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(21, 44, 31, 0.06);
+}
+
+.guide-workspace .content-hero.compact-guide-hero span {
+  color: var(--guide-forest);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.guide-workspace .content-hero.compact-guide-hero h1 {
+  color: #111827;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: clamp(30px, 2.2vw, 38px);
+  font-weight: 850;
+  line-height: 1.12;
+  letter-spacing: 0;
+}
+
+.guide-workspace .guide-layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+  margin-top: 18px;
+}
+
+.guide-workspace .guide-sidebar {
+  display: block;
+}
+
+.guide-workspace .quick-panel,
+.guide-workspace .guide-main,
+.guide-workspace .guide-list-panel,
+.guide-workspace .guide-detail-panel {
+  background: #ffffff;
+  border: 1px solid var(--guide-line);
+  border-radius: 8px;
+  box-shadow: 0 12px 30px rgba(23, 43, 33, 0.06);
+}
+
+.guide-workspace .quick-panel {
+  top: 88px;
+  padding: 18px 14px;
+}
+
+.guide-workspace .quick-panel h2 {
+  margin: 0 0 14px;
+  padding: 0 8px 12px;
+  color: #111827;
+  border-bottom: 1px solid var(--guide-line);
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: 16px;
+  font-weight: 850;
+  text-align: left;
+}
+
+.guide-workspace .quick-panel button {
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  min-height: 40px;
+  padding: 8px 10px;
+  color: #334155;
+  background: transparent;
+  border: 0;
+  border-left: 2px solid transparent;
+  border-radius: 0;
+  box-shadow: none;
+  font-size: 13px;
+  font-weight: 750;
+  text-align: left;
+}
+
+.guide-workspace .quick-panel button svg {
+  color: #94a3b8;
+}
+
+.guide-workspace .quick-panel button small {
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.guide-workspace .quick-panel button.active,
+.guide-workspace .quick-panel button:hover {
+  color: var(--guide-forest);
+  background: #f1f6f3;
+  border-left-color: var(--guide-forest);
+}
+
+.guide-workspace .quick-panel button.active svg,
+.guide-workspace .quick-panel button:hover svg {
+  color: var(--guide-forest);
+}
+
+.guide-workspace .guide-main {
+  grid-column: auto;
+  min-width: 0;
+  padding: 20px;
+}
+
+.guide-workspace .tech-title {
+  color: var(--guide-forest);
+}
+
+.guide-workspace .tech-title h2 {
+  color: #111827;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: 22px;
+  font-weight: 850;
+}
+
+.guide-workspace .family-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.guide-workspace .guide-family-card {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  flex-direction: column;
+  min-height: 170px;
+  overflow: hidden;
+  padding: 18px;
+  border: 1px solid rgba(26, 77, 46, 0.18);
+  border-radius: 8px;
+  background: #0f2419;
+  box-shadow: none;
+  text-align: left;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.guide-workspace .guide-family-card:hover,
+.guide-workspace .guide-family-card.active {
+  transform: translateY(-1px);
+  border-color: rgba(26, 77, 46, 0.42);
+  box-shadow: 0 16px 32px rgba(23, 43, 33, 0.14);
+}
+
+.guide-workspace .guide-family-art {
+  position: absolute;
+  inset: 0;
+  height: auto;
+  border-radius: 0;
+}
+
+.guide-workspace .guide-family-art::after {
+  position: absolute;
+  inset: 0;
+  display: block;
+  content: "";
+  background:
+    linear-gradient(180deg, rgba(5, 22, 15, 0.08) 0%, rgba(5, 22, 15, 0.74) 100%),
+    linear-gradient(90deg, rgba(5, 22, 15, 0.38), transparent 58%);
+}
+
+.guide-workspace .guide-family-art img {
+  height: 100%;
+  filter: saturate(0.95) contrast(1.04);
+}
+
+.guide-workspace .guide-family-card strong,
+.guide-workspace .guide-family-card span {
+  position: relative;
+  z-index: 1;
+  padding: 0;
+}
+
+.guide-workspace .guide-family-card strong {
+  color: #ffffff;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: 18px;
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+.guide-workspace .guide-family-card span {
+  margin-top: 6px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.guide-workspace .plant-strip {
+  gap: 8px;
+  margin: 16px 0 18px;
+}
+
+.guide-workspace .plant-strip button {
+  min-height: 36px;
+  padding: 0 14px;
+  color: #334155;
+  background: #f2f5f3;
+  border: 1px solid #dbe4de;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: none;
+}
+
+.guide-workspace .plant-strip button small {
+  height: 22px;
+  min-width: 22px;
+  color: #64748b;
+  background: #ffffff;
+}
+
+.guide-workspace .plant-strip button.active,
+.guide-workspace .plant-strip button:hover {
+  color: #ffffff;
+  background: var(--guide-forest);
+  border-color: var(--guide-forest);
+}
+
+.guide-workspace .plant-strip button.active small,
+.guide-workspace .plant-strip button:hover small {
+  color: var(--guide-forest);
+  background: #ffffff;
+}
+
+.guide-workspace .guide-browser {
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 18px;
+}
+
+.guide-workspace .guide-list-panel {
+  position: sticky;
+  top: 88px;
+  padding: 14px;
+}
+
+.guide-workspace .guide-filter-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.guide-workspace .guide-filter-tabs button {
+  flex: 1;
+  min-height: 36px;
+  color: #334155;
+  background: #f2f5f3;
+  border: 1px solid #dbe4de;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 850;
+  box-shadow: none;
+}
+
+.guide-workspace .guide-filter-tabs button svg {
+  color: currentColor;
+}
+
+.guide-workspace .guide-filter-tabs button.active {
+  color: #ffffff;
+  background: var(--guide-forest);
+  border-color: var(--guide-forest);
+}
+
+.guide-workspace .guide-filter-tabs button small {
+  color: inherit;
+  opacity: 0.74;
+}
+
+.guide-workspace .guide-search {
+  margin-top: 12px;
+  border-color: var(--guide-line);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.guide-workspace .guide-search svg {
+  color: var(--guide-forest);
+}
+
+.guide-workspace .guide-search input {
+  color: #111827;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-weight: 650;
+}
+
+.guide-workspace .guide-list {
+  max-height: 660px;
+  gap: 2px;
+}
+
+.guide-workspace .guide-list button {
+  min-height: 42px;
+  padding: 9px 8px 9px 14px;
+  color: #334155;
+  background: transparent;
+  border: 0;
+  border-left: 2px solid transparent;
+  border-radius: 0;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.guide-workspace .guide-list button svg {
+  color: #94a3b8;
+}
+
+.guide-workspace .guide-list button span {
+  padding-left: 4px;
+}
+
+.guide-workspace .guide-list button.active,
+.guide-workspace .guide-list button:hover {
+  color: var(--guide-forest);
+  background: #f1f6f3;
+  border-left-color: var(--guide-forest);
+}
+
+.guide-workspace .guide-list button.active svg,
+.guide-workspace .guide-list button:hover svg {
+  color: var(--guide-forest);
+}
+
+.guide-workspace .guide-detail-panel {
+  min-height: 620px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.guide-article-header {
+  display: grid;
+  gap: 12px;
+  padding: 28px 30px 22px;
+  border-bottom: 1px solid var(--guide-line);
+  background: linear-gradient(180deg, #ffffff, #fbfcfb);
+}
+
+.guide-tag-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.guide-tag-row span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  color: #355b47;
+  background: #f3f8f5;
+  border: 1px solid #d7e5dc;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.guide-workspace .guide-detail-panel h2 {
+  max-width: 920px;
+  margin: 0;
+  color: #111827;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: clamp(30px, 2.5vw, 42px);
+  font-weight: 850;
+  line-height: 1.12;
+  letter-spacing: 0;
+}
+
+.guide-workspace .guide-detail-panel > p,
+.guide-article-header p {
+  max-width: 820px;
+  margin: 0;
+  color: #475569;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.62;
+}
+
+.guide-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, max-content));
+  gap: 10px;
+}
+
+.guide-meta-grid small {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  padding: 0 10px;
+  color: #475569;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.guide-meta-grid svg {
+  color: var(--guide-forest);
+}
+
+.guide-article-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 290px;
+  gap: 28px;
+  align-items: start;
+  padding: 28px 30px 34px;
+}
+
+.guide-workspace .structured-guide-body {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+  color: #263238;
+  white-space: normal;
+}
+
+.guide-workspace .structured-guide-body section {
+  padding: 20px 0;
+  border-bottom: 1px solid #e5ece8;
+}
+
+.guide-workspace .structured-guide-body section:first-child {
+  padding-top: 0;
+}
+
+.guide-workspace .structured-guide-body h3 {
+  margin: 0 0 10px;
+  color: #111827;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: 21px;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.guide-workspace .structured-guide-body p {
+  color: #425466;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.72;
+}
+
+.guide-workspace .structured-guide-body section:first-child p {
+  color: #263238;
+  font-weight: 650;
+}
+
+.guide-workspace .structured-guide-body li {
+  color: #344256;
+  font-size: 14px;
+  line-height: 1.62;
+}
+
+.guide-workspace .structured-guide-body li::before {
+  background: var(--guide-forest);
+}
+
+.guide-workspace .guide-image-grid img {
+  border-color: var(--guide-line);
+  border-radius: 8px;
+}
+
+.guide-reference-panel {
+  position: sticky;
+  top: 88px;
+  display: grid;
+  gap: 14px;
+}
+
+.guide-reference-panel section {
+  padding: 16px;
+  background: #fbfcfb;
+  border: 1px solid var(--guide-line);
+  border-radius: 8px;
+}
+
+.guide-reference-panel section > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: var(--guide-forest);
+}
+
+.guide-reference-panel h3 {
+  margin: 0;
+  color: #111827;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: 15px;
+  font-weight: 850;
+}
+
+.guide-reference-panel dl {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.guide-reference-panel dl div {
+  display: grid;
+  gap: 4px;
+  padding-top: 10px;
+  border-top: 1px solid #e5ece8;
+}
+
+.guide-reference-panel dt {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.guide-reference-panel dd {
+  margin: 0;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.guide-reference-panel ul {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guide-reference-panel li {
+  padding: 9px 10px;
+  color: #334155;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+@media (max-width: 1279px) {
+  .guide-workspace .guide-layout,
+  .guide-workspace .guide-browser,
+  .guide-article-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .guide-workspace .guide-list-panel,
+  .guide-reference-panel {
+    position: static;
+  }
+
+  .guide-workspace .family-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .guide-meta-grid,
+  .guide-workspace .family-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .guide-article-header,
+  .guide-article-layout {
+    padding-inline: 20px;
+  }
+}
+

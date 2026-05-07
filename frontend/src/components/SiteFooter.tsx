@@ -1,5 +1,6 @@
 import { FormEvent, useState } from "react";
 import { subscribeNewsletter } from "../lib/api";
+import { useMediaQuery } from "../hooks/useMediaQuery";
 
 type Props = {
   onOpenNews: () => void;
@@ -10,6 +11,7 @@ type Props = {
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics }: Props) {
+  const isMobile = useMediaQuery("(max-width: 860px)");
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
@@ -41,23 +43,24 @@ export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics }: Props)
   return (
     <footer className="site-footer">
       <div className="site-footer-grid">
-        <section className="footer-brand-block" aria-label="Thông tin pháp lý">
-          <h2>Dự báo nông sản</h2>
+        <details className="footer-brand-block site-footer-section" aria-label="Thông tin pháp lý" open={!isMobile}>
+          <summary><span className="footer-section-title">Dự báo nông sản</span></summary>
           <p>
             Đây là trang blog cá nhân lưu trữ và phân tích thông tin nông nghiệp nhằm mục đích chia sẻ kiến thức, hỗ trợ bà con nông dân phi lợi nhuận, không phải là cơ quan báo chí.
           </p>
           <a href="mailto:dubaonongsan@gmail.com">dubaonongsan@gmail.com</a>
-        </section>
+        </details>
 
-        <nav className="footer-links" aria-label="Liên kết nhanh">
-          <h3>Liên kết nhanh</h3>
+        <details className="footer-links site-footer-section" aria-label="Liên kết nhanh" open={!isMobile}>
+          <summary><span className="footer-section-title">Liên kết nhanh</span></summary>
           <button type="button" onClick={onOpenNews}>Tin tức thị trường</button>
           <button type="button" onClick={onOpenGuides}>Quy trình kỹ thuật</button>
           <button type="button" onClick={onOpenAnalytics}>Dự báo giá nông sản</button>
-        </nav>
+        </details>
 
-        <section className="footer-subscribe" aria-label="Đăng ký nhận tin">
-          <h3>Đừng bỏ lỡ biến động giá nông sản ngày mai. Đăng ký ngay!</h3>
+        <details className="footer-subscribe site-footer-section" aria-label="Đăng ký nhận tin" open={!isMobile}>
+          <summary><span className="footer-section-title">Nhận tin giá nông sản</span></summary>
+          <p>Đừng bỏ lỡ biến động giá nông sản ngày mai. Đăng ký ngay!</p>
           <form onSubmit={handleSubmit} noValidate>
             <label htmlFor="footer-email">Email</label>
             <div>
@@ -86,7 +89,7 @@ export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics }: Props)
             </div>
           </form>
           {message ? <p id="footer-email-feedback" className={`footer-form-message ${status}`}>{message}</p> : null}
-        </section>
+        </details>
       </div>
 
       <div className="footer-bottom">© 2026 Dự báo nông sản. All rights reserved.</div>

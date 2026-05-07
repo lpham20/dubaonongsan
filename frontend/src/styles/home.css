@@ -1,0 +1,660 @@
+/* Homepage: financial news desk redesign */
+.finance-home {
+  --finance-forest: #08251b;
+  --finance-green: #0f6b4d;
+  --finance-green-2: #117d58;
+  --finance-slate: #334155;
+  --finance-muted: #64748b;
+  --finance-line: #d8e1dc;
+  --finance-paper: #ffffff;
+  --finance-bg: #f7faf8;
+  display: grid;
+  gap: 22px;
+  padding-top: 0;
+  color: #101a16;
+  font-family: "Inter", "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+}
+
+.home-price-ticker {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 42px;
+  margin: 10px -24px 0;
+  padding: 0 24px;
+  overflow: hidden;
+  color: #f8fff9;
+  background: linear-gradient(90deg, #061b14, #0a3325 48%, #123d2e);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.home-price-ticker-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.home-price-track {
+  overflow: hidden;
+  flex: 1;
+}
+
+.home-price-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 42px;
+  min-width: max-content;
+  white-space: nowrap;
+  animation: homeTicker 190s linear infinite;
+}
+
+.home-price-content span {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.home-price-content strong {
+  color: rgba(255, 255, 255, 0.72);
+  font-weight: 650;
+}
+
+.home-price-content b {
+  color: #ffffff;
+  font-weight: 850;
+}
+
+.home-price-content em {
+  font-style: normal;
+  font-weight: 850;
+}
+
+.home-price-content em.up {
+  color: #51d18a;
+}
+
+.home-price-content em.down {
+  color: #ff6b66;
+}
+
+.forecast-price-ticker {
+  margin-bottom: 18px;
+}
+
+@keyframes homeTicker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.home-market-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 34px;
+  min-height: 560px;
+  overflow: hidden;
+  padding: 56px;
+  color: #ffffff;
+  border: 1px solid rgba(12, 43, 31, 0.18);
+  border-radius: 10px;
+  background:
+    linear-gradient(90deg, rgba(4, 22, 16, 0.92) 0%, rgba(5, 30, 21, 0.78) 46%, rgba(5, 34, 24, 0.2) 100%),
+    image-set("/coffee-hero-photo.webp" type("image/webp"), "/coffee-hero-photo.jpg" type("image/jpeg")) center / cover no-repeat;
+  box-shadow: 0 22px 54px rgba(18, 45, 34, 0.16);
+}
+
+.home-market-hero::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(2, 15, 10, 0.18) 100%),
+    radial-gradient(circle at 84% 18%, rgba(255, 255, 255, 0.18), transparent 24%);
+}
+
+.home-hero-copy,
+.home-hero-terminal {
+  position: relative;
+  z-index: 1;
+}
+
+.home-hero-copy {
+  display: grid;
+  align-content: center;
+  gap: 22px;
+  max-width: 850px;
+}
+
+.home-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  padding: 8px 12px;
+  color: #def8e8;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  backdrop-filter: blur(12px);
+}
+
+.home-market-hero h1 {
+  max-width: 880px;
+  margin: 0;
+  color: #ffffff;
+  font-family: "Inter", "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(46px, 5.2vw, 78px);
+  font-weight: 850;
+  line-height: 1.02;
+  letter-spacing: 0;
+}
+
+.home-market-hero p {
+  max-width: 760px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.home-quick-search {
+  display: grid;
+  grid-template-columns: auto minmax(210px, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  width: min(760px, 100%);
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 8px;
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.18);
+}
+
+.home-quick-search svg {
+  margin-left: 8px;
+  color: var(--finance-green);
+}
+
+.home-quick-search input {
+  min-width: 0;
+  height: 44px;
+  color: #0f1c17;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.home-quick-search button,
+.home-hero-actions button,
+.story-link,
+.market-alert-panel > button,
+.home-ops-strip button {
+  border-radius: 8px;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+
+.home-quick-search button {
+  height: 44px;
+  padding: 0 14px;
+  color: #173329;
+  background: #eef6f1;
+  border: 1px solid #dce8e1;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.home-quick-search .home-search-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #ffffff;
+  background: var(--finance-green);
+  border-color: var(--finance-green);
+}
+
+.home-quick-search button:hover,
+.home-hero-actions button:hover,
+.story-link:hover,
+.market-alert-panel > button:hover,
+.home-ops-strip button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(10, 40, 28, 0.16);
+}
+
+.home-hero-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.home-hero-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 18px;
+  color: #ffffff;
+  background: var(--finance-green-2);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  font-size: 15px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.home-hero-actions button + button {
+  color: #12251d;
+  background: #ffffff;
+}
+
+.home-hero-terminal {
+  align-self: end;
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+  color: #10221a;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 10px;
+  box-shadow: 0 18px 46px rgba(3, 19, 13, 0.2);
+  backdrop-filter: blur(16px);
+}
+
+.home-hero-terminal span {
+  display: block;
+  color: var(--finance-green);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.home-hero-terminal strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 22px;
+  line-height: 1.18;
+}
+
+.home-hero-terminal dl {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+
+.home-hero-terminal dl div {
+  display: grid;
+  gap: 4px;
+  padding: 13px 0;
+  border-top: 1px solid rgba(35, 66, 50, 0.16);
+}
+
+.home-hero-terminal dt {
+  color: #17231e;
+  font-weight: 850;
+}
+
+.home-hero-terminal dd {
+  margin: 0;
+  color: var(--finance-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.market-card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.market-data-card {
+  display: grid;
+  gap: 10px;
+  min-height: 178px;
+  padding: 18px;
+  background: #ffffff;
+  border: 1px solid var(--finance-line);
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(25, 47, 36, 0.06);
+}
+
+.market-card-head,
+.market-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.market-card-head span {
+  color: var(--finance-slate);
+  font-size: 13px;
+  font-weight: 850;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.market-data-card.up .market-card-head svg,
+.market-data-card.up em {
+  color: #08875d;
+}
+
+.market-data-card.down .market-card-head svg,
+.market-data-card.down em {
+  color: #cf2e2e;
+}
+
+.market-data-card > strong {
+  color: #111827;
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.market-card-meta small {
+  color: var(--finance-muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.market-card-meta em {
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.sparkline {
+  width: 100%;
+  height: 48px;
+  margin-top: auto;
+  overflow: visible;
+}
+
+.sparkline polygon {
+  opacity: 0.12;
+}
+
+.sparkline polyline {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sparkline.up polygon {
+  fill: #0f9965;
+}
+
+.sparkline.up polyline {
+  stroke: #0f9965;
+}
+
+.sparkline.down polygon {
+  fill: #cf2e2e;
+}
+
+.sparkline.down polyline {
+  stroke: #cf2e2e;
+}
+
+.home-intel-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(360px, 0.72fr);
+  gap: 18px;
+}
+
+.lead-market-story,
+.market-alert-panel,
+.home-ops-strip {
+  background: #ffffff;
+  border: 1px solid var(--finance-line);
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(23, 43, 33, 0.06);
+}
+
+.lead-market-story {
+  display: grid;
+  grid-template-columns: 42% minmax(0, 1fr);
+  min-height: 390px;
+  overflow: hidden;
+}
+
+.lead-market-image {
+  min-height: 100%;
+  background: #dce5df;
+}
+
+.lead-market-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lead-market-copy {
+  display: grid;
+  align-content: center;
+  gap: 16px;
+  padding: 34px;
+}
+
+.story-label,
+.panel-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--finance-green);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.lead-market-copy h2 {
+  margin: 0;
+  color: #111827;
+  font-family: "Inter", "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(30px, 3vw, 46px);
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+.lead-market-copy p {
+  margin: 0;
+  color: #46564f;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.58;
+}
+
+.story-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  color: var(--finance-muted);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.story-link,
+.market-alert-panel > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: fit-content;
+  min-height: 44px;
+  padding: 0 15px;
+  color: #ffffff;
+  background: var(--finance-green);
+  border: 1px solid var(--finance-green);
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.market-alert-panel {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  padding: 22px;
+}
+
+.panel-heading h2 {
+  margin: 0;
+  color: #14231d;
+  font-size: 18px;
+}
+
+.alert-list {
+  display: grid;
+  gap: 0;
+}
+
+.alert-list a {
+  display: grid;
+  gap: 6px;
+  padding: 15px 0;
+  color: inherit;
+  border-top: 1px solid var(--finance-line);
+  text-decoration: none;
+}
+
+.alert-list a:hover strong {
+  color: var(--finance-green);
+}
+
+.alert-list span {
+  color: var(--finance-green);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.alert-list strong {
+  color: #17231e;
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.alert-list small {
+  color: var(--finance-muted);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.market-alert-panel > button {
+  width: 100%;
+  cursor: pointer;
+}
+
+.home-ops-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  overflow: hidden;
+}
+
+.home-ops-strip button {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  min-height: 118px;
+  padding: 18px;
+  color: #17231e;
+  background: #ffffff;
+  border: 0;
+  border-right: 1px solid var(--finance-line);
+  cursor: pointer;
+  text-align: left;
+}
+
+.home-ops-strip button:last-child {
+  border-right: 0;
+}
+
+.home-ops-strip svg {
+  color: var(--finance-green);
+}
+
+.home-ops-strip span {
+  color: var(--finance-muted);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.home-ops-strip strong {
+  color: #111827;
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+@media (max-width: 1279px) {
+  .home-market-hero,
+  .home-intel-grid,
+  .lead-market-story {
+    grid-template-columns: 1fr;
+  }
+
+  .home-hero-terminal {
+    align-self: stretch;
+    max-width: 560px;
+  }
+
+  .market-card-grid,
+  .home-ops-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .home-market-hero {
+    min-height: auto;
+    padding: 28px;
+  }
+
+  .home-market-hero h1 {
+    font-size: 38px;
+  }
+
+  .home-quick-search {
+    grid-template-columns: auto 1fr;
+  }
+
+  .home-quick-search button {
+    grid-column: span 2;
+  }
+
+  .market-card-grid,
+  .home-ops-strip {
+    grid-template-columns: 1fr;
+  }
+}
+

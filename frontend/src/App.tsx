@@ -642,7 +642,12 @@ export function App() {
             <div className="quote-main">
               <div className="quote-title-row">
                 <ActiveIcon size={20} />
-                <h1>Giá {cropLabel} hôm nay & dự báo 30 ngày{selectedRegion?.province ? ` tại ${selectedRegion.province}` : ""}</h1>
+                <h1>
+                  <span className="quote-h1-line1">Giá {cropLabel} hôm nay</span>
+                  <span className="quote-h1-line2">
+                    {` Dự báo 30 ngày${selectedRegion?.province ? ` tại ${selectedRegion.province}` : ""}`}
+                  </span>
+                </h1>
               </div>
               <div className="quote-meta">
                 <span>{selectedRegion?.province ?? selectedRegion?.region_name ?? "Vùng trồng"}</span>
@@ -655,6 +660,7 @@ export function App() {
                   {quoteChangePct >= 0 ? "+" : ""}
                   {quoteChangePct.toFixed(2)}%
                 </span>
+                <small>VND/kg · {selectedVariety?.name ?? "Giống"}</small>
               </div>
               <p>Dữ liệu giá, dự báo và cảnh báo theo vùng trồng đang chọn.</p>
             </div>

@@ -28,6 +28,7 @@ export {
   IconContext,
   Key as KeyRound,
   Leaf,
+  List as Menu,
   MagnifyingGlass as Search,
   MapPinArea as MapPinned,
   Newspaper,
@@ -48,7 +49,8 @@ export {
   TrendUp as TrendingUp,
   UserCircle as UserRound,
   Warning as AlertTriangle,
-  Warning as TriangleAlert
+  Warning as TriangleAlert,
+  X
 } from "@phosphor-icons/react";
 
 export type { Icon as LucideIcon } from "@phosphor-icons/react";

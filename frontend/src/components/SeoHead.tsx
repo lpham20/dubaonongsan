@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useInsertionEffect } from "react";
 import { canonicalUrl, compactText, DEFAULT_OG_IMAGE, SITE_NAME } from "../lib/seo";
 
 type Props = {
@@ -38,7 +38,7 @@ export function SeoHead({
   const fullDescription = compactText(description, 160);
   const fullCanonical = canonicalUrl(canonical);
 
-  useEffect(() => {
+  useInsertionEffect(() => {
     document.title = fullTitle;
     managedMetaSelectors.forEach((selector) => document.head.querySelector(selector)?.remove());
     upsertMeta("name", "description", fullDescription);

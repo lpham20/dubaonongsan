@@ -1,0 +1,493 @@
+/* News page: financial publication redesign */
+.finance-news-page {
+  --news-forest: #1a4d2e;
+  --news-forest-deep: #0b2f1d;
+  --news-slate: #475569;
+  --news-muted: #64748b;
+  --news-line: #d9e2dd;
+  --news-card: #ffffff;
+  display: grid;
+  gap: 18px;
+  color: #111827;
+  font-family: "Inter", "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+}
+
+.news-price-ticker {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 40px;
+  margin: 10px -24px 0;
+  padding: 0 24px;
+  overflow: hidden;
+  color: #f8fff9;
+  background: linear-gradient(90deg, #061b14, #0d3a27 54%, #143d2c);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.news-price-ticker > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.news-price-ticker > div {
+  overflow: hidden;
+  flex: 1;
+}
+
+.news-price-ticker > div > div {
+  display: inline-flex;
+  align-items: center;
+  gap: 40px;
+  min-width: max-content;
+  white-space: nowrap;
+  animation: newsTicker 170s linear infinite;
+}
+
+.news-price-ticker strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.news-price-ticker b {
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.news-price-ticker em {
+  font-style: normal;
+  font-weight: 900;
+}
+
+.news-price-ticker em.up {
+  color: #51d18a;
+}
+
+.news-price-ticker em.down {
+  color: #ff6b66;
+}
+
+@keyframes newsTicker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.finance-news-page .content-hero.news-hero {
+  min-height: 118px;
+  padding: 26px 30px;
+  background: #ffffff;
+  border: 1px solid var(--news-line);
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(21, 44, 31, 0.06);
+}
+
+.finance-news-page .content-hero.news-hero span {
+  color: var(--news-forest);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.finance-news-page .content-hero.news-hero h1 {
+  color: #111827;
+  font-family: "Inter", "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(28px, 2.1vw, 36px);
+  font-weight: 850;
+  line-height: 1.14;
+  letter-spacing: 0;
+}
+
+.finance-news-page .news-refresh-button,
+.finance-news-page .news-lead-copy > a,
+.finance-news-page .news-row-card a {
+  color: #ffffff;
+  background: var(--news-forest);
+  border-color: var(--news-forest);
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+.finance-news-page .news-refresh-button:hover,
+.finance-news-page .news-lead-copy > a:hover,
+.finance-news-page .news-row-card a:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(26, 77, 46, 0.18);
+}
+
+.finance-news-page .news-toolbar,
+.finance-news-page .news-digest-panel,
+.finance-news-page .news-brief-panel,
+.finance-news-page .market-watch-panel,
+.finance-news-page .news-lead,
+.finance-news-page .news-row-card,
+.finance-news-page .news-empty {
+  background: var(--news-card);
+  border: 1px solid var(--news-line);
+  border-radius: 8px;
+  box-shadow: 0 12px 30px rgba(23, 43, 33, 0.07);
+}
+
+.finance-news-page .news-topic-tabs button,
+.finance-news-page .news-sort button {
+  color: #334155;
+  background: #f8fafc;
+  border: 1px solid #dbe4de;
+  border-radius: 8px;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.finance-news-page .news-topic-tabs button.active,
+.finance-news-page .news-sort button.active,
+.finance-news-page .market-watch-panel button.active {
+  color: #ffffff;
+  background: var(--news-forest);
+  border-color: var(--news-forest);
+}
+
+.finance-news-page .news-topic-tabs small {
+  color: inherit;
+  background: rgba(255, 255, 255, 0.24);
+  font-weight: 900;
+}
+
+.finance-news-page .news-search {
+  border-color: #dbe4de;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.finance-news-page .news-search svg {
+  color: var(--news-forest);
+}
+
+.finance-news-page .news-search input {
+  color: #111827;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-weight: 650;
+}
+
+.finance-news-page .news-digest-panel {
+  padding: 18px 20px;
+}
+
+.finance-news-page .news-digest-panel > div,
+.finance-news-page .news-brief-panel > div,
+.finance-news-page .market-watch-panel > div {
+  color: var(--news-forest);
+}
+
+.finance-news-page .news-digest-panel h2,
+.finance-news-page .news-brief-panel h3,
+.finance-news-page .market-watch-panel h3 {
+  color: #111827;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.finance-news-page .news-digest-panel li {
+  color: #425466;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.finance-news-page .news-market-layout {
+  grid-template-columns: minmax(0, 1.48fr) minmax(320px, 0.62fr);
+  gap: 18px;
+}
+
+.finance-news-page .news-lead {
+  grid-template-columns: minmax(240px, 0.38fr) minmax(0, 0.62fr);
+  padding: 14px;
+  overflow: hidden;
+}
+
+.finance-news-page .news-lead .news-thumb {
+  height: 220px;
+  border-radius: 8px;
+}
+
+.finance-news-page .news-thumb {
+  background: #eef3ef;
+}
+
+.finance-news-page .news-thumb img {
+  filter: saturate(0.96) contrast(1.03);
+}
+
+.finance-news-page .news-meta-line {
+  align-items: center;
+  gap: 8px;
+}
+
+.finance-news-page .news-meta-line > span {
+  color: var(--news-forest);
+  background: #e7f3ed;
+  border: 1px solid #d0e4d8;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.finance-news-page .impact-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #4b5563;
+  background: #eef2f7;
+  border: 1px solid #dce3ea;
+  border-radius: 999px;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.finance-news-page .impact-badge.high {
+  color: #8a2f14;
+  background: #f8e7c4;
+  border-color: #edd18f;
+}
+
+.finance-news-page .news-lead h2,
+.finance-news-page .news-row-card h3,
+.finance-news-page .news-brief-panel strong {
+  color: #111827;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.finance-news-page .news-lead h2 {
+  font-size: clamp(24px, 1.85vw, 31px);
+  line-height: 1.18;
+}
+
+.finance-news-page .news-row-card h3 {
+  font-size: 19px;
+  line-height: 1.26;
+}
+
+.finance-news-page .news-lead p,
+.finance-news-page .news-row-card p {
+  color: #475569;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.finance-news-page .related-tag {
+  color: #31536d;
+  background: #eef5fb;
+  border: 1px solid #d9e9f5;
+  border-radius: 999px;
+  font-weight: 850;
+}
+
+.finance-news-page .news-source-row small {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.finance-news-page .news-row-card {
+  grid-template-columns: 168px minmax(0, 1fr);
+  min-height: 144px;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.finance-news-page .news-row-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(26, 77, 46, 0.24);
+  box-shadow: 0 16px 34px rgba(23, 43, 33, 0.1);
+}
+
+.finance-news-page .news-archive-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 4px;
+  padding: 2px 2px 0;
+}
+
+.finance-news-page .news-archive-heading h2 {
+  margin: 0;
+  color: #111827;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: 21px;
+  font-weight: 850;
+  letter-spacing: 0;
+}
+
+.finance-news-page .news-archive-heading span {
+  color: #64748b;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.finance-news-page .news-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 0 4px;
+}
+
+.finance-news-page .news-pagination button,
+.finance-news-page .news-pagination span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 36px;
+  border-radius: 8px;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.finance-news-page .news-pagination button {
+  color: #334155;
+  background: #ffffff;
+  border: 1px solid var(--news-line);
+  cursor: pointer;
+}
+
+.finance-news-page .news-pagination button:hover,
+.finance-news-page .news-pagination button.active {
+  color: #ffffff;
+  background: var(--news-forest);
+  border-color: var(--news-forest);
+}
+
+.finance-news-page .news-pagination span {
+  color: #94a3b8;
+}
+
+.finance-news-page .news-row-card .news-thumb,
+.finance-news-page .news-row-card .news-thumb > img {
+  min-height: 144px;
+}
+
+.finance-news-page .news-brief-panel,
+.finance-news-page .market-watch-panel {
+  padding: 18px;
+}
+
+.finance-news-page .news-brief-panel a {
+  gap: 8px;
+  padding: 14px 0;
+  border-top-color: var(--news-line);
+}
+
+.finance-news-page .news-brief-panel a > span {
+  color: var(--news-forest);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.news-alert-title {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 76px;
+  align-items: center;
+  gap: 10px;
+}
+
+.finance-news-page .news-brief-panel strong {
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+.finance-news-page .news-brief-panel small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.news-mini-sparkline {
+  width: 76px;
+  height: 30px;
+  overflow: visible;
+}
+
+.news-mini-sparkline polyline {
+  fill: none;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.news-mini-sparkline.up polyline,
+.news-mini-sparkline.up svg {
+  color: #0f8f61;
+  stroke: #0f8f61;
+}
+
+.news-mini-sparkline.down polyline,
+.news-mini-sparkline.down svg {
+  color: #cf2e2e;
+  stroke: #cf2e2e;
+}
+
+.finance-news-page .market-watch-panel button {
+  border-color: var(--news-line);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.finance-news-page .market-watch-panel button span {
+  color: #111827;
+  font-weight: 800;
+}
+
+.finance-news-page .market-watch-panel button strong {
+  color: var(--news-forest);
+  font-weight: 900;
+}
+
+.finance-news-page .market-watch-panel button small {
+  color: #64748b;
+}
+
+@media (max-width: 1023px) {
+  .finance-news-page .news-market-layout,
+  .finance-news-page .news-lead,
+  .finance-news-page .news-row-card {
+    grid-template-columns: 1fr;
+  }
+
+  .finance-news-page .news-row-card .news-thumb {
+    min-height: 180px;
+  }
+}
+

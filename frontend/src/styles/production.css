@@ -1,0 +1,363 @@
+/* Price report and fertilizer methodology refinements. */
+.fertilizer-advisor-hero,
+.fertilizer-method-hero {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Production viewport guard. */
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.app-shell {
+  --app-shell-pad: clamp(12px, 1.6vw, 24px);
+  width: 100%;
+  max-width: 100%;
+  padding-inline: var(--app-shell-pad);
+  overflow-x: clip;
+}
+
+@media (max-width: 1279px) and (min-width: 861px) {
+  .menu-bar .brand-title,
+  .app-shell > .menu-bar .brand-title {
+    flex: 0 1 156px;
+    max-width: 156px;
+    font-size: 12.5px;
+    letter-spacing: 0;
+  }
+
+  .menu-bar .main-nav,
+  .app-shell > .menu-bar .main-nav {
+    flex-wrap: nowrap;
+    gap: 2px;
+    padding: 3px;
+    max-width: none;
+    flex: 1 1 auto;
+  }
+
+  .menu-bar .tab-button,
+  .menu-bar .nav-dropdown > .tab-button,
+  .app-shell > .menu-bar .tab-button,
+  .app-shell > .menu-bar .nav-dropdown > .tab-button {
+    gap: 5px;
+    min-height: 36px;
+    padding-inline: 6px;
+    font-size: 11.5px;
+  }
+
+  .menu-bar .tab-button svg,
+  .menu-bar .nav-dropdown > .tab-button svg,
+  .app-shell > .menu-bar .tab-button svg,
+  .app-shell > .menu-bar .nav-dropdown > .tab-button svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .menu-bar .account-trigger,
+  .app-shell > .menu-bar .account-trigger {
+    min-height: 38px;
+    padding-inline: 9px;
+    font-size: 11.5px;
+  }
+
+  .menu-bar .account-trigger svg,
+  .app-shell > .menu-bar .account-trigger svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+@media (max-width: 860px) {
+  .menu-bar:not(.mobile-menu-bar),
+  .app-shell > .menu-bar:not(.mobile-menu-bar) {
+    display: none;
+  }
+}
+
+.fertilizer-method-page {
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.fertilizer-methodology-article {
+  display: grid;
+  gap: 22px;
+  margin-top: 22px;
+  padding: 28px;
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: rgba(255, 254, 249, 0.94);
+  box-shadow: var(--shadow-sm);
+}
+
+.fertilizer-methodology-article section {
+  display: grid;
+  gap: 12px;
+}
+
+.fertilizer-methodology-article h2,
+.fertilizer-methodology-article h3,
+.fertilizer-methodology-article p {
+  margin: 0;
+}
+
+.fertilizer-methodology-article h2 {
+  font-size: clamp(22px, 2.2vw, 34px);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.fertilizer-methodology-article h3 {
+  font-size: 17px;
+  line-height: 1.28;
+}
+
+.fertilizer-methodology-article p {
+  color: var(--color-text-soft);
+  font-size: 15px;
+  line-height: 1.72;
+}
+
+.method-kicker {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  gap: 8px;
+  color: var(--accent-deep);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.formula-card {
+  padding: 16px 18px;
+  color: #0d241b;
+  border: 1px solid rgba(22, 112, 82, 0.2);
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(217, 239, 228, 0.86), rgba(255, 254, 249, 0.96));
+  font-family: "Cambria Math", Georgia, serif;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.62;
+}
+
+.method-step-grid,
+.method-note-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.method-step-grid article,
+.method-note-grid article {
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: #fffef9;
+}
+
+.method-step-grid svg,
+.method-note-grid svg {
+  color: var(--accent);
+}
+
+.price-report-notice {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px;
+  gap: 14px;
+  align-items: stretch;
+  margin: 18px 0;
+  padding: 14px;
+  border: 1px solid rgba(22, 112, 82, 0.16);
+  border-radius: 10px;
+  background: rgba(217, 239, 228, 0.45);
+}
+
+.price-report-notice p {
+  margin: 0;
+  color: var(--color-text-soft);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.58;
+}
+
+.price-report-notice button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 72px;
+  color: #fffef9;
+  background: var(--accent-deep);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  box-shadow: 0 8px 18px rgba(13, 75, 56, 0.14);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 900;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.price-report-notice button:hover {
+  background: #126246;
+  box-shadow: 0 12px 24px rgba(13, 75, 56, 0.2);
+  transform: translateY(-1px);
+}
+
+.price-report-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(8, 22, 17, 0.48);
+  backdrop-filter: blur(4px);
+}
+
+.price-report-modal {
+  width: min(100%, 560px);
+  max-height: min(92vh, 760px);
+  overflow: auto;
+  color: var(--color-text);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 14px;
+  background: #fffef9;
+  box-shadow: 0 28px 70px rgba(8, 22, 17, 0.28);
+}
+
+.price-report-modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 20px 22px 14px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.price-report-modal-head span {
+  color: var(--accent-deep);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.price-report-modal-head h3 {
+  margin: 5px 0 0;
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.price-report-modal-head button {
+  width: 34px;
+  height: 34px;
+  color: var(--color-text-soft);
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.price-report-modal form {
+  display: grid;
+  gap: 14px;
+  padding: 20px 22px 22px;
+}
+
+.price-report-modal label {
+  display: grid;
+  gap: 7px;
+  color: var(--color-text-soft);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.price-report-modal input,
+.price-report-modal select,
+.price-report-modal textarea {
+  width: 100%;
+  color: var(--color-text);
+  background: #fff;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 8px;
+  padding: 11px 12px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 650;
+  outline: none;
+}
+
+.price-report-modal textarea {
+  resize: vertical;
+}
+
+.price-report-modal input:focus,
+.price-report-modal select:focus,
+.price-report-modal textarea:focus {
+  border-color: rgba(22, 112, 82, 0.56);
+  box-shadow: 0 0 0 3px rgba(22, 112, 82, 0.1);
+}
+
+.price-report-message {
+  margin: 0;
+  color: #a13b24;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.price-report-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.price-report-actions button {
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-weight: 900;
+}
+
+.price-report-actions button:first-child {
+  color: var(--color-text-soft);
+  background: #fff;
+  border: 1px solid var(--color-border);
+}
+
+.price-report-actions button:last-child {
+  color: #fffef9;
+  background: var(--accent-deep);
+  border: 1px solid var(--accent-deep);
+}
+
+.price-report-actions button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+@media (max-width: 860px) {
+  .method-step-grid,
+  .method-note-grid,
+  .price-report-notice {
+    grid-template-columns: 1fr;
+  }
+
+  .price-report-notice button {
+    min-height: 46px;
+  }
+}
+

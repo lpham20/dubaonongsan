@@ -1,0 +1,615 @@
+/* Forecast page: premium financial dashboard redesign */
+.forecast-shell {
+  --forecast-forest: #1a4d2e;
+  --forecast-forest-deep: #0b2f1d;
+  --forecast-slate: #475569;
+  --forecast-muted: #64748b;
+  --forecast-line: #e2e8f0;
+  --forecast-line-soft: #edf2f5;
+  --forecast-red: #b84a4a;
+  --forecast-red-bg: #fff1f1;
+  --forecast-green: #2f8a5b;
+  --forecast-green-bg: #edf8f2;
+  color: #111827;
+  background: #f8faf8;
+  font-family: "Inter", "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+}
+
+.forecast-shell .ticker {
+  position: relative;
+  z-index: 1;
+  gap: 18px;
+  min-height: 42px;
+  margin: 10px -24px 18px;
+  padding: 0 24px;
+  color: #f8fff9;
+  background: linear-gradient(90deg, #061b14, #0d3a27 54%, #143d2c);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.forecast-shell .ticker-label {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.forecast-shell .ticker-content {
+  gap: 40px;
+  min-width: max-content;
+  animation: homeTicker 190s linear infinite;
+}
+
+.forecast-shell .ticker-content span {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.forecast-shell .ticker-content strong {
+  color: rgba(255, 255, 255, 0.72);
+  font-weight: 750;
+}
+
+.forecast-shell .ticker-content b {
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.forecast-shell .ticker-content em {
+  font-style: normal;
+  font-weight: 900;
+}
+
+.forecast-shell .ticker-content em.up {
+  color: #51d18a;
+}
+
+.forecast-shell .ticker-content em.down {
+  color: #ff6b66;
+}
+
+.forecast-shell .market-quote-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 34px;
+  padding: 30px 0 24px;
+  border-bottom: 1px solid var(--forecast-line);
+}
+
+.forecast-shell .quote-main {
+  gap: 10px;
+}
+
+.forecast-shell .quote-title-row {
+  gap: 10px;
+}
+
+.forecast-shell .quote-title-row svg {
+  color: var(--forecast-forest);
+  stroke-width: 1.8;
+}
+
+.forecast-shell .quote-title-row h1 {
+  margin: 0;
+  color: var(--forecast-forest-deep);
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: 34px;
+  font-weight: 850;
+  line-height: 1.16;
+  letter-spacing: 0;
+}
+
+.forecast-shell .quote-meta {
+  gap: 9px;
+  color: var(--forecast-slate);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.forecast-shell .quote-meta span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
+
+.forecast-shell .quote-meta span + span::before {
+  margin-right: 9px;
+  color: #cbd5e1;
+}
+
+.forecast-shell .quote-price-row {
+  align-items: center;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.forecast-shell .quote-price-row strong {
+  color: #0f172a;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: 68px;
+  font-weight: 900;
+  line-height: 0.96;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.forecast-shell .quote-change {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 11px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 850;
+  line-height: 1;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.forecast-shell .quote-change.positive {
+  color: #236e49;
+  background: var(--forecast-green-bg);
+  border-color: #cfeadc;
+}
+
+.forecast-shell .quote-change.negative {
+  color: #9d3434;
+  background: var(--forecast-red-bg);
+  border-color: #f1caca;
+}
+
+.forecast-shell .quote-change.positive::before,
+.forecast-shell .quote-change.negative::before {
+  display: inline-block;
+  margin-right: 6px;
+  font-size: 12px;
+}
+
+.forecast-shell .quote-change.positive::before {
+  content: "â†—";
+}
+
+.forecast-shell .quote-change.negative::before {
+  content: "â†˜";
+}
+
+.forecast-shell .quote-main p {
+  max-width: 620px;
+  margin: 0;
+  color: var(--forecast-muted);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.forecast-shell .quote-side {
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 12px 16px;
+}
+
+.forecast-shell .quote-side .icon-button {
+  width: 42px;
+  height: 42px;
+  color: var(--forecast-forest);
+  background: #ffffff;
+  border: 1px solid var(--forecast-line);
+  border-radius: 4px;
+  box-shadow: none;
+}
+
+.forecast-shell .quote-side .icon-button svg {
+  stroke-width: 1.8;
+}
+
+.forecast-shell .quote-range {
+  width: 100%;
+  padding: 10px 0 11px;
+  border-bottom: 1px solid var(--forecast-line);
+}
+
+.forecast-shell .quote-range span {
+  color: var(--forecast-muted);
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0;
+}
+
+.forecast-shell .quote-range strong {
+  color: #111827;
+  font-size: 19px;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.forecast-shell .market-subnav {
+  gap: 34px;
+  margin: 0 0 18px;
+  border-bottom: 1px solid var(--forecast-line);
+}
+
+.forecast-shell .market-subnav button {
+  min-height: 50px;
+  padding: 0;
+  color: #334155;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  box-shadow: none;
+}
+
+.forecast-shell .market-subnav button.active {
+  color: var(--forecast-forest);
+}
+
+.forecast-shell .market-subnav button.active::after {
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: var(--forecast-forest);
+  border-radius: 999px 999px 0 0;
+}
+
+.forecast-shell .control-band {
+  align-items: flex-end;
+  margin-top: 0;
+  padding: 14px 0 18px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--forecast-line);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.forecast-shell .filter-group {
+  gap: 14px;
+}
+
+.forecast-shell .filter-group > svg {
+  color: var(--forecast-forest);
+  stroke-width: 1.8;
+}
+
+.forecast-shell label {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--forecast-muted);
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.forecast-shell select {
+  height: 38px;
+  min-width: 190px;
+  padding: 0 34px 0 11px;
+  color: #111827;
+  background: #ffffff;
+  border: 1px solid #d6dee3;
+  border-radius: 4px;
+  box-shadow: none;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.forecast-shell select:focus-visible {
+  outline: 2px solid rgba(26, 77, 46, 0.24);
+  outline-offset: 2px;
+}
+
+.forecast-shell .market-status {
+  color: var(--forecast-slate);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.forecast-shell .chart-toolbar {
+  align-items: center;
+  margin-top: 18px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.forecast-shell .segmented,
+.forecast-shell .layer-toggles {
+  gap: 8px;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+}
+
+.forecast-shell .segmented button,
+.forecast-shell .layer-toggles button {
+  min-height: 36px;
+  padding: 0 14px;
+  color: #334155;
+  background: #f1f5f3;
+  border: 1px solid #dbe4de;
+  border-radius: 999px;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: 13px;
+  font-weight: 850;
+  box-shadow: none;
+}
+
+.forecast-shell .segmented button:last-child,
+.forecast-shell .layer-toggles button:last-child {
+  border-right: 1px solid #dbe4de;
+}
+
+.forecast-shell .segmented button.active,
+.forecast-shell .layer-toggles button.active {
+  color: var(--forecast-forest);
+  background: #e8f3ed;
+  border-color: #cde3d6;
+}
+
+.forecast-shell .pin-button {
+  min-height: 38px;
+  padding: 0 15px;
+  color: #ffffff;
+  background: var(--forecast-forest);
+  border: 1px solid var(--forecast-forest);
+  border-radius: 8px;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: 13px;
+  font-weight: 850;
+  box-shadow: none;
+}
+
+.forecast-shell .pin-button svg {
+  stroke-width: 1.8;
+}
+
+.forecast-shell .pin-button:hover {
+  background: #153f27;
+}
+
+.forecast-shell .chart-section {
+  padding-top: 18px;
+}
+
+.forecast-shell .chart-section .section-heading {
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.forecast-shell .chart-section .section-heading h2 {
+  color: #111827;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: 22px;
+  font-weight: 850;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+.forecast-shell .chart-section .section-heading p {
+  display: none;
+}
+
+.forecast-shell .legend {
+  gap: 16px;
+  color: var(--forecast-slate);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.forecast-shell .legend span {
+  display: inline-flex;
+  align-items: center;
+}
+
+.forecast-shell .legend span::before {
+  width: 8px;
+  height: 8px;
+  margin-right: 7px;
+  border-radius: 999px;
+}
+
+.forecast-shell .legend-price::before {
+  background: var(--forecast-forest);
+}
+
+.forecast-shell .legend-forecast::before {
+  background: #c47a2c;
+}
+
+.forecast-shell .legend-rain::before {
+  background: #a8d5b8;
+}
+
+.forecast-shell .chart-wrap {
+  min-height: 500px;
+  padding: 18px 10px 0;
+  background: #ffffff;
+  border: 1px solid var(--forecast-line);
+  border-radius: 4px;
+  box-shadow: none;
+}
+
+.forecast-shell .chart-wrap .recharts-cartesian-axis-tick-value,
+.forecast-shell .chart-wrap .recharts-tooltip-wrapper {
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+}
+
+.forecast-shell .chart-wrap .recharts-area-curve,
+.forecast-shell .chart-wrap .recharts-line-curve {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.forecast-shell .signal-chip {
+  top: 12px;
+  right: 14px;
+  min-height: 30px;
+  padding: 0 10px;
+  color: #8f1d1d;
+  background: var(--forecast-red-bg);
+  border: 1px solid #efc8c8;
+  border-radius: 4px;
+  box-shadow: none;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.forecast-shell .signal-chip svg {
+  color: #b84a4a;
+  stroke-width: 1.8;
+}
+
+@media (max-width: 1023px) {
+  .forecast-shell .market-quote-header {
+    grid-template-columns: 1fr;
+  }
+
+  .forecast-shell .quote-side {
+    justify-items: stretch;
+  }
+
+  .forecast-shell .quote-price-row strong {
+    font-size: 54px;
+  }
+}
+
+@media (max-width: 480px) {
+  .forecast-shell .quote-price-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .forecast-shell .quote-price-row strong {
+    font-size: 44px;
+  }
+
+  .forecast-shell select {
+    width: 100%;
+  }
+}
+
+/* Forecast methodology: align typography with the financial product system */
+.method-page {
+  --method-forest: #1a4d2e;
+  --method-forest-deep: #0b2f1d;
+  --method-slate: #475569;
+  --method-muted: #64748b;
+  --method-line: #e2e8f0;
+  color: #111827;
+  font-family: "Inter", "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+}
+
+.method-page .method-hero,
+.method-page .method-article section,
+.method-page .method-sidebar article,
+.method-page .method-sources {
+  background: #ffffff;
+  border: 1px solid var(--method-line);
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+.method-page .method-hero {
+  padding: 28px 30px;
+  background: linear-gradient(180deg, #ffffff, #fbfcfb);
+}
+
+.method-page .method-hero span,
+.method-page .method-sources > div {
+  color: var(--method-forest);
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.method-page .method-hero h1 {
+  color: var(--method-forest-deep);
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: clamp(34px, 3vw, 48px);
+  font-weight: 850;
+  line-height: 1.12;
+  letter-spacing: 0;
+}
+
+.method-page .method-hero p,
+.method-page .method-article p,
+.method-page .method-sources li,
+.method-page .method-sidebar p {
+  color: var(--method-slate);
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.68;
+}
+
+.method-page .method-article h2,
+.method-page .method-sources h2 {
+  color: #111827;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: 23px;
+  font-weight: 850;
+  line-height: 1.28;
+  letter-spacing: 0;
+}
+
+.method-page .method-article code {
+  color: var(--method-forest-deep);
+  background: #edf8f2;
+  border: 1px solid #d6eadf;
+  font-family: "Inter", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 750;
+}
+
+.method-page .formula-block {
+  background: #f8fafc;
+  border: 1px solid #dbe4ea;
+  border-left: 3px solid var(--method-forest);
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+.method-page .formula-block > span {
+  color: var(--method-forest);
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+}
+
+.method-page .formula-expression {
+  color: #0f172a;
+  font-family: "Cambria Math", "Times New Roman", serif;
+  font-size: clamp(18px, 1.35vw, 21px);
+}
+
+.method-page .method-sidebar svg {
+  color: var(--method-forest);
+  stroke-width: 1.8;
+}
+
+.method-page .method-sidebar span {
+  color: var(--method-muted);
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+}
+
+.method-page .method-sidebar strong {
+  color: #111827;
+  font-family: "Inter", "Be Vietnam Pro", sans-serif;
+  font-size: 20px;
+  font-weight: 850;
+}
+
+.method-page .method-sources a {
+  color: var(--method-forest);
+}
+

@@ -7,5 +7,6 @@ Disallow: /*?fbclid=*
 User-agent: Googlebot-Image
 Allow: /
 
+# Sitemap is generated at build time by prerender_seo.py
 Sitemap: https://dubaonongsan.com/sitemap.xml
 Crawl-delay: 1

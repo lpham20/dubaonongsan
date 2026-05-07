@@ -105,6 +105,40 @@ export function GuideLibrary({ guides }: Props) {
         </div>
       </div>
 
+      <div className="guide-mobile-filter-strip" aria-label="Bộ lọc hướng dẫn trên di động">
+        <div className="plant-strip">
+          {familyStats.map((item) => (
+            <button
+              type="button"
+              className={item.family === currentFamily ? "active" : ""}
+              key={item.family}
+              onClick={() => {
+                setActiveFamily(item.family);
+                setActivePlant("");
+                setSelectedSlug("");
+              }}
+            >
+              {item.family} <small>({item.count})</small>
+            </button>
+          ))}
+        </div>
+        <div className="plant-strip plant-strip-secondary">
+          {plants.map((item) => (
+            <button
+              type="button"
+              className={item.plant === currentPlant ? "active" : ""}
+              key={item.plant}
+              onClick={() => {
+                setActivePlant(item.plant);
+                setSelectedSlug("");
+              }}
+            >
+              {item.plant} <small>({item.count})</small>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="guide-layout">
         <aside className="guide-sidebar">
           <div className="quick-panel">
@@ -310,6 +344,8 @@ function GuideContent({ content, postId }: { content: string; postId: number }) 
                   src={guideImageUrl(postId, image.index)}
                   alt={block.heading}
                   loading="lazy"
+                  width="420"
+                  height="260"
                   key={image.index}
                   onError={(event) => {
                     event.currentTarget.style.display = "none";

@@ -1,17 +1,23 @@
 from __future__ import annotations
 
 import html
+import json
 import os
 import re
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlencode, urlparse
-from urllib.request import urlopen
-import json
+from urllib.request import Request, urlopen
 
 
-API_BASE = os.environ.get("API_BASE", "http://127.0.0.1:8010").rstrip("/")
+API_BASE = (
+    os.environ.get("SEO_API_BASE_URL")
+    or os.environ.get("API_BASE")
+    or os.environ.get("VITE_API_BASE_URL")
+    or "http://127.0.0.1:8010"
+).rstrip("/")
 SITE_BASE = os.environ.get("SITE_BASE", "https://dubaonongsan.com").rstrip("/")
+SITE_NAME = "Dự báo nông sản"
 ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "frontend" / "dist"
 OUTPUT = DIST / "seo"
@@ -19,6 +25,16 @@ OUTPUT = DIST / "seo"
 
 def _slug_text(value: str) -> str:
     value = value.strip().lower()
+    value = (
+        value.replace("đ", "d")
+        .replace("Đ", "D")
+        .replace("ă", "a")
+        .replace("â", "a")
+        .replace("ê", "e")
+        .replace("ô", "o")
+        .replace("ơ", "o")
+        .replace("ư", "u")
+    )
     value = re.sub(r"[^a-zA-Z0-9\-_]+", "-", value)
     value = re.sub(r"-+", "-", value).strip("-")
     return value[:120] or "bai-viet"
@@ -50,7 +66,14 @@ def _write(path: Path, body: str) -> None:
 def _json(path: str, limit: int) -> list[dict]:
     try:
         url = f"{API_BASE}{path}?{urlencode({'limit': limit})}"
-        with urlopen(url, timeout=20) as response:
+        request = Request(
+            url,
+            headers={
+                "Accept": "application/json",
+                "User-Agent": "DubaonongsanSEOPrerender/1.0 (+https://dubaonongsan.com)",
+            },
+        )
+        with urlopen(request, timeout=20) as response:
             payload = json.loads(response.read().decode("utf-8"))
         return payload if isinstance(payload, list) else []
     except Exception as exc:
@@ -58,30 +81,92 @@ def _json(path: str, limit: int) -> list[dict]:
         return []
 
 
-def _page(title: str, description: str, canonical: str, body: str, schema: dict | None = None) -> str:
+def _asset_tags() -> str:
+    index_html_path = DIST / "index.html"
+    if not index_html_path.exists():
+        return ""
+    index_html = index_html_path.read_text(encoding="utf-8")
+    tags = re.findall(r"<(?:script|link)\b[^>]*(?:/assets/|modulepreload)[^>]*>", index_html)
+    return "\n  ".join(dict.fromkeys(tags))
+
+
+def _breadcrumb(items: list[tuple[str, str]]) -> dict:
+    return {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": index + 1, "name": name, "item": url}
+            for index, (name, url) in enumerate(items)
+        ],
+    }
+
+
+def _schema_block(schema: dict | list[dict] | None) -> str:
+    if not schema:
+        return ""
+    schemas = schema if isinstance(schema, list) else [schema]
+    return "\n  ".join(
+        f'<script type="application/ld+json">{json.dumps(item, ensure_ascii=False)}</script>'
+        for item in schemas
+    )
+
+
+def _page(
+    title: str,
+    description: str,
+    canonical: str,
+    body: str,
+    schema: dict | list[dict] | None = None,
+    published_at: str | None = None,
+) -> str:
     escaped_title = html.escape(title)
     escaped_description = html.escape(description[:180])
-    schema_block = ""
-    if schema:
-        schema_block = f'<script type="application/ld+json">{json.dumps(schema, ensure_ascii=False)}</script>'
+    schema_markup = _schema_block(schema)
+    article_meta = ""
+    if published_at:
+        article_meta = f'<meta property="article:published_time" content="{html.escape(published_at)}" />'
+    asset_tags = _asset_tags()
+
     return f"""<!doctype html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{escaped_title} | Dự báo nông sản</title>
+  <meta name="theme-color" content="#0d4b38" />
+  <title>{escaped_title} | {SITE_NAME}</title>
   <meta name="description" content="{escaped_description}" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
   <link rel="canonical" href="{canonical}" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="manifest" href="/manifest.webmanifest" />
   <meta property="og:type" content="article" />
+  <meta property="og:locale" content="vi_VN" />
+  <meta property="og:site_name" content="{SITE_NAME}" />
   <meta property="og:title" content="{escaped_title}" />
   <meta property="og:description" content="{escaped_description}" />
   <meta property="og:url" content="{canonical}" />
   <meta property="og:image" content="{SITE_BASE}/og-cover.jpg" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image" content="{SITE_BASE}/og-cover.webp" />
+  <meta property="og:image:type" content="image/webp" />
   <meta name="twitter:card" content="summary_large_image" />
-  {schema_block}
+  {article_meta}
+  {schema_markup}
+  {asset_tags}
 </head>
-<body>{body}</body>
+<body>
+  <div id="seo-prerender" hidden>{body}</div>
+  <div id="root"></div>
+</body>
 </html>"""
+
+
+def _lastmod(value: object) -> str | None:
+    if not isinstance(value, str) or not value:
+        return None
+    return value[:10]
 
 
 def render_news() -> list[tuple[str, str | None]]:
@@ -102,17 +187,35 @@ def render_news() -> list[tuple[str, str | None]]:
   <p>{html.escape(article.get("excerpt") or summary)}</p>
   <p>Đọc thêm tại nguồn: <a href="{html.escape(source_url)}">{html.escape(source_name)}</a></p>
 </article>"""
-        schema = {
+        article_schema = {
             "@context": "https://schema.org",
             "@type": "NewsArticle",
-            "headline": title,
+            "headline": title[:110],
             "description": summary[:180],
             "url": canonical,
+            "mainEntityOfPage": {"@type": "WebPage", "@id": canonical},
             "datePublished": published_at,
-            "publisher": {"@type": "Organization", "name": "Dự báo nông sản"},
+            "dateModified": published_at,
+            "author": {"@type": "Organization", "name": SITE_NAME},
+            "publisher": {
+                "@type": "Organization",
+                "name": SITE_NAME,
+                "logo": {"@type": "ImageObject", "url": f"{SITE_BASE}/og-cover.jpg"},
+            },
+            "image": f"{SITE_BASE}/og-cover.jpg",
         }
-        _write(OUTPUT / "news" / f"{slug}.html", _page(title, summary, canonical, body, schema))
-        urls.append((canonical, published_at[:10] if isinstance(published_at, str) else None))
+        breadcrumb_schema = _breadcrumb(
+            [
+                ("Trang chủ", f"{SITE_BASE}/"),
+                ("Tin tức", f"{SITE_BASE}/tin-tuc"),
+                (title[:60], canonical),
+            ]
+        )
+        _write(
+            OUTPUT / "news" / f"{slug}.html",
+            _page(title, summary, canonical, body, [article_schema, breadcrumb_schema], published_at),
+        )
+        urls.append((canonical, _lastmod(published_at)))
     return urls
 
 
@@ -130,18 +233,31 @@ def render_guides() -> list[tuple[str, str | None]]:
             if not line.strip().startswith("IMAGE::")
         ]
         content = html.escape("\n".join(clean_lines)).replace("\n", "<br />")
-        published_at = guide.get("published_at")
+        published_at = guide.get("published_at") or guide.get("updated_at")
         body = f"<article><h1>{html.escape(title)}</h1><p>{html.escape(summary)}</p><div>{content}</div></article>"
-        schema = {
+        guide_schema = {
             "@context": "https://schema.org",
             "@type": "HowTo",
             "name": title,
             "description": summary,
+            "url": canonical,
+            "mainEntityOfPage": {"@type": "WebPage", "@id": canonical},
             "datePublished": published_at,
-            "publisher": {"@type": "Organization", "name": "Dự báo nông sản"},
+            "dateModified": published_at,
+            "publisher": {"@type": "Organization", "name": SITE_NAME},
         }
-        _write(OUTPUT / "guides" / f"{slug}.html", _page(title, summary, canonical, body, schema))
-        urls.append((canonical, published_at[:10] if isinstance(published_at, str) else None))
+        breadcrumb_schema = _breadcrumb(
+            [
+                ("Trang chủ", f"{SITE_BASE}/"),
+                ("Hướng dẫn", f"{SITE_BASE}/huong-dan"),
+                (title[:60], canonical),
+            ]
+        )
+        _write(
+            OUTPUT / "guides" / f"{slug}.html",
+            _page(title, summary, canonical, body, [guide_schema, breadcrumb_schema], published_at),
+        )
+        urls.append((canonical, _lastmod(published_at)))
     return urls
 
 
@@ -153,11 +269,12 @@ def render_static_pages() -> list[tuple[str, str | None]]:
         "lua": "lúa",
     }
     urls: list[tuple[str, str | None]] = []
+    today = datetime.utcnow().date().isoformat()
     for crop, label in crops.items():
         canonical = f"{SITE_BASE}/du-bao-gia/{crop}"
         title = f"Giá {label} hôm nay & dự báo 30 ngày"
         desc = f"Cập nhật giá {label} theo vùng trồng, giống, biểu đồ lịch sử và dự báo 30 ngày."
-        schema = {
+        product_schema = {
             "@context": "https://schema.org",
             "@type": "Product",
             "name": f"Giá {label}",
@@ -165,14 +282,53 @@ def render_static_pages() -> list[tuple[str, str | None]]:
             "category": f"Nông sản / {label}",
             "offers": {"@type": "AggregateOffer", "priceCurrency": "VND", "offerCount": 1},
         }
-        _write(OUTPUT / "forecast" / f"{crop}.html", _page(title, desc, canonical, f"<main><h1>{html.escape(title)}</h1><p>{html.escape(desc)}</p></main>", schema))
-        urls.append((canonical, datetime.utcnow().date().isoformat()))
+        breadcrumb_schema = _breadcrumb(
+            [
+                ("Trang chủ", f"{SITE_BASE}/"),
+                ("Dự báo giá nông sản", f"{SITE_BASE}/du-bao-gia/{crop}"),
+            ]
+        )
+        _write(
+            OUTPUT / "forecast" / f"{crop}.html",
+            _page(title, desc, canonical, f"<main><h1>{html.escape(title)}</h1><p>{html.escape(desc)}</p></main>", [product_schema, breadcrumb_schema]),
+        )
+        urls.append((canonical, today))
 
-    canonical = f"{SITE_BASE}/thuat-toan-du-bao"
-    title = "Thuật toán dự báo giá nông sản"
-    desc = "Giải thích dữ liệu đầu vào, công thức dự báo, MAE, RMSE và cách đọc khoảng tin cậy."
-    _write(OUTPUT / "methodology.html", _page(title, desc, canonical, f"<main><h1>{title}</h1><p>{desc}</p></main>"))
-    urls.append((canonical, None))
+    static_pages = [
+        (
+            "methodology.html",
+            f"{SITE_BASE}/thuat-toan-du-bao",
+            "Thuật toán dự báo giá nông sản",
+            "Giải thích dữ liệu đầu vào, công thức dự báo, MAE, RMSE và cách đọc khoảng tin cậy.",
+            "Thuật toán dự báo",
+        ),
+        (
+            "fertilizer-methodology.html",
+            f"{SITE_BASE}/thuat-toan-bon-phan",
+            "Giải thích logic khuyến nghị bón phân",
+            "Cách hệ thống tính nhu cầu N-P-K, quy đổi ra phân thương mại, chia lịch bón và cảnh báo an toàn.",
+            "Thuật toán bón phân",
+        ),
+    ]
+    for filename, canonical, title, desc, crumb in static_pages:
+        web_page_schema = {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": title,
+            "description": desc,
+            "url": canonical,
+        }
+        breadcrumb_schema = _breadcrumb(
+            [
+                ("Trang chủ", f"{SITE_BASE}/"),
+                (crumb, canonical),
+            ]
+        )
+        _write(
+            OUTPUT / filename,
+            _page(title, desc, canonical, f"<main><h1>{html.escape(title)}</h1><p>{html.escape(desc)}</p></main>", [web_page_schema, breadcrumb_schema]),
+        )
+        urls.append((canonical, today))
     return urls
 
 
@@ -200,7 +356,7 @@ def write_sitemap(urls: list[tuple[str, str | None]]) -> None:
 
 if __name__ == "__main__":
     OUTPUT.mkdir(parents=True, exist_ok=True)
-    urls = []
+    urls: list[tuple[str, str | None]] = []
     urls.extend(render_static_pages())
     urls.extend(render_news())
     urls.extend(render_guides())

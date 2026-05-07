@@ -1,0 +1,1005 @@
+/* Phase 1 design foundation: normalize the product into a calmer, reusable system. */
+body {
+  color: var(--color-text);
+  background:
+    linear-gradient(180deg, rgba(245, 247, 242, 0.98), rgba(240, 245, 237, 0.98)),
+    var(--color-bg);
+}
+
+.app-shell {
+  max-width: 1360px;
+}
+
+h1 {
+  color: var(--color-text);
+  font-size: clamp(32px, 3.8vw, 50px);
+  line-height: 1.06;
+}
+
+.topbar h1,
+.content-hero h1,
+.home-hero h1 {
+  letter-spacing: 0;
+}
+
+.content-hero h1,
+.section-heading h2,
+.panel-heading h3,
+.home-section-title h2,
+.tech-title h2,
+.quick-panel h2,
+.news-digest-panel h2,
+.news-brief-panel h3,
+.market-watch-panel h3,
+.guide-card h2,
+.metric-card h3,
+.brain-panel h3,
+.production-panel h2 {
+  font-family: var(--font-ui);
+  letter-spacing: 0;
+}
+
+.content-hero h1 {
+  font-size: clamp(30px, 3.2vw, 42px);
+  line-height: 1.12;
+}
+
+.section-heading h2,
+.home-section-title h2,
+.tech-title h2 {
+  font-size: var(--text-2xl);
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+.brand-title {
+  font-family: var(--font-ui);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.product-tabs,
+.main-nav,
+.control-band,
+.chart-toolbar,
+.content-hero,
+.topbar,
+.home-split article,
+.quick-panel,
+.guide-main,
+.guide-list-panel,
+.guide-detail-panel,
+.news-lead,
+.news-brief-panel,
+.market-watch-panel,
+.news-row-card,
+.news-empty,
+.news-digest-panel,
+.intel-panel,
+.brain-panel,
+.metric-card,
+.production-panel,
+.chart-wrap,
+.table-wrap {
+  border-color: var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.topbar,
+.content-hero,
+.home-hero {
+  background:
+    linear-gradient(135deg, rgba(255, 254, 249, 0.98), rgba(247, 250, 244, 0.94)),
+    var(--color-surface);
+}
+
+.content-hero,
+.topbar {
+  padding: var(--space-5);
+}
+
+.tab-button,
+.dropdown-menu button,
+.account-trigger,
+.segmented button,
+.layer-toggles button,
+.pin-button,
+.content-hero button,
+.news-lead-copy > a,
+.news-row-card a,
+.guide-filter-tabs button,
+.plant-strip button,
+.quick-panel button,
+.market-watch-panel button {
+  border-radius: var(--radius-sm);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.tab-button {
+  min-height: 36px;
+  padding-inline: 12px;
+  color: var(--color-text-soft);
+}
+
+.tab-button.active,
+.dropdown-menu button.active,
+.dropdown-menu button:hover,
+.segmented button.active,
+.layer-toggles button.active,
+.news-topic-tabs button.active,
+.news-sort button.active {
+  color: #fffef9;
+  background: var(--accent);
+  box-shadow: none;
+}
+
+.account-trigger,
+.content-hero button,
+.news-lead-copy > a,
+.news-row-card a,
+.pin-button {
+  box-shadow: none;
+}
+
+.crop-kicker,
+.impact-badge,
+.related-tag,
+.guide-card span,
+.news-meta-line span,
+.news-topic-tabs button,
+.quality-tags span,
+.risk-flags span,
+.watchlist button {
+  font-size: var(--text-xs);
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.news-topic-tabs button {
+  min-height: 30px;
+  padding-inline: 10px;
+}
+
+.news-lead h2 {
+  font-family: var(--font-ui);
+  font-size: clamp(24px, 2vw, 30px);
+  font-weight: 800;
+  line-height: 1.18;
+}
+
+.news-row-card h3,
+.news-brief-panel strong,
+.guide-family-card strong,
+.home-news-row strong,
+.home-guide-row strong {
+  font-family: var(--font-ui);
+  color: var(--color-text);
+  font-weight: 800;
+}
+
+.news-lead p,
+.news-row-card p,
+.content-hero p,
+.topbar p,
+.section-heading p,
+.intel-panel p,
+.guide-body,
+.home-guide-row p {
+  color: var(--color-text-soft);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+
+.news-lead,
+.news-row-card {
+  background: rgba(255, 254, 249, 0.96);
+}
+
+.news-thumb,
+.hero-visual,
+.guide-family-art {
+  border-radius: var(--radius-md);
+}
+
+.intel-grid,
+.metrics-grid,
+.production-grid,
+.brain-grid,
+.home-split,
+.news-page,
+.guide-layout {
+  gap: var(--space-4);
+}
+
+.chart-section,
+.data-section {
+  padding-top: var(--space-5);
+}
+
+th {
+  color: var(--color-text-soft);
+  background: var(--color-surface-muted);
+  font-size: var(--text-xs);
+  font-weight: 800;
+}
+
+td {
+  color: var(--color-text);
+  font-size: var(--text-sm);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid rgba(22, 112, 82, 0.32);
+  outline-offset: 2px;
+}
+
+/* Phase 2 template refinements: make each page read as a product surface, not a landing-page collage. */
+.topbar {
+  grid-template-columns: minmax(0, 1.1fr) minmax(240px, 340px) auto;
+  gap: var(--space-4);
+}
+
+.topbar h1 {
+  max-width: 720px;
+  font-size: clamp(30px, 3vw, 42px);
+}
+
+.hero-visual {
+  min-height: 150px;
+}
+
+.hero-image {
+  min-height: 150px;
+}
+
+.control-band {
+  align-items: flex-end;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.field-grid {
+  gap: var(--space-3);
+}
+
+label {
+  color: var(--color-text-soft);
+  font-size: var(--text-xs);
+  font-weight: 800;
+}
+
+select {
+  height: 38px;
+  border-color: var(--color-border-strong);
+  background: var(--color-surface);
+  font-size: var(--text-sm);
+}
+
+.market-status {
+  min-width: 260px;
+  font-size: var(--text-sm);
+}
+
+.metrics-grid {
+  gap: var(--space-3);
+  padding-block: var(--space-4);
+}
+
+.metric-card {
+  min-height: 96px;
+  padding: var(--space-4);
+}
+
+.metric-card span {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 750;
+}
+
+.metric-card strong {
+  font-size: 28px;
+}
+
+.production-panel {
+  background: var(--color-surface);
+}
+
+.production-head h2 {
+  font-family: var(--font-ui);
+  font-size: var(--text-xl);
+  line-height: 1.18;
+}
+
+.guide-layout {
+  grid-template-columns: 1fr;
+}
+
+.guide-sidebar {
+  display: none;
+}
+
+.guide-main {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.family-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.guide-family-card {
+  min-height: 146px;
+  box-shadow: none;
+}
+
+.guide-family-art {
+  height: 78px;
+}
+
+.guide-browser {
+  grid-template-columns: minmax(280px, 0.36fr) minmax(0, 0.64fr);
+}
+
+.guide-detail-panel h2 {
+  font-family: var(--font-ui);
+  font-size: var(--text-2xl);
+  line-height: 1.2;
+}
+
+/* Phase 3 dashboard refinements: put the forecasting workflow first and keep secondary panels compact. */
+.metrics-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding-block: var(--space-4) var(--space-3);
+}
+
+.metric-card {
+  min-height: 88px;
+  padding: 14px 16px;
+  box-shadow: none;
+}
+
+.metric-card strong {
+  font-size: 25px;
+}
+
+.metric-card small {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.brain-grid {
+  grid-template-columns: minmax(210px, 0.72fr) minmax(0, 1.45fr) minmax(260px, 0.98fr);
+  align-items: stretch;
+  padding-top: var(--space-2);
+}
+
+.brain-panel {
+  min-height: 150px;
+  padding: var(--space-4);
+  box-shadow: none;
+}
+
+.brain-number {
+  margin-top: var(--space-4);
+  font-size: 26px;
+}
+
+.driver-list,
+.compare-list {
+  gap: 6px;
+}
+
+.driver-row,
+.compare-row {
+  padding-block: 7px;
+}
+
+.chart-toolbar {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: none;
+}
+
+.chart-section {
+  padding-top: var(--space-3);
+}
+
+.chart-wrap {
+  min-height: 430px;
+  padding: var(--space-3) var(--space-2) 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.section-heading {
+  align-items: center;
+}
+
+.section-heading h2 {
+  margin: 0;
+}
+
+.section-heading p {
+  max-width: 560px;
+  margin-top: 4px;
+}
+
+.intel-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding-top: var(--space-5);
+}
+
+.intel-panel {
+  min-height: auto;
+  padding: var(--space-4);
+  box-shadow: none;
+}
+
+.intel-panel.data-quality {
+  grid-column: span 1;
+}
+
+.heatmap-panel,
+.alerts-panel {
+  grid-column: span 1;
+}
+
+.mover-list,
+.heatmap-list,
+.alerts-list {
+  gap: 6px;
+}
+
+.mover-row,
+.heatmap-row,
+.alert-row {
+  padding-block: 7px;
+}
+
+.quality-score {
+  font-size: 34px;
+}
+
+.export-actions {
+  gap: 8px;
+}
+
+.production-panel {
+  margin-top: var(--space-4);
+  box-shadow: none;
+}
+
+.production-grid {
+  gap: var(--space-3);
+}
+
+.status-cell {
+  min-height: 84px;
+  background: var(--color-surface-muted);
+}
+
+.guide-browser {
+  grid-template-columns: minmax(270px, 0.34fr) minmax(0, 0.66fr);
+  gap: var(--space-4);
+}
+
+.guide-list-panel,
+.guide-detail-panel {
+  box-shadow: none;
+}
+
+.guide-list {
+  max-height: 600px;
+}
+
+.guide-list button {
+  min-height: 42px;
+  padding: 8px;
+}
+
+.guide-detail-panel {
+  min-height: 540px;
+}
+
+.structured-guide-body section {
+  padding-block: var(--space-4);
+}
+
+.structured-guide-body h3 {
+  font-family: var(--font-ui);
+  font-size: var(--text-lg);
+  line-height: 1.25;
+}
+
+/* Professional typography and news density pass: remove editorial serif weight and make the news page scannable. */
+h1,
+h2,
+h3,
+.brand-title,
+.content-hero h1,
+.topbar h1,
+.news-lead h2,
+.news-row-card h3,
+.guide-detail-panel h2,
+.guide-card h2,
+.panel-heading h3,
+.production-head h2 {
+  font-family: var(--font-ui);
+}
+
+h1,
+.content-hero h1,
+.topbar h1,
+.portal-hero-title {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.topbar {
+  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 360px) auto;
+}
+
+.hero-visual {
+  min-height: 172px;
+  background: #10251d;
+}
+
+.hero-image {
+  min-height: 172px;
+  filter: saturate(0.88) contrast(1.08);
+}
+
+.hero-visual::after {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(12, 28, 22, 0.34), rgba(12, 28, 22, 0.04) 52%, rgba(12, 28, 22, 0.22)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(11, 34, 25, 0.18));
+  content: "";
+}
+
+.crop-cardlet {
+  z-index: 2;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  color: #f8fff6;
+  background: rgba(15, 42, 31, 0.72);
+  backdrop-filter: blur(10px);
+  box-shadow: none;
+}
+
+.news-page {
+  gap: var(--space-3);
+}
+
+.news-hero {
+  padding-block: var(--space-4);
+}
+
+.news-hero h1 {
+  max-width: none;
+  font-size: clamp(24px, 1.85vw, 31px);
+  line-height: 1.16;
+  white-space: nowrap;
+}
+
+.news-hero p {
+  max-width: 660px;
+  font-size: var(--text-sm);
+}
+
+.news-toolbar {
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 300px);
+}
+
+.news-topic-tabs {
+  gap: 5px;
+}
+
+.news-topic-tabs button {
+  min-height: 28px;
+  padding-inline: 9px;
+  font-size: 11px;
+}
+
+.news-tools {
+  gap: 6px;
+}
+
+.news-search {
+  min-height: 34px;
+}
+
+.news-digest-panel {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+  padding: 12px 14px;
+  box-shadow: none;
+}
+
+.news-digest-panel h2 {
+  font-size: var(--text-md);
+}
+
+.news-digest-panel ul {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.news-digest-panel li {
+  font-size: var(--text-sm);
+  line-height: 1.42;
+}
+
+.news-market-layout {
+  grid-template-columns: minmax(0, 1.5fr) minmax(270px, 0.58fr);
+}
+
+.news-lead {
+  grid-template-columns: minmax(240px, 0.38fr) minmax(0, 0.62fr);
+  gap: var(--space-4);
+  padding: 14px;
+}
+
+.news-lead-stack {
+  gap: var(--space-3);
+}
+
+.news-lead h2 {
+  font-size: clamp(22px, 1.65vw, 27px);
+  line-height: 1.22;
+}
+
+.news-lead p {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.news-lead-copy {
+  gap: 8px;
+}
+
+.news-lead .news-thumb {
+  height: 210px;
+  margin-top: 0;
+}
+
+.news-meta-line {
+  gap: 6px;
+}
+
+.impact-badge,
+.related-tag {
+  padding: 3px 7px;
+  font-size: 10.5px;
+}
+
+.news-source-row {
+  gap: 6px;
+}
+
+.news-source-row small {
+  font-size: 11px;
+}
+
+.news-lead-copy > a,
+.news-row-card a {
+  min-height: 31px;
+  padding-inline: 10px;
+  font-size: 12px;
+}
+
+.news-brief-panel,
+.market-watch-panel {
+  padding: 12px;
+  box-shadow: none;
+}
+
+.news-brief-panel h3,
+.market-watch-panel h3 {
+  font-size: var(--text-md);
+}
+
+.news-brief-panel a {
+  gap: 3px;
+  padding: 9px 0;
+}
+
+.news-brief-panel strong {
+  font-size: var(--text-sm);
+  line-height: 1.28;
+}
+
+.news-brief-panel small,
+.market-watch-panel small {
+  font-size: 11px;
+}
+
+.market-watch-panel button {
+  min-height: 46px;
+  padding: 8px 9px;
+}
+
+.news-row-card {
+  grid-template-columns: 150px minmax(0, 1fr);
+  min-height: 126px;
+}
+
+.news-row-card > div:not(.news-thumb) {
+  gap: 6px;
+  padding: 12px 14px;
+}
+
+.news-row-card .news-thumb,
+.news-row-card .news-thumb > img {
+  min-height: 126px;
+}
+
+.news-row-card h3 {
+  font-size: var(--text-lg);
+  line-height: 1.25;
+}
+
+.news-row-card p {
+  -webkit-line-clamp: 1;
+  font-size: var(--text-sm);
+}
+
+/* Type scale and homepage authority pass: one rhythm across homepage, news, guides, and forecasting. */
+:root {
+  --type-caption: 11px;
+  --type-label: 12px;
+  --type-body-sm: 13px;
+  --type-body: 14px;
+  --type-body-lg: 15px;
+  --type-card-title: 17px;
+  --type-section: 22px;
+  --type-page: 32px;
+  --type-hero: 42px;
+}
+
+body {
+  font-size: var(--type-body);
+}
+
+h1,
+h2,
+h3,
+p {
+  letter-spacing: 0;
+}
+
+.topbar h1,
+.content-hero h1,
+.portal-hero h1 {
+  font-size: clamp(30px, 3vw, var(--type-hero));
+  line-height: 1.12;
+  font-weight: 800;
+}
+
+.news-hero h1,
+.guide-detail-panel h2 {
+  font-size: clamp(26px, 2.35vw, var(--type-page));
+  line-height: 1.18;
+}
+
+.section-heading h2,
+.home-section-title h2,
+.tech-title h2,
+.news-digest-panel h2,
+.production-head h2 {
+  font-size: var(--type-section);
+  line-height: 1.22;
+  font-weight: 750;
+}
+
+.panel-heading h3,
+.news-brief-panel h3,
+.market-watch-panel h3,
+.guide-card h2 {
+  font-size: var(--type-card-title);
+  line-height: 1.25;
+  font-weight: 750;
+}
+
+.news-lead h2 {
+  font-size: clamp(21px, 1.55vw, 25px);
+  line-height: 1.24;
+  font-weight: 750;
+}
+
+.news-row-card h3,
+.home-news-row strong,
+.home-guide-row strong,
+.guide-family-card strong,
+.portal-modules button strong {
+  font-size: var(--type-card-title);
+  line-height: 1.28;
+  font-weight: 750;
+}
+
+.topbar p,
+.content-hero p,
+.portal-hero p,
+.news-lead p,
+.news-row-card p,
+.home-guide-row p,
+.portal-modules button span,
+.section-heading p,
+.intel-panel p {
+  font-size: var(--type-body);
+  line-height: 1.55;
+}
+
+.crop-kicker,
+.portal-kicker,
+.news-meta-line span,
+.impact-badge,
+.related-tag,
+label,
+th,
+.home-news-row span,
+.home-guide-row span {
+  font-size: var(--type-label);
+}
+
+.topbar {
+  grid-template-columns: minmax(0, 0.95fr) minmax(420px, 0.72fr);
+  min-height: 286px;
+  padding-right: 72px;
+}
+
+.topbar > .icon-button {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+}
+
+.hero-copy {
+  max-width: 640px;
+}
+
+.hero-visual {
+  height: 100%;
+  min-height: 236px;
+}
+
+.hero-image {
+  height: 100%;
+  min-height: 236px;
+  object-fit: cover;
+  object-position: center 46%;
+}
+
+.crop-ca_phe .hero-image {
+  object-position: center center;
+}
+
+.portal-hero {
+  position: relative;
+  grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.65fr);
+  overflow: hidden;
+  padding: var(--space-6);
+  background:
+    linear-gradient(135deg, rgba(255, 254, 249, 0.96), rgba(242, 247, 238, 0.94)),
+    var(--color-surface);
+}
+
+.portal-hero::after {
+  position: absolute;
+  right: -120px;
+  bottom: -180px;
+  width: 420px;
+  height: 420px;
+  border-radius: 999px;
+  background: rgba(22, 112, 82, 0.08);
+  content: "";
+}
+
+.portal-hero-copy,
+.portal-summary {
+  position: relative;
+  z-index: 1;
+}
+
+.portal-hero h1 {
+  max-width: 760px;
+}
+
+.portal-hero p {
+  max-width: 640px;
+}
+
+.home-actions {
+  margin-top: var(--space-3);
+}
+
+.home-actions button {
+  min-height: 40px;
+  padding-inline: 13px;
+}
+
+.portal-summary {
+  align-content: center;
+}
+
+.portal-summary-item {
+  min-height: 76px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.portal-summary-item strong {
+  font-size: 24px;
+}
+
+.home-market-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.home-market-strip article {
+  min-height: 92px;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.home-market-strip span {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--accent);
+  font-size: var(--type-label);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.home-market-strip strong {
+  display: block;
+  color: var(--color-text);
+  font-size: var(--type-card-title);
+  line-height: 1.32;
+  font-weight: 750;
+}
+
+.portal-modules button {
+  min-height: 118px;
+  padding: 14px;
+}
+
+.portal-split article {
+  padding: 14px 16px;
+}
+
+.home-news-row,
+.home-guide-row {
+  padding-block: 11px;
+}
+
+.home-guide-row p {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+

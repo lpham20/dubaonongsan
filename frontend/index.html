@@ -3,7 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0d4b38" />
+    <meta name="theme-color" content="#102b20" media="(prefers-color-scheme: dark)" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Dự báo nông sản" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
 
     <title>Dự báo nông sản - Dự báo giá nông sản Việt Nam</title>
     <meta
@@ -13,9 +19,7 @@
     <meta name="keywords" content="giá sầu riêng, giá cà phê, giá hồ tiêu, giá lúa, dự báo giá nông sản, dubaonongsan" />
     <meta name="robots" content="index, follow" />
     <meta name="author" content="Dự báo nông sản" />
-    <link rel="canonical" href="https://dubaonongsan.com/" />
-    <link rel="alternate" hreflang="vi-VN" href="https://dubaonongsan.com/" />
-    <link rel="alternate" hreflang="x-default" href="https://dubaonongsan.com/" />
+    <!-- canonical/og:url injected per route by SeoHead.tsx and build-time SEO HTML -->
     <link rel="alternate" type="application/rss+xml" title="Dự báo nông sản RSS" href="/api/v1/rss/news.xml" />
 
     <meta property="og:type" content="website" />
@@ -23,10 +27,13 @@
     <meta property="og:site_name" content="Dự báo nông sản" />
     <meta property="og:title" content="Dự báo giá nông sản Việt Nam" />
     <meta property="og:description" content="Theo dõi giá sầu riêng, cà phê, hồ tiêu, lúa và dự báo 30 ngày theo vùng trồng." />
-    <meta property="og:url" content="https://dubaonongsan.com/" />
+    <!-- og:url injected per route -->
     <meta property="og:image" content="https://dubaonongsan.com/og-cover.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image" content="https://dubaonongsan.com/og-cover.webp" />
+    <meta property="og:image:type" content="image/webp" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Dự báo nông sản - Dự báo giá nông sản" />

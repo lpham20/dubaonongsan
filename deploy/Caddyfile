@@ -25,7 +25,25 @@
 	}
 
 	root * /var/www/frontend
-	file_server
+
+	@seoNews path_regexp seoNews ^/tin-tuc/([^/]+)$
+	rewrite @seoNews /seo/news/{re.seoNews.1}.html
+
+	@seoGuides path_regexp seoGuides ^/huong-dan/([^/]+)$
+	rewrite @seoGuides /seo/guides/{re.seoGuides.1}.html
+
+	@seoForecast path_regexp seoForecast ^/du-bao-gia/([^/]+)$
+	rewrite @seoForecast /seo/forecast/{re.seoForecast.1}.html
+
+	@seoMethodology {
+		path /thuat-toan-du-bao
+	}
+	rewrite @seoMethodology /seo/methodology.html
+
+	@seoFertilizerMethodology {
+		path /thuat-toan-bon-phan
+	}
+	rewrite @seoFertilizerMethodology /seo/fertilizer-methodology.html
 
 	@assets {
 		path /assets/*
@@ -50,6 +68,7 @@
 	}
 
 	try_files {path} /index.html
+	file_server
 }
 
 {$API_DOMAIN} {

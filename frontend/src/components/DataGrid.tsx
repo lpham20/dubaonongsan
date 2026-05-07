@@ -43,6 +43,34 @@ function DataGridComponent({ points }: Props) {
           </tbody>
         </table>
       </div>
+      <div className="mobile-price-cards" aria-label="Bảng giá lịch sử dạng thẻ">
+        {rows.map((row) => (
+          <article key={`mobile-${row.timestamp}-${row.quality_grade}-${row.variety}-${row.province ?? row.region}`}>
+            <div>
+              <strong>{row.variety}</strong>
+              <span>{new Date(row.timestamp).toLocaleDateString("vi-VN")}</span>
+            </div>
+            <dl>
+              <div>
+                <dt>Khu vực</dt>
+                <dd>{row.province ?? row.region}</dd>
+              </div>
+              <div>
+                <dt>Loại</dt>
+                <dd>{row.quality_grade}</dd>
+              </div>
+              <div>
+                <dt>Thấp nhất</dt>
+                <dd>{row.min_price_vnd?.toLocaleString("vi-VN")}</dd>
+              </div>
+              <div>
+                <dt>Cao nhất</dt>
+                <dd>{row.max_price_vnd?.toLocaleString("vi-VN")}</dd>
+              </div>
+            </dl>
+          </article>
+        ))}
+      </div>
     </section>
   );
 }

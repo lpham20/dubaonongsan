@@ -1,5 +1,11 @@
-/tin-tuc/:slug /seo/news/:slug.html 200
-/huong-dan/:slug /seo/guides/:slug.html 200
-/du-bao-gia/:crop /seo/forecast/:crop.html 200
-/thuat-toan-du-bao /seo/methodology.html 200
-/* /index.html 200
+# Prerendered HTML for SEO bots and users hitting deep URLs directly
+# Cloudflare Pages: 200 = rewrite; URL stays the same, content from destination is served.
+
+/tin-tuc/:slug                 /seo/news/:slug.html              200
+/huong-dan/:slug               /seo/guides/:slug.html            200
+/du-bao-gia/:crop              /seo/forecast/:crop.html          200
+/thuat-toan-du-bao             /seo/methodology.html             200
+/thuat-toan-bon-phan           /seo/fertilizer-methodology.html  200
+
+# Static SPA fallback must be last.
+/*                             /index.html                       200

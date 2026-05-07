@@ -203,6 +203,17 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
     setNewsPage(1);
   }, [activeTopic, query, sortMode]);
 
+  useEffect(() => {
+    const next = query.trim();
+    const url = new URL(window.location.href);
+    if (next) {
+      url.searchParams.set("q", next);
+    } else {
+      url.searchParams.delete("q");
+    }
+    window.history.replaceState({}, "", url.toString());
+  }, [query]);
+
   function reloadPriceBoard(cropToLoad: PriceNewsCrop, signal?: AbortSignal) {
     setPriceBoardLoading(true);
     return fetchDailyPriceBoard(cropToLoad, signal)

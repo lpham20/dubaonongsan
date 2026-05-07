@@ -160,6 +160,8 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
   const [searchQuery, setSearchQuery] = useState("");
   const articles = useMemo(() => rankHomeArticles(news.length ? news : fallbackNews), [news]);
   const lead = articles[0];
+  const leadImageUrl = lead.image_url || "/coffee-hero-photo.jpg";
+  const leadWebpUrl = localWebpSource(leadImageUrl);
   const marketAlerts = articles.slice(1, 6);
   const guidePreview = guides.slice(0, 3);
   const tickerItems = useMemo(() => buildTickerItems(liveTicker), [liveTicker]);
@@ -204,6 +206,17 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
         title="Dự báo giá nông sản & hướng dẫn kỹ thuật Việt Nam"
         description="Cập nhật giá cà phê, sầu riêng, hồ tiêu, lúa hằng ngày. Dự báo 30 ngày theo vùng trồng, bản tin thị trường và hướng dẫn kỹ thuật nông nghiệp."
         canonical="/"
+        schemaJsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: "Dự báo nông sản",
+          url: "https://dubaonongsan.com/",
+          description: "Nền tảng tin tức, kỹ thuật và dự báo giá nông sản Việt Nam",
+          speakable: {
+            "@type": "SpeakableSpecification",
+            cssSelector: [".home-market-hero h1", ".home-market-hero p"]
+          }
+        }}
       />
       <PriceTicker items={tickerItems} />
 
@@ -295,16 +308,19 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
       <section className="home-intel-grid">
         <article className="lead-market-story">
           <div className="lead-market-image">
-            <img
-              src={lead.image_url || "/coffee-hero-photo.jpg"}
-              alt={`Ảnh minh họa: ${lead.title}`}
-              loading="lazy"
-              width="800"
-              height="450"
-              onError={(event) => {
-                event.currentTarget.src = "/coffee-hero-photo.jpg";
-              }}
-            />
+            <picture>
+              {leadWebpUrl ? <source srcSet={leadWebpUrl} type="image/webp" /> : null}
+              <img
+                src={leadImageUrl}
+                alt={`Ảnh minh họa: ${lead.title}`}
+                loading="lazy"
+                width="800"
+                height="450"
+                onError={(event) => {
+                  event.currentTarget.src = "/coffee-hero-photo.jpg";
+                }}
+              />
+            </picture>
           </div>
           <div className="lead-market-copy">
             <span className="story-label">
@@ -566,6 +582,11 @@ function displayTitle(title: string, maxLength: number) {
   if (cleaned.length <= maxLength) return cleaned;
   const boundary = cleaned.lastIndexOf(" ", maxLength - 1);
   return `${cleaned.slice(0, boundary > 42 ? boundary : maxLength).trim()}...`;
+}
+
+function localWebpSource(src: string) {
+  if (!src.startsWith("/") || !src.endsWith(".jpg")) return null;
+  return src.replace(/\.jpg$/i, ".webp");
 }
 
 function formatDate(value: string | null) {
