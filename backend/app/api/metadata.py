@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core.admin_units import is_production_region
+from app.core.admin_units import is_crop_province, is_production_region
 from app.core.config import get_settings
 from app.db import get_db
 from app.models import DailyMarketPrice, DurianVariety, ProductionRegion
@@ -24,7 +24,12 @@ def regions(
         .order_by(ProductionRegion.region_id)
         .distinct()
     ).all()
-    production_rows = [row for row in rows if is_production_region(row.region_name, row.province)]
+    production_rows = [
+        row
+        for row in rows
+        if is_production_region(row.region_name, row.province)
+        and is_crop_province(crop, row.province)
+    ]
     return [
         {
             "region_id": row.region_id,

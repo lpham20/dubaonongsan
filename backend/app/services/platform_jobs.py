@@ -14,6 +14,7 @@ from sqlalchemy import desc, select
 from sqlalchemy.orm import Session
 
 from app.core.cache import invalidate_cache
+from app.core.admin_units import is_crop_province
 from app.core.config import get_settings
 from app.db import SessionLocal
 from app.ingestion.service import PriceIngestionService
@@ -169,6 +170,7 @@ class PlatformJobService:
             for region in regions
             if region.province is not None
             and region.region_name not in {"Thị trường Việt Nam", "Chợ đầu mối TP.HCM"}
+            and is_crop_province(crop, region.province)
         ]
         scores: list[int] = []
         weak_pairs = []
