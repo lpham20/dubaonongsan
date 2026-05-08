@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
 import { App } from "./App";
-import { ErrorBoundary } from "./components/ErrorBoundary";
+import { ErrorBoundary, isRecoverableChunkError, reloadOnceForNewBundle } from "./components/ErrorBoundary";
 import { AuthProvider } from "./contexts/AuthContext";
 import "./styles/tokens.css";
 import "./styles/fertilizer.css";
@@ -19,6 +19,20 @@ import "./styles/header.css";
 import "./styles/production.css";
 import "./styles/responsive.css";
 import "./styles/finance-terminal.css";
+
+if (typeof window !== "undefined") {
+  window.addEventListener("error", (event) => {
+    if (isRecoverableChunkError(event.error ?? event.message)) {
+      reloadOnceForNewBundle();
+    }
+  });
+
+  window.addEventListener("unhandledrejection", (event) => {
+    if (isRecoverableChunkError(event.reason)) {
+      reloadOnceForNewBundle();
+    }
+  });
+}
 
 if (import.meta.env.PROD) {
   registerSW({
