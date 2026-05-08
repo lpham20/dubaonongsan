@@ -144,9 +144,9 @@ class PublicPriceCalibrationService:
                 for day_index, day in enumerate(dates):
                     source = sources[(day_index + region.region_id + variety.variety_id) % len(sources)]
                     min_price, max_price, volume = self._calibrated_price(region, variety, day_index, anchors)
-                    row = self._synthetic_row(day, region.region_id, variety.variety_id)
+                    row = self._existing_calibrated_row(day, region.region_id, variety.variety_id, source)
                     if row is None:
-                        row = self._existing_calibrated_row(day, region.region_id, variety.variety_id, source)
+                        row = self._synthetic_row(day, region.region_id, variety.variety_id)
                     if row:
                         row.exchange_source = source
                         row.min_price_vnd = min_price

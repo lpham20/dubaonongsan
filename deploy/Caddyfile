@@ -26,6 +26,9 @@
 
 	root * /var/www/frontend
 
+	@seoNewsViews path_regexp seoNewsViews ^/tin-tuc/(gia-sau-rieng|gia-ca-phe|gia-ho-tieu)$
+	rewrite @seoNewsViews /seo/news-views/{re.seoNewsViews.1}.html
+
 	@seoNews path_regexp seoNews ^/tin-tuc/([^/]+)$
 	rewrite @seoNews /seo/news/{re.seoNews.1}.html
 

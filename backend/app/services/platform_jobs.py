@@ -59,6 +59,8 @@ class PlatformJobService:
                 self._finish_job(job, "thành công", summary)
                 return summary
             except Exception as exc:
+                self.db.rollback()
+                job = self.db.get(PlatformJobRun, job.job_id) or job
                 self._finish_job(job, "lỗi", None, str(exc))
                 raise
 
@@ -71,6 +73,8 @@ class PlatformJobService:
                 self._finish_job(job, "thành công", summary)
                 return summary
             except Exception as exc:
+                self.db.rollback()
+                job = self.db.get(PlatformJobRun, job.job_id) or job
                 self._finish_job(job, "lỗi", None, str(exc))
                 raise
 
@@ -86,6 +90,8 @@ class PlatformJobService:
                 self._finish_job(job, "thành công", summary)
                 return summary
             except Exception as exc:
+                self.db.rollback()
+                job = self.db.get(PlatformJobRun, job.job_id) or job
                 self._finish_job(job, "lỗi", None, str(exc))
                 raise
 
@@ -117,6 +123,8 @@ class PlatformJobService:
                 self._finish_job(job, "thành công", summary)
                 return summary
             except Exception as exc:
+                self.db.rollback()
+                job = self.db.get(PlatformJobRun, job.job_id) or job
                 self._finish_job(job, "lỗi", None, str(exc))
                 raise
 
@@ -228,11 +236,19 @@ class JobScheduler:
         )
         cls._scheduler.add_job(
             cls._run_with_session,
-            "interval",
-            minutes=settings.scrape_interval_minutes,
+            "cron",
+            hour="6-22",
+            minute=0,
             args=["scrape"],
-            id="scrape_prices",
-            next_run_time=datetime.now(SCHEDULER_TZ) + timedelta(seconds=10),
+            id="scrape_prices_business_hours",
+            replace_existing=True,
+        )
+        cls._scheduler.add_job(
+            cls._run_with_session,
+            "date",
+            run_date=datetime.now(SCHEDULER_TZ) + timedelta(seconds=10),
+            args=["scrape"],
+            id="scrape_prices_boot_catchup",
             replace_existing=True,
         )
         cls._scheduler.add_job(

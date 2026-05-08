@@ -15,10 +15,20 @@ SCRAPERS = {
     "vietnamvn": VietnamVnScraper,
 }
 
+DISABLED_SCRAPERS = {
+    # These sources currently return stale historical prices while the scraper
+    # technically succeeds. Keep them out of scheduled runs until their parser
+    # or upstream feed is verified.
+    "baohatinh",
+    "vietnamvn",
+}
+
 
 def build_scrapers(source: str | None = None):
     if source:
         if source not in SCRAPERS:
             raise ValueError(f"Unknown scraper source: {source}")
+        if source in DISABLED_SCRAPERS:
+            raise ValueError(f"Scraper source is disabled: {source}")
         return [SCRAPERS[source]()]
-    return [factory() for factory in SCRAPERS.values()]
+    return [factory() for name, factory in SCRAPERS.items() if name not in DISABLED_SCRAPERS]

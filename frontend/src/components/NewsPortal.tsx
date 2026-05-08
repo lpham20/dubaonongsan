@@ -12,6 +12,7 @@ import {
 } from "./icons";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
+import { FreshnessBanner } from "./FreshnessBanner";
 import { SeoHead } from "./SeoHead";
 import {
   fetchAvailableVarieties,
@@ -116,6 +117,32 @@ const SORT_OPTIONS: { value: SortMode; label: string }[] = [
 ];
 
 const NEWS_PAGE_SIZE = 8;
+const VIEW_SEO: Record<NewsView, { title: string; description: string; canonical: string }> = {
+  latest: {
+    title: "Tin tức thị trường nông sản, phân bón và chính sách mới nhất",
+    description:
+      "Bản tin nông nghiệp mới nhất về giá nông sản, phân bón, vật tư, xuất khẩu và chính sách có thể ảnh hưởng tới thị trường.",
+    canonical: "/tin-tuc"
+  },
+  sau_rieng: {
+    title: "Tin giá sầu riêng - cập nhật giá hôm nay",
+    description:
+      "Tin tức giá sầu riêng theo vùng trồng, giá Ri6, Monthong, Sầu Chuồng Bò và bản tin xuất khẩu sầu riêng mới nhất.",
+    canonical: "/tin-tuc/gia-sau-rieng"
+  },
+  ca_phe: {
+    title: "Tin giá cà phê - cập nhật giá hôm nay",
+    description:
+      "Tin tức giá cà phê Robusta và Arabica tại Tây Nguyên, Đắk Lắk, Lâm Đồng. Bản tin xuất khẩu, tồn kho và chính sách cà phê mới nhất.",
+    canonical: "/tin-tuc/gia-ca-phe"
+  },
+  ho_tieu: {
+    title: "Tin giá hồ tiêu - cập nhật giá hôm nay",
+    description:
+      "Tin tức giá hồ tiêu Đắk Lắk, Đắk Nông, Bà Rịa - Vũng Tàu. Cập nhật xuất khẩu, tồn kho và chính sách hồ tiêu mới nhất.",
+    canonical: "/tin-tuc/gia-ho-tieu"
+  }
+};
 const PRICE_DISCLAIMER =
   "Giá dự báo được tổng hợp từ dữ liệu thị trường và xử lý bằng mô hình AI, chỉ mang tính tham khảo — thực tế có thể dao động theo từng vùng và từng thời điểm. Bạn biết giá tại địa phương mình? Chia sẻ để giúp bà con nông dân khác cùng nắm thông tin tốt hơn! (Dubaonongsan cung cấp giá dự báo với mục đích tham khảo và không chịu trách nhiệm đối với các quyết định giao dịch phát sinh từ thông tin này.)";
 
@@ -199,6 +226,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
   const marketWatch = buildMarketWatch(rankedArticles);
   const digest = buildDigest(filteredArticles);
   const tickerItems = useMemo(() => buildNewsTicker(tickerData), [tickerData]);
+  const seo = VIEW_SEO[activeView] ?? VIEW_SEO.latest;
 
   useEffect(() => {
     setNewsPage(1);
@@ -266,9 +294,9 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
   return (
     <section className="content-page news-page finance-news-page">
       <SeoHead
-        title="Tin tức thị trường nông sản, phân bón và chính sách mới nhất"
-        description="Bản tin nông nghiệp mới nhất về giá nông sản, phân bón, vật tư, xuất khẩu và chính sách có thể ảnh hưởng tới thị trường."
-        canonical="/tin-tuc"
+        title={seo.title}
+        description={seo.description}
+        canonical={seo.canonical}
       />
       <NewsPriceTicker items={tickerItems} />
 
@@ -440,7 +468,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
                 <RelatedTag relation={relation} />
                 <div className="news-source-row">
                   <small>{article.source_name}</small>
-                  <small>{formatDate(article.published_at ?? article.scraped_at)}</small>
+                  <small className="num">{formatDate(article.published_at ?? article.scraped_at)}</small>
                   <Link to={newsPath(article)}>
                     Xem chi tiết
                     <ExternalLink size={14} />
@@ -515,6 +543,7 @@ function PriceBoardSection({
           <p>
             Tổng hợp giá {meta.cropName} theo giống và vùng/tỉnh trong dữ liệu mới nhất của hệ thống.
           </p>
+          <FreshnessBanner />
         </div>
         <div className="price-board-kpis">
           <span>
@@ -559,9 +588,9 @@ function PriceBoardSection({
                   </td>
                   <td><span lang={languageForCropName(row.variety)}>{row.variety}</span></td>
                   <td>{row.quality_grade ?? "Chuẩn thị trường"}</td>
-                  <td>{formatMoney(row.min_price_vnd ?? row.max_price_vnd)}</td>
-                  <td>{formatMoney(row.max_price_vnd ?? row.min_price_vnd)}</td>
-                  <td>{formatDate(row.timestamp)}</td>
+                  <td className="num">{formatMoney(row.min_price_vnd ?? row.max_price_vnd)}</td>
+                  <td className="num">{formatMoney(row.max_price_vnd ?? row.min_price_vnd)}</td>
+                  <td className="num">{formatDate(row.timestamp)}</td>
                   <td>
                     {row.farmer_report_price_vnd ? (
                       <>

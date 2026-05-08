@@ -81,6 +81,12 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import json,sys,urllib.request; r=urllib.request.urlopen('http://api:8010/api/v1/health/scrape', timeout=10); body=json.loads(r.read().decode()); sys.exit(0 if body.get('status') == 'ok' else 1)\""]
+      interval: 30m
+      timeout: 15s
+      retries: 2
+      start_period: 5m
     deploy:
       resources:
         limits:

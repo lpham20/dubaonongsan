@@ -23,14 +23,6 @@ select {
   padding: 0 24px 44px;
 }
 
-.crop-ca_phe {
-  --accent: #5f6f35;
-  --accent-deep: #344326;
-  --accent-soft: #edf1d8;
-  --harvest: #c9823e;
-  --soil: #6f4931;
-}
-
 .ticker {
   display: flex;
   align-items: center;

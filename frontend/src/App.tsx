@@ -15,6 +15,7 @@ import {
   Sprout
 } from "./components/icons";
 import { AppHeader } from "./components/AppHeader";
+import { FreshnessBanner } from "./components/FreshnessBanner";
 import { TickerTape } from "./components/TickerTape";
 import { SiteFooter } from "./components/SiteFooter";
 import { SeoHead } from "./components/SeoHead";
@@ -720,6 +721,7 @@ function RoutedApp() {
                     {`Dự báo 30 ngày${selectedRegion?.province ? ` tại ${selectedRegion.province}` : ""}`}
                   </span>
                 </h1>
+                <FreshnessBanner />
               </div>
               <div className="quote-meta">
                 <span>{selectedRegion?.province ?? selectedRegion?.region_name ?? "Vùng trồng"}</span>
@@ -759,6 +761,18 @@ function RoutedApp() {
                 <span>Giá mới nhất</span>
                 <strong className="num">{latestPrice.toLocaleString("vi-VN")}</strong>
               </div>
+              {user?.is_admin ? (
+                <button
+                  type="button"
+                  className="quote-side-action"
+                  onClick={() => void runJob("scrape")}
+                  disabled={platformBusy}
+                  title="Chạy scrape giá ngay"
+                >
+                  <RefreshCw size={14} />
+                  {platformBusy ? "Đang quét..." : "Quét giá"}
+                </button>
+              ) : null}
             </div>
           </header>
 

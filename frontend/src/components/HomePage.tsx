@@ -15,6 +15,7 @@ import {
 } from "./icons";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { FreshnessBanner } from "./FreshnessBanner";
 import { SeoHead } from "./SeoHead";
 import { fetchTickerPrices, type CropType, type GuidePost, type NewsArticle, type PricePoint } from "../lib/api";
 import { newsPath } from "../lib/seo";
@@ -288,6 +289,10 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
           </dl>
         </aside>
       </section>
+
+      <div className="market-card-freshness">
+        <FreshnessBanner />
+      </div>
 
       <section className="market-card-grid" aria-label="Biến động giá nông sản">
         {dataCards.map((card) => (

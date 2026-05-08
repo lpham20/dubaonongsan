@@ -42,11 +42,15 @@ class PriceIngestionService:
                 run.records_inserted = inserted
                 run.records_updated = updated
                 if len(result.observations) == 0:
+                    run.status = "trống"
+                    run.error_message = "Parser tìm 0 dữ liệu - kiểm tra HTML nguồn."
                     logger.warning(
                         "Scrape returned 0 records - possibly source HTML changed or no new prices: %s",
                         scraper.source,
                     )
                 if inserted == 0 and updated == 0 and len(result.observations) > 0:
+                    run.status = "trùng lặp"
+                    run.error_message = "Tất cả dữ liệu trùng với DB - nguồn chưa cập nhật."
                     logger.warning(
                         "Scrape parsed %d records but none persisted (all dedup): %s",
                         len(result.observations),

@@ -395,6 +395,45 @@ def render_static_pages() -> list[tuple[str, str | None]]:
             _page(title, desc, canonical, f"<main><h1>{html.escape(title)}</h1><p>{html.escape(desc)}</p></main>", [web_page_schema, breadcrumb_schema]),
         )
         urls.append((canonical, today))
+
+    news_views = [
+        (
+            "gia-sau-rieng",
+            "Tin giá sầu riêng - cập nhật giá hôm nay",
+            "Tin giá sầu riêng theo vùng trồng, giá Ri6, Monthong và bản tin xuất khẩu sầu riêng mới nhất.",
+        ),
+        (
+            "gia-ca-phe",
+            "Tin giá cà phê - cập nhật giá hôm nay",
+            "Tin giá cà phê Robusta và Arabica tại Tây Nguyên, Đắk Lắk, Lâm Đồng.",
+        ),
+        (
+            "gia-ho-tieu",
+            "Tin giá hồ tiêu - cập nhật giá hôm nay",
+            "Tin giá hồ tiêu Đắk Lắk, Đắk Nông, Bà Rịa - Vũng Tàu.",
+        ),
+    ]
+    for slug, title, desc in news_views:
+        canonical = f"{SITE_BASE}/tin-tuc/{slug}"
+        breadcrumb_schema = _breadcrumb(
+            [
+                ("Trang chủ", f"{SITE_BASE}/"),
+                ("Tin tức", f"{SITE_BASE}/tin-tuc"),
+                (title.split("-")[0].strip(), canonical),
+            ]
+        )
+        web_page_schema = {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": title,
+            "description": desc,
+            "url": canonical,
+        }
+        _write(
+            OUTPUT / "news-views" / f"{slug}.html",
+            _page(title, desc, canonical, f"<main><h1>{html.escape(title)}</h1><p>{html.escape(desc)}</p></main>", [web_page_schema, breadcrumb_schema]),
+        )
+        urls.append((canonical, today))
     return urls
 
 

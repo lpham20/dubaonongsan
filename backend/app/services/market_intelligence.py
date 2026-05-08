@@ -114,19 +114,21 @@ class MarketIntelligenceService:
             .group_by(DailyMarketPrice.exchange_source)
             .order_by(func.count(DailyMarketPrice.id).desc())
         ).all()
-        latest_runs = {
-            run.source: run
-            for run in self.db.scalars(select(ScrapeRun).order_by(ScrapeRun.started_at.desc())).all()
-            if run.source not in {}
-        }
+        latest_runs: dict[str, ScrapeRun] = {}
+        for run in self.db.scalars(select(ScrapeRun).order_by(ScrapeRun.started_at.desc())).all():
+            if run.source not in latest_runs:
+                latest_runs[run.source] = run
         result = []
         for source, count, latest_price_at in rows:
             run = latest_runs.get(source)
             freshness_days = self._freshness_days(latest_price_at)
             is_derived = _is_derived_source(source)
+            is_system_generated = source == SYNTHETIC_SOURCE or is_derived
             status = "nội suy" if source == SYNTHETIC_SOURCE else ("hiệu chỉnh" if is_derived else (run.status if run else "quan sát"))
-            if not is_derived and freshness_days is not None and freshness_days > 45:
-                status = "cũ"
+            if not is_system_generated and freshness_days is not None and freshness_days > 7:
+                status = "sources-broken"
+            elif not is_system_generated and freshness_days is not None and freshness_days > 3:
+                status = "stale"
             result.append(
                 {
                     "source": source,
