@@ -19,13 +19,31 @@ export function isRecoverableChunkError(error: unknown): boolean {
   );
 }
 
+async function clearStaleAppCaches() {
+  if (typeof window === "undefined") return;
+  if ("serviceWorker" in navigator) {
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(registrations.map((registration) => registration.unregister()));
+  }
+  if ("caches" in window) {
+    const keys = await window.caches.keys();
+    await Promise.all(keys.map((key) => window.caches.delete(key)));
+  }
+}
+
+function hardReloadForNewBundle() {
+  void clearStaleAppCaches().finally(() => {
+    window.location.reload();
+  });
+}
+
 export function reloadOnceForNewBundle(): boolean {
   if (typeof window === "undefined") return false;
   const lastReload = Number(window.sessionStorage.getItem(CHUNK_RELOAD_KEY) ?? "0");
   const now = Date.now();
   if (now - lastReload < CHUNK_RELOAD_WINDOW_MS) return false;
   window.sessionStorage.setItem(CHUNK_RELOAD_KEY, String(now));
-  window.location.reload();
+  hardReloadForNewBundle();
   return true;
 }
 
@@ -55,7 +73,7 @@ export class ErrorBoundary extends Component<Props, State> {
               onClick={() => {
                 if (this.state.error && isRecoverableChunkError(this.state.error)) {
                   window.sessionStorage.removeItem(CHUNK_RELOAD_KEY);
-                  window.location.reload();
+                  hardReloadForNewBundle();
                   return;
                 }
                 this.setState({ error: null });
