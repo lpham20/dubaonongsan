@@ -318,7 +318,8 @@ export type FertilizerRecommendation = {
   rationale: { calculation_trace: string[]; sources_cited: { id: string; title: string }[] };
 };
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
+const DEFAULT_API_BASE_URL = import.meta.env.PROD ? "https://api.dubaonongsan.com" : "";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? DEFAULT_API_BASE_URL).replace(/\/$/, "");
 const jsonHeaders = { "Content-Type": "application/json" };
 
 function apiUrl(path: string) {

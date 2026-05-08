@@ -15,63 +15,64 @@
 {$FRONTEND_DOMAIN} {
 	encode zstd gzip
 
-	@api {
-		path /api/*
-	}
-	reverse_proxy @api api:8010 {
-		header_up X-Real-IP {remote_host}
-		header_up X-Forwarded-For {remote_host}
-		header_up X-Forwarded-Proto {scheme}
-	}
-
-	root * /var/www/frontend
-
-	@seoNewsViews path_regexp seoNewsViews ^/tin-tuc/(gia-sau-rieng|gia-ca-phe|gia-ho-tieu)$
-	rewrite @seoNewsViews /seo/news-views/{re.seoNewsViews.1}.html
-
-	@seoNews path_regexp seoNews ^/tin-tuc/([^/]+)$
-	rewrite @seoNews /seo/news/{re.seoNews.1}.html
-
-	@seoGuides path_regexp seoGuides ^/huong-dan/([^/]+)$
-	rewrite @seoGuides /seo/guides/{re.seoGuides.1}.html
-
-	@seoForecast path_regexp seoForecast ^/du-bao-gia/([^/]+)$
-	rewrite @seoForecast /seo/forecast/{re.seoForecast.1}.html
-
-	@seoMethodology {
-		path /thuat-toan-du-bao
-	}
-	rewrite @seoMethodology /seo/methodology.html
-
-	@seoFertilizerMethodology {
-		path /thuat-toan-bon-phan /khuyen-nghi-bon-phan/logic
-	}
-	rewrite @seoFertilizerMethodology /seo/fertilizer-methodology.html
-
-	@assets {
-		path /assets/*
-	}
-	header @assets Cache-Control "public, max-age=31536000, immutable"
-
-	@html {
-		path *.html
-	}
-	header @html Cache-Control "public, max-age=300, must-revalidate"
-
-	@images {
-		path *.jpg *.jpeg *.png *.webp *.svg
-	}
-	header @images Cache-Control "public, max-age=604800"
-
-	header {
-		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
-		X-Content-Type-Options "nosniff"
-		Referrer-Policy "strict-origin-when-cross-origin"
-		-Server
+	handle /api/* {
+		reverse_proxy api:8010 {
+			header_up X-Real-IP {remote_host}
+			header_up X-Forwarded-For {remote_host}
+			header_up X-Forwarded-Proto {scheme}
+		}
 	}
 
-	try_files {path} /index.html
-	file_server
+	handle {
+		root * /var/www/frontend
+
+		@seoNewsViews path_regexp seoNewsViews ^/tin-tuc/(gia-sau-rieng|gia-ca-phe|gia-ho-tieu)$
+		rewrite @seoNewsViews /seo/news-views/{re.seoNewsViews.1}.html
+
+		@seoNews path_regexp seoNews ^/tin-tuc/([^/]+)$
+		rewrite @seoNews /seo/news/{re.seoNews.1}.html
+
+		@seoGuides path_regexp seoGuides ^/huong-dan/([^/]+)$
+		rewrite @seoGuides /seo/guides/{re.seoGuides.1}.html
+
+		@seoForecast path_regexp seoForecast ^/du-bao-gia/([^/]+)$
+		rewrite @seoForecast /seo/forecast/{re.seoForecast.1}.html
+
+		@seoMethodology {
+			path /thuat-toan-du-bao
+		}
+		rewrite @seoMethodology /seo/methodology.html
+
+		@seoFertilizerMethodology {
+			path /thuat-toan-bon-phan /khuyen-nghi-bon-phan/logic
+		}
+		rewrite @seoFertilizerMethodology /seo/fertilizer-methodology.html
+
+		@assets {
+			path /assets/*
+		}
+		header @assets Cache-Control "public, max-age=31536000, immutable"
+
+		@html {
+			path *.html
+		}
+		header @html Cache-Control "public, max-age=300, must-revalidate"
+
+		@images {
+			path *.jpg *.jpeg *.png *.webp *.svg
+		}
+		header @images Cache-Control "public, max-age=604800"
+
+		header {
+			Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+			X-Content-Type-Options "nosniff"
+			Referrer-Policy "strict-origin-when-cross-origin"
+			-Server
+		}
+
+		try_files {path} /index.html
+		file_server
+	}
 }
 
 {$API_DOMAIN} {
