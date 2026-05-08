@@ -1328,6 +1328,93 @@ h5 {
   }
 }
 
+/* Guide detail pages need a tighter reading column than the legacy article shell.
+   This override lives in the last-loaded stylesheet so it wins over older guide/header rules. */
+.guide-detail-page.detail-page {
+  width: min(100%, 920px);
+  max-width: 920px;
+  margin-inline: auto;
+}
+
+.guide-detail-page .detail-article {
+  width: 100%;
+  max-width: 920px;
+  padding: clamp(20px, 3vw, 36px);
+  border-radius: var(--radius-xs);
+}
+
+.guide-detail-page .detail-article header,
+.guide-detail-page .detail-guide-meta,
+.guide-detail-page .detail-body,
+.guide-detail-page .related-forecast {
+  width: min(100%, 720px);
+  max-width: 720px;
+  margin-inline: auto;
+}
+
+.guide-detail-page .detail-article h1 {
+  max-width: 720px;
+  font-size: clamp(30px, 4vw, 46px);
+  letter-spacing: -0.018em;
+  line-height: 1.08;
+}
+
+.guide-detail-page .detail-article header > p {
+  max-width: 720px;
+  font-size: clamp(16px, 1.5vw, 18px);
+  line-height: 1.6;
+}
+
+.guide-detail-page .detail-body p,
+.guide-detail-page .detail-body li {
+  font-size: 16.5px;
+  line-height: 1.68;
+}
+
+.guide-detail-page .detail-body h2 {
+  margin-top: 1.65em;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.guide-detail-page .detail-body h3 {
+  margin-top: 1.35em;
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+@media (max-width: 860px) {
+  .guide-detail-page.detail-page {
+    width: 100%;
+  }
+
+  .guide-detail-page .detail-article {
+    padding: 18px;
+  }
+
+  .guide-detail-page .detail-article h1 {
+    font-size: clamp(28px, 8vw, 34px);
+  }
+
+  .guide-detail-page .detail-article header > p {
+    font-size: 16px;
+  }
+
+  .guide-detail-page .detail-body p,
+  .guide-detail-page .detail-body li {
+    font-size: 16px;
+    line-height: 1.62;
+  }
+
+  .guide-detail-page .detail-body h2 {
+    font-size: 22px;
+  }
+
+  .guide-detail-page .detail-body h3 {
+    font-size: 18px;
+  }
+}
+
 /* Footer */
 .site-footer {
   margin: var(--space-7) calc(-1 * var(--shell-pad-desktop)) 0;
