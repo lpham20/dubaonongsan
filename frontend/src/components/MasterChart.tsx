@@ -1,6 +1,7 @@
 import {
   Area,
   Bar,
+  Brush,
   CartesianGrid,
   ComposedChart,
   Line,
@@ -10,7 +11,7 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { memo, useEffect, useState, type CSSProperties } from "react";
+import { memo, useEffect, useMemo, useState, type CSSProperties } from "react";
 import { TriangleAlert } from "./icons";
 import type { ForecastPoint, PricePoint, TradingSignal } from "../lib/api";
 
@@ -77,6 +78,7 @@ function pickDailyPoint(points: PricePoint[]) {
 
 function MasterChartComponent({ historical, forecast, signals, showPrice, showForecast, showRain, showSignals }: Props) {
   const isDark = useDarkChart();
+  const [zoomRange, setZoomRange] = useState<{ startIndex: number; endIndex: number } | null>(null);
 
   const colors = isDark
     ? {
@@ -108,38 +110,69 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
         tooltipBorder: "#d3d8d0"
       };
 
-  const signalByDate = new Map(signals.map((signal) => [toDateKey(signal.timestamp), signal.price_vnd]));
-  const historicalByDate = historical.reduce((groups, point) => {
-    const dateKey = toDateKey(point.timestamp);
-    groups.set(dateKey, [...(groups.get(dateKey) ?? []), point]);
-    return groups;
-  }, new Map<string, PricePoint[]>());
+  const rows = useMemo<ChartRow[]>(() => {
+    const signalByDate = new Map(signals.map((signal) => [toDateKey(signal.timestamp), signal.price_vnd]));
+    const historicalByDate = historical.reduce((groups, point) => {
+      const dateKey = toDateKey(point.timestamp);
+      groups.set(dateKey, [...(groups.get(dateKey) ?? []), point]);
+      return groups;
+    }, new Map<string, PricePoint[]>());
 
-  const rows: ChartRow[] = [
-    ...Array.from(historicalByDate.entries())
-      .sort(([left], [right]) => left.localeCompare(right))
-      .map(([dateKey, points]) => {
-        const point = pickDailyPoint(points);
-        const rain = average(
-          points.map((row) => row.precipitation_mm).filter((value): value is number => typeof value === "number")
-        );
+    return [
+      ...Array.from(historicalByDate.entries())
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([dateKey, points]) => {
+          const point = pickDailyPoint(points);
+          const rain = average(
+            points.map((row) => row.precipitation_mm).filter((value): value is number => typeof value === "number")
+          );
 
-        return {
-          dateKey,
-          price: point.max_price_vnd ?? undefined,
-          rain,
-          signalPrice: signalByDate.get(dateKey)
-        };
-      }),
-    ...forecast.map((point) => ({
-      dateKey: toDateKey(point.timestamp),
-      forecast: point.forecast_price_vnd
-    }))
-  ];
+          return {
+            dateKey,
+            price: point.max_price_vnd ?? undefined,
+            rain,
+            signalPrice: signalByDate.get(dateKey)
+          };
+        }),
+      ...forecast.map((point) => ({
+        dateKey: toDateKey(point.timestamp),
+        forecast: point.forecast_price_vnd
+      }))
+    ];
+  }, [forecast, historical, signals]);
 
   const maxRain = Math.max(0, ...rows.map((row) => row.rain ?? 0));
   const rainDomain: [number, number] = [0, Math.max(50, Math.ceil(maxRain * 1.4))];
   const hasRainData = rows.some((row) => typeof row.rain === "number" && row.rain > 0);
+  const fullEndIndex = Math.max(rows.length - 1, 0);
+  const defaultZoomRange = { startIndex: Math.max(0, fullEndIndex - 119), endIndex: fullEndIndex };
+  const activeZoomRange = clampZoomRange(zoomRange ?? defaultZoomRange, fullEndIndex);
+  const canZoom = rows.length > 14;
+
+  useEffect(() => {
+    setZoomRange(null);
+  }, [rows.length]);
+
+  function updateZoom(nextRange: { startIndex: number; endIndex: number }) {
+    setZoomRange(clampZoomRange(nextRange, fullEndIndex));
+  }
+
+  function zoomBy(factor: number) {
+    if (!canZoom) return;
+    const currentLength = activeZoomRange.endIndex - activeZoomRange.startIndex + 1;
+    const nextLength = Math.min(rows.length, Math.max(14, Math.round(currentLength * factor)));
+    if (nextLength >= rows.length) {
+      updateZoom({ startIndex: 0, endIndex: fullEndIndex });
+      return;
+    }
+    const center = (activeZoomRange.startIndex + activeZoomRange.endIndex) / 2;
+    const startIndex = Math.round(center - nextLength / 2);
+    updateZoom({ startIndex, endIndex: startIndex + nextLength - 1 });
+  }
+
+  function resetZoom() {
+    setZoomRange({ startIndex: 0, endIndex: fullEndIndex });
+  }
 
   return (
     <section className="chart-section">
@@ -148,6 +181,7 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
           <h2>Diễn biến giá và dự báo</h2>
           <p>Giá lịch sử, đường dự báo và lượng mưa theo bộ lọc đang chọn.</p>
         </div>
+        <div className="chart-heading-tools">
         <div className="legend">
           <span className="legend-price" style={{ "--legend-color": colors.priceLine } as CSSProperties}>
             Giá
@@ -162,6 +196,20 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
           >
             Mưa{hasRainData ? "" : " (chưa có dữ liệu)"}
           </span>
+        </div>
+          {canZoom ? (
+            <div className="chart-zoom-controls" aria-label="Điều khiển thu phóng biểu đồ">
+              <button type="button" onClick={() => zoomBy(0.58)} aria-label="Phóng to biểu đồ">
+                +
+              </button>
+              <button type="button" onClick={() => zoomBy(1.72)} aria-label="Thu nhỏ biểu đồ">
+                -
+              </button>
+              <button type="button" onClick={resetZoom}>
+                Tất cả
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
       <div className="chart-wrap">
@@ -270,6 +318,24 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
                     />
                   ))
               : null}
+            {canZoom ? (
+              <Brush
+                dataKey="dateKey"
+                height={28}
+                travellerWidth={8}
+                startIndex={activeZoomRange.startIndex}
+                endIndex={activeZoomRange.endIndex}
+                tickFormatter={formatDate}
+                stroke={colors.priceLine}
+                fill={isDark ? "#111918" : "#f4f6f3"}
+                gap={4}
+                onChange={(nextRange) => {
+                  if (typeof nextRange?.startIndex === "number" && typeof nextRange.endIndex === "number") {
+                    updateZoom({ startIndex: nextRange.startIndex, endIndex: nextRange.endIndex });
+                  }
+                }}
+              />
+            ) : null}
           </ComposedChart>
         </ResponsiveContainer>
         <div className="signal-chip">
@@ -279,6 +345,13 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
       </div>
     </section>
   );
+}
+
+function clampZoomRange(range: { startIndex: number; endIndex: number }, fullEndIndex: number) {
+  const endLimit = Math.max(0, fullEndIndex);
+  const startIndex = Math.min(Math.max(0, range.startIndex), endLimit);
+  const endIndex = Math.min(Math.max(startIndex, range.endIndex), endLimit);
+  return { startIndex, endIndex };
 }
 
 export const MasterChart = memo(MasterChartComponent);

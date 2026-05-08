@@ -14,7 +14,7 @@ import {
   TrendingUp
 } from "./icons";
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FreshnessBanner } from "./FreshnessBanner";
 import { SeoHead } from "./SeoHead";
 import { fetchTickerPrices, type CropType, type GuidePost, type NewsArticle, type PricePoint } from "../lib/api";
@@ -158,6 +158,7 @@ const fallbackNews: NewsArticle[] = [
 ];
 
 export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuides }: Props) {
+  const navigate = useNavigate();
   const [liveTicker, setLiveTicker] = useState<HomeTickerState>({ coffee: [], durian: [], pepper: [], rice: [] });
   const [searchQuery, setSearchQuery] = useState("");
   const articles = useMemo(() => rankHomeArticles(news.length ? news : fallbackNews), [news]);
@@ -197,9 +198,7 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const query = searchQuery.trim();
-    if (query) {
-      window.location.href = `/tin-tuc?q=${encodeURIComponent(query)}`;
-    }
+    navigate(query ? `/tin-tuc?q=${encodeURIComponent(query)}` : "/tin-tuc");
   }
 
   return (

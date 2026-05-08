@@ -414,9 +414,11 @@ function RoutedApp() {
   useEffect(() => {
     const route = getInitialRoute(location.pathname, location.search);
     const canonicalUrl = routeToUrl(route);
+    const canonicalWithSearch =
+      route.section === "news" && !route.newsSlug && location.search ? `${canonicalUrl}${location.search}` : canonicalUrl;
     const currentUrl = `${location.pathname}${location.search}`;
-    if (!route.notFound && canonicalUrl !== currentUrl) {
-      navigate(canonicalUrl, { replace: true });
+    if (!route.notFound && canonicalWithSearch !== currentUrl) {
+      navigate(canonicalWithSearch, { replace: true });
       return;
     }
     setSection(route.section);

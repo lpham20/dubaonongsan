@@ -421,6 +421,14 @@
   object-fit: contain;
 }
 
+.finance-news-page .source-logo-mark strong {
+  color: var(--accent-deep);
+  font-family: var(--font-sans);
+  font-size: 18px;
+  font-weight: var(--fw-black);
+  letter-spacing: 0.02em;
+}
+
 .finance-news-page .source-logo-card small {
   color: var(--accent-deep);
   font-family: var(--font-sans);
@@ -646,7 +654,7 @@
   grid-column: 1;
 }
 
-.finance-news-page .news-row-card > div {
+.finance-news-page .news-row-card > div:not(.news-thumb) {
   display: grid;
   grid-column: 2 / -1;
   grid-template-columns: minmax(0, 1fr) 110px;
@@ -966,7 +974,7 @@
 
   .finance-news-page .news-lead,
   .finance-news-page .news-row-card,
-  .finance-news-page .news-row-card > div {
+  .finance-news-page .news-row-card > div:not(.news-thumb) {
     grid-template-columns: 1fr;
   }
 

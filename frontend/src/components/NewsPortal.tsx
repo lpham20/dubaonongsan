@@ -11,7 +11,7 @@ import {
   TrendingUp
 } from "./icons";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { FreshnessBanner } from "./FreshnessBanner";
 import { SeoHead } from "./SeoHead";
 import {
@@ -148,6 +148,7 @@ const FALLBACK_NEWS_TICKER: TickerItem[] = [
 ];
 
 export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, onViewChange, onOpenAnalytics }: Props) {
+  const location = useLocation();
   const [activeTopic, setActiveTopic] = useState<NewsTopic>(topicFromPath);
   const [sortMode, setSortMode] = useState<SortMode>("newest");
   const [query, setQuery] = useState(() => new URLSearchParams(window.location.search).get("q") ?? "");
@@ -220,6 +221,11 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
   const digest = buildDigest(filteredArticles);
   const tickerItems = useMemo(() => buildNewsTicker(tickerData), [tickerData]);
   const seo = VIEW_SEO[activeView] ?? VIEW_SEO.latest;
+
+  useEffect(() => {
+    const nextQuery = new URLSearchParams(location.search).get("q") ?? "";
+    setQuery((current) => (current === nextQuery ? current : nextQuery));
+  }, [location.search]);
 
   useEffect(() => {
     setNewsPage(1);
@@ -819,15 +825,25 @@ function LeadNewsCard({ item }: { item: RankedArticle }) {
 }
 
 function NewsImage({ article }: { article: NewsArticle }) {
-  const [imageFailed, setImageFailed] = useState(false);
-  const hasOriginalImage = Boolean(article.image_url && !imageFailed);
+  const imageUrl = normalizeNewsImageUrl(article.image_url);
   const logoUrl = sourceLogoUrl(article.source_url);
+  const [imageFailed, setImageFailed] = useState(false);
+  const [logoFailed, setLogoFailed] = useState(false);
+  const hasOriginalImage = Boolean(imageUrl && !imageFailed);
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [imageUrl]);
+
+  useEffect(() => {
+    setLogoFailed(false);
+  }, [logoUrl]);
 
   return (
     <div className={`news-thumb ${hasOriginalImage ? "" : "source-logo-mode"}`}>
       {hasOriginalImage ? (
         <img
-          src={article.image_url ?? ""}
+          src={imageUrl}
           alt={`Ảnh minh họa: ${article.title}`}
           loading="lazy"
           decoding="async"
@@ -838,7 +854,7 @@ function NewsImage({ article }: { article: NewsArticle }) {
       ) : (
         <div className="source-logo-card">
           <span className="source-logo-mark">
-            {logoUrl ? (
+            {logoUrl && !logoFailed ? (
               <img
                 src={logoUrl}
                 alt={`Logo ${article.source_name}`}
@@ -846,12 +862,11 @@ function NewsImage({ article }: { article: NewsArticle }) {
                 decoding="async"
                 width="64"
                 height="64"
-                onError={(event) => {
-                  event.currentTarget.style.display = "none";
-                }}
+                onError={() => setLogoFailed(true)}
               />
-            ) : null}
-            <strong>{sourceInitials(article.source_name)}</strong>
+            ) : (
+              <strong>{sourceInitials(article.source_name)}</strong>
+            )}
           </span>
           <small>{article.source_name}</small>
         </div>
@@ -1110,6 +1125,19 @@ function hasAny(text: string, terms: string[]) {
 function sourceLogoUrl(url: string) {
   const domain = sourceDomain(url);
   return domain ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=128` : "";
+}
+
+function normalizeNewsImageUrl(value: string | null | undefined) {
+  const raw = value?.trim();
+  if (!raw) return "";
+  if (raw.startsWith("//")) return `https:${raw}`;
+  if (raw.startsWith("/")) return raw;
+  try {
+    const url = new URL(raw);
+    return url.protocol === "http:" || url.protocol === "https:" ? url.toString() : "";
+  } catch {
+    return "";
+  }
 }
 
 function sourceDomain(url: string) {
