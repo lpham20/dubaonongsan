@@ -428,25 +428,25 @@
 
 .guide-body h2,
 .detail-body h2 {
-  margin: 1.6em 0 0.5em;
+  margin: 1.8em 0 0.6em;
   padding-bottom: var(--space-2);
   border-bottom: 1px solid var(--color-border);
   color: var(--color-text);
   font-family: var(--font-sans);
-  font-size: 22px;
+  font-size: 28px;
   font-weight: var(--fw-black);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
   line-height: var(--lh-snug);
 }
 
 .guide-body h3,
 .detail-body h3 {
-  margin: 1.3em 0 0.4em;
+  margin: 1.5em 0 0.4em;
   color: var(--color-text);
   font-family: var(--font-sans);
-  font-size: 18px;
+  font-size: 22px;
   font-weight: var(--fw-bold);
-  letter-spacing: -0.005em;
+  letter-spacing: -0.01em;
   line-height: var(--lh-snug);
 }
 
@@ -601,11 +601,11 @@
 
   .guide-body h2,
   .detail-body h2 {
-    font-size: 20px;
+    font-size: 24px;
   }
 
   .guide-body h3,
   .detail-body h3 {
-    font-size: 17px;
+    font-size: 19px;
   }
 }
