@@ -43,7 +43,7 @@ function MetricsDashboardComponent({ metrics }: Props) {
           <article className="metric-card" key={item.label}>
             <Icon size={20} />
             <span>{item.label}</span>
-            <strong>{item.value}</strong>
+            <strong className="num">{item.value}</strong>
             <small>{item.suffix}</small>
           </article>
         );

@@ -296,10 +296,10 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
               <span>{card.label}</span>
               {card.tone === "up" ? <TrendingUp size={18} /> : <TrendingDown size={18} />}
             </div>
-            <strong>{card.value}</strong>
+            <strong className="num">{card.value}</strong>
             <div className="market-card-meta">
               <small>{card.sublabel}</small>
-              <em>{card.change}</em>
+              <em className="num">{card.change}</em>
             </div>
             <Sparkline points={card.points} tone={card.tone} />
           </article>

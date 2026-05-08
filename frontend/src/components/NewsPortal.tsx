@@ -938,7 +938,7 @@ function NewsPriceTicker({ items }: { items: TickerItem[] }) {
           {repeated.map((item, index) => (
             <strong key={`${item.label}-${index}`}>
               {item.label}
-              <b>{item.value}</b>
+              <b className="num">{item.value}</b>
               <em className={item.tone}>{item.change}</em>
             </strong>
           ))}

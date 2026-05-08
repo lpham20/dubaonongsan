@@ -104,44 +104,44 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
           <ComposedChart data={rows} margin={{ top: 18, right: 16, left: 4, bottom: 4 }}>
             <defs>
               <linearGradient id="priceArea" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="#1a4d2e" stopOpacity={0.14} />
-                <stop offset="100%" stopColor="#1a4d2e" stopOpacity={0.025} />
+                <stop offset="0%" stopColor="#0d4b38" stopOpacity={0.2} />
+                <stop offset="100%" stopColor="#0d4b38" stopOpacity={0.02} />
               </linearGradient>
             </defs>
-            <CartesianGrid stroke="#eef2f4" strokeDasharray="0" vertical={false} />
+            <CartesianGrid stroke="#e8ece6" strokeDasharray="0" vertical={false} />
             <XAxis
               dataKey="dateKey"
               tickFormatter={formatDate}
               minTickGap={30}
-              axisLine={false}
+              axisLine={{ stroke: "#aab2a3" }}
               tickLine={false}
-              tick={{ fill: "#64748b", fontSize: 11, fontFamily: "Inter, sans-serif" }}
+              tick={{ fill: "#6b746a", fontSize: 11, fontFamily: "JetBrains Mono, monospace" }}
             />
             <YAxis
               yAxisId="price"
-              tickFormatter={(value) => `${Math.round(Number(value) / 1000)}k`}
+              tickFormatter={(value) => `${Math.round(Number(value) / 1000)}K`}
               orientation="right"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "#64748b", fontSize: 11, fontFamily: "Inter, sans-serif" }}
-              width={58}
+              tick={{ fill: "#6b746a", fontSize: 11, fontFamily: "JetBrains Mono, monospace" }}
+              width={56}
             />
             <YAxis yAxisId="rain" hide />
             <Tooltip
               labelFormatter={(label) => formatDate(String(label))}
               formatter={(value, name) => {
-                if (name === "rain") return [`${value} mm`, "Mưa"];
-                return [formatMoney(Number(value)), name === "forecast" ? "Dự báo" : "Giá"];
+                if (name === "Mưa (mm)") return [`${value} mm`, "Mưa"];
+                return [formatMoney(Number(value)), name === "Dự báo" ? "Dự báo" : "Giá"];
               }}
             />
             {showRain ? (
               <Bar
                 yAxisId="rain"
                 dataKey="rain"
-                fill="#a8d5b8"
-                opacity={0.36}
-                radius={[4, 4, 0, 0]}
-                name="rain"
+                fill="#7c5b36"
+                opacity={0.2}
+                radius={[0, 0, 0, 0]}
+                name="Mưa (mm)"
               />
             ) : null}
             {showPrice ? (
@@ -149,13 +149,13 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
                 yAxisId="price"
                 type="monotone"
                 dataKey="price"
-                stroke="#1a4d2e"
-                strokeWidth={1.7}
+                stroke="#0d4b38"
+                strokeWidth={1.5}
                 fill="url(#priceArea)"
                 dot={false}
-                activeDot={{ r: 4, fill: "#1a4d2e", stroke: "#fff", strokeWidth: 2 }}
+                activeDot={{ r: 4, fill: "#0d4b38", stroke: "#fff", strokeWidth: 2 }}
                 connectNulls
-                name="price"
+                name="Giá"
               />
             ) : null}
             {showForecast ? (
@@ -163,12 +163,12 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
                 yAxisId="price"
                 type="monotone"
                 dataKey="forecast"
-                stroke="#c47a2c"
-                strokeDasharray="5 5"
-                strokeWidth={1.7}
+                stroke="#d7a93b"
+                strokeDasharray="4 4"
+                strokeWidth={1.5}
                 dot={false}
                 connectNulls
-                name="forecast"
+                name="Dự báo"
               />
             ) : null}
             {showSignals

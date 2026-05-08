@@ -18,6 +18,7 @@ import "./styles/forecast.css";
 import "./styles/header.css";
 import "./styles/production.css";
 import "./styles/responsive.css";
+import "./styles/finance-terminal.css";
 
 if (import.meta.env.PROD) {
   registerSW({

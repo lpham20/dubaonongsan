@@ -36,7 +36,7 @@ function IntelligencePanelsComponent({
           <BadgeCheck size={18} />
           <h3>Độ tin cậy dữ liệu</h3>
         </div>
-        <div className="quality-score">{quality?.score ?? "-"}<span>/100</span></div>
+        <div className="quality-score num">{quality?.score ?? "-"}<span>/100</span></div>
         <p>{quality?.note ?? "Đang tính chất lượng dữ liệu."}</p>
         <div className="quality-tags">
           <span>{quality?.source_count ?? 0} nguồn</span>
@@ -111,8 +111,8 @@ function IntelligencePanelsComponent({
           {heatmap.slice(0, 10).map((cell) => (
             <div className="heatmap-row" key={`${cell.region_id}-${cell.province}`}>
               <span>{cell.province ?? cell.region}</span>
-              <strong>{money(cell.avg_price_vnd)}</strong>
-              <em className={cell.change_pct >= 0 ? "positive" : "negative"}>
+              <strong className="num">{money(cell.avg_price_vnd)}</strong>
+              <em className={cell.change_pct >= 0 ? "positive num" : "negative num"}>
                 {cell.change_pct >= 0 ? "+" : ""}
                 {cell.change_pct}%
               </em>
@@ -151,7 +151,7 @@ function MoverList({ rows, positive = false }: { rows: Mover[]; positive?: boole
             <strong>{row.province ?? row.region}</strong>
             <span>{row.variety}</span>
           </div>
-          <em className={positive ? "positive" : "negative"}>
+          <em className={positive ? "positive num" : "negative num"}>
             {row.change_pct >= 0 ? "+" : ""}
             {row.change_pct}%
           </em>

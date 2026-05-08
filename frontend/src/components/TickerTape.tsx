@@ -26,7 +26,7 @@ function TickerTapeComponent({ points }: Props) {
           {repeated.map((item, index) => (
             <span key={`${item.label}-${index}`}>
               <strong>{item.label}</strong>
-              <b>{item.value}</b>
+              <b className="num">{item.value}</b>
               <em className={item.tone}>{item.change}</em>
             </span>
           ))}

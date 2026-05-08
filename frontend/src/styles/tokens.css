@@ -1,56 +1,182 @@
-@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&family=Inter:wght@400;600;800&display=swap");
+/* ============================================================
+   DESIGN SYSTEM - Agricultural Finance Terminal
+
+   Colors preserve the agricultural green identity.
+   Typography, spacing, radii and borders are tightened for a
+   financial terminal feel.
+   ============================================================ */
 
 :root {
-  color: #1c2925;
-  background: #eef4ec;
-  font-family:
-    "Be Vietnam Pro", "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
   --accent: #167052;
   --accent-deep: #0d4b38;
+  --accent-darker: #08321f;
   --accent-soft: #d9efe4;
+  --accent-50: #f0f8f3;
+
   --harvest: #d7a93b;
+  --harvest-soft: #fff1d6;
   --sky: #a9d6df;
   --soil: #7c5b36;
   --paper: #fffdf8;
   --line: #cddbd1;
   --muted: #5a6b64;
-  --font-garamond: "Be Vietnam Pro", "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-ui: "Be Vietnam Pro", "Inter", ui-sans-serif, system-ui, sans-serif;
-  --color-bg: #f5f7f2;
-  --color-bg-band: #eef4ec;
-  --color-surface: #fffef9;
-  --color-surface-muted: #f7faf4;
-  --color-text: #17231e;
-  --color-text-soft: #42534b;
-  --color-text-muted: #68786f;
-  --color-muted: #68786f;
-  --color-border: rgba(39, 73, 57, 0.14);
-  --color-border-strong: rgba(39, 73, 57, 0.22);
-  --radius-xs: 4px;
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 10px;
-  --shadow-sm: 0 1px 2px rgba(31, 49, 39, 0.06);
-  --shadow-md: 0 8px 22px rgba(31, 49, 39, 0.08);
-  --shadow-popover: 0 18px 42px rgba(31, 49, 39, 0.16);
+
+  --ink-black: #0a0e0c;
+  --ink-black-2: #11161a;
+  --ink-deep-green: #062618;
+  --ink-line: rgba(255, 255, 255, 0.1);
+  --ink-line-strong: rgba(255, 255, 255, 0.18);
+  --ink-text-bright: #ffffff;
+  --ink-text-soft: rgba(255, 255, 255, 0.78);
+  --ink-text-muted: rgba(255, 255, 255, 0.52);
+
+  --up: #157a4a;
+  --up-bright: #4ade80;
+  --up-bg: #d4f3e3;
+  --down: #b91c1c;
+  --down-bright: #f87171;
+  --down-bg: #fee2e2;
+  --flat: #525252;
+  --flat-bg: #f1f5f4;
+
+  --gray-0: #ffffff;
+  --gray-25: #fafbfa;
+  --gray-50: #f4f6f3;
+  --gray-100: #e8ece6;
+  --gray-200: #d3d8d0;
+  --gray-300: #aab2a3;
+  --gray-400: #6b746a;
+  --gray-500: #4a534a;
+  --gray-700: #1f2a23;
+  --gray-900: #0b110c;
+
+  --color-bg: var(--gray-25);
+  --color-bg-band: var(--gray-50);
+  --color-surface: var(--gray-0);
+  --color-surface-muted: var(--gray-50);
+  --color-text: var(--gray-700);
+  --color-text-soft: var(--gray-500);
+  --color-text-muted: var(--gray-400);
+  --color-muted: var(--gray-400);
+  --color-border: var(--gray-200);
+  --color-border-strong: var(--gray-300);
+
+  --font-sans: "Inter", "Be Vietnam Pro", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-vi: "Be Vietnam Pro", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-garamond: var(--font-vi);
+  --font-ui: var(--font-vi);
+
+  --type-label: 12px;
+  --type-data: 14px;
+  --type-body: 15px;
+  --type-h3: 18px;
+  --type-h2: 22px;
+  --type-h1: 32px;
+  --type-h1-mobile: 24px;
+  --type-display: 56px;
+  --type-display-mobile: 36px;
+
+  --text-xs: var(--type-label);
+  --text-sm: var(--type-data);
+  --text-md: var(--type-body);
+  --text-lg: var(--type-h3);
+  --text-xl: var(--type-h2);
+  --text-2xl: var(--type-h1);
+  --text-3xl: var(--type-display);
+
+  --lh-tight: 1.05;
+  --lh-snug: 1.2;
+  --lh-normal: 1.45;
+  --lh-loose: 1.65;
+
+  --fw-regular: 400;
+  --fw-medium: 600;
+  --fw-bold: 700;
+  --fw-black: 800;
+
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
-  --text-xs: 12px;
-  --text-sm: 14px;
-  --text-md: 16px;
-  --text-lg: 18px;
-  --text-xl: 22px;
-  --text-2xl: 28px;
-  --text-3xl: 36px;
+  --space-5: 20px;
+  --space-6: 28px;
+  --space-7: 40px;
+  --space-8: 56px;
+
+  --radius-none: 0;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 6px;
+  --radius-pill: 999px;
+
+  --border-thin: 1px solid var(--color-border);
+  --border-strong: 1px solid var(--color-border-strong);
+  --border-data: 1px solid var(--gray-100);
+  --border-emphasis: 2px solid var(--gray-900);
+  --border-accent: 2px solid var(--accent-deep);
+
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-popover: 0 8px 24px rgba(11, 17, 12, 0.12);
+  --shadow-modal: 0 20px 50px rgba(11, 17, 12, 0.2);
+
+  --shell-max-width: 1440px;
+  --shell-pad-mobile: 12px;
+  --shell-pad-desktop: 24px;
+  --header-height-desktop: 56px;
+  --header-height-mobile: 56px;
+  --ticker-height: 32px;
+
   --bp-sm: 480px;
   --bp-md: 768px;
   --bp-lg: 1024px;
   --bp-xl: 1280px;
+
+  color: var(--color-text);
+  background: var(--color-bg);
+  font-family: var(--font-vi);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "tnum" 1;
 }
 
+.forecast-shell {
+  --color-bg: var(--ink-black);
+  --color-bg-band: var(--ink-black-2);
+  --color-surface: #131918;
+  --color-surface-muted: #181f1d;
+  --color-text: #ecf2ee;
+  --color-text-soft: #b6c0bb;
+  --color-text-muted: #8a958f;
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-border-strong: rgba(255, 255, 255, 0.18);
+  --gray-100: rgba(255, 255, 255, 0.08);
+  --gray-200: rgba(255, 255, 255, 0.1);
+  --gray-300: rgba(255, 255, 255, 0.18);
+  --up-bg: rgba(21, 122, 74, 0.18);
+  --down-bg: rgba(185, 28, 28, 0.18);
+  --flat-bg: rgba(82, 82, 82, 0.22);
+  --paper: #131918;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums slashed-zero;
+  font-feature-settings: "tnum" 1, "zero" 1;
+  letter-spacing: -0.01em;
+}

@@ -727,8 +727,8 @@ function RoutedApp() {
                 <span>VND/kg</span>
               </div>
               <div className="quote-price-row">
-                <strong>{latestPrice.toLocaleString("vi-VN")}</strong>
-                <span className={quoteChangePct >= 0 ? "quote-change positive" : "quote-change negative"}>
+                <strong className="num">{latestPrice.toLocaleString("vi-VN")}</strong>
+                <span className={quoteChangePct >= 0 ? "quote-change positive num" : "quote-change negative num"}>
                   {quoteChangePct >= 0 ? "+" : ""}
                   {quoteChangePct.toFixed(2)}%
                 </span>
@@ -753,11 +753,11 @@ function RoutedApp() {
               </button>
               <div className="quote-range">
                 <span>Khung dữ liệu</span>
-                <strong>{days} ngày</strong>
+                <strong className="num">{days} ngày</strong>
               </div>
               <div className="quote-range">
                 <span>Giá mới nhất</span>
-                <strong>{latestPrice.toLocaleString("vi-VN")}</strong>
+                <strong className="num">{latestPrice.toLocaleString("vi-VN")}</strong>
               </div>
             </div>
           </header>
@@ -800,7 +800,7 @@ function RoutedApp() {
             <div className="market-status">
               <Database size={18} />
               <span>Giá mới nhất</span>
-              <strong>{latestPrice.toLocaleString("vi-VN")} VND/kg</strong>
+              <strong className="num">{latestPrice.toLocaleString("vi-VN")} VND/kg</strong>
             </div>
           </section>
         </>

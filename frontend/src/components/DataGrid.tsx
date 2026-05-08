@@ -31,13 +31,13 @@ function DataGridComponent({ points }: Props) {
           <tbody>
             {rows.map((row) => (
               <tr key={`${row.timestamp}-${row.quality_grade}-${row.variety}-${row.province ?? row.region}`}>
-                <td>{new Date(row.timestamp).toLocaleDateString("vi-VN")}</td>
+                <td className="num">{new Date(row.timestamp).toLocaleDateString("vi-VN")}</td>
                 <td>{row.province ?? row.region}</td>
                 <td>{row.variety}</td>
                 <td>{row.quality_grade}</td>
-                <td>{row.min_price_vnd?.toLocaleString("vi-VN")}</td>
-                <td>{row.max_price_vnd?.toLocaleString("vi-VN")}</td>
-                <td>{row.volume_traded_tons}</td>
+                <td className="num">{row.min_price_vnd?.toLocaleString("vi-VN")}</td>
+                <td className="num">{row.max_price_vnd?.toLocaleString("vi-VN")}</td>
+                <td className="num">{row.volume_traded_tons}</td>
               </tr>
             ))}
           </tbody>
@@ -48,7 +48,7 @@ function DataGridComponent({ points }: Props) {
           <article key={`mobile-${row.timestamp}-${row.quality_grade}-${row.variety}-${row.province ?? row.region}`}>
             <div>
               <strong>{row.variety}</strong>
-              <span>{new Date(row.timestamp).toLocaleDateString("vi-VN")}</span>
+              <span className="num">{new Date(row.timestamp).toLocaleDateString("vi-VN")}</span>
             </div>
             <dl>
               <div>
@@ -61,11 +61,11 @@ function DataGridComponent({ points }: Props) {
               </div>
               <div>
                 <dt>Thấp nhất</dt>
-                <dd>{row.min_price_vnd?.toLocaleString("vi-VN")}</dd>
+                <dd className="num">{row.min_price_vnd?.toLocaleString("vi-VN")}</dd>
               </div>
               <div>
                 <dt>Cao nhất</dt>
-                <dd>{row.max_price_vnd?.toLocaleString("vi-VN")}</dd>
+                <dd className="num">{row.max_price_vnd?.toLocaleString("vi-VN")}</dd>
               </div>
             </dl>
           </article>
