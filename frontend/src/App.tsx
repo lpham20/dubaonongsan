@@ -498,6 +498,10 @@ function RoutedApp() {
     if (!first || !last) return 0;
     return ((last - first) / first) * 100;
   }, [visibleHistorical]);
+  const hasRainData = useMemo(
+    () => visibleHistorical.some((point) => typeof point.precipitation_mm === "number" && point.precipitation_mm > 0),
+    [visibleHistorical]
+  );
   const freshnessDays = quality?.freshness_days ?? null;
   const freshnessLabel = useMemo(() => {
     if (freshnessDays == null) return null;
@@ -521,6 +525,7 @@ function RoutedApp() {
   const watchKey = `${crop}|${regionId}|${varietyId}|${selectedRegion?.province ?? selectedRegion?.region_name ?? "Vùng"} - ${selectedVariety?.name ?? "Giống"}`;
 
   function toggleLayer(key: keyof typeof layers) {
+    if (key === "rain" && !hasRainData) return;
     setLayers((current) => ({ ...current, [key]: !current[key] }));
   }
 
@@ -866,7 +871,15 @@ function RoutedApp() {
                 <div className="layer-toggles">
                   <button type="button" className={layers.price ? "active" : ""} onClick={() => toggleLayer("price")}>Giá</button>
                   <button type="button" className={layers.forecast ? "active" : ""} onClick={() => toggleLayer("forecast")}>Dự báo</button>
-                  <button type="button" className={layers.rain ? "active" : ""} onClick={() => toggleLayer("rain")}>Mưa</button>
+                  <button
+                    type="button"
+                    className={layers.rain && hasRainData ? "active" : ""}
+                    onClick={() => toggleLayer("rain")}
+                    disabled={!hasRainData}
+                    title={hasRainData ? undefined : "Chưa có dữ liệu lượng mưa cho khoảng thời gian này"}
+                  >
+                    Mưa
+                  </button>
                   <button type="button" className={layers.signals ? "active" : ""} onClick={() => toggleLayer("signals")}>Cảnh báo</button>
                 </div>
                 <button type="button" className="pin-button" onClick={() => void addWatchlist()}>
@@ -880,7 +893,7 @@ function RoutedApp() {
                 signals={signals}
                 showPrice={layers.price}
                 showForecast={layers.forecast}
-                showRain={layers.rain}
+                showRain={layers.rain && hasRainData}
                 showSignals={layers.signals}
               />
               <IntelligencePanels

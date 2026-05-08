@@ -16,7 +16,7 @@
   align-items: stretch;
   height: var(--ticker-height);
   margin: 0 calc(-1 * var(--shell-pad-desktop));
-  padding: 0;
+  padding: 0 var(--shell-pad-desktop);
   overflow: hidden;
   color: var(--ink-text-bright);
   background: var(--ink-black);
@@ -30,7 +30,8 @@
   flex: 0 0 auto;
   align-items: center;
   gap: 6px;
-  padding: 0 14px;
+  margin-left: calc(-1 * var(--shell-pad-desktop));
+  padding: 0 14px 0 calc(var(--shell-pad-desktop) + 4px);
   color: var(--ink-text-bright);
   background: var(--accent-deep);
   font-family: var(--font-sans);
@@ -430,6 +431,19 @@
   background: var(--accent);
 }
 
+.forecast-shell .layer-toggles button:disabled {
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.legend-disabled {
+  color: var(--color-text-muted);
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
 .forecast-shell .pin-button {
   display: inline-flex;
   align-items: center;
@@ -803,7 +817,13 @@
     height: auto;
     min-height: var(--ticker-height);
     margin: 0 calc(-1 * var(--shell-pad-mobile));
+    padding: 0 var(--shell-pad-mobile);
     flex-direction: column;
+  }
+
+  .forecast-shell .ticker-label {
+    margin-left: calc(-1 * var(--shell-pad-mobile));
+    padding: 0 12px 0 calc(var(--shell-pad-mobile) + 4px);
   }
 
   .forecast-shell .ticker-content {

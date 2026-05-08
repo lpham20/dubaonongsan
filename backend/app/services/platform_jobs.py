@@ -78,6 +78,22 @@ class PlatformJobService:
                 self._finish_job(job, "lỗi", None, str(exc))
                 raise
 
+    def run_weather(self) -> dict:
+        with job_lock("weather"):
+            job = self._start_job("weather")
+            try:
+                from app.ingestion.weather import populate_precipitation
+
+                summary = populate_precipitation(self.db, days_back=90)
+                invalidate_cache()
+                self._finish_job(job, "thÃ nh cÃ´ng", summary)
+                return summary
+            except Exception as exc:
+                self.db.rollback()
+                job = self.db.get(PlatformJobRun, job.job_id) or job
+                self._finish_job(job, "lá»—i", None, str(exc))
+                raise
+
     def run_data_quality(self) -> dict:
         with job_lock("data_quality_check"):
             job = self._start_job("data_quality_check")
@@ -280,6 +296,15 @@ class JobScheduler:
         )
         cls._scheduler.add_job(
             cls._run_with_session,
+            "cron",
+            hour=4,
+            minute=0,
+            args=["weather"],
+            id="weather_daily_0400",
+            replace_existing=True,
+        )
+        cls._scheduler.add_job(
+            cls._run_with_session,
             "interval",
             minutes=settings.retrain_interval_minutes,
             args=["retrain"],
@@ -308,6 +333,8 @@ class JobScheduler:
                     service.run_data_quality()
                 elif job == "retrain":
                     service.run_retrain()
+                elif job == "weather":
+                    service.run_weather()
             except Exception:
                 logger.exception("Scheduled job %s failed", job)
 

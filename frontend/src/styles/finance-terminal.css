@@ -291,7 +291,7 @@ h5 {
   height: var(--ticker-height);
   min-height: var(--ticker-height);
   margin: 0 calc(-1 * var(--shell-pad-desktop));
-  padding: 0;
+  padding: 0 var(--shell-pad-desktop);
   background: var(--ink-black);
   color: var(--ink-text-bright);
   border: 0;
@@ -312,7 +312,8 @@ h5 {
   gap: 6px;
   flex: 0 0 auto;
   height: 100%;
-  padding: 0 14px;
+  margin-left: calc(-1 * var(--shell-pad-desktop));
+  padding: 0 14px 0 calc(var(--shell-pad-desktop) + 4px);
   background: var(--accent-deep);
   color: var(--ink-text-bright);
   font-family: var(--font-sans);
@@ -939,6 +940,12 @@ h5 {
   opacity: 0.6;
 }
 
+.legend-disabled {
+  color: var(--color-text-muted);
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
 .signal-chip {
   display: inline-flex;
   align-items: center;
@@ -1436,6 +1443,7 @@ h5 {
     height: auto;
     min-height: var(--ticker-height);
     margin: 0 calc(-1 * var(--shell-pad-mobile));
+    padding: 0 var(--shell-pad-mobile);
     flex-direction: column;
     align-items: stretch;
   }
@@ -1445,7 +1453,8 @@ h5 {
   .news-price-ticker > span {
     width: 100%;
     height: 22px;
-    padding: 0 12px;
+    margin-left: calc(-1 * var(--shell-pad-mobile));
+    padding: 0 12px 0 calc(var(--shell-pad-mobile) + 4px);
   }
 
   .ticker-content,
@@ -1524,7 +1533,11 @@ h5 {
   }
 
   .home-market-hero h1 {
-    font-size: 30px;
+    font-size: clamp(24px, 7vw, 32px);
+  }
+
+  .home-hero-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .site-footer {

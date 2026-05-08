@@ -23,7 +23,7 @@
   align-items: stretch;
   height: var(--ticker-height);
   margin: 0 calc(-1 * var(--shell-pad-desktop));
-  padding: 0;
+  padding: 0 var(--shell-pad-desktop);
   overflow: hidden;
   color: var(--ink-text-bright);
   background: var(--ink-black);
@@ -37,7 +37,8 @@
   flex: 0 0 auto;
   align-items: center;
   gap: 6px;
-  padding: 0 14px;
+  margin-left: calc(-1 * var(--shell-pad-desktop));
+  padding: 0 14px 0 calc(var(--shell-pad-desktop) + 4px);
   color: var(--ink-text-bright);
   background: var(--accent-deep);
   font-family: var(--font-sans);
@@ -912,12 +913,15 @@
     height: auto;
     min-height: var(--ticker-height);
     margin: 0 calc(-1 * var(--shell-pad-mobile));
+    padding: 0 var(--shell-pad-mobile);
     flex-direction: column;
   }
 
   .news-price-ticker > span {
     width: 100%;
     height: 22px;
+    margin-left: calc(-1 * var(--shell-pad-mobile));
+    padding: 0 12px 0 calc(var(--shell-pad-mobile) + 4px);
   }
 
   .news-price-ticker > div > div {

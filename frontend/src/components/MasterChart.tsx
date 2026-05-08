@@ -139,6 +139,7 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
 
   const maxRain = Math.max(0, ...rows.map((row) => row.rain ?? 0));
   const rainDomain: [number, number] = [0, Math.max(50, Math.ceil(maxRain * 1.4))];
+  const hasRainData = rows.some((row) => typeof row.rain === "number" && row.rain > 0);
 
   return (
     <section className="chart-section">
@@ -154,8 +155,12 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
           <span className="legend-forecast" style={{ "--legend-color": colors.forecastLine } as CSSProperties}>
             Dự báo
           </span>
-          <span className="legend-rain" style={{ "--legend-color": colors.rainBar } as CSSProperties}>
-            Mưa
+          <span
+            className={`legend-rain ${hasRainData ? "" : "legend-disabled"}`}
+            style={{ "--legend-color": colors.rainBar } as CSSProperties}
+            title={hasRainData ? undefined : "Chưa có dữ liệu lượng mưa"}
+          >
+            Mưa{hasRainData ? "" : " (chưa có dữ liệu)"}
           </span>
         </div>
       </div>

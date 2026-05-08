@@ -63,6 +63,14 @@ def run_news_scrape_job(
     return PlatformJobService(db).run_news_scrape()
 
 
+@router.post("/platform/jobs/weather")
+def run_weather_job(
+    _: AppUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> dict:
+    return PlatformJobService(db).run_weather()
+
+
 @router.post("/platform/jobs/retrain")
 def run_retrain_job(
     _: AppUser = Depends(require_admin),
