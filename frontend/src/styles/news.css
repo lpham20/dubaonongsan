@@ -929,6 +929,10 @@
     animation: none !important;
   }
 
+  .news-price-ticker > div > div > *:nth-child(n + 4) {
+    display: none !important;
+  }
+
   .news-price-ticker > div > div > * {
     display: flex !important;
     justify-content: space-between;
