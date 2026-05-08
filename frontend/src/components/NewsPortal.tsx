@@ -72,13 +72,6 @@ type TickerItem = {
 
 type PriceNewsCrop = Exclude<NewsView, "latest">;
 
-const NEWS_VIEWS: { value: NewsView; label: string; note: string }[] = [
-  { value: "latest", label: "Tin tức mới nhất", note: "Bản tin thị trường" },
-  { value: "sau_rieng", label: "Giá Sầu riêng", note: "Bảng giá hôm nay" },
-  { value: "ca_phe", label: "Giá Cà phê", note: "Bảng giá hôm nay" },
-  { value: "ho_tieu", label: "Giá Hồ tiêu", note: "Bảng giá hôm nay" }
-];
-
 const PRICE_VIEW_META: Record<PriceNewsCrop, { title: string; cropName: string; forecastLabel: string }> = {
   sau_rieng: {
     title: "Giá sầu riêng",
@@ -317,20 +310,6 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
           ) : null}
         </div>
       ) : null}
-
-      <nav className="news-view-tabs" aria-label="Chọn chuyên mục tin tức">
-        {NEWS_VIEWS.map((view) => (
-          <button
-            type="button"
-            key={view.value}
-            className={activeView === view.value ? "active" : ""}
-            onClick={() => onViewChange(view.value)}
-          >
-            <strong>{view.label}</strong>
-            <span>{view.note}</span>
-          </button>
-        ))}
-      </nav>
 
       {activePriceCrop ? (
         <PriceBoardSection

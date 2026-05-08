@@ -102,6 +102,7 @@
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 360px;
+  align-items: start;
   gap: 34px;
   min-height: 560px;
   overflow: hidden;
@@ -133,9 +134,13 @@
 
 .home-hero-copy {
   display: grid;
-  align-content: center;
-  gap: 22px;
+  align-content: start;
+  gap: var(--space-3);
   max-width: 850px;
+}
+
+.home-hero-copy .home-kicker {
+  margin-bottom: var(--space-1);
 }
 
 .home-kicker {
@@ -159,11 +164,11 @@
   max-width: 880px;
   margin: 0;
   color: #ffffff;
-  font-family: "Inter", "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(46px, 5.2vw, 78px);
-  font-weight: 850;
-  line-height: 1.02;
-  letter-spacing: 0;
+  font-family: var(--font-sans);
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: var(--fw-black);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.02em;
 }
 
 .home-market-hero p {
@@ -657,4 +662,3 @@
     grid-template-columns: 1fr;
   }
 }
-

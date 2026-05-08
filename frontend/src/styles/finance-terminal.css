@@ -73,7 +73,6 @@ h5 {
 .watchlist button,
 .topic-filter button,
 .sort-segment button,
-.news-view-tabs button,
 .market-subnav button,
 .home-hero-actions button,
 .story-label,
@@ -922,21 +921,22 @@ h5 {
 .legend > span::before {
   content: "";
   display: inline-block;
-  width: 12px;
+  width: 14px;
   height: 2px;
-}
-
-.legend-price::before {
-  background: #0d4b38;
+  background: var(--legend-color, currentColor);
 }
 
 .legend-forecast::before {
-  background: #d7a93b;
+  height: 0;
+  border-top: 2px dashed var(--legend-color, currentColor);
+  background: transparent;
 }
 
 .legend-rain::before {
-  background: #7c5b36;
-  opacity: 0.5;
+  width: 8px;
+  height: 8px;
+  background: var(--legend-color, currentColor);
+  opacity: 0.6;
 }
 
 .signal-chip {
@@ -1104,25 +1104,7 @@ h5 {
 /* News */
 .news-portal,
 .finance-news-page {
-  margin-top: var(--space-4);
-}
-
-.news-view-tabs {
-  gap: 1px;
-  background: var(--color-border);
-  border: 1px solid var(--color-border);
-}
-
-.news-view-tabs button {
-  border: 0;
-  border-radius: 0;
-  background: var(--color-surface);
-  box-shadow: none;
-}
-
-.news-view-tabs button.active {
-  background: var(--accent-deep);
-  color: #ffffff;
+  margin-top: 0;
 }
 
 .news-row,
@@ -1543,18 +1525,6 @@ h5 {
 
   .home-market-hero h1 {
     font-size: 30px;
-  }
-
-  .news-view-tabs {
-    display: flex !important;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-  }
-
-  .news-view-tabs button {
-    flex: 0 0 auto;
-    min-width: 150px;
-    scroll-snap-align: start;
   }
 
   .site-footer {

@@ -310,7 +310,6 @@ body.mobile-drawer-locked {
   .export-actions,
   .layer-toggles,
   .segmented,
-  .news-view-tabs,
   .plant-strip,
   .guide-filter-tabs {
     overflow-x: auto;
@@ -323,7 +322,6 @@ body.mobile-drawer-locked {
   .export-actions a,
   .layer-toggles button,
   .segmented button,
-  .news-view-tabs button,
   .plant-strip button,
   .guide-filter-tabs button {
     flex: 0 0 auto;
@@ -733,20 +731,6 @@ body.mobile-drawer-locked {
     text-align: left;
   }
 
-  .news-view-tabs {
-    display: flex !important;
-    grid-template-columns: none !important;
-    overflow-x: auto;
-    margin-inline: -12px;
-    padding-inline: 12px;
-    scroll-snap-type: x mandatory;
-  }
-
-  .news-view-tabs button {
-    flex: 0 0 auto;
-    min-width: 140px;
-    scroll-snap-align: start;
-  }
 }
 
 @media (max-width: 480px) {

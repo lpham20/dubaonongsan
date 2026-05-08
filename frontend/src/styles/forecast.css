@@ -606,6 +606,80 @@
   border-color: var(--harvest);
 }
 
+.forecast-shell .quality-tags span,
+.forecast-shell .risk-flags span,
+.forecast-shell .watchlist button,
+.forecast-shell .watchlist span {
+  color: var(--ink-text-bright);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.forecast-shell .risk-flags span {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+  border-color: rgba(251, 191, 36, 0.4);
+}
+
+.forecast-shell .mover-row,
+.forecast-shell .heatmap-row,
+.forecast-shell .gainer-list,
+.forecast-shell .alert-list {
+  color: var(--color-text);
+}
+
+.forecast-shell .mover-row strong,
+.forecast-shell .heatmap-row strong,
+.forecast-shell .alert-row strong,
+.forecast-shell .driver-row strong,
+.forecast-shell .compare-row strong {
+  color: var(--color-text);
+  font-weight: var(--fw-bold);
+}
+
+.forecast-shell .mover-row span,
+.forecast-shell .heatmap-row span:not(.chip),
+.forecast-shell .alert-row span:not(.chip),
+.forecast-shell .driver-row span:not(.chip),
+.forecast-shell .compare-row span:not(.chip) {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.forecast-shell .positive,
+.forecast-shell em.up,
+.forecast-shell .mover-row em.up {
+  color: var(--up-bright);
+  font-weight: var(--fw-bold);
+}
+
+.forecast-shell .negative,
+.forecast-shell em.down,
+.forecast-shell .mover-row em.down {
+  color: var(--down-bright);
+  font-weight: var(--fw-bold);
+}
+
+.forecast-shell .watchlist-empty,
+.forecast-shell .intel-panel p:empty + p,
+.forecast-shell .intel-panel .empty {
+  color: var(--color-text-muted);
+}
+
+.forecast-shell .action-button,
+.forecast-shell .intel-panel button:not(.watchlist button) {
+  padding: 6px 12px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-xs);
+  color: #fff;
+  background: var(--accent);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: var(--fw-black);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .forecast-shell .data-section {
   margin-top: var(--space-4);
 }

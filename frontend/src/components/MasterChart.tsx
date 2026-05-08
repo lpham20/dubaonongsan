@@ -10,7 +10,7 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { memo } from "react";
+import { memo, useEffect, useState, type CSSProperties } from "react";
 import { TriangleAlert } from "./icons";
 import type { ForecastPoint, PricePoint, TradingSignal } from "../lib/api";
 
@@ -47,6 +47,25 @@ const formatMoney = (value?: number) => (value ? `${Math.round(value).toLocaleSt
 const average = (values: number[]) =>
   values.length ? values.reduce((total, value) => total + value, 0) / values.length : undefined;
 
+function useDarkChart(): boolean {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsDark(Boolean(document.querySelector(".forecast-shell")));
+    check();
+    const observer = new MutationObserver(check);
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"],
+      childList: true,
+      subtree: true
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  return isDark;
+}
+
 function pickDailyPoint(points: PricePoint[]) {
   return (
     points.find((point) => point.quality_grade?.toUpperCase().includes("A") && !point.is_synthetic) ??
@@ -57,6 +76,38 @@ function pickDailyPoint(points: PricePoint[]) {
 }
 
 function MasterChartComponent({ historical, forecast, signals, showPrice, showForecast, showRain, showSignals }: Props) {
+  const isDark = useDarkChart();
+
+  const colors = isDark
+    ? {
+        grid: "rgba(255,255,255,0.06)",
+        axisLine: "rgba(255,255,255,0.18)",
+        tickFill: "#b6c0bb",
+        priceLine: "#4ade80",
+        priceArea: "#4ade80",
+        forecastLine: "#fbbf24",
+        rainBar: "#60a5fa",
+        signal: "#f87171",
+        signalText: "#fca5a5",
+        tooltipBg: "#181f1d",
+        tooltipText: "#ecf2ee",
+        tooltipBorder: "rgba(255,255,255,0.18)"
+      }
+    : {
+        grid: "#e8ece6",
+        axisLine: "#aab2a3",
+        tickFill: "#6b746a",
+        priceLine: "#0d4b38",
+        priceArea: "#0d4b38",
+        forecastLine: "#c4690b",
+        rainBar: "#1d4ed8",
+        signal: "#b91c1c",
+        signalText: "#7f1d1d",
+        tooltipBg: "#fffdf8",
+        tooltipText: "#1f2a23",
+        tooltipBorder: "#d3d8d0"
+      };
+
   const signalByDate = new Map(signals.map((signal) => [toDateKey(signal.timestamp), signal.price_vnd]));
   const historicalByDate = historical.reduce((groups, point) => {
     const dateKey = toDateKey(point.timestamp);
@@ -86,17 +137,26 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
     }))
   ];
 
+  const maxRain = Math.max(0, ...rows.map((row) => row.rain ?? 0));
+  const rainDomain: [number, number] = [0, Math.max(50, Math.ceil(maxRain * 1.4))];
+
   return (
     <section className="chart-section">
       <div className="section-heading">
         <div>
           <h2>Diễn biến giá và dự báo</h2>
-          <p>Giá lịch sử, đường dự báo và tín hiệu cảnh báo theo bộ lọc đang chọn.</p>
+          <p>Giá lịch sử, đường dự báo và lượng mưa theo bộ lọc đang chọn.</p>
         </div>
         <div className="legend">
-          <span className="legend-price">Giá</span>
-          <span className="legend-forecast">Dự báo</span>
-          <span className="legend-rain">Mưa</span>
+          <span className="legend-price" style={{ "--legend-color": colors.priceLine } as CSSProperties}>
+            Giá
+          </span>
+          <span className="legend-forecast" style={{ "--legend-color": colors.forecastLine } as CSSProperties}>
+            Dự báo
+          </span>
+          <span className="legend-rain" style={{ "--legend-color": colors.rainBar } as CSSProperties}>
+            Mưa
+          </span>
         </div>
       </div>
       <div className="chart-wrap">
@@ -104,18 +164,18 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
           <ComposedChart data={rows} margin={{ top: 18, right: 16, left: 4, bottom: 4 }}>
             <defs>
               <linearGradient id="priceArea" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="#0d4b38" stopOpacity={0.2} />
-                <stop offset="100%" stopColor="#0d4b38" stopOpacity={0.02} />
+                <stop offset="0%" stopColor={colors.priceArea} stopOpacity={isDark ? 0.3 : 0.2} />
+                <stop offset="100%" stopColor={colors.priceArea} stopOpacity={0.02} />
               </linearGradient>
             </defs>
-            <CartesianGrid stroke="#e8ece6" strokeDasharray="0" vertical={false} />
+            <CartesianGrid stroke={colors.grid} strokeDasharray="0" vertical={false} />
             <XAxis
               dataKey="dateKey"
               tickFormatter={formatDate}
               minTickGap={30}
-              axisLine={{ stroke: "#aab2a3" }}
+              axisLine={{ stroke: colors.axisLine }}
               tickLine={false}
-              tick={{ fill: "#6b746a", fontSize: 11, fontFamily: "JetBrains Mono, monospace" }}
+              tick={{ fill: colors.tickFill, fontSize: 11, fontFamily: "JetBrains Mono, monospace" }}
             />
             <YAxis
               yAxisId="price"
@@ -123,12 +183,23 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
               orientation="right"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "#6b746a", fontSize: 11, fontFamily: "JetBrains Mono, monospace" }}
+              tick={{ fill: colors.tickFill, fontSize: 11, fontFamily: "JetBrains Mono, monospace" }}
               width={56}
             />
-            <YAxis yAxisId="rain" hide />
+            <YAxis yAxisId="rain" orientation="left" domain={rainDomain} hide />
             <Tooltip
               labelFormatter={(label) => formatDate(String(label))}
+              contentStyle={{
+                background: colors.tooltipBg,
+                border: `1px solid ${colors.tooltipBorder}`,
+                borderRadius: 2,
+                color: colors.tooltipText,
+                fontFamily: "Inter, sans-serif",
+                fontSize: 12,
+                padding: "8px 12px"
+              }}
+              labelStyle={{ color: colors.tooltipText, fontWeight: 700, marginBottom: 4 }}
+              itemStyle={{ color: colors.tooltipText }}
               formatter={(value, name) => {
                 if (name === "Mưa (mm)") return [`${value} mm`, "Mưa"];
                 return [formatMoney(Number(value)), name === "Dự báo" ? "Dự báo" : "Giá"];
@@ -138,9 +209,9 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
               <Bar
                 yAxisId="rain"
                 dataKey="rain"
-                fill="#7c5b36"
-                opacity={0.2}
-                radius={[0, 0, 0, 0]}
+                fill={colors.rainBar}
+                opacity={isDark ? 0.55 : 0.35}
+                radius={[2, 2, 0, 0]}
                 name="Mưa (mm)"
               />
             ) : null}
@@ -149,11 +220,11 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
                 yAxisId="price"
                 type="monotone"
                 dataKey="price"
-                stroke="#0d4b38"
-                strokeWidth={1.5}
+                stroke={colors.priceLine}
+                strokeWidth={2}
                 fill="url(#priceArea)"
                 dot={false}
-                activeDot={{ r: 4, fill: "#0d4b38", stroke: "#fff", strokeWidth: 2 }}
+                activeDot={{ r: 4, fill: colors.priceLine, stroke: colors.tooltipBg, strokeWidth: 2 }}
                 connectNulls
                 name="Giá"
               />
@@ -163,9 +234,9 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
                 yAxisId="price"
                 type="monotone"
                 dataKey="forecast"
-                stroke="#d7a93b"
+                stroke={colors.forecastLine}
                 strokeDasharray="4 4"
-                strokeWidth={1.5}
+                strokeWidth={2}
                 dot={false}
                 connectNulls
                 name="Dự báo"
@@ -181,10 +252,16 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
                       x={row.dateKey}
                       y={row.signalPrice}
                       r={6}
-                      fill="#c43d3d"
-                      stroke="#fff"
+                      fill={colors.signal}
+                      stroke={colors.tooltipBg}
                       strokeWidth={2}
-                      label={{ value: "Bán", position: "top", fill: "#8f1d1d", fontSize: 11, fontWeight: 700 }}
+                      label={{
+                        value: "Bán",
+                        position: "top",
+                        fill: colors.signalText,
+                        fontSize: 11,
+                        fontWeight: 700
+                      }}
                     />
                   ))
               : null}
