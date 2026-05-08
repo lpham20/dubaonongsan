@@ -87,7 +87,14 @@ def _asset_tags() -> str:
     if not index_html_path.exists():
         return ""
     index_html = index_html_path.read_text(encoding="utf-8")
-    tags = re.findall(r"<(?:script|link)\b[^>]*(?:/assets/|modulepreload)[^>]*>", index_html)
+    tags = [
+        line.strip()
+        for line in index_html.splitlines()
+        if (
+            ("<script" in line or "<link" in line)
+            and ("/assets/" in line or 'rel="modulepreload"' in line)
+        )
+    ]
     return "\n  ".join(dict.fromkeys(tags))
 
 
