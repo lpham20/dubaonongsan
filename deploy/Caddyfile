@@ -15,6 +15,17 @@
 {$FRONTEND_DOMAIN} {
 	encode zstd gzip
 
+	handle /sitemap.xml {
+		rewrite * /api/v1/sitemap.xml
+		reverse_proxy api:8010 {
+			header_up X-Real-IP {remote_host}
+			header_up X-Forwarded-For {remote_host}
+			header_up X-Forwarded-Proto {scheme}
+		}
+		header Cache-Control "public, max-age=300, must-revalidate"
+		header X-Robots-Tag "index, follow"
+	}
+
 	handle /api/* {
 		reverse_proxy api:8010 {
 			header_up X-Real-IP {remote_host}
