@@ -5,9 +5,9 @@ import hmac
 from datetime import UTC, datetime, timedelta
 
 import bcrypt
+import jwt
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
@@ -69,7 +69,7 @@ def decode_access_token(token: str) -> dict:
             algorithms=[JWT_ALGORITHM],
             issuer=JWT_ISSUER,
         )
-    except JWTError as exc:
+    except jwt.PyJWTError as exc:
         raise HTTPException(status_code=401, detail="Token không hợp lệ") from exc
 
 

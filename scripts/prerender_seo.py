@@ -114,8 +114,19 @@ def _schema_block(schema: dict | list[dict] | None) -> str:
         return ""
     schemas = schema if isinstance(schema, list) else [schema]
     return "\n  ".join(
-        f'<script type="application/ld+json">{json.dumps(item, ensure_ascii=False)}</script>'
+        f'<script type="application/ld+json">{_json_ld(item)}</script>'
         for item in schemas
+    )
+
+
+def _json_ld(value: object) -> str:
+    return (
+        json.dumps(value, ensure_ascii=False)
+        .replace("<", "\\u003c")
+        .replace(">", "\\u003e")
+        .replace("&", "\\u0026")
+        .replace("\u2028", "\\u2028")
+        .replace("\u2029", "\\u2029")
     )
 
 
@@ -127,6 +138,7 @@ def _page(
     schema: dict | list[dict] | None = None,
     published_at: str | None = None,
     news_keywords: str | None = None,
+    og_type: str = "article",
 ) -> str:
     escaped_title = html.escape(title)
     escaped_description = html.escape(description[:180])
@@ -161,7 +173,7 @@ def _page(
   <link rel="canonical" href="{canonical}" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="manifest" href="/manifest.webmanifest" />
-  <meta property="og:type" content="article" />
+  <meta property="og:type" content="{html.escape(og_type)}" />
   <meta property="og:locale" content="vi_VN" />
   <meta property="og:site_name" content="{SITE_NAME}" />
   <meta property="og:title" content="{escaped_title}" />
@@ -316,6 +328,71 @@ def render_static_pages() -> list[tuple[str, str | None]]:
     }
     urls: list[tuple[str, str | None]] = []
     today = datetime.utcnow().date().isoformat()
+    landing_pages = [
+        (
+            "home.html",
+            f"{SITE_BASE}/",
+            "Dự báo nông sản - Dự báo giá nông sản Việt Nam",
+            "Theo dõi giá sầu riêng, cà phê, hồ tiêu, lúa và dự báo 30 ngày theo vùng trồng tại Việt Nam.",
+            "Dự báo giá nông sản Việt Nam",
+        ),
+        (
+            "news.html",
+            f"{SITE_BASE}/tin-tuc",
+            "Tin tức thị trường nông sản, phân bón và chính sách mới nhất",
+            "Bản tin nông nghiệp mới nhất về giá nông sản, phân bón, vật tư, xuất khẩu và chính sách thị trường.",
+            "Tin tức thị trường nông sản",
+        ),
+        (
+            "guides.html",
+            f"{SITE_BASE}/huong-dan",
+            "Cẩm nang kỹ thuật canh tác nông sản",
+            "Thư viện hướng dẫn kỹ thuật trồng, chăm sóc, xử lý sâu bệnh và quản lý vườn cho nông dân Việt Nam.",
+            "Cẩm nang kỹ thuật canh tác",
+        ),
+        (
+            "fertilizer.html",
+            f"{SITE_BASE}/khuyen-nghi-bon-phan",
+            "Khuyến nghị bón phân N-P-K theo cây trồng",
+            "Công cụ tham khảo nhu cầu N-P-K, chia lịch bón phân và cảnh báo an toàn theo cây trồng, tuổi cây và năng suất mục tiêu.",
+            "Khuyến nghị bón phân",
+        ),
+    ]
+    for filename, canonical, title, desc, heading in landing_pages:
+        schema: dict | list[dict] = {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": title,
+            "description": desc,
+            "url": canonical,
+            "isPartOf": {"@type": "WebSite", "name": SITE_NAME, "url": SITE_BASE},
+            "inLanguage": "vi",
+        }
+        if canonical == f"{SITE_BASE}/":
+            schema = [
+                {
+                    "@context": "https://schema.org",
+                    "@type": "Organization",
+                    "name": SITE_NAME,
+                    "url": SITE_BASE,
+                    "logo": f"{SITE_BASE}/og-cover.jpg",
+                },
+                {
+                    "@context": "https://schema.org",
+                    "@type": "WebSite",
+                    "name": SITE_NAME,
+                    "url": SITE_BASE,
+                    "potentialAction": {
+                        "@type": "SearchAction",
+                        "target": f"{SITE_BASE}/tin-tuc?q={{search_term_string}}",
+                        "query-input": "required name=search_term_string",
+                    },
+                },
+            ]
+        body = f"<main><h1>{html.escape(heading)}</h1><p>{html.escape(desc)}</p></main>"
+        _write(OUTPUT / filename, _page(title, desc, canonical, body, schema, og_type="website"))
+        urls.append((canonical, today))
+
     for crop, label in crops.items():
         canonical = f"{SITE_BASE}/du-bao-gia/{crop}"
         title = f"Giá {label} hôm nay & dự báo 30 ngày"
@@ -457,7 +534,13 @@ def write_sitemap(urls: list[tuple[str, str | None]]) -> None:
         (f"{SITE_BASE}/tin-tuc/category/ho-tieu", today),
         (f"{SITE_BASE}/tin-tuc/category/phan-bon-vat-tu", today),
     ]
-    all_urls = static_urls + urls
+    all_urls = []
+    seen: set[str] = set()
+    for loc, lastmod in static_urls + urls:
+        if loc in seen:
+            continue
+        seen.add(loc)
+        all_urls.append((loc, lastmod))
     lines = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for loc, lastmod in all_urls:
         lines.append("  <url>")

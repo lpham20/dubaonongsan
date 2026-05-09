@@ -1,4 +1,5 @@
 import { useInsertionEffect } from "react";
+import { safeJsonLd } from "../lib/jsonLd";
 import { canonicalUrl, compactText, DEFAULT_OG_IMAGE, SITE_NAME } from "../lib/seo";
 
 type Props = {
@@ -65,7 +66,7 @@ export function SeoHead({
         <script
           key={index}
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
         />
       ))}
     </>

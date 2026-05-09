@@ -15,6 +15,16 @@
 {$FRONTEND_DOMAIN} {
 	encode zstd gzip
 
+	header {
+		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+		Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://api.dubaonongsan.com https://www.google-analytics.com https://region1.google-analytics.com; manifest-src 'self'; worker-src 'self' blob:; upgrade-insecure-requests"
+		-Server
+	}
+
 	handle /sitemap.xml {
 		rewrite * /api/v1/sitemap.xml
 		reverse_proxy api:8010 {
@@ -42,6 +52,26 @@
 
 	handle {
 		root * /var/www/frontend
+
+		@seoHome {
+			path /
+		}
+		rewrite @seoHome /seo/home.html
+
+		@seoNewsIndex {
+			path /tin-tuc
+		}
+		rewrite @seoNewsIndex /seo/news.html
+
+		@seoGuidesIndex {
+			path /huong-dan
+		}
+		rewrite @seoGuidesIndex /seo/guides.html
+
+		@seoFertilizer {
+			path /khuyen-nghi-bon-phan
+		}
+		rewrite @seoFertilizer /seo/fertilizer.html
 
 		@seoNewsViews path_regexp seoNewsViews ^/tin-tuc/(gia-sau-rieng|gia-ca-phe|gia-ho-tieu)$
 		rewrite @seoNewsViews /seo/news-views/{re.seoNewsViews.1}.html
@@ -75,13 +105,6 @@
 		}
 		header @images Cache-Control "public, max-age=604800"
 
-		header {
-			Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
-			X-Content-Type-Options "nosniff"
-			Referrer-Policy "strict-origin-when-cross-origin"
-			-Server
-		}
-
 		try_files {path} /index.html
 		file_server
 	}
@@ -93,6 +116,11 @@
 	request_body {
 		max_size 5MB
 	}
+
+	@apiDocs {
+		path /docs /redoc /openapi.json
+	}
+	respond @apiDocs 404
 
 	reverse_proxy api:8010 {
 		header_up X-Real-IP {remote_host}

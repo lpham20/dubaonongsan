@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { safeJsonLd } from "../lib/jsonLd";
 import { canonicalUrl } from "../lib/seo";
 
 type Item = {
@@ -29,7 +30,7 @@ export function Breadcrumb({ items }: { items: Item[] }) {
           ))}
         </ol>
       </nav>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }} />
     </>
   );
 }

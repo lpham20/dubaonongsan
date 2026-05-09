@@ -12,6 +12,7 @@ from sqlalchemy import desc, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.config import get_settings
 from app.models import GuidePost, NewsArticle
 
 
@@ -410,6 +411,8 @@ Tối thiểu cần có ngày, lô, thao tác, vật tư, liều lượng, nhân
         self.seed_hainong_guides()
 
     def seed_hainong_guides(self) -> None:
+        if get_settings().database_url == "sqlite:///:memory:":
+            return
         if self.db.scalar(select(GuidePost).where(GuidePost.slug.like("hainong-%"))):
             return
         try:
