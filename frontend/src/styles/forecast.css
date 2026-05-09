@@ -479,6 +479,10 @@
   background: var(--color-surface);
 }
 
+.forecast-shell .chart-wrap .recharts-wrapper {
+  touch-action: pan-y;
+}
+
 .forecast-shell .chart-section .section-heading {
   display: flex;
   align-items: flex-start;
@@ -852,6 +856,17 @@
   .forecast-shell .chart-heading-tools {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .forecast-shell .chart-zoom-controls {
+    width: 100%;
+  }
+
+  .forecast-shell .chart-zoom-controls button {
+    flex: 1 1 0;
+    height: 36px;
+    min-width: 0;
+    font-size: 13px;
   }
 
   .forecast-shell .intel-grid {

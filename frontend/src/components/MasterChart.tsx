@@ -57,14 +57,30 @@ function useDarkChart(): boolean {
     const observer = new MutationObserver(check);
     observer.observe(document.body, {
       attributes: true,
-      attributeFilter: ["class"],
-      childList: true,
-      subtree: true
+      attributeFilter: ["class"]
     });
     return () => observer.disconnect();
   }, []);
 
   return isDark;
+}
+
+function useCoarsePointer(): boolean {
+  const [isCoarse, setIsCoarse] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(pointer: coarse), (max-width: 860px)");
+    const update = () => setIsCoarse(mediaQuery.matches);
+    update();
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", update);
+      return () => mediaQuery.removeEventListener("change", update);
+    }
+    mediaQuery.addListener(update);
+    return () => mediaQuery.removeListener(update);
+  }, []);
+
+  return isCoarse;
 }
 
 function pickDailyPoint(points: PricePoint[]) {
@@ -78,6 +94,7 @@ function pickDailyPoint(points: PricePoint[]) {
 
 function MasterChartComponent({ historical, forecast, signals, showPrice, showForecast, showRain, showSignals }: Props) {
   const isDark = useDarkChart();
+  const isCoarsePointer = useCoarsePointer();
   const [zoomRange, setZoomRange] = useState<{ startIndex: number; endIndex: number } | null>(null);
 
   const colors = isDark
@@ -148,13 +165,21 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
   const defaultZoomRange = { startIndex: Math.max(0, fullEndIndex - 119), endIndex: fullEndIndex };
   const activeZoomRange = clampZoomRange(zoomRange ?? defaultZoomRange, fullEndIndex);
   const canZoom = rows.length > 14;
+  const showBrush = canZoom && !isCoarsePointer;
 
   useEffect(() => {
     setZoomRange(null);
   }, [rows.length]);
 
   function updateZoom(nextRange: { startIndex: number; endIndex: number }) {
-    setZoomRange(clampZoomRange(nextRange, fullEndIndex));
+    const clamped = clampZoomRange(nextRange, fullEndIndex);
+    setZoomRange((current) => {
+      const previous = clampZoomRange(current ?? defaultZoomRange, fullEndIndex);
+      if (previous.startIndex === clamped.startIndex && previous.endIndex === clamped.endIndex) {
+        return current;
+      }
+      return clamped;
+    });
   }
 
   function zoomBy(factor: number) {
@@ -182,21 +207,21 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
           <p>Giá lịch sử, đường dự báo và lượng mưa theo bộ lọc đang chọn.</p>
         </div>
         <div className="chart-heading-tools">
-        <div className="legend">
-          <span className="legend-price" style={{ "--legend-color": colors.priceLine } as CSSProperties}>
-            Giá
-          </span>
-          <span className="legend-forecast" style={{ "--legend-color": colors.forecastLine } as CSSProperties}>
-            Dự báo
-          </span>
-          <span
-            className={`legend-rain ${hasRainData ? "" : "legend-disabled"}`}
-            style={{ "--legend-color": colors.rainBar } as CSSProperties}
-            title={hasRainData ? undefined : "Chưa có dữ liệu lượng mưa"}
-          >
-            Mưa{hasRainData ? "" : " (chưa có dữ liệu)"}
-          </span>
-        </div>
+          <div className="legend">
+            <span className="legend-price" style={{ "--legend-color": colors.priceLine } as CSSProperties}>
+              Giá
+            </span>
+            <span className="legend-forecast" style={{ "--legend-color": colors.forecastLine } as CSSProperties}>
+              Dự báo
+            </span>
+            <span
+              className={`legend-rain ${hasRainData ? "" : "legend-disabled"}`}
+              style={{ "--legend-color": colors.rainBar } as CSSProperties}
+              title={hasRainData ? undefined : "Chưa có dữ liệu lượng mưa"}
+            >
+              Mưa{hasRainData ? "" : " (chưa có dữ liệu)"}
+            </span>
+          </div>
           {canZoom ? (
             <div className="chart-zoom-controls" aria-label="Điều khiển thu phóng biểu đồ">
               <button type="button" onClick={() => zoomBy(0.58)} aria-label="Phóng to biểu đồ">
@@ -214,7 +239,7 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
       </div>
       <div className="chart-wrap">
         <ResponsiveContainer width="100%" height={430}>
-          <ComposedChart data={rows} margin={{ top: 18, right: 16, left: 4, bottom: 4 }}>
+          <ComposedChart data={rows} margin={{ top: 18, right: 16, left: 4, bottom: showBrush ? 4 : 0 }}>
             <defs>
               <linearGradient id="priceArea" x1="0" x2="0" y1="0" y2="1">
                 <stop offset="0%" stopColor={colors.priceArea} stopOpacity={isDark ? 0.3 : 0.2} />
@@ -318,7 +343,7 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
                     />
                   ))
               : null}
-            {canZoom ? (
+            {showBrush ? (
               <Brush
                 dataKey="dateKey"
                 height={28}
@@ -328,7 +353,7 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
                 tickFormatter={formatDate}
                 stroke={colors.priceLine}
                 fill={isDark ? "#111918" : "#f4f6f3"}
-                gap={4}
+                gap={8}
                 onChange={(nextRange) => {
                   if (typeof nextRange?.startIndex === "number" && typeof nextRange.endIndex === "number") {
                     updateZoom({ startIndex: nextRange.startIndex, endIndex: nextRange.endIndex });
