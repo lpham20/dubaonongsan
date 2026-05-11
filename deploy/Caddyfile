@@ -15,6 +15,9 @@
 {$FRONTEND_DOMAIN} {
 	encode zstd gzip
 
+	@wwwHost host www.dubaonongsan.com
+	redir @wwwHost https://dubaonongsan.com{uri} permanent
+
 	header {
 		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
 		X-Content-Type-Options "nosniff"

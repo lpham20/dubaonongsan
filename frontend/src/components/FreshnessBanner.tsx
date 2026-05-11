@@ -7,6 +7,14 @@ type ScrapeHealth = {
   age_minutes?: number;
 };
 
+async function readHealthResponse(res: Response) {
+  const contentType = res.headers.get("content-type") ?? "";
+  if (!contentType.toLowerCase().includes("application/json")) {
+    throw new Error("Invalid health response");
+  }
+  return res.json();
+}
+
 export function FreshnessBanner() {
   const [health, setHealth] = useState<ScrapeHealth | null>(null);
 
@@ -17,7 +25,7 @@ export function FreshnessBanner() {
       try {
         const apiBase = import.meta.env.VITE_API_BASE_URL || "https://api.dubaonongsan.com";
         const res = await fetch(`${apiBase}/api/v1/health/scrape`);
-        const body = await res.json();
+        const body = await readHealthResponse(res);
         if (cancelled) return;
         setHealth(
           res.ok

@@ -320,7 +320,8 @@ export type FertilizerRecommendation = {
 
 const DEFAULT_API_BASE_URL = import.meta.env.PROD ? "https://api.dubaonongsan.com" : "";
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? DEFAULT_API_BASE_URL).replace(/\/$/, "");
-const jsonHeaders = { "Content-Type": "application/json" };
+const jsonHeaders = { Accept: "application/json", "Content-Type": "application/json" };
+const GET_RETRY_DELAY_MS = 450;
 
 function apiUrl(path: string) {
   if (/^https?:\/\//i.test(path)) return path;
@@ -331,20 +332,108 @@ function authHeaders(token?: string) {
   return token ? { ...jsonHeaders, Authorization: `Bearer ${token}` } : jsonHeaders;
 }
 
-async function getJson<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(apiUrl(url), { headers: jsonHeaders, signal });
-  if (!response.ok) {
-    throw new Error(`${response.status} ${response.statusText}`);
+class ApiRequestError extends Error {
+  status?: number;
+  transient: boolean;
+
+  constructor(message: string, options: { status?: number; transient?: boolean } = {}) {
+    super(message);
+    this.name = "ApiRequestError";
+    this.status = options.status;
+    this.transient = Boolean(options.transient);
   }
-  return response.json() as Promise<T>;
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function mergedJsonHeaders(headers?: HeadersInit) {
+  const merged = new Headers(jsonHeaders);
+  if (headers) {
+    new Headers(headers).forEach((value, key) => merged.set(key, value));
+  }
+  return merged;
+}
+
+function isAbortError(error: unknown) {
+  return error instanceof DOMException && error.name === "AbortError";
+}
+
+function errorMessageFromPayload(payload: unknown, fallback: string) {
+  if (payload && typeof payload === "object" && "detail" in payload) {
+    const detail = (payload as { detail?: unknown }).detail;
+    if (Array.isArray(detail)) {
+      const first = detail[0] as { msg?: unknown } | undefined;
+      if (typeof first?.msg === "string") return first.msg;
+    }
+    if (typeof detail === "string") return detail;
+  }
+  return fallback;
+}
+
+async function parseJsonResponse<T>(response: Response): Promise<T> {
+  const contentType = response.headers.get("content-type") ?? "";
+  const expectsJson = contentType.toLowerCase().includes("application/json");
+  const fallback = `${response.status} ${response.statusText}`.trim();
+
+  if (!expectsJson) {
+    await response.text().catch(() => "");
+    throw new ApiRequestError(
+      response.ok
+        ? "Máy chủ trả về định dạng không hợp lệ. Vui lòng thử lại sau vài giây."
+        : `API tạm thời không khả dụng (${fallback}). Vui lòng thử lại sau vài giây.`,
+      { status: response.status, transient: response.ok || response.status >= 500 }
+    );
+  }
+
+  const payload = await response.json().catch(() => {
+    throw new ApiRequestError("Dữ liệu API không phải JSON hợp lệ. Vui lòng thử lại sau vài giây.", {
+      status: response.status,
+      transient: true
+    });
+  });
+
+  if (!response.ok) {
+    throw new ApiRequestError(errorMessageFromPayload(payload, fallback), {
+      status: response.status,
+      transient: response.status >= 500
+    });
+  }
+
+  return payload as T;
+}
+
+async function requestJson<T>(url: string, init: RequestInit = {}): Promise<T> {
+  const method = (init.method ?? "GET").toUpperCase();
+  const headers = mergedJsonHeaders(init.headers);
+  const attempts = method === "GET" ? 2 : 1;
+
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      const response = await fetch(apiUrl(url), { ...init, headers });
+      return await parseJsonResponse<T>(response);
+    } catch (error) {
+      const canRetry =
+        attempt < attempts &&
+        !isAbortError(error) &&
+        !(init.signal instanceof AbortSignal && init.signal.aborted) &&
+        (!(error instanceof ApiRequestError) || error.transient);
+
+      if (!canRetry) throw error;
+      await sleep(GET_RETRY_DELAY_MS);
+    }
+  }
+
+  throw new ApiRequestError("Không kết nối được API. Vui lòng thử lại sau vài giây.", { transient: true });
+}
+
+async function getJson<T>(url: string, signal?: AbortSignal): Promise<T> {
+  return requestJson<T>(url, { signal });
 }
 
 async function authJson<T>(url: string, token: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(apiUrl(url), { ...init, headers: authHeaders(token) });
-  if (!response.ok) {
-    throw new Error(`${response.status} ${response.statusText}`);
-  }
-  return response.json() as Promise<T>;
+  return requestJson<T>(url, { ...init, headers: authHeaders(token) });
 }
 
 export function fetchHistorical(
@@ -463,19 +552,9 @@ export function register(email: string, password: string, displayName?: string) 
 }
 
 function getAuth(url: string, payload: Record<string, string | undefined>) {
-  return fetch(apiUrl(url), {
+  return requestJson<AuthSession>(url, {
     method: "POST",
-    headers: jsonHeaders,
     body: JSON.stringify(payload)
-  }).then(async (response) => {
-    if (!response.ok) {
-      const payload = await response.json().catch(() => null);
-      const detail = Array.isArray(payload?.detail)
-        ? payload.detail[0]?.msg
-        : payload?.detail;
-      throw new Error(detail || `${response.status} ${response.statusText}`);
-    }
-    return response.json() as Promise<AuthSession>;
   });
 }
 
@@ -524,27 +603,16 @@ export function fetchGuideDetail(slug: string, signal?: AbortSignal) {
 }
 
 export function subscribeNewsletter(email: string) {
-  return fetch(apiUrl("/api/v1/content/subscribers"), {
+  return requestJson<Subscriber>("/api/v1/content/subscribers", {
     method: "POST",
-    headers: jsonHeaders,
     body: JSON.stringify({ email, source: "footer" })
-  }).then(async (response) => {
-    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-    return response.json() as Promise<Subscriber>;
   });
 }
 
 export function reportLocalPrice(payload: UserPriceReportPayload) {
-  return fetch(apiUrl("/api/v1/content/price-reports"), {
+  return requestJson<UserPriceReport>("/api/v1/content/price-reports", {
     method: "POST",
-    headers: jsonHeaders,
     body: JSON.stringify(payload)
-  }).then(async (response) => {
-    if (!response.ok) {
-      const errorPayload = await response.json().catch(() => null);
-      throw new Error(errorPayload?.detail || `${response.status} ${response.statusText}`);
-    }
-    return response.json() as Promise<UserPriceReport>;
   });
 }
 
@@ -556,16 +624,9 @@ export function fetchFertilizerCrops(signal?: AbortSignal) {
 }
 
 export function recommendFertilizer(payload: FertilizerRequest, signal?: AbortSignal) {
-  return fetch(apiUrl("/api/v1/fertilizer/recommend"), {
+  return requestJson<FertilizerRecommendation>("/api/v1/fertilizer/recommend", {
     method: "POST",
-    headers: jsonHeaders,
     signal,
     body: JSON.stringify(payload)
-  }).then(async (response) => {
-    if (!response.ok) {
-      const errorPayload = await response.json().catch(() => null);
-      throw new Error(errorPayload?.detail || `${response.status} ${response.statusText}`);
-    }
-    return response.json() as Promise<FertilizerRecommendation>;
   });
 }

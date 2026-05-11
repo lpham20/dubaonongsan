@@ -529,10 +529,6 @@ def write_sitemap(urls: list[tuple[str, str | None]]) -> None:
         (f"{SITE_BASE}/huong-dan", today),
         (f"{SITE_BASE}/khuyen-nghi-bon-phan", today),
         (f"{SITE_BASE}/khuyen-nghi-bon-phan/logic", today),
-        (f"{SITE_BASE}/tin-tuc/category/ca-phe", today),
-        (f"{SITE_BASE}/tin-tuc/category/sau-rieng", today),
-        (f"{SITE_BASE}/tin-tuc/category/ho-tieu", today),
-        (f"{SITE_BASE}/tin-tuc/category/phan-bon-vat-tu", today),
     ]
     all_urls = []
     seen: set[str] = set()

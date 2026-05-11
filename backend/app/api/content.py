@@ -196,9 +196,7 @@ def sitemap(db: Session = Depends(get_db)) -> Response:
         lastmod = guide.published_at.date().isoformat() if guide.published_at else None
         urls.append((f"{SITE_BASE}/huong-dan/{_public_guide_slug(guide.slug)}", "0.7", "monthly", lastmod))
 
-    articles = db.scalars(
-        select(NewsArticle).order_by(NewsArticle.published_at.desc().nullslast(), NewsArticle.scraped_at.desc()).limit(1000)
-    ).all()
+    articles = ContentPortalService(db).latest_news(limit=500)
     for article in articles:
         published = article.published_at or article.scraped_at
         lastmod = published.date().isoformat() if published else None
@@ -219,9 +217,7 @@ def sitemap(db: Session = Depends(get_db)) -> Response:
 
 @router.get("/rss/news.xml", include_in_schema=False)
 def news_rss(db: Session = Depends(get_db)) -> Response:
-    articles = db.scalars(
-        select(NewsArticle).order_by(NewsArticle.published_at.desc().nullslast(), NewsArticle.scraped_at.desc()).limit(50)
-    ).all()
+    articles = ContentPortalService(db).latest_news(limit=50)
     items = []
     for article in articles:
         published = article.published_at or article.scraped_at
