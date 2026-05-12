@@ -571,10 +571,12 @@
     display: grid;
     grid-template-columns: 1fr;
     gap: 0;
+    min-width: 0;
   }
 
   .finance-news-page .news-lead-stack {
     gap: 0;
+    min-width: 0;
   }
 
   .finance-news-page .news-lead {
@@ -586,6 +588,8 @@
     border-color: var(--mobile-hairline);
     border-radius: 0;
     background: #ffffff;
+    min-width: 0;
+    overflow-x: clip;
   }
 
   .finance-news-page .news-lead .news-thumb {
@@ -596,14 +600,18 @@
 
   .finance-news-page .news-lead-copy {
     gap: 8px;
+    min-width: 0;
   }
 
   .finance-news-page .news-lead-copy h2,
   .finance-news-page .news-lead-copy h3 {
-    font-size: clamp(27px, 7.8vw, 36px);
+    max-width: 100%;
+    min-width: 0;
+    font-size: clamp(24px, 7vw, 32px);
     line-height: 1.02;
     letter-spacing: -0.04em;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
+    white-space: normal !important;
   }
 
   .finance-news-page .news-lead-copy p {
@@ -644,6 +652,7 @@
     padding: 14px 0;
     border-bottom: 1px solid var(--mobile-hairline);
     background: transparent;
+    min-width: 0;
   }
 
   .finance-news-page .news-row-card > .news-thumb {
@@ -677,6 +686,10 @@
     font-size: 17px !important;
     line-height: 1.08;
     letter-spacing: -0.015em;
+    max-width: 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    white-space: normal !important;
   }
 
   .finance-news-page .news-row-card p,
