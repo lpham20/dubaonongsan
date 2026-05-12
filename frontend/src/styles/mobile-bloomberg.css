@@ -601,16 +601,20 @@
   .finance-news-page .news-lead-copy {
     gap: 8px;
     min-width: 0;
+    max-width: calc(100vw - var(--mobile-page-pad) - var(--mobile-page-pad-r));
+    padding-right: 2px;
+    box-sizing: border-box;
   }
 
   .finance-news-page .news-lead-copy h2,
   .finance-news-page .news-lead-copy h3 {
-    max-width: 100%;
+    max-width: calc(100vw - var(--mobile-page-pad) - var(--mobile-page-pad-r) - 2px);
     min-width: 0;
-    font-size: clamp(24px, 7vw, 32px);
-    line-height: 1.02;
-    letter-spacing: -0.04em;
+    font-size: clamp(22px, 6.2vw, 26px);
+    line-height: 1.06;
+    letter-spacing: -0.03em;
     overflow-wrap: anywhere;
+    word-break: break-word;
     white-space: normal !important;
   }
 
