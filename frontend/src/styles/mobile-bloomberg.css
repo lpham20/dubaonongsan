@@ -2955,4 +2955,29 @@
     grid-template-columns: 1fr !important;
     gap: 14px !important;
   }
+
+  .market-alert-panel .alert-list a {
+    margin: 0 !important;
+    padding: 14px 16px !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+  }
+
+  .market-alert-panel .alert-list span,
+  .market-alert-panel .alert-list strong,
+  .market-alert-panel .alert-list small {
+    display: block !important;
+    margin: 0 !important;
+  }
+
+  .market-alert-panel .alert-list strong {
+    line-height: 1.22 !important;
+    overflow-wrap: break-word !important;
+  }
+
+  .forecast-shell .chart-mobile-hint,
+  .chart-mobile-hint {
+    display: block !important;
+    max-width: 34ch;
+  }
 }

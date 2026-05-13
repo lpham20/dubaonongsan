@@ -517,6 +517,23 @@
   gap: var(--space-3);
 }
 
+.forecast-shell .chart-mobile-hint {
+  display: none;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: var(--fw-bold);
+  line-height: 1.35;
+}
+
+@media (max-width: 860px) {
+  .forecast-shell .chart-mobile-hint {
+    display: block !important;
+    max-width: 34ch;
+  }
+}
+
 .forecast-shell .chart-zoom-controls {
   display: inline-flex;
   overflow: hidden;

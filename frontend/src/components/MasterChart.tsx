@@ -162,14 +162,16 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
   const rainDomain: [number, number] = [0, Math.max(50, Math.ceil(maxRain * 1.4))];
   const hasRainData = rows.some((row) => typeof row.rain === "number" && row.rain > 0);
   const fullEndIndex = Math.max(rows.length - 1, 0);
-  const defaultZoomRange = { startIndex: Math.max(0, fullEndIndex - 119), endIndex: fullEndIndex };
+  const defaultVisiblePoints = isCoarsePointer ? 72 : 120;
+  const defaultZoomRange = { startIndex: Math.max(0, fullEndIndex - defaultVisiblePoints + 1), endIndex: fullEndIndex };
   const activeZoomRange = clampZoomRange(zoomRange ?? defaultZoomRange, fullEndIndex);
   const canZoom = rows.length > 14;
   const showBrush = canZoom && !isCoarsePointer;
+  const chartRows = showBrush || !canZoom ? rows : rows.slice(activeZoomRange.startIndex, activeZoomRange.endIndex + 1);
 
   useEffect(() => {
     setZoomRange(null);
-  }, [rows.length]);
+  }, [isCoarsePointer, rows.length]);
 
   function updateZoom(nextRange: { startIndex: number; endIndex: number }) {
     const clamped = clampZoomRange(nextRange, fullEndIndex);
@@ -235,11 +237,14 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
               </button>
             </div>
           ) : null}
+          {canZoom ? (
+            <small className="chart-mobile-hint">Dùng + / - để phóng gần hoặc thu ra, Tất cả để xem toàn bộ chuỗi.</small>
+          ) : null}
         </div>
       </div>
       <div className="chart-wrap">
         <ResponsiveContainer width="100%" height={430}>
-          <ComposedChart data={rows} margin={{ top: 18, right: 16, left: 4, bottom: showBrush ? 4 : 0 }}>
+          <ComposedChart data={chartRows} margin={{ top: 18, right: 16, left: 4, bottom: showBrush ? 4 : 0 }}>
             <defs>
               <linearGradient id="priceArea" x1="0" x2="0" y1="0" y2="1">
                 <stop offset="0%" stopColor={colors.priceArea} stopOpacity={isDark ? 0.3 : 0.2} />
@@ -321,7 +326,7 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
               />
             ) : null}
             {showSignals
-              ? rows
+              ? chartRows
                   .filter((row) => typeof row.signalPrice === "number")
                   .map((row) => (
                     <ReferenceDot
