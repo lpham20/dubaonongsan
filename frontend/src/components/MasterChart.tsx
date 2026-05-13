@@ -329,17 +329,21 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
                       yAxisId="price"
                       x={row.dateKey}
                       y={row.signalPrice}
-                      r={6}
+                      r={isCoarsePointer ? 4 : 6}
                       fill={colors.signal}
                       stroke={colors.tooltipBg}
                       strokeWidth={2}
-                      label={{
-                        value: "Bán",
-                        position: "top",
-                        fill: colors.signalText,
-                        fontSize: 11,
-                        fontWeight: 700
-                      }}
+                      label={
+                        isCoarsePointer
+                          ? undefined
+                          : {
+                              value: "Bán",
+                              position: "top",
+                              fill: colors.signalText,
+                              fontSize: 11,
+                              fontWeight: 700
+                            }
+                      }
                     />
                   ))
               : null}

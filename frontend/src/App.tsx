@@ -718,6 +718,8 @@ function RoutedApp() {
     }
   }
 
+  const showErrorBanner = Boolean(error && (section !== "methodology" || authOpen));
+
   return (
     <IconContext.Provider value={{ size: 18, weight: "regular", mirrored: false }}>
     <main className={section === "analytics" ? `app-shell forecast-shell crop-${crop}` : "app-shell"}>
@@ -862,7 +864,7 @@ function RoutedApp() {
         </>
       ) : null}
 
-      {error ? (
+      {showErrorBanner ? (
         <div className="error-banner" role="status" aria-live="polite">
           <div className="error-banner-copy">
             <strong>{safeErrorTitle(error)}</strong>
