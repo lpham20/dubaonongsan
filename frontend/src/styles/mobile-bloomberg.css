@@ -2204,3 +2204,381 @@
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
+
+/*
+   Mobile/tablet stabilization audit pass.
+   Keep this block last: it only affects <=1023px and corrects the earlier
+   prototype pass where mobile typography and masthead scale were too large.
+*/
+@media (max-width: 1023px) {
+  :root {
+    --mobile-page-pad: max(16px, env(safe-area-inset-left));
+    --mobile-page-pad-r: max(16px, env(safe-area-inset-right));
+    --mobile-topbar-height: 58px;
+    --mobile-market-height: 56px;
+  }
+
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .app-shell {
+    padding-right: var(--mobile-page-pad-r) !important;
+    padding-left: var(--mobile-page-pad) !important;
+  }
+
+  .app-shell > .menu-bar.mobile-menu-bar,
+  .mobile-menu-bar {
+    position: sticky !important;
+    top: 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 44px !important;
+    gap: 10px !important;
+    align-items: center !important;
+    min-height: var(--mobile-topbar-height) !important;
+    height: var(--mobile-topbar-height) !important;
+    padding: 7px var(--mobile-page-pad-r) 7px var(--mobile-page-pad) !important;
+    margin-right: calc(-1 * var(--mobile-page-pad-r)) !important;
+    margin-left: calc(-1 * var(--mobile-page-pad)) !important;
+    width: calc(100% + var(--mobile-page-pad) + var(--mobile-page-pad-r)) !important;
+    max-width: none !important;
+    overflow: hidden !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    color: var(--mobile-ink) !important;
+    border-bottom: 1px solid var(--mobile-line) !important;
+  }
+
+  .mobile-menu-bar .mobile-brand-button {
+    grid-column: 1 !important;
+    display: inline-flex !important;
+    justify-content: flex-start !important;
+    gap: 9px !important;
+    min-width: 0 !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .mobile-menu-bar .mobile-brand-button svg {
+    display: block !important;
+    width: 34px !important;
+    height: 34px !important;
+    flex: 0 0 34px !important;
+    padding: 7px !important;
+    border-radius: 10px !important;
+  }
+
+  .mobile-menu-bar .mobile-brand-button span {
+    display: block !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    font-size: clamp(14px, 4vw, 16px) !important;
+    font-weight: 850 !important;
+    line-height: 1.05 !important;
+    letter-spacing: -0.01em !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    text-transform: uppercase !important;
+  }
+
+  .mobile-menu-trigger {
+    position: static !important;
+    grid-column: 2 !important;
+    justify-self: end !important;
+    display: inline-grid !important;
+    place-items: center !important;
+    width: 44px !important;
+    min-width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+  }
+
+  .home-price-ticker,
+  .news-price-ticker,
+  .ticker,
+  .forecast-price-ticker,
+  .forecast-shell .ticker {
+    top: var(--mobile-topbar-height) !important;
+    min-height: var(--mobile-market-height) !important;
+    height: var(--mobile-market-height) !important;
+    margin-right: calc(-1 * var(--mobile-page-pad-r)) !important;
+    margin-left: calc(-1 * var(--mobile-page-pad)) !important;
+    width: calc(100% + var(--mobile-page-pad) + var(--mobile-page-pad-r)) !important;
+    max-width: none !important;
+    overflow: hidden !important;
+  }
+
+  .home-price-content,
+  .news-price-ticker > div > div,
+  .ticker-content,
+  .forecast-shell .ticker-content {
+    min-height: var(--mobile-market-height) !important;
+    height: var(--mobile-market-height) !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+  }
+
+  .home-price-content span,
+  .home-price-content span:nth-child(n + 3),
+  .home-price-content span:nth-child(n + 4),
+  .news-price-ticker strong,
+  .news-price-ticker strong:nth-child(n + 4),
+  .news-price-ticker > div > div > *:nth-child(n + 4),
+  .ticker-content > span,
+  .ticker-content span:nth-child(n + 3),
+  .ticker-content span:nth-child(n + 4),
+  .forecast-shell .ticker-content > span,
+  .forecast-shell .ticker-content span:nth-child(n + 4) {
+    flex-basis: min(70vw, 248px) !important;
+    width: min(70vw, 248px) !important;
+    min-height: 42px !important;
+    padding: 7px 10px !important;
+    border-radius: 12px !important;
+  }
+
+  .home-price-content strong,
+  .news-price-ticker strong,
+  .ticker-content span strong,
+  .forecast-shell .ticker-content strong {
+    font-size: 12px !important;
+  }
+
+  .home-price-content b,
+  .news-price-ticker b,
+  .ticker-content b,
+  .forecast-shell .ticker-content b,
+  .home-price-content em,
+  .news-price-ticker em,
+  .ticker-content em,
+  .forecast-shell .ticker-content em {
+    font-size: 11px !important;
+  }
+
+  .home-market-hero,
+  .finance-news-page .content-hero.news-hero,
+  .guide-workspace .content-hero.guide-hero,
+  .guide-workspace .content-hero.compact-guide-hero,
+  .fertilizer-hero {
+    overflow: visible !important;
+  }
+
+  .home-market-hero {
+    gap: 13px !important;
+    margin-top: 14px !important;
+    margin-bottom: 18px !important;
+    padding: 16px !important;
+    border-radius: 16px !important;
+  }
+
+  .home-hero-copy {
+    gap: 12px !important;
+  }
+
+  .home-kicker,
+  .home-hero-copy .home-kicker {
+    min-height: 28px !important;
+    padding: 4px 9px !important;
+    font-size: 11px !important;
+  }
+
+  .home-market-hero h1 {
+    max-width: 100% !important;
+    font-size: clamp(28px, 7.2vw, 34px) !important;
+    line-height: 1.08 !important;
+    letter-spacing: -0.015em !important;
+    overflow-wrap: break-word !important;
+    text-wrap: balance !important;
+  }
+
+  .home-market-hero p {
+    font-size: 15px !important;
+    line-height: 1.45 !important;
+  }
+
+  .home-quick-search {
+    gap: 8px !important;
+    padding: 12px !important;
+    border-radius: 16px !important;
+  }
+
+  .home-quick-search input {
+    min-height: 44px !important;
+    font-size: 15px !important;
+  }
+
+  .home-search-filter {
+    min-height: 44px !important;
+    border-radius: 12px !important;
+  }
+
+  .home-hero-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .home-hero-actions button {
+    min-height: 46px !important;
+    padding: 0 10px !important;
+    border-radius: 12px !important;
+    font-size: 13px !important;
+    line-height: 1.15 !important;
+  }
+
+  .finance-news-page .content-hero.news-hero,
+  .guide-workspace .content-hero.guide-hero,
+  .guide-workspace .content-hero.compact-guide-hero,
+  .fertilizer-hero {
+    margin-top: 14px !important;
+    margin-bottom: 16px !important;
+    padding: 16px !important;
+    border-radius: 16px !important;
+  }
+
+  .finance-news-page .content-hero.news-hero h1,
+  .guide-workspace .content-hero h1,
+  .detail-article header h1,
+  .guide-article-header h1,
+  .fertilizer-hero h1 {
+    max-width: 100% !important;
+    font-size: clamp(26px, 7vw, 34px) !important;
+    line-height: 1.08 !important;
+    letter-spacing: -0.015em !important;
+    overflow-wrap: break-word !important;
+    text-wrap: balance !important;
+  }
+
+  .detail-article header {
+    padding: 16px 0 14px !important;
+  }
+
+  .detail-article header p,
+  .fertilizer-hero p {
+    font-size: 16px !important;
+    line-height: 1.5 !important;
+  }
+
+  .detail-body p,
+  .detail-body li {
+    font-size: 16px !important;
+    line-height: 1.62 !important;
+  }
+
+  .detail-body h2 {
+    font-size: 22px !important;
+  }
+
+  .finance-news-page .news-side-stack,
+  .finance-news-page .news-digest-panel,
+  .finance-news-page .news-brief-panel,
+  .finance-news-page .market-watch-panel {
+    display: none !important;
+  }
+
+  .finance-news-page .news-row-card {
+    grid-template-columns: 104px minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .finance-news-page .news-row-card > .news-thumb {
+    width: 104px !important;
+    aspect-ratio: 4 / 3 !important;
+  }
+
+  .finance-news-page .news-row-card h3 {
+    font-size: 16px !important;
+    line-height: 1.16 !important;
+  }
+
+  .forecast-shell {
+    padding-right: var(--mobile-page-pad-r) !important;
+    padding-left: var(--mobile-page-pad) !important;
+  }
+
+  .forecast-shell .market-quote-header,
+  .market-quote-header {
+    margin-top: 14px !important;
+    padding: 16px !important;
+    border-radius: 16px !important;
+  }
+
+  .forecast-shell .market-quote-header h1,
+  .market-quote-header h1 {
+    max-width: 100% !important;
+    font-size: clamp(25px, 6.7vw, 32px) !important;
+    line-height: 1.08 !important;
+  }
+
+  .quote-price-row strong {
+    font-size: clamp(38px, 11vw, 52px) !important;
+  }
+
+  .chart-section,
+  .forecast-shell .chart-section {
+    border-radius: 16px !important;
+    overflow: hidden !important;
+  }
+
+  .chart-wrap {
+    min-height: 330px !important;
+  }
+}
+
+@media (max-width: 374px) {
+  .home-hero-actions {
+    grid-template-columns: 1fr !important;
+  }
+
+  .home-market-hero h1 {
+    font-size: 28px !important;
+  }
+
+  .finance-news-page .news-row-card {
+    grid-template-columns: 92px minmax(0, 1fr) !important;
+  }
+
+  .finance-news-page .news-row-card > .news-thumb {
+    width: 92px !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  :root {
+    --mobile-page-pad: 24px;
+    --mobile-page-pad-r: 24px;
+  }
+
+  .home-market-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.78fr) !important;
+    gap: 22px !important;
+    padding: 22px !important;
+  }
+
+  .home-market-hero h1 {
+    font-size: clamp(38px, 5.4vw, 46px) !important;
+  }
+
+  .home-hero-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .finance-news-page .news-side-stack,
+  .finance-news-page .news-digest-panel,
+  .finance-news-page .news-brief-panel,
+  .finance-news-page .market-watch-panel {
+    display: grid !important;
+  }
+
+  .finance-news-page .news-row-card {
+    grid-template-columns: 148px minmax(0, 1fr) !important;
+  }
+
+  .finance-news-page .news-row-card > .news-thumb {
+    width: 148px !important;
+  }
+}
