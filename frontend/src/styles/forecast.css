@@ -484,8 +484,38 @@
 }
 
 .forecast-shell .mobile-chart-frame {
+  position: relative;
+  display: grid;
+  gap: 8px;
   width: 100%;
   padding: 2px 0 0;
+}
+
+.forecast-shell .mobile-chart-readout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  color: var(--color-text-soft);
+  background: rgba(255, 255, 255, 0.04);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+}
+
+.forecast-shell .mobile-chart-readout strong,
+.forecast-shell .mobile-chart-readout span {
+  white-space: nowrap;
+}
+
+.forecast-shell .mobile-chart-readout strong {
+  color: var(--color-text);
+  font-family: var(--font-mono);
 }
 
 .forecast-shell .mobile-svg-chart {
@@ -493,6 +523,8 @@
   width: 100%;
   height: auto;
   min-height: 292px;
+  touch-action: pan-y;
+  user-select: none;
 }
 
 .forecast-shell .mobile-chart-label {
@@ -595,7 +627,74 @@
   background: var(--accent);
 }
 
+.forecast-shell .mobile-chart-range-controls {
+  display: none;
+}
+
+.forecast-shell .mobile-chart-pan-buttons {
+  display: inline-grid;
+  grid-template-columns: repeat(2, 36px);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+}
+
+.forecast-shell .mobile-chart-pan-buttons button {
+  height: 32px;
+  border: 0;
+  border-right: 1px solid var(--color-border);
+  color: var(--color-text);
+  background: var(--color-surface);
+  font-family: var(--font-mono);
+  font-size: 0;
+  font-weight: var(--fw-black);
+}
+
+.forecast-shell .mobile-chart-pan-buttons button::before {
+  font-size: 15px;
+}
+
+.forecast-shell .mobile-chart-pan-buttons button:first-child::before {
+  content: "<";
+}
+
+.forecast-shell .mobile-chart-pan-buttons button:last-child::before {
+  content: ">";
+}
+
+.forecast-shell .mobile-chart-pan-buttons button:last-child {
+  border-right: 0;
+}
+
+.forecast-shell .mobile-chart-range-controls label {
+  display: grid;
+  gap: 6px;
+  min-width: min(100%, 260px);
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.forecast-shell .mobile-chart-range-controls input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+@media (max-width: 860px) {
+  .forecast-shell .mobile-chart-range-controls {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+    width: 100%;
+  }
+}
+
 .forecast-shell .signal-chip {
+  position: static;
   display: inline-flex;
   align-items: center;
   gap: 4px;

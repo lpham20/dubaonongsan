@@ -11,7 +11,7 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { memo, useEffect, useMemo, useState, type CSSProperties } from "react";
+import { memo, useEffect, useMemo, useState, type CSSProperties, type PointerEvent } from "react";
 import { TriangleAlert } from "./icons";
 import type { ForecastPoint, PricePoint, TradingSignal } from "../lib/api";
 
@@ -185,6 +185,8 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
   const canZoom = rows.length > 14;
   const showBrush = canZoom && !isCoarsePointer;
   const chartRows = showBrush || !canZoom ? rows : rows.slice(activeZoomRange.startIndex, activeZoomRange.endIndex + 1);
+  const activeWindowLength = activeZoomRange.endIndex - activeZoomRange.startIndex + 1;
+  const maxWindowStart = Math.max(0, rows.length - activeWindowLength);
 
   useEffect(() => {
     setZoomRange(null);
@@ -213,6 +215,16 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
     const center = (activeZoomRange.startIndex + activeZoomRange.endIndex) / 2;
     const startIndex = Math.round(center - nextLength / 2);
     updateZoom({ startIndex, endIndex: startIndex + nextLength - 1 });
+  }
+
+  function panBy(steps: number) {
+    if (!canZoom) return;
+    updateZoom({ startIndex: activeZoomRange.startIndex + steps, endIndex: activeZoomRange.endIndex + steps });
+  }
+
+  function setWindowStart(startIndex: number) {
+    if (!canZoom) return;
+    updateZoom({ startIndex, endIndex: startIndex + activeWindowLength - 1 });
   }
 
   function resetZoom() {
@@ -257,6 +269,42 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
           ) : null}
           {canZoom ? (
             <small className="chart-mobile-hint">Dùng + / - để phóng gần hoặc thu ra, Tất cả để xem toàn bộ chuỗi.</small>
+          ) : null}
+          {canZoom && isCoarsePointer ? (
+            <div className="mobile-chart-range-controls">
+              <div className="mobile-chart-pan-buttons">
+                <button
+                  type="button"
+                  onClick={() => panBy(-Math.max(1, Math.round(activeWindowLength * 0.45)))}
+                  aria-label="Lùi về khoảng thời gian trước"
+                >
+                  {"<"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => panBy(Math.max(1, Math.round(activeWindowLength * 0.45)))}
+                  aria-label="Tiến tới khoảng thời gian sau"
+                >
+                  {">"}
+                </button>
+              </div>
+              <label>
+                <span>
+                  {rows[activeZoomRange.startIndex]?.dateKey ? formatDate(rows[activeZoomRange.startIndex].dateKey) : "-"} -{" "}
+                  {rows[activeZoomRange.endIndex]?.dateKey ? formatDate(rows[activeZoomRange.endIndex].dateKey) : "-"}
+                </span>
+                <input
+                  type="range"
+                  min={0}
+                  max={maxWindowStart}
+                  step={1}
+                  value={Math.min(activeZoomRange.startIndex, maxWindowStart)}
+                  onInput={(event) => setWindowStart(Number(event.currentTarget.value))}
+                  onChange={(event) => setWindowStart(Number(event.currentTarget.value))}
+                  aria-label="Chọn khoảng thời gian hiển thị trên biểu đồ"
+                />
+              </label>
+            </div>
           ) : null}
         </div>
       </div>
@@ -428,6 +476,11 @@ function MobileSvgChart({
   showRain: boolean;
   showSignals: boolean;
 }) {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  useEffect(() => {
+    setSelectedIndex(null);
+  }, [rows]);
+
   const width = 360;
   const height = 292;
   const plot = { left: 20, right: 46, top: 20, bottom: 34 };
@@ -452,6 +505,9 @@ function MobileSvgChart({
   const xFor = (index: number) =>
     plot.left + (rows.length <= 1 ? plotWidth : (index / (rows.length - 1)) * plotWidth);
   const yFor = (value: number) => plot.top + ((yMax - value) / (yMax - yMin)) * plotHeight;
+  const currentIndex = Math.min(selectedIndex ?? rows.length - 1, rows.length - 1);
+  const currentRow = rows[currentIndex];
+  const currentValue = currentRow?.price ?? currentRow?.forecast ?? currentRow?.signalPrice;
   const yTicks = [yMax, (yMax + yMin) / 2, yMin];
   const xTickIndexes = Array.from(new Set([0, Math.floor((rows.length - 1) / 2), rows.length - 1]));
 
@@ -476,9 +532,38 @@ function MobileSvgChart({
       ? `${pricePath}L${pricePoints[pricePoints.length - 1].x.toFixed(1)},${areaBaseline.toFixed(1)}L${pricePoints[0].x.toFixed(1)},${areaBaseline.toFixed(1)}Z`
       : "";
 
+  function selectFromClientX(clientX: number, element: SVGSVGElement) {
+    const rect = element.getBoundingClientRect();
+    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    setSelectedIndex(Math.round(ratio * (rows.length - 1)));
+  }
+
+  function selectFromPointer(event: PointerEvent<SVGSVGElement>) {
+    selectFromClientX(event.clientX, event.currentTarget);
+  }
+
   return (
     <div className="mobile-chart-frame" aria-label="Biểu đồ giá thu gọn cho điện thoại">
-      <svg className="mobile-svg-chart" viewBox={`0 0 ${width} ${height}`} role="img">
+      <div className="mobile-chart-readout">
+        <strong>{formatDate(currentRow.dateKey)}</strong>
+        {typeof currentRow.price === "number" ? <span>Giá {formatMoney(currentRow.price)}</span> : null}
+        {typeof currentRow.forecast === "number" ? <span>Dự báo {formatMoney(currentRow.forecast)}</span> : null}
+        {typeof currentRow.rain === "number" ? <span>Mưa {currentRow.rain.toFixed(1)} mm</span> : null}
+      </div>
+      <svg
+        className="mobile-svg-chart"
+        viewBox={`0 0 ${width} ${height}`}
+        role="img"
+        onPointerDown={selectFromPointer}
+        onPointerMove={(event) => {
+          if (event.buttons || event.pointerType === "touch") selectFromPointer(event);
+        }}
+        onClick={(event) => selectFromClientX(event.clientX, event.currentTarget)}
+        onTouchStart={(event) => {
+          const touch = event.touches.item(0);
+          if (touch) selectFromClientX(touch.clientX, event.currentTarget);
+        }}
+      >
         <defs>
           <linearGradient id="mobilePriceArea" x1="0" x2="0" y1="0" y2="1">
             <stop offset="0%" stopColor={colors.priceArea} stopOpacity="0.28" />
@@ -545,6 +630,27 @@ function MobileSvgChart({
               ) : null
             )
           : null}
+        {typeof currentValue === "number" ? (
+          <g className="mobile-chart-current">
+            <line
+              x1={xFor(currentIndex)}
+              x2={xFor(currentIndex)}
+              y1={plot.top}
+              y2={areaBaseline}
+              stroke={colors.axisLine}
+              strokeWidth="1"
+              strokeDasharray="3 4"
+            />
+            <circle
+              cx={xFor(currentIndex)}
+              cy={yFor(currentValue)}
+              r="4.4"
+              fill={colors.tooltipBg}
+              stroke={typeof currentRow.forecast === "number" && typeof currentRow.price !== "number" ? colors.forecastLine : colors.priceLine}
+              strokeWidth="2"
+            />
+          </g>
+        ) : null}
         <line
           x1={plot.left}
           x2={plot.left + plotWidth}
@@ -565,6 +671,14 @@ function MobileSvgChart({
             {formatDate(rows[index].dateKey)}
           </text>
         ))}
+        <rect
+          x={plot.left}
+          y={plot.top}
+          width={plotWidth}
+          height={plotHeight}
+          fill="transparent"
+          pointerEvents="all"
+        />
       </svg>
     </div>
   );
