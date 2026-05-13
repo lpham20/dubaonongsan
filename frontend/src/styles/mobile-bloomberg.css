@@ -2244,7 +2244,7 @@
     margin-left: calc(-1 * var(--mobile-page-pad)) !important;
     width: calc(100% + var(--mobile-page-pad) + var(--mobile-page-pad-r)) !important;
     max-width: none !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     background: rgba(255, 255, 255, 0.96) !important;
     color: var(--mobile-ink) !important;
     border-bottom: 1px solid var(--mobile-line) !important;
