@@ -2705,9 +2705,16 @@
 
   .quote-price-row strong {
     min-width: 0 !important;
-    font-size: clamp(42px, 14.5vw, 58px) !important;
-    line-height: 0.94 !important;
+    font-size: clamp(38px, 13vw, 52px) !important;
+    line-height: 0.98 !important;
     white-space: nowrap !important;
+  }
+
+  .quote-price-row .quote-change {
+    grid-column: 1 / -1 !important;
+    justify-self: start !important;
+    width: auto !important;
+    margin-top: 2px !important;
   }
 
   .quote-price-row small,
