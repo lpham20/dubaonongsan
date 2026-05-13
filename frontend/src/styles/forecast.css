@@ -483,6 +483,35 @@
   touch-action: pan-y;
 }
 
+.forecast-shell .mobile-chart-frame {
+  width: 100%;
+  padding: 2px 0 0;
+}
+
+.forecast-shell .mobile-svg-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 292px;
+}
+
+.forecast-shell .mobile-chart-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.forecast-shell .mobile-chart-empty {
+  display: grid;
+  place-items: center;
+  min-height: 260px;
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: var(--fw-bold);
+}
+
 .forecast-shell .chart-section .section-heading {
   display: flex;
   align-items: flex-start;

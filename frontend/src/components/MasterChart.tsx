@@ -33,6 +33,21 @@ type ChartRow = {
   signalPrice?: number;
 };
 
+type ChartColors = {
+  grid: string;
+  axisLine: string;
+  tickFill: string;
+  priceLine: string;
+  priceArea: string;
+  forecastLine: string;
+  rainBar: string;
+  signal: string;
+  signalText: string;
+  tooltipBg: string;
+  tooltipText: string;
+  tooltipBorder: string;
+};
+
 const toDateKey = (value: string) => {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? value.slice(0, 10) : date.toISOString().slice(0, 10);
@@ -66,7 +81,9 @@ function useDarkChart(): boolean {
 }
 
 function useCoarsePointer(): boolean {
-  const [isCoarse, setIsCoarse] = useState(false);
+  const getInitialValue = () =>
+    typeof window === "undefined" ? true : window.matchMedia("(pointer: coarse), (max-width: 860px)").matches;
+  const [isCoarse, setIsCoarse] = useState(getInitialValue);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(pointer: coarse), (max-width: 860px)");
@@ -162,7 +179,7 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
   const rainDomain: [number, number] = [0, Math.max(50, Math.ceil(maxRain * 1.4))];
   const hasRainData = rows.some((row) => typeof row.rain === "number" && row.rain > 0);
   const fullEndIndex = Math.max(rows.length - 1, 0);
-  const defaultVisiblePoints = isCoarsePointer ? 72 : 120;
+  const defaultVisiblePoints = isCoarsePointer ? 48 : 120;
   const defaultZoomRange = { startIndex: Math.max(0, fullEndIndex - defaultVisiblePoints + 1), endIndex: fullEndIndex };
   const activeZoomRange = clampZoomRange(zoomRange ?? defaultZoomRange, fullEndIndex);
   const canZoom = rows.length > 14;
@@ -187,7 +204,8 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
   function zoomBy(factor: number) {
     if (!canZoom) return;
     const currentLength = activeZoomRange.endIndex - activeZoomRange.startIndex + 1;
-    const nextLength = Math.min(rows.length, Math.max(14, Math.round(currentLength * factor)));
+    const minVisiblePoints = isCoarsePointer ? 10 : 14;
+    const nextLength = Math.min(rows.length, Math.max(minVisiblePoints, Math.round(currentLength * factor)));
     if (nextLength >= rows.length) {
       updateZoom({ startIndex: 0, endIndex: fullEndIndex });
       return;
@@ -243,6 +261,16 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
         </div>
       </div>
       <div className="chart-wrap">
+        {isCoarsePointer ? (
+          <MobileSvgChart
+            rows={chartRows}
+            colors={colors}
+            showPrice={showPrice}
+            showForecast={showForecast}
+            showRain={showRain}
+            showSignals={showSignals}
+          />
+        ) : (
         <ResponsiveContainer width="100%" height={430}>
           <ComposedChart data={chartRows} margin={{ top: 18, right: 16, left: 4, bottom: showBrush ? 4 : 0 }}>
             <defs>
@@ -295,6 +323,7 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
                 fill={colors.rainBar}
                 opacity={isDark ? 0.55 : 0.35}
                 radius={[2, 2, 0, 0]}
+                isAnimationActive={false}
                 name="Mưa (mm)"
               />
             ) : null}
@@ -309,6 +338,7 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
                 dot={false}
                 activeDot={{ r: 4, fill: colors.priceLine, stroke: colors.tooltipBg, strokeWidth: 2 }}
                 connectNulls
+                isAnimationActive={false}
                 name="Giá"
               />
             ) : null}
@@ -322,6 +352,7 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
                 strokeWidth={2}
                 dot={false}
                 connectNulls
+                isAnimationActive={false}
                 name="Dự báo"
               />
             ) : null}
@@ -372,12 +403,170 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
             ) : null}
           </ComposedChart>
         </ResponsiveContainer>
+        )}
         <div className="signal-chip">
           <TriangleAlert size={16} />
           {signals.length} CẢNH BÁO BÁN
         </div>
       </div>
     </section>
+  );
+}
+
+function MobileSvgChart({
+  rows,
+  colors,
+  showPrice,
+  showForecast,
+  showRain,
+  showSignals
+}: {
+  rows: ChartRow[];
+  colors: ChartColors;
+  showPrice: boolean;
+  showForecast: boolean;
+  showRain: boolean;
+  showSignals: boolean;
+}) {
+  const width = 360;
+  const height = 292;
+  const plot = { left: 20, right: 46, top: 20, bottom: 34 };
+  const plotWidth = width - plot.left - plot.right;
+  const plotHeight = height - plot.top - plot.bottom;
+  const priceValues = rows.flatMap((row) => [
+    ...(showPrice && typeof row.price === "number" ? [row.price] : []),
+    ...(showForecast && typeof row.forecast === "number" ? [row.forecast] : [])
+  ]);
+
+  if (!rows.length || !priceValues.length) {
+    return <div className="mobile-chart-empty">Chưa có đủ dữ liệu để vẽ biểu đồ.</div>;
+  }
+
+  const rawMin = Math.min(...priceValues);
+  const rawMax = Math.max(...priceValues);
+  const span = Math.max(rawMax - rawMin, rawMax * 0.08, 1);
+  const yMin = rawMin - span * 0.18;
+  const yMax = rawMax + span * 0.18;
+  const maxRain = Math.max(0, ...rows.map((row) => row.rain ?? 0));
+
+  const xFor = (index: number) =>
+    plot.left + (rows.length <= 1 ? plotWidth : (index / (rows.length - 1)) * plotWidth);
+  const yFor = (value: number) => plot.top + ((yMax - value) / (yMax - yMin)) * plotHeight;
+  const yTicks = [yMax, (yMax + yMin) / 2, yMin];
+  const xTickIndexes = Array.from(new Set([0, Math.floor((rows.length - 1) / 2), rows.length - 1]));
+
+  const buildPath = (key: "price" | "forecast") =>
+    rows.reduce((path, row, index) => {
+      const value = row[key];
+      if (typeof value !== "number") return path;
+      const command = path ? "L" : "M";
+      return `${path}${command}${xFor(index).toFixed(1)},${yFor(value).toFixed(1)}`;
+    }, "");
+
+  const pricePath = buildPath("price");
+  const forecastPath = buildPath("forecast");
+  const pricePoints = rows
+    .map((row, index) =>
+      typeof row.price === "number" ? { x: xFor(index), y: yFor(row.price), value: row.price } : null
+    )
+    .filter((point): point is { x: number; y: number; value: number } => Boolean(point));
+  const areaBaseline = plot.top + plotHeight;
+  const areaPath =
+    pricePoints.length > 1
+      ? `${pricePath}L${pricePoints[pricePoints.length - 1].x.toFixed(1)},${areaBaseline.toFixed(1)}L${pricePoints[0].x.toFixed(1)},${areaBaseline.toFixed(1)}Z`
+      : "";
+
+  return (
+    <div className="mobile-chart-frame" aria-label="Biểu đồ giá thu gọn cho điện thoại">
+      <svg className="mobile-svg-chart" viewBox={`0 0 ${width} ${height}`} role="img">
+        <defs>
+          <linearGradient id="mobilePriceArea" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor={colors.priceArea} stopOpacity="0.28" />
+            <stop offset="100%" stopColor={colors.priceArea} stopOpacity="0.03" />
+          </linearGradient>
+        </defs>
+        {yTicks.map((tick) => {
+          const y = yFor(tick);
+          return (
+            <g key={`y-${tick.toFixed(0)}`}>
+              <line x1={plot.left} x2={plot.left + plotWidth} y1={y} y2={y} stroke={colors.grid} strokeWidth="1" />
+              <text x={width - 8} y={y + 4} textAnchor="end" fill={colors.tickFill} className="mobile-chart-label">
+                {Math.round(tick / 1000)}K
+              </text>
+            </g>
+          );
+        })}
+
+        {showRain && maxRain > 0
+          ? rows.map((row, index) => {
+              if (typeof row.rain !== "number" || row.rain <= 0) return null;
+              const barHeight = Math.max(1, (row.rain / maxRain) * (plotHeight * 0.34));
+              const x = xFor(index);
+              return (
+                <rect
+                  key={`rain-${row.dateKey}`}
+                  x={x - 1.2}
+                  y={areaBaseline - barHeight}
+                  width="2.4"
+                  height={barHeight}
+                  fill={colors.rainBar}
+                  opacity="0.55"
+                />
+              );
+            })
+          : null}
+
+        {areaPath ? <path d={areaPath} fill="url(#mobilePriceArea)" /> : null}
+        {showPrice && pricePath ? (
+          <path d={pricePath} fill="none" stroke={colors.priceLine} strokeWidth="2.4" strokeLinecap="round" />
+        ) : null}
+        {showForecast && forecastPath ? (
+          <path
+            d={forecastPath}
+            fill="none"
+            stroke={colors.forecastLine}
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeDasharray="5 5"
+          />
+        ) : null}
+        {showSignals
+          ? rows.map((row, index) =>
+              typeof row.signalPrice === "number" ? (
+                <circle
+                  key={`signal-${row.dateKey}`}
+                  cx={xFor(index)}
+                  cy={yFor(row.signalPrice)}
+                  r="3.8"
+                  fill={colors.signal}
+                  stroke={colors.tooltipBg}
+                  strokeWidth="1.5"
+                />
+              ) : null
+            )
+          : null}
+        <line
+          x1={plot.left}
+          x2={plot.left + plotWidth}
+          y1={areaBaseline}
+          y2={areaBaseline}
+          stroke={colors.axisLine}
+          strokeWidth="1"
+        />
+        {xTickIndexes.map((index) => (
+          <text
+            key={`x-${rows[index]?.dateKey ?? index}`}
+            x={xFor(index)}
+            y={height - 8}
+            textAnchor={index === 0 ? "start" : index === rows.length - 1 ? "end" : "middle"}
+            fill={colors.tickFill}
+            className="mobile-chart-label"
+          >
+            {formatDate(rows[index].dateKey)}
+          </text>
+        ))}
+      </svg>
+    </div>
   );
 }
 
