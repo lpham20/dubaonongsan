@@ -12,7 +12,7 @@
   }
 
   html {
-    scroll-padding-top: calc(var(--header-height-mobile) + 76px);
+    scroll-padding-top: calc(var(--header-height-mobile) + 56px);
   }
 
   body {
@@ -167,11 +167,11 @@
     top: var(--header-height-mobile);
     z-index: 120;
     display: grid !important;
-    grid-template-columns: 44px minmax(0, 1fr);
+    grid-template-columns: 38px minmax(0, 1fr);
     align-items: stretch;
     width: calc(100% + var(--mobile-page-pad) + var(--mobile-page-pad-r));
-    height: 78px;
-    min-height: 78px;
+    height: 58px;
+    min-height: 58px;
     margin: 0 calc(-1 * var(--mobile-page-pad-r)) 0 calc(-1 * var(--mobile-page-pad));
     padding: 0 !important;
     overflow: hidden;
@@ -187,9 +187,9 @@
   .forecast-shell .ticker-label {
     display: grid !important;
     place-items: center;
-    width: 44px !important;
-    height: 78px !important;
-    min-height: 78px;
+    width: 38px !important;
+    height: 58px !important;
+    min-height: 58px;
     margin: 0 !important;
     padding: 0 !important;
     background: #ffffff;
@@ -205,7 +205,7 @@
     content: "GIÁ";
     color: #111111;
     font-family: var(--font-sans);
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 900;
     letter-spacing: 0.08em;
     writing-mode: vertical-rl;
@@ -237,8 +237,8 @@
     align-items: center;
     gap: 8px;
     width: max-content;
-    height: 78px;
-    padding: 8px 12px !important;
+    height: 58px;
+    padding: 7px 10px !important;
     animation: none !important;
     transform: none !important;
   }
@@ -258,10 +258,10 @@
     grid-template-columns: 1fr;
     align-content: center;
     gap: 2px;
-    flex: 0 0 156px;
-    width: 156px;
-    height: 58px;
-    padding: 8px 12px !important;
+    flex: 0 0 150px;
+    width: 150px;
+    height: 44px;
+    padding: 6px 10px !important;
     border: 0;
     border-radius: 8px;
     background: #191919;
@@ -277,7 +277,7 @@
     overflow: hidden;
     color: #ffffff !important;
     font-family: var(--font-sans);
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 900;
     line-height: 1.05;
     letter-spacing: -0.01em;
@@ -292,7 +292,7 @@
   .forecast-shell .ticker-content b {
     color: #ffffff;
     font-family: var(--font-mono);
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 700;
     line-height: 1.1;
   }
@@ -303,7 +303,7 @@
   .forecast-shell .ticker-content em {
     color: var(--up-bright);
     font-family: var(--font-mono);
-    font-size: 13px;
+    font-size: 12px;
     font-style: normal;
     font-weight: 800;
     line-height: 1;
@@ -1045,6 +1045,107 @@
     padding: 8px var(--mobile-page-pad);
     border-bottom: 1px solid var(--mobile-hairline);
     background: #ffffff;
+  }
+
+  /* Fertilizer/tool pages: linear, touch-safe form flow. */
+  .fertilizer-page {
+    padding: 0 0 28px;
+    overflow-x: clip;
+  }
+
+  .fertilizer-hero {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+    margin: 0 0 14px;
+    padding: 18px 0 16px !important;
+    border-bottom: 2px solid #111111;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: var(--color-text);
+    box-shadow: none !important;
+  }
+
+  .fertilizer-hero h1 {
+    max-width: 100%;
+    margin: 0 0 8px;
+    color: var(--color-text) !important;
+    font-family: var(--font-sans);
+    font-size: clamp(26px, 7vw, 34px) !important;
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+    overflow-wrap: anywhere;
+    white-space: normal !important;
+  }
+
+  .fertilizer-hero p {
+    max-width: 100%;
+    color: var(--color-text-soft) !important;
+    font-size: 16px;
+    line-height: 1.45;
+    overflow-wrap: break-word;
+  }
+
+  .fertilizer-layout {
+    grid-template-columns: 1fr !important;
+    gap: 14px;
+  }
+
+  .fertilizer-form,
+  .fertilizer-panel,
+  .fertilizer-summary,
+  .fertilizer-empty,
+  .fertilizer-warning {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .fertilizer-form {
+    gap: 16px;
+    padding: 16px !important;
+  }
+
+  .fertilizer-form section {
+    gap: 12px;
+    padding-bottom: 14px;
+  }
+
+  .fertilizer-form label {
+    min-width: 0;
+    font-size: 13px;
+  }
+
+  .fertilizer-form input,
+  .fertilizer-form select,
+  .fertilizer-submit {
+    min-height: 48px;
+    font-size: 15px;
+  }
+
+  .fertilizer-results {
+    gap: 14px;
+  }
+
+  .fertilizer-error {
+    padding: 10px 12px;
+    border: 1px solid var(--harvest);
+    border-radius: var(--radius-xs);
+    background: var(--harvest-soft);
+    color: var(--gray-900);
+    line-height: 1.35;
+  }
+
+  .error-banner {
+    right: var(--mobile-page-pad-r);
+    bottom: max(14px, env(safe-area-inset-bottom));
+    left: var(--mobile-page-pad);
+    width: auto;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .error-banner button {
+    width: 100%;
   }
 
   /* Footer: sharp accordion rows. */

@@ -872,9 +872,48 @@ select {
   z-index: 140;
   width: min(520px, calc(100vw - 32px));
   margin: 0;
-  color: #8f1825;
-  background: #ffecef;
-  box-shadow: 0 18px 42px rgba(31, 49, 39, 0.16);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--harvest);
+  border-radius: var(--radius-xs);
+  color: var(--gray-900);
+  background: var(--harvest-soft);
+  box-shadow: var(--shadow-popover);
+}
+
+.error-banner-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.error-banner strong {
+  color: var(--gray-900);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.error-banner span {
+  color: var(--gray-500);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.error-banner button {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-xs);
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: var(--fw-black);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .loading {

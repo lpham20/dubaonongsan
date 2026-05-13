@@ -124,7 +124,8 @@ export function FertilizerAdvisor() {
       };
       setResult(await recommendFertilizer(payload));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Không tính được khuyến nghị bón phân.");
+      console.warn("[FertilizerAdvisor] recommendation failed", err);
+      setError("Không tính được khuyến nghị lúc này. Vui lòng thử lại sau ít phút.");
     } finally {
       setBusy(false);
     }

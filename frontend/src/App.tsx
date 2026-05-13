@@ -228,6 +228,30 @@ function routeToUrl(route: InitialRoute) {
   return params.toString() ? `${path}?${params}` : path;
 }
 
+const TECHNICAL_ERROR_PATTERN = /api|json|unexpected token|doctype|failed to fetch|networkerror|syntaxerror|html|stack|trace|chunkload/i;
+const USER_ACTION_ERROR_PATTERN = /^(email|mật khẩu|mat khau|vui lòng|vui long)/i;
+
+function safeErrorCopy(message: string | null) {
+  const clean = (message ?? "").replace(/\s+/g, " ").trim();
+  if (!clean) return "Dữ liệu đang được cập nhật. Vui lòng thử lại sau ít phút.";
+  if (USER_ACTION_ERROR_PATTERN.test(clean) || clean.toLowerCase().includes("chưa có dữ liệu")) return clean;
+  if (TECHNICAL_ERROR_PATTERN.test(clean)) return "Dữ liệu đang được cập nhật. Vui lòng thử lại sau ít phút.";
+  return clean.length > 150 ? "Dữ liệu đang được cập nhật. Vui lòng thử lại sau ít phút." : clean;
+}
+
+function safeErrorTitle(message: string | null) {
+  const clean = message ?? "";
+  if (USER_ACTION_ERROR_PATTERN.test(clean) || clean.toLowerCase().includes("chưa có dữ liệu")) {
+    return "Cần kiểm tra lại thông tin";
+  }
+  return "Dữ liệu đang được cập nhật";
+}
+
+function canRetryError(message: string | null) {
+  const clean = message ?? "";
+  return !USER_ACTION_ERROR_PATTERN.test(clean);
+}
+
 function RoutedApp() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -386,7 +410,7 @@ function RoutedApp() {
       setMarketComparison(comparisonPayload);
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
-      setError(err instanceof Error ? err.message : "Lỗi API không xác định");
+      setError(err instanceof Error ? err.message : "Không tải được dữ liệu.");
     } finally {
       setLoading(false);
     }
@@ -402,7 +426,7 @@ function RoutedApp() {
       void fetchNews()
         .then(setNewsArticles)
         .catch((err) => {
-          setError(err instanceof Error ? err.message : "Không tải được tin mới.");
+          console.warn("[App] background news refresh failed", err);
         });
     }, 15 * 60 * 1000);
     return () => {
@@ -683,6 +707,17 @@ function RoutedApp() {
     }
   }
 
+  function retryAfterError() {
+    setError(null);
+    if (section === "analytics") {
+      void loadData();
+      return;
+    }
+    if (section === "home" || section === "news" || section === "guides") {
+      void loadContent();
+    }
+  }
+
   return (
     <IconContext.Provider value={{ size: 18, weight: "regular", mirrored: false }}>
     <main className={section === "analytics" ? `app-shell forecast-shell crop-${crop}` : "app-shell"}>
@@ -827,7 +862,15 @@ function RoutedApp() {
         </>
       ) : null}
 
-      {error ? <div className="error-banner">Lỗi API: {error}</div> : null}
+      {error ? (
+        <div className="error-banner" role="status" aria-live="polite">
+          <div className="error-banner-copy">
+            <strong>{safeErrorTitle(error)}</strong>
+            <span>{safeErrorCopy(error)}</span>
+          </div>
+          {canRetryError(error) ? <button type="button" onClick={retryAfterError}>Thử lại</button> : null}
+        </div>
+      ) : null}
       {loading && section === "analytics" ? <div className="loading">Đang tải dữ liệu thị trường...</div> : null}
 
       <Suspense fallback={<div className="section-fallback">Đang tải giao diện...</div>}>
