@@ -3290,4 +3290,16 @@
     max-width: 100% !important;
     padding-inline: 0 !important;
   }
+
+  .guide-detail-page .detail-body {
+    margin-top: 8px !important;
+  }
+
+  .guide-detail-page .detail-body section:first-child {
+    padding-top: 8px !important;
+  }
+
+  .guide-detail-page .detail-body section:first-child h2 {
+    margin-top: 0 !important;
+  }
 }

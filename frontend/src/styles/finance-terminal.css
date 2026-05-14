@@ -1383,6 +1383,18 @@ h5 {
   line-height: 1.25;
 }
 
+.guide-detail-page .detail-body {
+  margin-top: 14px;
+}
+
+.guide-detail-page .detail-body section:first-child {
+  padding-top: 12px;
+}
+
+.guide-detail-page .detail-body section:first-child h2 {
+  margin-top: 0;
+}
+
 @media (max-width: 860px) {
   .guide-detail-page.detail-page {
     width: 100%;
