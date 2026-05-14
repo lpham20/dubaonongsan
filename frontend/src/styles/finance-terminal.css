@@ -324,6 +324,15 @@ h5 {
   white-space: nowrap;
 }
 
+@media (min-width: 861px) {
+  .ticker-label,
+  .home-price-ticker-label,
+  .news-price-ticker > span {
+    padding-right: 22px;
+    padding-left: calc(var(--shell-pad-desktop) + 20px);
+  }
+}
+
 .ticker-track,
 .home-price-track,
 .news-price-ticker > div {
@@ -1527,11 +1536,50 @@ h5 {
   text-transform: uppercase;
 }
 
-/* Fertilizer hero title readability */
-.fertilizer-hero h1,
-.fertilizer-hero .hero-title,
-.fertilizer-page h1 {
+/* Fertilizer methodology keeps the dark production hero treatment. */
+.fertilizer-method-hero h1,
+.fertilizer-method-hero .hero-title {
   color: #ffffff;
+}
+
+/* Fertilizer advisor uses the same editorial hierarchy as the technical guide tab. */
+.fertilizer-advisor-hero {
+  display: block;
+  max-width: 980px;
+  margin: var(--space-5) 0 var(--space-5);
+  padding: var(--space-5) 0 var(--space-4);
+  border: 0;
+  border-bottom: 2px solid var(--color-text);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-text);
+}
+
+.fertilizer-advisor-hero > div {
+  max-width: 930px;
+}
+
+.fertilizer-advisor-hero h1,
+.fertilizer-page .fertilizer-advisor-hero h1 {
+  max-width: 900px;
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: clamp(42px, 4.7vw, 64px);
+  font-weight: var(--fw-black);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+}
+
+.fertilizer-advisor-hero p {
+  max-width: 800px;
+  margin: var(--space-4) 0 0;
+  color: var(--color-text-soft);
+  font-family: var(--font-vi);
+  font-size: 20px;
+  font-weight: var(--fw-regular);
+  line-height: 1.55;
 }
 
 /* Mobile */
