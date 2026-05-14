@@ -2981,3 +2981,21 @@
     max-width: 34ch;
   }
 }
+
+@media (max-width: 860px) {
+  .home-hero-actions button:first-child {
+    background: var(--mobile-surface) !important;
+    border-color: var(--mobile-line) !important;
+    color: var(--mobile-ink) !important;
+  }
+
+  .market-card-grid {
+    margin-left: 0 !important;
+    padding-left: max(18px, var(--mobile-page-pad)) !important;
+    scroll-padding-left: max(18px, var(--mobile-page-pad)) !important;
+  }
+
+  .market-data-card:first-child {
+    margin-left: 2px !important;
+  }
+}

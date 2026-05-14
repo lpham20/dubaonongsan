@@ -63,6 +63,17 @@ export type ModelMetrics = {
 
 export type CropType = "sau_rieng" | "ca_phe" | "ho_tieu" | "lua";
 
+export type UsdVndRate = {
+  currency_code: "USD";
+  buy: number | null;
+  transfer: number;
+  sell: number | null;
+  as_of: string | null;
+  source: string;
+  raw_datetime: string | null;
+  stale?: boolean;
+};
+
 export type AuthUser = {
   user_id: number;
   email: string;
@@ -478,6 +489,10 @@ export function fetchAvailableVarieties(crop: CropType, regionId: number, signal
 
 export function fetchTickerPrices(crop: CropType, signal?: AbortSignal) {
   return getJson<PricePoint[]>(`/api/v1/analytics/ticker-prices?crop=${crop}&limit=60`, signal);
+}
+
+export function fetchUsdVndRate(signal?: AbortSignal) {
+  return getJson<UsdVndRate>(`/api/v1/analytics/usd-vnd-rate`, signal);
 }
 
 export function fetchDailyPriceBoard(crop: CropType, signal?: AbortSignal) {

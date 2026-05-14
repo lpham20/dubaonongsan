@@ -12,6 +12,7 @@ from app.models import DailyMarketPrice, DurianVariety, ModelTrainingRun, Produc
 from app.schemas import ForecastPoint, HistoricalPricePoint, ModelMetrics, TradingSignal
 from app.services.data_loader import DataLoader
 from app.services.exports import rows_to_pdf, rows_to_xlsx
+from app.services.exchange_rates import fetch_usd_vnd_rate
 from app.services.market_intelligence import MarketIntelligenceService
 
 
@@ -34,6 +35,12 @@ def ticker_prices(
         key = (row["variety"], row["region"], row["province"], row["quality_grade"])
         latest_by_key[key] = row
     return sorted(latest_by_key.values(), key=lambda item: item["timestamp"], reverse=True)[:limit]
+
+
+@router.get("/analytics/usd-vnd-rate")
+@cached(prefix="usd-vnd-rate", ttl_seconds=600)
+def usd_vnd_rate() -> dict:
+    return fetch_usd_vnd_rate()
 
 
 @router.get("/analytics/daily-price-board", response_model=list[HistoricalPricePoint])

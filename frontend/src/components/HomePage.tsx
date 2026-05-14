@@ -17,7 +17,15 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FreshnessBanner } from "./FreshnessBanner";
 import { SeoHead } from "./SeoHead";
-import { fetchTickerPrices, type CropType, type GuidePost, type NewsArticle, type PricePoint } from "../lib/api";
+import {
+  fetchTickerPrices,
+  fetchUsdVndRate,
+  type CropType,
+  type GuidePost,
+  type NewsArticle,
+  type PricePoint,
+  type UsdVndRate
+} from "../lib/api";
 import { newsPath } from "../lib/seo";
 
 type Props = {
@@ -160,6 +168,7 @@ const fallbackNews: NewsArticle[] = [
 export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuides }: Props) {
   const navigate = useNavigate();
   const [liveTicker, setLiveTicker] = useState<HomeTickerState>({ coffee: [], durian: [], pepper: [], rice: [] });
+  const [usdVndRate, setUsdVndRate] = useState<UsdVndRate | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const articles = useMemo(() => rankHomeArticles(news.length ? news : fallbackNews), [news]);
   const lead = articles[0];
@@ -167,7 +176,7 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
   const leadWebpUrl = localWebpSource(leadImageUrl);
   const marketAlerts = articles.slice(1, 6);
   const guidePreview = guides.slice(0, 3);
-  const tickerItems = useMemo(() => buildTickerItems(liveTicker), [liveTicker]);
+  const tickerItems = useMemo(() => buildTickerItems(liveTicker, usdVndRate), [liveTicker, usdVndRate]);
   const dataCards = useMemo(() => buildMarketCards(liveTicker), [liveTicker]);
 
   useEffect(() => {
@@ -188,6 +197,14 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
         if (active) {
           setLiveTicker({ coffee: [], durian: [], pepper: [], rice: [] });
         }
+      });
+
+    fetchUsdVndRate()
+      .then((rate) => {
+        if (active) setUsdVndRate(rate);
+      })
+      .catch(() => {
+        if (active) setUsdVndRate(null);
       });
 
     return () => {
@@ -438,8 +455,11 @@ function Sparkline({ points, tone }: { points: number[]; tone: "up" | "down" }) 
   );
 }
 
-function buildTickerItems(live: HomeTickerState): TickerItem[] {
-  if (!live.coffee.length && !live.durian.length && !live.pepper.length && !live.rice.length) return fallbackTicker;
+function buildTickerItems(live: HomeTickerState, usdVndRate: UsdVndRate | null): TickerItem[] {
+  const usdTicker = usdRateToTicker(usdVndRate) ?? fallbackTicker[6];
+  if (!live.coffee.length && !live.durian.length && !live.pepper.length && !live.rice.length) {
+    return [...fallbackTicker.slice(0, 6), usdTicker];
+  }
 
   return [
     pointToTicker(live.coffee, "Cà phê Robusta", ["Robusta", "Culi", "Arabica"]) ?? fallbackTicker[0],
@@ -447,8 +467,18 @@ function buildTickerItems(live: HomeTickerState): TickerItem[] {
     pointToTicker(live.pepper, "Hồ tiêu", ["Tiêu đen", "Tiêu trắng", "Tiêu đỏ"]) ?? fallbackTicker[2],
     pointToTicker(live.rice, "Lúa", ["OM", "Đài thơm", "Nàng Hoa", "Jasmine"]) ?? fallbackTicker[3],
     fallbackTicker[5],
-    fallbackTicker[6]
+    usdTicker
   ];
+}
+
+function usdRateToTicker(rate: UsdVndRate | null): TickerItem | null {
+  if (!rate?.transfer) return null;
+  return {
+    label: "USD/VND VCB",
+    value: Math.round(rate.transfer).toLocaleString("vi-VN"),
+    change: rate.as_of ? `VCB ${formatShortDate(rate.as_of)}` : "VCB",
+    tone: "up"
+  };
 }
 
 function buildMarketCards(live: HomeTickerState): MarketCard[] {
@@ -529,6 +559,12 @@ function computeChange(points: PricePoint[]) {
 
 function formatPrice(value: number) {
   return `${Math.round(value).toLocaleString("vi-VN")} đ/kg`;
+}
+
+function formatShortDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit" }).format(date);
 }
 
 function formatChange(value: number) {
