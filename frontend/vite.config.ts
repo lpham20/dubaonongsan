@@ -71,6 +71,7 @@ export default defineConfig({
     sourcemap: false,
     minify: "esbuild",
     cssMinify: "esbuild",
+    emptyOutDir: false,
     chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
