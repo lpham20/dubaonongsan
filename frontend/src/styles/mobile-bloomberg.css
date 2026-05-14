@@ -3711,3 +3711,35 @@
     text-overflow: ellipsis !important;
   }
 }
+
+/* News tab acceptance polish: this final block intentionally comes after the
+   earlier mobile passes to keep the news ticker and price notice aligned with
+   the supplied prototype without touching desktop or forecast/home tickers. */
+@media (max-width: 860px) {
+  .content-page.finance-news-page {
+    padding-top: 0 !important;
+  }
+
+  .finance-news-page .news-price-ticker {
+    position: static !important;
+    top: auto !important;
+    align-self: stretch !important;
+    width: calc(100% + var(--shell-pad-mobile) * 2) !important;
+    margin: 0 calc(-1 * var(--shell-pad-mobile)) !important;
+  }
+
+  .finance-news-page .news-view-tabs {
+    margin-top: 0 !important;
+  }
+
+  .news-price-board .price-report-notice summary {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-height: 38px !important;
+    padding: 0 8px !important;
+    margin-left: -8px !important;
+    color: var(--accent-deep) !important;
+    font-weight: var(--fw-bold) !important;
+    cursor: pointer !important;
+  }
+}
