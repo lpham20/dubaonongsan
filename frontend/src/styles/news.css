@@ -591,10 +591,15 @@
   align-items: center;
   gap: 4px;
   color: var(--accent-deep);
+  background: var(--accent-soft);
+  border: 1px solid rgba(22, 112, 82, 0.42);
+  border-radius: var(--radius-xs);
   font-family: var(--font-sans);
   font-size: 12px;
   font-weight: var(--fw-bold);
   letter-spacing: 0.04em;
+  min-height: 32px;
+  padding: 0 10px;
   text-decoration: none;
   text-transform: uppercase;
 }
@@ -602,7 +607,9 @@
 .finance-news-page .news-source-row a:hover,
 .finance-news-page .news-lead-copy > a:hover,
 .finance-news-page .news-row-card a:hover {
-  color: var(--accent);
+  color: var(--accent-darker);
+  background: #c8ead9;
+  border-color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 2px;
 }

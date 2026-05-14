@@ -592,6 +592,21 @@
   cursor: pointer;
 }
 
+.story-link,
+.market-alert-panel > button {
+  color: var(--accent-deep);
+  background: var(--accent-soft);
+  border-color: rgba(22, 112, 82, 0.42);
+  box-shadow: none;
+}
+
+.story-link:hover,
+.market-alert-panel > button:hover {
+  color: var(--accent-darker);
+  background: #c8ead9;
+  border-color: var(--accent);
+}
+
 .home-ops-strip {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

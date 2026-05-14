@@ -809,11 +809,11 @@ function LeadNewsCard({ item }: { item: RankedArticle }) {
         <p>{displayTitle(item.article.summary, 150)}</p>
         <RelatedTag relation={item.relation} />
         <div className="news-source-row">
+          <small>{item.article.source_name}</small>
           <small>
             <CalendarDays size={14} />
             {formatDate(item.article.published_at ?? item.article.scraped_at)}
           </small>
-          <small>{item.article.source_name}</small>
         </div>
         <Link to={newsPath(item.article)}>
           Đọc bản tin

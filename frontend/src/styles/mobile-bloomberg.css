@@ -2983,6 +2983,63 @@
 }
 
 @media (max-width: 860px) {
+  .story-link,
+  .market-alert-panel > button,
+  .finance-news-page .news-lead-copy > a,
+  .finance-news-page .news-source-row a,
+  .finance-news-page .news-row-card a {
+    color: var(--accent-deep) !important;
+    background: var(--accent-soft) !important;
+    border: 1px solid rgba(22, 112, 82, 0.42) !important;
+    box-shadow: none !important;
+  }
+
+  .story-link:hover,
+  .market-alert-panel > button:hover,
+  .finance-news-page .news-lead-copy > a:hover,
+  .finance-news-page .news-source-row a:hover,
+  .finance-news-page .news-row-card a:hover {
+    color: var(--accent-darker) !important;
+    background: #c8ead9 !important;
+    border-color: var(--accent) !important;
+  }
+
+  .finance-news-page .news-lead-copy .news-source-row,
+  .finance-news-page .news-row-card .news-source-row {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    justify-content: start !important;
+    justify-items: start !important;
+    align-items: start !important;
+    gap: 4px !important;
+    width: 100% !important;
+    text-align: left !important;
+  }
+
+  .finance-news-page .news-lead-copy .news-source-row small,
+  .finance-news-page .news-row-card .news-source-row small {
+    display: inline-flex !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    color: var(--mobile-muted) !important;
+    font-family: var(--font-sans) !important;
+    font-size: 12px !important;
+    font-weight: 850 !important;
+    letter-spacing: 0.06em !important;
+    line-height: 1.2 !important;
+    text-align: left !important;
+    text-transform: uppercase !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .finance-news-page .news-lead-copy .news-source-row small.num,
+  .finance-news-page .news-row-card .news-source-row small.num {
+    font-family: var(--font-mono) !important;
+    font-size: 12px !important;
+    letter-spacing: 0.02em !important;
+  }
+
   .home-hero-actions button:first-child {
     background: var(--mobile-surface) !important;
     border-color: var(--mobile-line) !important;
