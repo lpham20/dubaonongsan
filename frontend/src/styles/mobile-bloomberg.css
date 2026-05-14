@@ -3291,6 +3291,12 @@
     padding-inline: 0 !important;
   }
 
+  .guide-detail-page .detail-article header,
+  .guide-detail-page .detail-body,
+  .guide-detail-page .related-forecast {
+    padding-inline: 12px !important;
+  }
+
   .guide-detail-page .detail-body {
     margin-top: 8px !important;
   }

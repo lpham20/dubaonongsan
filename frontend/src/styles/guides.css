@@ -931,8 +931,8 @@
 }
 
 .guide-article-layout {
-  grid-template-columns: minmax(0, 1fr) minmax(210px, 250px);
-  gap: 24px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
 }
 
 .guide-body section,
@@ -941,13 +941,34 @@
   border-top: 1px solid var(--guide-border);
 }
 
+.guide-detail-panel .guide-body {
+  max-width: 780px;
+}
+
+.guide-detail-panel .guide-body section:first-child {
+  padding-top: 16px;
+}
+
+.guide-detail-panel .guide-body section:first-child h3 {
+  margin-top: 0;
+}
+
+.guide-detail-panel .guide-body p,
+.guide-detail-panel .guide-body li {
+  font-size: 16.5px;
+  font-weight: var(--fw-regular);
+  line-height: 1.68;
+}
+
 .guide-body h3,
 .detail-body h2 {
   margin-top: 0;
 }
 
 .guide-reference-panel {
+  position: static;
   top: calc(var(--header-height-desktop) + var(--ticker-height) + 16px);
+  max-width: 780px;
   border-color: var(--guide-border);
   border-radius: 13px;
   background: var(--guide-surface-muted);
@@ -962,7 +983,7 @@
 
 .guide-reference-panel dl > div {
   display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+  grid-template-columns: minmax(120px, 0.45fr) minmax(0, 1fr);
   gap: 10px;
 }
 
