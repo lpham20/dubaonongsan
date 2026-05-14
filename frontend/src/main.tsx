@@ -22,6 +22,8 @@ import "./styles/finance-terminal.css";
 import "./styles/mobile-bloomberg.css";
 
 if (typeof window !== "undefined") {
+  document.getElementById("seo-prerender")?.remove();
+
   window.addEventListener("error", (event) => {
     if (isRecoverableChunkError(event.error ?? event.message)) {
       reloadOnceForNewBundle();

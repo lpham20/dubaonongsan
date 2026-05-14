@@ -3732,6 +3732,10 @@
     margin-top: 0 !important;
   }
 
+  .finance-news-page .news-view-tab {
+    min-height: 44px !important;
+  }
+
   .news-price-board .price-report-notice summary {
     display: inline-flex !important;
     align-items: center !important;

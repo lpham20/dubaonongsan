@@ -151,13 +151,16 @@ def _page(
         keyword_meta = f'<meta name="news_keywords" content="{html.escape(news_keywords[:240])}" />'
     asset_tags = _asset_tags()
     fallback_script = (
-        "<script>(function(){setTimeout(function(){"
-        "var r=document.getElementById('root'),"
-        "s=document.getElementById('seo-prerender');"
-        "if(s&&r&&r.children.length===0){s.removeAttribute('hidden');"
+        "<script>(function(){"
+        "function ready(){var r=document.getElementById('root');return !!(r&&r.children.length);}"
+        "function removeSeo(){var s=document.getElementById('seo-prerender');if(s){s.remove();}}"
+        "var guard=setInterval(function(){if(ready()){clearInterval(guard);removeSeo();}},250);"
+        "setTimeout(function(){if(ready()){clearInterval(guard);removeSeo();return;}"
+        "var s=document.getElementById('seo-prerender');"
+        "if(s){s.removeAttribute('hidden');"
         "s.style.cssText='max-width:760px;margin:24px auto;padding:0 16px;"
-        "font-family:system-ui,sans-serif;line-height:1.6;color:#1a1a1a';"
-        "}},3000);})();</script>"
+        "font-family:system-ui,sans-serif;line-height:1.6;color:#1a1a1a';}"
+        "},5000);})();</script>"
     )
 
     return f"""<!doctype html>
