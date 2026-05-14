@@ -102,7 +102,8 @@ export function GuideLibrary({ guides }: Props) {
             <BookOpenCheck size={18} />
             Hướng dẫn nông nghiệp
           </span>
-          <h1>Quy trình kỹ thuật trồng trọt cho {currentPlant || currentFamily}</h1>
+          <h1>Quy trình kỹ thuật trồng trọt</h1>
+          <p>Chọn nhóm cây, chọn cây trồng rồi đọc cẩm nang hoặc quy trình chăm sóc theo từng chủ đề.</p>
         </div>
       </div>
 
@@ -247,7 +248,12 @@ export function GuideLibrary({ guides }: Props) {
                     onClick={() => setSelectedSlug(guide.slug)}
                   >
                     <FileText size={16} />
-                    <span>{guide.title}</span>
+                    <span className="guide-list-copy">
+                      <strong>{guide.title}</strong>
+                      <small>
+                        {guide.section} · {guide.plant} · {estimateReadingMinutes(guide.content)} phút đọc
+                      </small>
+                    </span>
                     <ChevronRight size={15} />
                   </button>
                 ))}
@@ -266,9 +272,6 @@ export function GuideLibrary({ guides }: Props) {
                     </div>
                     <h2>{selectedGuide.title}</h2>
                     <p>{selectedGuide.summary}</p>
-                    <Link className="guide-canonical-link" to={guidePath(selectedGuide.slug)}>
-                      Mở trang riêng của bài hướng dẫn
-                    </Link>
                     <div className="guide-meta-grid">
                       <small>
                         <Clock3 size={15} />
@@ -283,6 +286,9 @@ export function GuideLibrary({ guides }: Props) {
                         Cập nhật {formatGuideDate(selectedGuide.published_at)}
                       </small>
                     </div>
+                    <Link className="guide-canonical-link" to={guidePath(selectedGuide.slug)}>
+                      Mở trang riêng của bài hướng dẫn
+                    </Link>
                   </header>
                   <div className="guide-article-layout">
                     <GuideContent content={selectedGuide.content} postId={selectedGuide.post_id} />
