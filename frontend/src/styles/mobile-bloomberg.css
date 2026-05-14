@@ -3735,7 +3735,7 @@
   .news-price-board .price-report-notice summary {
     display: inline-flex !important;
     align-items: center !important;
-    min-height: 38px !important;
+    min-height: 44px !important;
     padding: 0 8px !important;
     margin-left: -8px !important;
     color: var(--accent-deep) !important;

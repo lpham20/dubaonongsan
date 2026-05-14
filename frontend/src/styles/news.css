@@ -397,9 +397,20 @@
 
 .finance-news-page .news-lead {
   display: grid;
-  grid-template-columns: 160px minmax(0, 1fr);
+  grid-template-columns: minmax(220px, 0.42fr) minmax(0, 1fr);
+  align-items: start;
   gap: var(--space-4);
   padding: var(--space-4);
+}
+
+.finance-news-page .news-lead > .news-thumb {
+  align-self: start;
+  aspect-ratio: 16 / 10;
+  min-height: 0;
+}
+
+.finance-news-page .news-lead > .news-thumb img {
+  min-height: 0;
 }
 
 .finance-news-page .news-thumb {
