@@ -3805,3 +3805,55 @@
     letter-spacing: 0 !important;
   }
 }
+
+/* Final fertilizer mobile guard: keep the calculator page aligned to the audit prototype. */
+@media (max-width: 860px) {
+  .fertilizer-page .fertilizer-advisor-hero {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: var(--space-3) !important;
+    margin: 0 0 var(--space-3) !important;
+    padding: var(--space-4) !important;
+    border: 1px solid rgba(13, 75, 56, 0.18) !important;
+    border-radius: var(--radius-md) !important;
+    background:
+      radial-gradient(circle at 88% 0%, rgba(215, 169, 59, 0.14), transparent 30%),
+      linear-gradient(135deg, #ffffff, var(--accent-50)) !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  .fertilizer-page .fertilizer-advisor-hero h1 {
+    max-width: 100% !important;
+    margin: var(--space-3) 0 0 !important;
+    color: var(--color-text) !important;
+    font-family: var(--font-sans) !important;
+    font-size: clamp(28px, 8.8vw, 38px) !important;
+    font-weight: var(--fw-black) !important;
+    line-height: 1.08 !important;
+    letter-spacing: -0.035em !important;
+    overflow-wrap: anywhere !important;
+    white-space: normal !important;
+  }
+
+  .fertilizer-page .fertilizer-advisor-hero p {
+    max-width: 100% !important;
+    margin: var(--space-3) 0 0 !important;
+    color: var(--color-text-soft) !important;
+    font-size: 15px !important;
+    line-height: 1.5 !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .fertilizer-page .fertilizer-intro-card {
+    display: none !important;
+  }
+
+  .fertilizer-page .fertilizer-form-section,
+  .fertilizer-page .fertilizer-submit-card,
+  .fertilizer-page .fertilizer-summary,
+  .fertilizer-page .fertilizer-panel,
+  .fertilizer-page .fertilizer-empty {
+    border-radius: var(--radius-md) !important;
+  }
+}

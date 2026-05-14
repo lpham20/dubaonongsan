@@ -140,15 +140,30 @@ export function FertilizerAdvisor() {
       />
       <header className="fertilizer-hero fertilizer-advisor-hero">
         <div>
+          <span className="fertilizer-eyebrow">Công cụ kỹ thuật</span>
           <h1>Khuyến nghị bón phân theo phân tích đất</h1>
           <p>Nhập chỉ tiêu đất, năng suất mục tiêu và điều kiện vườn để nhận lượng phân thương mại theo kg/ha, kèm lịch chia đợt và cảnh báo an toàn.</p>
+          <a className="fertilizer-inline-link" href="/khuyen-nghi-bon-phan/logic">Xem logic cách tính</a>
         </div>
+        <aside className="fertilizer-intro-card" aria-label="Nội dung kết quả">
+          <strong>Kết quả sau khi tính gồm</strong>
+          <ul>
+            <li>N-P-K và vôi theo kg/ha/năm</li>
+            <li>Lịch bón theo từng đợt</li>
+            <li>Cảnh báo an toàn và độ tin cậy</li>
+          </ul>
+        </aside>
       </header>
 
       <div className="fertilizer-layout">
         <form className="fertilizer-form" onSubmit={(event) => { event.preventDefault(); void submit(); }}>
-          <section>
-            <h2><Sprout size={18} /> Thông tin vườn</h2>
+          <div className="fertilizer-form-head">
+            <strong>{selectedCrop.label}</strong>
+            <span>3 nhóm thông tin</span>
+          </div>
+
+          <section className="fertilizer-form-section">
+            <SectionTitle step="1" Icon={Sprout} title="Thông tin vườn" note="Giữ giá trị mặc định nếu chưa có số liệu chính xác." />
             <label>
               Cây trồng
               <select value={form.crop} onChange={(event) => chooseCrop(event.target.value as FertilizerCrop)}>
@@ -177,8 +192,8 @@ export function FertilizerAdvisor() {
             </label>
           </section>
 
-          <section>
-            <h2><Ruler size={18} /> Chỉ tiêu đất</h2>
+          <section className="fertilizer-form-section">
+            <SectionTitle step="2" Icon={Ruler} title="Chỉ tiêu đất" note="Các trường có thể chỉnh theo phiếu phân tích đất." />
             <label>
               Loại đất
               <select value={form.texture} onChange={(event) => update("texture", event.target.value as SoilTexture)}>
@@ -186,33 +201,36 @@ export function FertilizerAdvisor() {
               </select>
             </label>
             <div className="fertilizer-two">
-              <label>pH KCl<input value={form.ph_kcl} onChange={(event) => update("ph_kcl", event.target.value)} /></label>
-              <label>Chất hữu cơ OC (%)<input value={form.organic_carbon_pct} onChange={(event) => update("organic_carbon_pct", event.target.value)} /></label>
-              <label>Đạm tổng số (%)<input value={form.total_n_pct} onChange={(event) => update("total_n_pct", event.target.value)} /></label>
-              <label>Lân dễ tiêu (mg/100g)<input value={form.available_p_mg_per_100g} onChange={(event) => update("available_p_mg_per_100g", event.target.value)} /></label>
-              <label>Kali trao đổi (mg K2O/100g)<input value={form.exchangeable_k2o_mg_per_100g} onChange={(event) => update("exchangeable_k2o_mg_per_100g", event.target.value)} /></label>
-              <label>CEC (cmolc/kg)<input value={form.cec_cmolc_per_kg} onChange={(event) => update("cec_cmolc_per_kg", event.target.value)} /></label>
+              <label>pH KCl<input value={form.ph_kcl} onChange={(event) => update("ph_kcl", event.target.value)} inputMode="decimal" /></label>
+              <label>Chất hữu cơ OC (%)<input value={form.organic_carbon_pct} onChange={(event) => update("organic_carbon_pct", event.target.value)} inputMode="decimal" /></label>
+              <label>Đạm tổng số (%)<input value={form.total_n_pct} onChange={(event) => update("total_n_pct", event.target.value)} inputMode="decimal" /></label>
+              <label>Lân dễ tiêu (mg/100g)<input value={form.available_p_mg_per_100g} onChange={(event) => update("available_p_mg_per_100g", event.target.value)} inputMode="decimal" /></label>
+              <label>Kali trao đổi (mg K2O/100g)<input value={form.exchangeable_k2o_mg_per_100g} onChange={(event) => update("exchangeable_k2o_mg_per_100g", event.target.value)} inputMode="decimal" /></label>
+              <label>CEC (cmolc/kg)<input value={form.cec_cmolc_per_kg} onChange={(event) => update("cec_cmolc_per_kg", event.target.value)} inputMode="decimal" /></label>
             </div>
           </section>
 
-          <section>
-            <h2><Gauge size={18} /> Điều kiện hiệu chỉnh</h2>
+          <section className="fertilizer-form-section">
+            <SectionTitle step="3" Icon={Gauge} title="Điều kiện hiệu chỉnh" note="Dùng để điều chỉnh liều theo điều kiện thực tế của vườn." />
             <div className="fertilizer-two">
-              <label>Lượng mưa năm (mm)<input value={form.annual_rainfall_mm} onChange={(event) => update("annual_rainfall_mm", event.target.value)} /></label>
-              <label>Độ dốc (%)<input value={form.slope_pct} onChange={(event) => update("slope_pct", event.target.value)} /></label>
-              <label>Tuổi vườn<input value={form.years_under_current_crop} onChange={(event) => update("years_under_current_crop", event.target.value)} /></label>
+              <label>Lượng mưa năm (mm)<input value={form.annual_rainfall_mm} onChange={(event) => update("annual_rainfall_mm", event.target.value)} inputMode="numeric" /></label>
+              <label>Độ dốc (%)<input value={form.slope_pct} onChange={(event) => update("slope_pct", event.target.value)} inputMode="decimal" /></label>
+              <label>Tuổi vườn<input value={form.years_under_current_crop} onChange={(event) => update("years_under_current_crop", event.target.value)} inputMode="numeric" /></label>
               <label className="fertilizer-check"><input type="checkbox" checked={form.irrigation_available} onChange={(event) => update("irrigation_available", event.target.checked)} /> Có tưới chủ động</label>
             </div>
           </section>
 
-          <button className="fertilizer-submit" type="submit" disabled={busy}>
-            <Calculator size={18} />
-            {busy ? "Đang tính..." : "Tính khuyến nghị"}
-          </button>
-          {error ? <p className="fertilizer-error">{error}</p> : null}
+          <div className="fertilizer-submit-card">
+            <button className="fertilizer-submit" type="submit" disabled={busy}>
+              <Calculator size={18} />
+              {busy ? "Đang tính..." : "Tính khuyến nghị"}
+            </button>
+            <p>Thông tin chỉ dùng để tính khuyến nghị bón phân hiện tại.</p>
+            {error ? <div className="fertilizer-error" role="alert"><strong>Không tính được khuyến nghị</strong><span>{error}</span></div> : null}
+          </div>
         </form>
 
-        <div className="fertilizer-results">
+        <div className={`fertilizer-results ${result ? "has-result" : "is-empty"}`}>
           <section className="fertilizer-summary">
             <div>
               <span>{selectedCrop.label}</span>
@@ -223,6 +241,13 @@ export function FertilizerAdvisor() {
               <ShieldAlert size={18} />
               Độ tin cậy: {confidenceLabel}
             </div>
+            {!result ? (
+              <div className="fertilizer-preview-list" aria-label="Kết quả sẽ gồm">
+                <article><strong>N-P-K và vôi</strong><span>Tóm tắt lượng hoạt chất theo kg/ha/năm.</span></article>
+                <article><strong>Lịch bón theo đợt</strong><span>Chia thành các cửa sổ bón phù hợp mùa vụ.</span></article>
+                <article><strong>Cảnh báo an toàn</strong><span>Hiển thị rủi ro pH thấp, hữu cơ thấp hoặc liều cao.</span></article>
+              </div>
+            ) : null}
           </section>
 
           {result ? (
@@ -292,7 +317,6 @@ export function FertilizerAdvisor() {
             </>
           ) : (
             <section className="fertilizer-empty">
-              <Calculator size={36} />
               <h2>Nhập phiếu phân tích đất để bắt đầu</h2>
               <p>Công cụ sẽ trả về lượng phân thương mại, cảnh báo, độ tin cậy và vết tính toán. Chỉ tiêu thiếu sẽ được giả định ở mức trung bình và ghi rõ trong kết quả.</p>
             </section>
@@ -300,6 +324,18 @@ export function FertilizerAdvisor() {
         </div>
       </div>
     </section>
+  );
+}
+
+function SectionTitle({ step, Icon, title, note }: { step: string; Icon: typeof Sprout; title: string; note: string }) {
+  return (
+    <div className="fertilizer-section-title">
+      <span className="fertilizer-step-dot">{step}</span>
+      <div>
+        <h2><Icon size={18} /> {title}</h2>
+        <p>{note}</p>
+      </div>
+    </div>
   );
 }
 
