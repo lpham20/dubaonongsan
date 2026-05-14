@@ -109,6 +109,13 @@ const SORT_OPTIONS: { value: SortMode; label: string }[] = [
   { value: "watch", label: "Cần theo dõi" }
 ];
 
+const NEWS_VIEW_TABS: { value: NewsView; label: string }[] = [
+  { value: "latest", label: "Tin tức mới nhất" },
+  { value: "sau_rieng", label: "Giá sầu riêng" },
+  { value: "ca_phe", label: "Giá cà phê" },
+  { value: "ho_tieu", label: "Giá hồ tiêu" }
+];
+
 const NEWS_PAGE_SIZE = 8;
 const VIEW_SEO: Record<NewsView, { title: string; description: string; canonical: string }> = {
   latest: {
@@ -316,6 +323,20 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
           ) : null}
         </div>
       ) : null}
+
+      <nav className="news-view-tabs" aria-label="Chọn mục tin tức">
+        {NEWS_VIEW_TABS.map((view) => (
+          <button
+            type="button"
+            className={`news-view-tab ${activeView === view.value ? "active" : ""}`}
+            aria-current={activeView === view.value ? "page" : undefined}
+            key={view.value}
+            onClick={() => onViewChange(view.value)}
+          >
+            {view.label}
+          </button>
+        ))}
+      </nav>
 
       {activePriceCrop ? (
         <PriceBoardSection
@@ -551,48 +572,90 @@ function PriceBoardSection({
       {loading ? (
         <div className="news-price-empty">Đang tải bảng giá mới nhất...</div>
       ) : displayRows.length ? (
-        <div className="news-price-table-wrap">
-          <table className="news-price-table">
-            <thead>
-              <tr>
-                <th>Tỉnh/vùng</th>
-                <th>Loại giống</th>
-                <th>Loại</th>
-                <th>Giá thấp</th>
-                <th>Giá cao</th>
-                <th>Cập nhật</th>
-                <th>Báo giá nông dân</th>
-              </tr>
-            </thead>
-            <tbody>
-              {displayRows.map((row, index) => (
-                <tr key={`${row.timestamp}-${row.region}-${row.variety}-${row.quality_grade ?? "all"}-${index}`}>
-                  <td>
+        <>
+          <div className="news-price-table-wrap">
+            <table className="news-price-table">
+              <thead>
+                <tr>
+                  <th>Tỉnh/vùng</th>
+                  <th>Loại giống</th>
+                  <th>Loại</th>
+                  <th>Giá thấp</th>
+                  <th>Giá cao</th>
+                  <th>Cập nhật</th>
+                  <th>Báo giá nông dân</th>
+                </tr>
+              </thead>
+              <tbody>
+                {displayRows.map((row, index) => (
+                  <tr key={`${row.timestamp}-${row.region}-${row.variety}-${row.quality_grade ?? "all"}-${index}`}>
+                    <td>
+                      <strong>{row.province ?? row.region}</strong>
+                      {row.province && row.region !== row.province ? <small>{row.region}</small> : null}
+                    </td>
+                    <td><span lang={languageForCropName(row.variety)}>{row.variety}</span></td>
+                    <td>{row.quality_grade ?? "Chuẩn thị trường"}</td>
+                    <td className="num">{formatMoney(row.min_price_vnd ?? row.max_price_vnd)}</td>
+                    <td className="num">{formatMoney(row.max_price_vnd ?? row.min_price_vnd)}</td>
+                    <td className="num">{formatDate(row.timestamp)}</td>
+                    <td>
+                      {row.farmer_report_price_vnd ? (
+                        <>
+                          <strong>{formatMoney(row.farmer_report_price_vnd)}</strong>
+                          <small>
+                            {row.farmer_report_quality_grade ?? "Giá tham khảo"} · {row.farmer_reported_at ? formatDate(row.farmer_reported_at) : ""}
+                          </small>
+                        </>
+                      ) : (
+                        <small>Chưa có báo giá</small>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="news-price-card-list" aria-label={`Bảng giá ${meta.cropName} dạng thẻ`}>
+            {displayRows.map((row, index) => (
+              <article className="news-price-card" key={`card-${row.timestamp}-${row.region}-${row.variety}-${row.quality_grade ?? "all"}-${index}`}>
+                <div className="news-price-card-head">
+                  <div>
                     <strong>{row.province ?? row.region}</strong>
                     {row.province && row.region !== row.province ? <small>{row.region}</small> : null}
-                  </td>
-                  <td><span lang={languageForCropName(row.variety)}>{row.variety}</span></td>
-                  <td>{row.quality_grade ?? "Chuẩn thị trường"}</td>
-                  <td className="num">{formatMoney(row.min_price_vnd ?? row.max_price_vnd)}</td>
-                  <td className="num">{formatMoney(row.max_price_vnd ?? row.min_price_vnd)}</td>
-                  <td className="num">{formatDate(row.timestamp)}</td>
-                  <td>
-                    {row.farmer_report_price_vnd ? (
-                      <>
-                        <strong>{formatMoney(row.farmer_report_price_vnd)}</strong>
-                        <small>
-                          {row.farmer_report_quality_grade ?? "Giá tham khảo"} · {row.farmer_reported_at ? formatDate(row.farmer_reported_at) : ""}
-                        </small>
-                      </>
-                    ) : (
-                      <small>Chưa có báo giá</small>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </div>
+                  <span className="num">{formatDate(row.timestamp)}</span>
+                </div>
+                <div className="news-price-card-meta">
+                  <span lang={languageForCropName(row.variety)}>{row.variety}</span>
+                  <span>{row.quality_grade ?? "Chuẩn thị trường"}</span>
+                </div>
+                <div className="news-price-card-range">
+                  <span>
+                    <small>Giá thấp</small>
+                    <b className="num">{formatMoney(row.min_price_vnd ?? row.max_price_vnd)}</b>
+                  </span>
+                  <span>
+                    <small>Giá cao</small>
+                    <b className="num">{formatMoney(row.max_price_vnd ?? row.min_price_vnd)}</b>
+                  </span>
+                </div>
+                <div className="news-price-card-footer">
+                  {row.farmer_report_price_vnd ? (
+                    <>
+                      <span>Báo giá nông dân</span>
+                      <strong className="num">{formatMoney(row.farmer_report_price_vnd)}</strong>
+                      <small>
+                        {row.farmer_report_quality_grade ?? "Giá tham khảo"}{row.farmer_reported_at ? ` · ${formatDate(row.farmer_reported_at)}` : ""}
+                      </small>
+                    </>
+                  ) : (
+                    <small>Chưa có báo giá nông dân</small>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        </>
       ) : (
         <div className="news-price-empty">
           Chưa có bảng giá đủ sạch cho mục này. Hệ thống sẽ bổ sung sau các lần quét dữ liệu tiếp theo.
@@ -620,7 +683,14 @@ function PriceBoardSection({
 function PriceReportNotice({ onOpen }: { onOpen: () => void }) {
   return (
     <div className="price-report-notice">
-      <p>{PRICE_DISCLAIMER}</p>
+      <div className="price-report-notice-body">
+        <strong>Lưu ý giá tham khảo</strong>
+        <p>Giá được tổng hợp từ dữ liệu thị trường và mô hình AI, dùng để tham khảo nhanh theo vùng.</p>
+        <details>
+          <summary>Xem lưu ý đầy đủ</summary>
+          <p>{PRICE_DISCLAIMER}</p>
+        </details>
+      </div>
       <button type="button" onClick={onOpen}>
         Báo giá
       </button>
