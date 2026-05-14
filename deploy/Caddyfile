@@ -47,6 +47,13 @@
 		}
 	}
 
+	handle /sw.js {
+		root * /var/www/frontend
+		header Cache-Control "no-cache, no-store, must-revalidate"
+		header Service-Worker-Allowed "/"
+		file_server
+	}
+
 	handle /assets/* {
 		root * /var/www/frontend
 		header Cache-Control "public, max-age=31536000, immutable"
