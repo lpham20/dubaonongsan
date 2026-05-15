@@ -53,9 +53,36 @@ export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics }: Props)
 
         <details className="footer-links site-footer-section" aria-label="Liên kết nhanh" open={!isMobile}>
           <summary><span className="footer-section-title">Liên kết nhanh</span></summary>
-          <button type="button" onClick={onOpenNews}>Tin tức thị trường</button>
-          <button type="button" onClick={onOpenGuides}>Quy trình kỹ thuật</button>
-          <button type="button" onClick={onOpenAnalytics}>Dự báo giá nông sản</button>
+          <a
+            href="/tin-tuc"
+            onClick={(event) => {
+              event.preventDefault();
+              onOpenNews();
+            }}
+          >
+            Tin tức thị trường
+          </a>
+          <a
+            href="/huong-dan"
+            onClick={(event) => {
+              event.preventDefault();
+              onOpenGuides();
+            }}
+          >
+            Quy trình kỹ thuật
+          </a>
+          <a
+            href="/du-bao-gia/sau_rieng"
+            onClick={(event) => {
+              event.preventDefault();
+              onOpenAnalytics();
+            }}
+          >
+            Dự báo giá nông sản
+          </a>
+          <a href="/du-bao-gia/ca_phe">Dự báo giá cà phê</a>
+          <a href="/du-bao-gia/ho_tieu">Dự báo giá hồ tiêu</a>
+          <a href="/khuyen-nghi-bon-phan">Khuyến nghị bón phân</a>
         </details>
 
         <details className="footer-subscribe site-footer-section" aria-label="Đăng ký nhận tin" open={!isMobile}>

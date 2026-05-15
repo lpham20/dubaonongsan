@@ -1,6 +1,8 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /api/v1/
+Disallow: /*.json$
 Disallow: /*?utm_*
 Disallow: /*?fbclid=*
 
@@ -9,4 +11,3 @@ Allow: /
 
 # Sitemap is generated at build time by prerender_seo.py
 Sitemap: https://dubaonongsan.com/sitemap.xml
-Crawl-delay: 1

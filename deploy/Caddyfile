@@ -28,6 +28,13 @@
 		-Server
 	}
 
+	@seoHtml {
+		path / /tin-tuc /huong-dan /khuyen-nghi-bon-phan /thuat-toan-du-bao /thuat-toan-bon-phan /khuyen-nghi-bon-phan/logic /tin-tuc/* /huong-dan/* /du-bao-gia/*
+	}
+	header @seoHtml Cache-Control "public, max-age=300, stale-while-revalidate=60"
+
+	redir /api/v1/sitemap.xml /sitemap.xml permanent
+
 	handle /sitemap.xml {
 		rewrite * /api/v1/sitemap.xml
 		reverse_proxy api:8010 {
@@ -45,6 +52,7 @@
 			header_up X-Forwarded-For {remote_host}
 			header_up X-Forwarded-Proto {scheme}
 		}
+		header X-Robots-Tag "noindex, nofollow, noarchive"
 	}
 
 	handle /sw.js {
@@ -132,6 +140,14 @@
 	}
 	respond @apiDocs 404
 
+	handle /robots.txt {
+		respond "User-agent: *\nDisallow: /\n\nSitemap: https://dubaonongsan.com/sitemap.xml\n" 200
+		header Content-Type "text/plain; charset=utf-8"
+		header Cache-Control "public, max-age=3600"
+	}
+
+	redir /api/v1/sitemap.xml https://dubaonongsan.com/sitemap.xml permanent
+
 	reverse_proxy api:8010 {
 		header_up X-Real-IP {remote_host}
 		header_up X-Forwarded-For {remote_host}
@@ -148,6 +164,7 @@
 		Referrer-Policy "strict-origin-when-cross-origin"
 		Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
 		Content-Security-Policy "default-src 'none'; frame-ancestors 'none'"
+		X-Robots-Tag "noindex, nofollow, noarchive"
 		-Server
 		-X-Powered-By
 	}
