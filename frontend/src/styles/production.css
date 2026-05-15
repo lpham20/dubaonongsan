@@ -85,19 +85,19 @@ body,
 
 .fertilizer-methodology-article {
   display: grid;
-  gap: 22px;
-  margin-top: 22px;
-  padding: 28px;
+  gap: 18px;
+  margin-top: 18px;
+  padding: 22px;
   color: var(--color-text);
   border: 1px solid var(--color-border);
-  border-radius: 14px;
-  background: rgba(255, 254, 249, 0.94);
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  box-shadow: none;
 }
 
 .fertilizer-methodology-article section {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .fertilizer-methodology-article h2,
@@ -107,7 +107,7 @@ body,
 }
 
 .fertilizer-methodology-article h2 {
-  font-size: clamp(22px, 2.2vw, 34px);
+  font-size: clamp(22px, 2vw, 30px);
   line-height: 1.12;
   letter-spacing: -0.02em;
 }
@@ -136,31 +136,32 @@ body,
 }
 
 .formula-card {
-  padding: 16px 18px;
+  padding: 14px 16px;
   color: #0d241b;
   border: 1px solid rgba(22, 112, 82, 0.2);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: linear-gradient(135deg, rgba(217, 239, 228, 0.86), rgba(255, 254, 249, 0.96));
   font-family: "Cambria Math", Georgia, serif;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
-  line-height: 1.62;
+  line-height: 1.56;
+  overflow-wrap: anywhere;
 }
 
 .method-step-grid,
 .method-note-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  gap: 12px;
 }
 
 .method-step-grid article,
 .method-note-grid article {
   display: grid;
-  gap: 10px;
-  padding: 18px;
+  gap: 8px;
+  padding: 16px;
   border: 1px solid var(--color-border);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   background: #fffef9;
 }
 
@@ -350,6 +351,20 @@ body,
 }
 
 @media (max-width: 860px) {
+  .fertilizer-methodology-article {
+    gap: 14px;
+    margin-top: 12px;
+    padding: 16px;
+  }
+
+  .formula-card {
+    padding: 12px 14px;
+    font-size: 14px;
+    line-height: 1.52;
+    white-space: normal;
+    word-break: break-word;
+  }
+
   .method-step-grid,
   .method-note-grid,
   .price-report-notice {
@@ -360,4 +375,3 @@ body,
     min-height: 46px;
   }
 }
-

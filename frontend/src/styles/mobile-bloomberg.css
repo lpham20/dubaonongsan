@@ -3808,12 +3808,21 @@
 
 /* Final fertilizer mobile guard: keep the calculator page aligned to the audit prototype. */
 @media (max-width: 860px) {
+  .fertilizer-page > .fertilizer-advisor-hero,
+  .fertilizer-page > .fertilizer-method-hero,
+  .fertilizer-page > .fertilizer-layout,
+  .fertilizer-page > .fertilizer-methodology-article {
+    box-sizing: border-box !important;
+    width: min(100%, calc(100vw - 32px)) !important;
+    max-width: calc(100vw - 32px) !important;
+  }
+
   .fertilizer-page .fertilizer-advisor-hero {
     display: grid !important;
     grid-template-columns: 1fr !important;
-    gap: var(--space-3) !important;
-    margin: 0 0 var(--space-3) !important;
-    padding: var(--space-4) !important;
+    gap: 10px !important;
+    margin: 0 0 12px !important;
+    padding: 14px 16px !important;
     border: 1px solid rgba(13, 75, 56, 0.18) !important;
     border-radius: var(--radius-md) !important;
     background:
@@ -3825,10 +3834,10 @@
 
   .fertilizer-page .fertilizer-advisor-hero h1 {
     max-width: 100% !important;
-    margin: var(--space-3) 0 0 !important;
+    margin: 0 !important;
     color: var(--color-text) !important;
     font-family: var(--font-sans) !important;
-    font-size: clamp(28px, 8.8vw, 38px) !important;
+    font-size: clamp(24px, 7vw, 30px) !important;
     font-weight: var(--fw-black) !important;
     line-height: 1.08 !important;
     letter-spacing: -0.035em !important;
@@ -3838,7 +3847,7 @@
 
   .fertilizer-page .fertilizer-advisor-hero p {
     max-width: 100% !important;
-    margin: var(--space-3) 0 0 !important;
+    margin: 6px 0 0 !important;
     color: var(--color-text-soft) !important;
     font-size: 15px !important;
     line-height: 1.5 !important;
@@ -3855,5 +3864,32 @@
   .fertilizer-page .fertilizer-panel,
   .fertilizer-page .fertilizer-empty {
     border-radius: var(--radius-md) !important;
+  }
+
+  .fertilizer-page .fertilizer-method-hero {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    margin: 0 0 12px !important;
+    padding: 14px 16px !important;
+    overflow: visible !important;
+  }
+
+  .fertilizer-page .fertilizer-method-hero h1 {
+    max-width: 100% !important;
+    margin: 0 !important;
+    font-size: clamp(24px, 7vw, 30px) !important;
+    line-height: 1.08 !important;
+    letter-spacing: -0.03em !important;
+    overflow-wrap: anywhere !important;
+    white-space: normal !important;
+  }
+
+  .fertilizer-page .fertilizer-method-hero p {
+    max-width: 100% !important;
+    margin: 6px 0 0 !important;
+    font-size: 15px !important;
+    line-height: 1.5 !important;
+    overflow-wrap: anywhere !important;
   }
 }
