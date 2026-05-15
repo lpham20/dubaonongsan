@@ -44,6 +44,14 @@ def usd_vnd_rate() -> dict:
     return fetch_usd_vnd_rate()
 
 
+def _usd_vnd_transfer_rate() -> float:
+    try:
+        rate = fetch_usd_vnd_rate()
+        return float(rate.get("transfer") or rate.get("sell") or 24500)
+    except Exception:
+        return 24500.0
+
+
 @router.get("/analytics/daily-price-board", response_model=list[HistoricalPricePoint])
 @cached(prefix="daily-price-board", ttl_seconds=300)
 def daily_price_board(
@@ -149,7 +157,7 @@ def forecast_30_days(
     timestamps = loader.extend_timestamps(window[-1]["timestamp"], config.horizon_days)
     latest_price = float(window[-1].get("max_price_vnd") or forecasts[0] or 0)
     price_scaled_band = max(450.0 if crop == "lua" else 2500.0, latest_price * (0.08 if crop != "lua" else 0.055))
-    band = min(config.rmse_usd_per_kg * 24500, price_scaled_band)
+    band = min(config.rmse_usd_per_kg * _usd_vnd_transfer_rate(), price_scaled_band)
     return [
         {
             "timestamp": ts,
@@ -193,11 +201,12 @@ def model_metrics(
         return ModelMetrics(note="Chưa có backtest. Job retrain sẽ chạy theo lịch.")
     rmse_vnd = float(latest_run.rmse_vnd_per_kg) if latest_run.rmse_vnd_per_kg else None
     mae_vnd = float(latest_run.mae_vnd_per_kg) if latest_run.mae_vnd_per_kg else None
+    usd_vnd = _usd_vnd_transfer_rate()
     return ModelMetrics(
         rmse_vnd_per_kg=rmse_vnd,
         mae_vnd_per_kg=mae_vnd,
-        rmse_usd_per_kg=round(rmse_vnd / 24500, 4) if rmse_vnd else 0.45,
-        mae_usd_per_kg=round(mae_vnd / 24500, 4) if mae_vnd else 0.32,
+        rmse_usd_per_kg=round(rmse_vnd / usd_vnd, 4) if rmse_vnd else 0.45,
+        mae_usd_per_kg=round(mae_vnd / usd_vnd, 4) if mae_vnd else 0.32,
         lookback_days=60,
         forecast_horizon_days=30,
         backtest_samples=latest_run.backtest_samples,
