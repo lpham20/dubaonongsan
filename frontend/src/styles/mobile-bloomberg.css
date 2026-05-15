@@ -4557,19 +4557,19 @@
   }
 
   .app-shell.forecast-shell.analytics-tab-chart .chart-section {
-    order: 20 !important;
+    order: 0 !important;
   }
 
   .app-shell.forecast-shell.analytics-tab-chart .chart-toolbar {
-    order: 30 !important;
+    order: 20 !important;
   }
 
   .app-shell.forecast-shell.analytics-tab-chart .control-band {
-    order: 40 !important;
+    order: 30 !important;
   }
 
   .app-shell.forecast-shell.analytics-tab-chart .intel-grid {
-    order: 50 !important;
+    order: 40 !important;
   }
 
   .app-shell.forecast-shell .market-quote-header {
