@@ -417,12 +417,12 @@ def render_static_pages() -> list[tuple[str, str | None]]:
                 {
                     "@type": "DataDownload",
                     "encodingFormat": "text/csv",
-                    "contentUrl": f"{SITE_BASE}/api/v1/analytics/export.csv?crop_type={crop}",
+                    "contentUrl": f"{API_BASE}/api/v1/analytics/export.csv?crop={crop}",
                 },
                 {
                     "@type": "DataDownload",
                     "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    "contentUrl": f"{SITE_BASE}/api/v1/analytics/export.xlsx?crop_type={crop}",
+                    "contentUrl": f"{API_BASE}/api/v1/analytics/export.xlsx?crop={crop}",
                 },
             ],
         }

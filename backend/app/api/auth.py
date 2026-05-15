@@ -9,7 +9,7 @@ from app.core.config import get_settings
 from app.core.rate_limit import limiter
 from app.db import get_db
 from app.models import AppUser, WatchlistItem
-from app.schemas import AuthCredentials, AuthTokenOut, AuthUserOut, WatchlistItemIn, WatchlistItemOut
+from app.schemas import AuthCredentials, AuthRegisterCredentials, AuthTokenOut, AuthUserOut, WatchlistItemIn, WatchlistItemOut
 from app.services.auth import (
     create_access_token,
     current_user,
@@ -38,7 +38,7 @@ def auth_response(user: AppUser) -> AuthTokenOut:
 
 @router.post("/auth/register", response_model=AuthTokenOut, status_code=201)
 @limiter.limit("5/minute")
-def register(request: Request, payload: AuthCredentials, db: Session = Depends(get_db)) -> AuthTokenOut:
+def register(request: Request, payload: AuthRegisterCredentials, db: Session = Depends(get_db)) -> AuthTokenOut:
     email = payload.email.strip().lower()
     user = AppUser(
         email=email,

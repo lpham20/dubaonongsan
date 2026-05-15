@@ -539,25 +539,39 @@ class MarketIntelligenceService:
             limit=1000,
         )
         output = StringIO()
+        output.write("\ufeff")
+        fieldnames = [
+            "timestamp",
+            "crop",
+            "variety",
+            "region",
+            "province",
+            "quality_grade",
+            "exchange_source",
+            "min_price_vnd",
+            "max_price_vnd",
+            "volume_traded_tons",
+            "temp_max_celsius",
+            "precipitation_mm",
+            "maturity_index",
+            "data_kind",
+        ]
         writer = csv.DictWriter(
             output,
-            fieldnames=[
-                "timestamp",
-                "variety",
-                "region",
-                "province",
-                "quality_grade",
-                "exchange_source",
-                "min_price_vnd",
-                "max_price_vnd",
-                "volume_traded_tons",
-                "temp_max_celsius",
-                "precipitation_mm",
-                "maturity_index",
-            ],
+            fieldnames=fieldnames,
+            extrasaction="ignore",
         )
         writer.writeheader()
-        writer.writerows(rows)
+        for row in rows:
+            safe_row = {key: row.get(key, "") for key in fieldnames}
+            safe_row["crop"] = crop
+            timestamp = safe_row.get("timestamp")
+            if hasattr(timestamp, "isoformat"):
+                safe_row["timestamp"] = timestamp.isoformat()
+            for key, value in list(safe_row.items()):
+                if value is None:
+                    safe_row[key] = ""
+            writer.writerow(safe_row)
         return output.getvalue()
 
     @staticmethod

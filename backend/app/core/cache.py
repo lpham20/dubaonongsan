@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import inspect
 import json
 import threading
 import time
@@ -51,7 +52,24 @@ def cache_key(prefix: str, **params: Any) -> str:
 
 
 def cached(prefix: str, ttl_seconds: int = 600) -> Callable:
+    """Cache decorator for public, non-user-specific endpoints only.
+
+    The cache key intentionally ignores request/response/db objects. That is
+    correct for public market data, but unsafe for endpoints that depend on the
+    authenticated user. If a future endpoint has a user-like parameter, fail at
+    import time instead of serving another user's cached payload.
+    """
+
     def decorator(func: Callable) -> Callable:
+        signature = inspect.signature(func)
+        for param_name, param in signature.parameters.items():
+            annotation = "" if param.annotation is inspect.Signature.empty else str(param.annotation)
+            if "user" in param_name.lower() or "User" in annotation or "AppUser" in annotation:
+                raise RuntimeError(
+                    f"@cached cannot be used on user-specific endpoint {func.__name__}; "
+                    f"parameter {param_name!r} would not be included in the cache key."
+                )
+
         @wraps(func)
         def wrapper(*args, **kwargs):
             key_params = {

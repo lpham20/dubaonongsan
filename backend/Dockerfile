@@ -4,6 +4,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1
 
+RUN groupadd --system marketai \
+    && useradd --system --gid marketai --home /app marketai
+
 WORKDIR /app
 
 RUN apt-get update \
@@ -18,6 +21,11 @@ COPY alembic.ini .
 COPY alembic ./alembic
 COPY app ./app
 
+RUN mkdir -p /app/.job_locks \
+    && chown -R marketai:marketai /app
+
+USER marketai
+
 EXPOSE 8010
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8010", "--proxy-headers", "--forwarded-allow-ips", "*"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8010", "--proxy-headers", "--forwarded-allow-ips", "127.0.0.1"]

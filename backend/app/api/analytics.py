@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, Query, Response
+from fastapi import APIRouter, Depends, Query, Request, Response
 from sqlalchemy import desc, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.core.admin_units import is_production_region
 from app.core.cache import cached
 from app.core.config import get_settings
+from app.core.rate_limit import limiter
 from app.db import get_db
 from app.ml_engine.lstm_forecaster import ForecastConfig, LSTMForecaster
 from app.ml_engine.signal_processor import detect_optimal_sell_points
@@ -287,7 +288,9 @@ def compare_markets(
 
 
 @router.get("/analytics/export.csv")
+@limiter.limit("10/minute")
 def export_csv(
+    request: Request,
     crop: str = Query(default="sau_rieng"),
     region_id: int | None = Query(default=None),
     variety_id: int | None = Query(default=None),
@@ -303,7 +306,9 @@ def export_csv(
 
 
 @router.get("/analytics/export.xlsx")
+@limiter.limit("10/minute")
 def export_xlsx(
+    request: Request,
     crop: str = Query(default="sau_rieng"),
     region_id: int | None = Query(default=None),
     variety_id: int | None = Query(default=None),
@@ -325,7 +330,9 @@ def export_xlsx(
 
 
 @router.get("/analytics/export.pdf")
+@limiter.limit("10/minute")
 def export_pdf(
+    request: Request,
     crop: str = Query(default="sau_rieng"),
     region_id: int | None = Query(default=None),
     variety_id: int | None = Query(default=None),

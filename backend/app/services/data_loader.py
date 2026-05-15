@@ -71,9 +71,14 @@ class DataLoader:
         latest_telemetry = (
             select(
                 IotSensorTelemetry.region_id.label("region_id"),
-                func.max(IotSensorTelemetry.id).label("latest_id"),
+                IotSensorTelemetry.maturity_index.label("maturity_index"),
+                func.row_number()
+                .over(
+                    partition_by=IotSensorTelemetry.region_id,
+                    order_by=(IotSensorTelemetry.record_timestamp.desc(), IotSensorTelemetry.id.desc()),
+                )
+                .label("rn"),
             )
-            .group_by(IotSensorTelemetry.region_id)
             .subquery()
         )
 
@@ -92,7 +97,7 @@ class DataLoader:
                 DailyMarketPrice.volume_traded_tons,
                 WeatherEnvironmentalMetric.temp_max_celsius,
                 WeatherEnvironmentalMetric.precipitation_mm,
-                IotSensorTelemetry.maturity_index,
+                latest_telemetry.c.maturity_index,
             )
             .join(DurianVariety, DailyMarketPrice.variety_id == DurianVariety.variety_id)
             .join(ProductionRegion, DailyMarketPrice.region_id == ProductionRegion.region_id)
@@ -105,13 +110,9 @@ class DataLoader:
             )
             .outerjoin(
                 latest_telemetry,
-                latest_telemetry.c.region_id == DailyMarketPrice.region_id,
-            )
-            .outerjoin(
-                IotSensorTelemetry,
                 and_(
-                    IotSensorTelemetry.region_id == DailyMarketPrice.region_id,
-                    IotSensorTelemetry.id == latest_telemetry.c.latest_id,
+                    latest_telemetry.c.region_id == DailyMarketPrice.region_id,
+                    latest_telemetry.c.rn == 1,
                 ),
             )
         )
@@ -136,7 +137,8 @@ class DataLoader:
     @staticmethod
     def _interpolate(points: list[dict]) -> list[dict]:
         if not points:
-            return points
+            return []
+        result = [dict(point) for point in points]
         numeric_keys = [
             "max_price_vnd",
             "temp_max_celsius",
@@ -145,18 +147,18 @@ class DataLoader:
             "maturity_index",
         ]
         last_seen = {key: None for key in numeric_keys}
-        for point in points:
+        for point in result:
             for key in numeric_keys:
                 if point.get(key) is None:
                     point[key] = last_seen[key]
                 else:
                     last_seen[key] = point[key]
         for key in numeric_keys:
-            fallback = next((p[key] for p in points if p.get(key) is not None), 0.0)
-            for point in points:
+            fallback = next((p[key] for p in result if p.get(key) is not None), 0.0)
+            for point in result:
                 if point.get(key) is None:
                     point[key] = fallback
-        return points
+        return result
 
     @staticmethod
     def extend_timestamps(last_timestamp, horizon_days: int):

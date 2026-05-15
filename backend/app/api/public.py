@@ -29,7 +29,15 @@ def scrape_health(db: Session = Depends(get_db)) -> dict:
     External uptime monitors should alert when this returns anything other than
     HTTP 200. Per-source freshness remains available at /analytics/source-health.
     """
-    healthy_statuses = ["thành công", "trùng lặp", "trống"]
+    healthy_statuses = [
+        "thành công",
+        "trùng lặp",
+        "trống",
+        # Backward compatibility for records written before the encoding fix.
+        "thÃ nh cÃ´ng",
+        "trÃ¹ng láº·p",
+        "trá»‘ng",
+    ]
     now = datetime.now(timezone.utc)
     last_success = db.scalar(
         select(ScrapeRun.finished_at)

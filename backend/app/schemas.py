@@ -80,7 +80,7 @@ class ScrapeRunOut(BaseModel):
 
 class AuthCredentials(BaseModel):
     email: EmailStr
-    password: str = Field(min_length=8, max_length=128)
+    password: str = Field(min_length=1, max_length=128)
     display_name: str | None = Field(default=None, max_length=120)
 
     @field_validator("email")
@@ -88,11 +88,19 @@ class AuthCredentials(BaseModel):
     def normalize_auth_email(cls, value: EmailStr) -> str:
         return str(value).strip().lower()
 
+
+class AuthRegisterCredentials(AuthCredentials):
+    password: str = Field(min_length=10, max_length=128)
+
     @field_validator("password")
     @classmethod
     def validate_password_strength(cls, value: str) -> str:
-        if not re.search(r"\d", value):
-            raise ValueError("Mật khẩu cần ít nhất 1 chữ số")
+        if len(value) < 10:
+            raise ValueError("Mật khẩu cần ít nhất 10 ký tự")
+        if not re.search(r"[a-z]", value):
+            raise ValueError("Mật khẩu cần ít nhất 1 chữ thường")
+        if not re.search(r"[A-Z]", value) and not re.search(r"\d", value):
+            raise ValueError("Mật khẩu cần ít nhất 1 chữ hoa hoặc 1 chữ số")
         return value
 
 

@@ -68,8 +68,13 @@ def _ensure_demo_user(db: Session) -> None:
             db.commit()
         return
     demo_password = os.getenv("MARKETAI_DEMO_PASSWORD")
-    if not demo_password or len(demo_password) < 12:
-        raise RuntimeError("MARKETAI_DEMO_PASSWORD phải có ít nhất 12 ký tự khi bật MARKETAI_CREATE_DEMO_USER")
+    if not demo_password or len(demo_password) < 16:
+        raise RuntimeError("MARKETAI_DEMO_PASSWORD phải có ít nhất 16 ký tự khi bật MARKETAI_CREATE_DEMO_USER")
+    if len(set(demo_password)) < 6:
+        raise RuntimeError("MARKETAI_DEMO_PASSWORD quá đơn giản")
+    weak_patterns = ("12345", "password", "qwerty", "abcdef", "demo")
+    if any(pattern in demo_password.lower() for pattern in weak_patterns):
+        raise RuntimeError("MARKETAI_DEMO_PASSWORD chứa pattern yếu")
     db.add(
         AppUser(
             email=email,

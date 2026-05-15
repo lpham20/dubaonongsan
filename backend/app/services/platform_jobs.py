@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 import logging
 import os
+import errno
+import time
 from contextlib import contextmanager
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -87,12 +89,12 @@ class PlatformJobService:
 
                 summary = populate_precipitation(self.db, days_back=90)
                 invalidate_cache()
-                self._finish_job(job, "thÃ nh cÃ´ng", summary)
+                self._finish_job(job, "thành công", summary)
                 return summary
             except Exception as exc:
                 self.db.rollback()
                 job = self.db.get(PlatformJobRun, job.job_id) or job
-                self._finish_job(job, "lá»—i", None, str(exc))
+                self._finish_job(job, "lỗi", None, str(exc))
                 raise
 
     def run_data_quality(self) -> dict:
@@ -346,17 +348,53 @@ def job_lock(name: str):
     lock_dir.mkdir(parents=True, exist_ok=True)
     lock_path = lock_dir / f"{name}.lock"
     handle = None
+    acquired = False
     try:
-        handle = os.open(str(lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-        os.write(handle, str(os.getpid()).encode("ascii"))
-        yield
-    except FileExistsError as exc:
-        raise RuntimeError(f"Job {name} đang chạy, bỏ qua lần chạy chồng.") from exc
-    finally:
-        if handle is not None:
-            os.close(handle)
+        try:
+            handle = os.open(str(lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except FileExistsError as exc:
+            if not _is_stale_lock(lock_path):
+                raise RuntimeError(f"Job {name} đang chạy, bỏ qua lần chạy chồng.") from exc
             try:
                 lock_path.unlink()
             except FileNotFoundError:
                 pass
+            handle = os.open(str(lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            logger.warning("Reset stale job lock: %s", name)
+        acquired = True
+        os.write(handle, json.dumps({"pid": os.getpid(), "at": time.time()}).encode("utf-8"))
+        yield
+    finally:
+        if handle is not None:
+            os.close(handle)
+        if acquired:
+            try:
+                lock_path.unlink()
+            except FileNotFoundError:
+                pass
+
+
+def _is_stale_lock(lock_path: Path, max_age_seconds: int = 6 * 3600) -> bool:
+    try:
+        raw = lock_path.read_text(encoding="utf-8")
+    except (FileNotFoundError, OSError):
+        return True
+    try:
+        meta = json.loads(raw)
+        pid = int(meta.get("pid", 0))
+        created_at = float(meta.get("at", 0))
+    except (TypeError, ValueError, json.JSONDecodeError):
+        try:
+            pid = int(raw.strip())
+            created_at = lock_path.stat().st_mtime
+        except (ValueError, OSError):
+            return True
+
+    if pid <= 0 or time.time() - created_at > max_age_seconds:
+        return True
+    try:
+        os.kill(pid, 0)
+        return False
+    except OSError as exc:
+        return exc.errno == errno.ESRCH
 

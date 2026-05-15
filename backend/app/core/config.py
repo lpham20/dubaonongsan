@@ -62,12 +62,18 @@ class Settings(BaseSettings):
     @classmethod
     def validate_cors_origins(cls, value: list[str], info) -> list[str]:
         environment = info.data.get("environment", "development")
+        origins = [origin.strip().rstrip("/") for origin in value if origin and origin.strip()]
         if environment == "production":
-            if "*" in value:
-                raise ValueError("MARKETAI_CORS_ORIGINS không được dùng wildcard trong production")
-            if any("localhost" in origin or "127.0.0.1" in origin for origin in value):
-                raise ValueError("MARKETAI_CORS_ORIGINS không được chứa localhost trong production")
-        return value
+            if not origins:
+                raise ValueError("MARKETAI_CORS_ORIGINS is required in production")
+            if "*" in origins:
+                raise ValueError("MARKETAI_CORS_ORIGINS cannot use wildcard in production")
+            for origin in origins:
+                if "localhost" in origin or "127.0.0.1" in origin:
+                    raise ValueError(f"MARKETAI_CORS_ORIGINS cannot contain localhost in production: {origin}")
+                if not origin.startswith("https://"):
+                    raise ValueError(f"Production CORS origin must use HTTPS: {origin}")
+        return origins
 
 
 @lru_cache
