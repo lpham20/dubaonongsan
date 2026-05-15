@@ -4548,3 +4548,78 @@
     display: block !important;
   }
 }
+
+/* Forecast mobile final pass: keep desktop untouched, move the chart closer to the top. */
+@media (max-width: 860px) {
+  .app-shell.forecast-shell.analytics-tab-chart {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .app-shell.forecast-shell.analytics-tab-chart .chart-section {
+    order: 20 !important;
+  }
+
+  .app-shell.forecast-shell.analytics-tab-chart .chart-toolbar {
+    order: 30 !important;
+  }
+
+  .app-shell.forecast-shell.analytics-tab-chart .control-band {
+    order: 40 !important;
+  }
+
+  .app-shell.forecast-shell.analytics-tab-chart .intel-grid {
+    order: 50 !important;
+  }
+
+  .app-shell.forecast-shell .market-quote-header {
+    gap: 10px !important;
+    margin: 10px 0 8px !important;
+    padding: 12px !important;
+  }
+
+  .app-shell.forecast-shell .market-quote-header h1 {
+    font-size: clamp(21px, 5.7vw, 25px) !important;
+    line-height: 1.03 !important;
+  }
+
+  .app-shell.forecast-shell .quote-title-row {
+    grid-template-columns: 20px minmax(0, 1fr) !important;
+    gap: 7px !important;
+  }
+
+  .app-shell.forecast-shell .quote-h1-line1 {
+    max-width: 14.5ch !important;
+  }
+
+  .app-shell.forecast-shell .quote-title-row .freshness-banner {
+    min-height: 28px !important;
+    padding: 5px 8px !important;
+    font-size: 11px !important;
+  }
+
+  .app-shell.forecast-shell .quote-price-row {
+    gap: 7px !important;
+  }
+
+  .app-shell.forecast-shell .quote-price-row strong {
+    font-size: clamp(31px, 9.7vw, 40px) !important;
+  }
+
+  .app-shell.forecast-shell .quote-refresh-button {
+    min-height: 40px !important;
+  }
+
+  .app-shell.forecast-shell .market-subnav {
+    margin-bottom: 8px !important;
+  }
+
+  .app-shell.forecast-shell .chart-section {
+    margin-top: 6px !important;
+  }
+
+  .app-shell.forecast-shell .chart-toolbar,
+  .app-shell.forecast-shell .control-band {
+    margin-top: 10px !important;
+  }
+}

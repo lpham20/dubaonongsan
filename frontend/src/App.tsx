@@ -720,10 +720,14 @@ function RoutedApp() {
   }
 
   const showErrorBanner = Boolean(error && (section !== "methodology" || authOpen));
+  const appShellClassName =
+    section === "analytics"
+      ? `app-shell forecast-shell crop-${crop} analytics-tab-${analyticsTab}`
+      : "app-shell";
 
   return (
     <IconContext.Provider value={{ size: 18, weight: "regular", mirrored: false }}>
-    <main className={section === "analytics" ? `app-shell forecast-shell crop-${crop}` : "app-shell"}>
+    <main className={appShellClassName}>
       <AppHeader
         section={section}
         crop={crop}
