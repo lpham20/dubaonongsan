@@ -760,7 +760,9 @@
   }
 
   .forecast-shell .quote-title-row .freshness-banner,
-  .quote-title-row .freshness-banner {
+  .forecast-shell .quote-main > .freshness-banner,
+  .quote-title-row .freshness-banner,
+  .quote-main > .freshness-banner {
     grid-column: 1 / -1;
     grid-row: 2;
     width: 100%;
@@ -2677,7 +2679,9 @@
   }
 
   .forecast-shell .quote-title-row .freshness-banner,
-  .quote-title-row .freshness-banner {
+  .forecast-shell .quote-main > .freshness-banner,
+  .quote-title-row .freshness-banner,
+  .quote-main > .freshness-banner {
     grid-column: 1 / -1 !important;
   }
 
@@ -3912,6 +3916,30 @@
   padding: 14px 0 16px !important;
 }
 
+.app-shell.forecast-shell .quote-title-row {
+  display: grid !important;
+  grid-template-columns: 22px minmax(0, 1fr) !important;
+  align-items: start !important;
+  gap: 8px !important;
+}
+
+.app-shell.forecast-shell .quote-title-row > svg {
+  margin-top: 5px;
+}
+
+.app-shell.forecast-shell .quote-main > .freshness-banner {
+  justify-self: start;
+  width: fit-content;
+  max-width: min(100%, 390px);
+  margin-top: 4px;
+}
+
+.app-shell.forecast-shell .quote-main > .freshness-banner span {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 .app-shell.forecast-shell .quote-title-row,
 .app-shell.forecast-shell .quote-price-row,
 .app-shell.forecast-shell .quote-side,
@@ -4180,7 +4208,8 @@
     align-items: start !important;
   }
 
-  .app-shell.forecast-shell .quote-title-row .freshness-banner {
+  .app-shell.forecast-shell .quote-title-row .freshness-banner,
+  .app-shell.forecast-shell .quote-main > .freshness-banner {
     grid-column: 1 / -1 !important;
     max-width: 100% !important;
     width: 100% !important;
@@ -4188,6 +4217,13 @@
     min-height: 30px !important;
     justify-content: flex-start !important;
     align-items: flex-start !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .app-shell.forecast-shell .quote-title-row .freshness-banner span,
+  .app-shell.forecast-shell .quote-main > .freshness-banner span {
+    min-width: 0 !important;
     white-space: normal !important;
     overflow-wrap: anywhere !important;
   }
@@ -4596,7 +4632,8 @@
     max-width: 14.5ch !important;
   }
 
-  .app-shell.forecast-shell .quote-title-row .freshness-banner {
+  .app-shell.forecast-shell .quote-title-row .freshness-banner,
+  .app-shell.forecast-shell .quote-main > .freshness-banner {
     min-height: 28px !important;
     padding: 5px 8px !important;
     font-size: 11px !important;

@@ -770,8 +770,8 @@ function RoutedApp() {
                     {`Dự báo 30 ngày${selectedRegion?.province ? ` tại ${selectedRegion.province}` : ""}`}
                   </span>
                 </h1>
-                <FreshnessBanner />
               </div>
+              <FreshnessBanner />
               <div className="quote-meta">
                 <span>{selectedRegion?.province ?? selectedRegion?.region_name ?? "Vùng trồng"}</span>
                 <span>{selectedVariety?.name ?? "Giống"}</span>
