@@ -35,6 +35,12 @@
 
 	redir /api/v1/sitemap.xml /sitemap.xml permanent
 
+	handle /robots.txt {
+		root * /var/www/frontend
+		header Cache-Control "public, max-age=300, must-revalidate"
+		file_server
+	}
+
 	handle /sitemap.xml {
 		rewrite * /api/v1/sitemap.xml
 		reverse_proxy api:8010 {
@@ -148,7 +154,7 @@ Disallow: /
 Sitemap: https://dubaonongsan.com/sitemap.xml
 EOF
 		header Content-Type "text/plain; charset=utf-8"
-		header Cache-Control "public, max-age=3600"
+		header Cache-Control "public, max-age=300, must-revalidate"
 	}
 
 	redir /api/v1/sitemap.xml https://dubaonongsan.com/sitemap.xml permanent
