@@ -4572,6 +4572,10 @@
     order: 40 !important;
   }
 
+  .app-shell.forecast-shell.analytics-tab-chart .site-footer {
+    order: 1000 !important;
+  }
+
   .app-shell.forecast-shell .market-quote-header {
     gap: 10px !important;
     margin: 10px 0 8px !important;
