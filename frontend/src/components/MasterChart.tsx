@@ -556,7 +556,7 @@ function MobileSvgChart({
         role="img"
         onPointerDown={selectFromPointer}
         onPointerMove={(event) => {
-          if (event.buttons || event.pointerType === "touch") selectFromPointer(event);
+          if (event.pointerType !== "touch" && event.buttons) selectFromPointer(event);
         }}
         onClick={(event) => selectFromClientX(event.clientX, event.currentTarget)}
         onTouchStart={(event) => {

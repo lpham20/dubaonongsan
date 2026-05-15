@@ -233,10 +233,11 @@ const USER_ACTION_ERROR_PATTERN = /^(email|mật khẩu|mat khau|vui lòng|vui l
 
 function safeErrorCopy(message: string | null) {
   const clean = (message ?? "").replace(/\s+/g, " ").trim();
-  if (!clean) return "Dữ liệu đang được cập nhật. Vui lòng thử lại sau ít phút.";
+  const fallback = "Một phần dữ liệu dự báo chưa tải được. Bạn có thể thử lại sau ít phút.";
+  if (!clean) return fallback;
   if (USER_ACTION_ERROR_PATTERN.test(clean) || clean.toLowerCase().includes("chưa có dữ liệu")) return clean;
-  if (TECHNICAL_ERROR_PATTERN.test(clean)) return "Dữ liệu đang được cập nhật. Vui lòng thử lại sau ít phút.";
-  return clean.length > 150 ? "Dữ liệu đang được cập nhật. Vui lòng thử lại sau ít phút." : clean;
+  if (TECHNICAL_ERROR_PATTERN.test(clean)) return fallback;
+  return clean.length > 150 ? fallback : clean;
 }
 
 function safeErrorTitle(message: string | null) {
@@ -903,7 +904,9 @@ function RoutedApp() {
           {analyticsTab === "chart" ? (
             <>
               <section className="chart-toolbar">
-                <div className="segmented">
+                <div className="chart-control-group">
+                  <span className="control-label">Khoảng thời gian</span>
+                  <div className="segmented">
                   {[30, 90, 180].map((value) => (
                     <button
                       type="button"
@@ -914,8 +917,11 @@ function RoutedApp() {
                       {value} ngày
                     </button>
                   ))}
+                  </div>
                 </div>
-                <div className="layer-toggles">
+                <div className="chart-control-group chart-control-group--layers">
+                  <span className="control-label">Lớp dữ liệu</span>
+                  <div className="layer-toggles">
                   <button type="button" className={layers.price ? "active" : ""} onClick={() => toggleLayer("price")}>Giá</button>
                   <button type="button" className={layers.forecast ? "active" : ""} onClick={() => toggleLayer("forecast")}>Dự báo</button>
                   <button
@@ -928,6 +934,7 @@ function RoutedApp() {
                     Mưa
                   </button>
                   <button type="button" className={layers.signals ? "active" : ""} onClick={() => toggleLayer("signals")}>Cảnh báo</button>
+                  </div>
                 </div>
                 <button type="button" className="pin-button" onClick={() => void addWatchlist()}>
                   <Pin size={16} />
