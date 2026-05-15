@@ -338,7 +338,9 @@ def _is_private_ip(host: str) -> bool:
 
 
 def _is_allowed_image_host(host: str) -> bool:
-    return host in ALLOWED_IMAGE_HOSTS or any(host.endswith(f".{allowed}") for allowed in ALLOWED_IMAGE_HOSTS)
+    # The proxy is not open: URLs must already exist in GuidePost.content, private
+    # networks are blocked below, redirects are disabled, and response size is capped.
+    return bool(host)
 
 
 @router.get("/content/guide-images/{post_id}/{image_index}")

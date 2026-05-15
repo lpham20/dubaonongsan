@@ -719,7 +719,7 @@ function RoutedApp() {
     }
   }
 
-  const showErrorBanner = Boolean(error && (section !== "methodology" || authOpen));
+  const showErrorBanner = Boolean(error && (authOpen || section === "analytics"));
   const appShellClassName =
     section === "analytics"
       ? `app-shell forecast-shell crop-${crop} analytics-tab-${analyticsTab}`
