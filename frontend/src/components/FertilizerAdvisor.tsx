@@ -140,10 +140,8 @@ export function FertilizerAdvisor() {
       />
       <header className="fertilizer-hero fertilizer-advisor-hero">
         <div>
-          <span className="fertilizer-eyebrow">Công cụ kỹ thuật</span>
           <h1>Khuyến nghị bón phân theo phân tích đất</h1>
           <p>Nhập chỉ tiêu đất, năng suất mục tiêu và điều kiện vườn để nhận lượng phân thương mại theo kg/ha, kèm lịch chia đợt và cảnh báo an toàn.</p>
-          <a className="fertilizer-inline-link" href="/khuyen-nghi-bon-phan/logic">Xem logic cách tính</a>
         </div>
         <aside className="fertilizer-intro-card" aria-label="Nội dung kết quả">
           <strong>Kết quả sau khi tính gồm</strong>

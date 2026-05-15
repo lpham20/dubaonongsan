@@ -30,10 +30,8 @@ export function FertilizerMethodology() {
       />
       <header className="fertilizer-hero fertilizer-method-hero">
         <div>
-          <span className="fertilizer-eyebrow">Minh bạch công thức</span>
           <h1>Giải thích logic chi tiết cách tính khuyến nghị bón phân</h1>
           <p>Cách tính được thiết kế để người trồng có thể kiểm tra từng bước: từ chỉ tiêu đất, liều nền, hệ số hiệu chỉnh đến lượng phân thương mại cần bón theo từng đợt.</p>
-          <a className="fertilizer-inline-link" href="/khuyen-nghi-bon-phan">Mở công cụ khuyến nghị</a>
         </div>
       </header>
 
