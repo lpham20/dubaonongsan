@@ -179,6 +179,7 @@ def guide_detail(slug: str, db: Session = Depends(get_db)) -> dict:
 
 
 @router.get("/sitemap.xml", include_in_schema=False)
+@router.head("/sitemap.xml", include_in_schema=False)
 def sitemap(db: Session = Depends(get_db)) -> Response:
     urls: list[tuple[str, str, str, str | None]] = [
         (f"{SITE_BASE}/", "1.0", "daily", None),
