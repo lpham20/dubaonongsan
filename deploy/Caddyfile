@@ -141,7 +141,12 @@
 	respond @apiDocs 404
 
 	handle /robots.txt {
-		respond "User-agent: *\nDisallow: /\n\nSitemap: https://dubaonongsan.com/sitemap.xml\n" 200
+		respond <<EOF
+User-agent: *
+Disallow: /
+
+Sitemap: https://dubaonongsan.com/sitemap.xml
+EOF
 		header Content-Type "text/plain; charset=utf-8"
 		header Cache-Control "public, max-age=3600"
 	}

@@ -14,7 +14,7 @@ API_BASE = (
     os.environ.get("SEO_API_BASE_URL")
     or os.environ.get("API_BASE")
     or os.environ.get("VITE_API_BASE_URL")
-    or "http://127.0.0.1:8010"
+    or "https://api.dubaonongsan.com"
 ).rstrip("/")
 SITE_BASE = os.environ.get("SITE_BASE", "https://dubaonongsan.com").rstrip("/")
 SITE_NAME = "Dự báo nông sản"
