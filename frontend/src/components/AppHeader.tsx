@@ -6,7 +6,7 @@ import type { AppHeaderProps } from "./header/types";
 
 export function AppHeader(props: AppHeaderProps) {
   const { user, signOut } = useAuth();
-  const isMobile = useMediaQuery("(max-width: 1023px)");
+  const isMobile = useMediaQuery("(max-width: 1180px)");
   const userLabel = user?.display_name ?? null;
 
   const authContent = user ? (
