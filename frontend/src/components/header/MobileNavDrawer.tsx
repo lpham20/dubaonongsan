@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Leaf, Menu, X } from "../icons";
+import { Leaf, Menu, UserRound, X } from "../icons";
 import { fertilizerMenuItems, newsMenuItems } from "./navItems";
 import { MobileAccordion } from "./MobileAccordion";
 import type { HeaderSurfaceProps } from "./types";
@@ -108,6 +108,18 @@ export function MobileNavDrawer({
         onClick={() => setDrawerOpen(true)}
       >
         <Menu size={24} />
+      </button>
+      <button
+        type="button"
+        className="mobile-header-account-trigger"
+        aria-label={userLabel ? `Tài khoản ${userLabel}` : "Mở tài khoản"}
+        onClick={() => {
+          setDrawerOpen(false);
+          onAuthOpenChange(true);
+        }}
+      >
+        <UserRound size={24} />
+        <span className="sr-only">{userLabel ?? "Tài khoản"}</span>
       </button>
 
       <div className={drawerOpen ? "mobile-drawer-backdrop open" : "mobile-drawer-backdrop"} onClick={closeDrawer} />

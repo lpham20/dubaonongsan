@@ -82,11 +82,11 @@ function useDarkChart(): boolean {
 
 function useCoarsePointer(): boolean {
   const getInitialValue = () =>
-    typeof window === "undefined" ? true : window.matchMedia("(pointer: coarse), (max-width: 860px)").matches;
+    typeof window === "undefined" ? true : window.matchMedia("(pointer: coarse), (max-width: 1180px)").matches;
   const [isCoarse, setIsCoarse] = useState(getInitialValue);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(pointer: coarse), (max-width: 860px)");
+    const mediaQuery = window.matchMedia("(pointer: coarse), (max-width: 1180px)");
     const update = () => setIsCoarse(mediaQuery.matches);
     update();
     if (typeof mediaQuery.addEventListener === "function") {
@@ -557,11 +557,6 @@ function MobileSvgChart({
         onPointerDown={selectFromPointer}
         onPointerMove={(event) => {
           if (event.pointerType !== "touch" && event.buttons) selectFromPointer(event);
-        }}
-        onClick={(event) => selectFromClientX(event.clientX, event.currentTarget)}
-        onTouchStart={(event) => {
-          const touch = event.touches.item(0);
-          if (touch) selectFromClientX(touch.clientX, event.currentTarget);
         }}
       >
         <defs>

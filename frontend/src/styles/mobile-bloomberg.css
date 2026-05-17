@@ -4919,3 +4919,165 @@
     box-shadow: 0 20px 44px rgba(4, 15, 11, 0.24) !important;
   }
 }
+
+/* iPad/tablet forecast charts should use the stable mobile SVG flow, not the
+   desktop brush/tooltip interaction that jitters under touch. */
+@media (min-width: 861px) and (max-width: 1180px) {
+  .app-shell.forecast-shell .chart-mobile-hint {
+    display: block !important;
+    max-width: 100% !important;
+  }
+
+  .app-shell.forecast-shell .mobile-chart-range-controls {
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) !important;
+    gap: 10px !important;
+    align-items: center !important;
+    width: min(100%, 560px) !important;
+  }
+
+  .app-shell.forecast-shell .mobile-chart-range-controls label {
+    min-width: 0 !important;
+  }
+
+  .app-shell.forecast-shell .chart-heading-tools {
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+  }
+
+  .app-shell.forecast-shell .chart-zoom-controls button {
+    min-height: 34px !important;
+  }
+
+  .app-shell.forecast-shell .mobile-chart-frame {
+    max-width: 860px !important;
+    margin: 0 auto !important;
+  }
+
+  .app-shell.forecast-shell .mobile-svg-chart {
+    min-height: 340px !important;
+    touch-action: pan-y !important;
+  }
+}
+
+/* Final masthead lock for phone/tablet: one predictable Bloomberg-style bar.
+   This overrides older mobile rules that moved the hamburger to the right. */
+@media (max-width: 1180px) {
+  .app-shell > .menu-bar.mobile-menu-bar,
+  .mobile-menu-bar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 120 !important;
+    display: grid !important;
+    grid-template-columns: 56px minmax(0, 1fr) 56px !important;
+    align-items: center !important;
+    width: calc(100% + var(--app-shell-pad, 24px) + var(--app-shell-pad, 24px)) !important;
+    min-height: 64px !important;
+    height: 64px !important;
+    margin: 0 calc(-1 * var(--app-shell-pad, 24px)) !important;
+    padding: 8px var(--app-shell-pad, 24px) !important;
+    color: #ffffff !important;
+    background: #000000 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+    box-shadow: none !important;
+  }
+
+  .app-shell > .menu-bar.mobile-menu-bar::after,
+  .mobile-menu-bar::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  .mobile-menu-trigger,
+  .mobile-header-account-trigger {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    left: auto !important;
+    display: inline-grid !important;
+    place-items: center !important;
+    width: 44px !important;
+    min-width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 !important;
+    color: #ffffff !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    transform: none !important;
+  }
+
+  .mobile-menu-trigger {
+    grid-column: 1 !important;
+    justify-self: start !important;
+  }
+
+  .mobile-header-account-trigger {
+    grid-column: 3 !important;
+    justify-self: end !important;
+  }
+
+  .mobile-header-account-trigger span {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
+  .mobile-menu-bar .mobile-brand-button {
+    grid-column: 2 !important;
+    justify-self: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    min-height: 44px !important;
+    padding: 0 8px !important;
+    color: #ffffff !important;
+    background: transparent !important;
+    border: 0 !important;
+    text-align: center !important;
+  }
+
+  .mobile-menu-bar .mobile-brand-button svg {
+    display: none !important;
+  }
+
+  .app-shell > .menu-bar.mobile-menu-bar .mobile-brand-button span,
+  .mobile-menu-bar .mobile-brand-button span {
+    display: block !important;
+    max-width: 100% !important;
+    padding: 3px 0 2px !important;
+    overflow: visible !important;
+    color: #ffffff !important;
+    font-family: var(--font-sans) !important;
+    font-size: clamp(18px, 2.4vw, 26px) !important;
+    font-weight: 800 !important;
+    line-height: 1.18 !important;
+    letter-spacing: -0.01em !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+    text-transform: uppercase !important;
+  }
+}
+
+@media (max-width: 860px) {
+  .app-shell > .menu-bar.mobile-menu-bar,
+  .mobile-menu-bar {
+    grid-template-columns: 48px minmax(0, 1fr) 48px !important;
+    width: calc(100% + var(--mobile-page-pad, max(16px, env(safe-area-inset-left))) + var(--mobile-page-pad-r, max(16px, env(safe-area-inset-right)))) !important;
+    margin: 0 calc(-1 * var(--mobile-page-pad-r, max(16px, env(safe-area-inset-right)))) 0 calc(-1 * var(--mobile-page-pad, max(16px, env(safe-area-inset-left)))) !important;
+    padding: max(8px, env(safe-area-inset-top)) var(--mobile-page-pad-r, max(16px, env(safe-area-inset-right))) 8px var(--mobile-page-pad, max(16px, env(safe-area-inset-left))) !important;
+  }
+
+  .app-shell > .menu-bar.mobile-menu-bar .mobile-brand-button span,
+  .mobile-menu-bar .mobile-brand-button span {
+    font-size: clamp(15px, 4vw, 18px) !important;
+  }
+}
