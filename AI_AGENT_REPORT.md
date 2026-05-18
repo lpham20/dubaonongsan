@@ -1234,6 +1234,66 @@ None.
 - Local `curl -I` on the new markdown endpoints returned 405 because FastAPI did not auto-map `HEAD`; equivalent GET-header smoke check passed with `content-type: text/markdown; charset=utf-8`.
 - Local Caddy binary is not installed, so Caddy syntax validation was skipped locally per plan. Production reload will validate the live Caddyfile.
 - PowerShell `Get-Content` displays UTF-8 Vietnamese as mojibake in some outputs; Python UTF-8 reads confirmed `frontend/dist/llms.txt` content is correct.
+- Post-plan deployment found that Caddy's generic API `X-Robots-Tag: noindex, nofollow` overrode the markdown endpoint header. Added a follow-up Caddy fix so `/api/v1/llm-content/*` returns `X-Robots-Tag: index, follow`, while normal API routes remain `noindex`.
+
+## Deployment results
+
+**User override**: deploy to VPS after completing L0.1 through L4.5.
+
+**Git / VPS**:
+
+- Pushed `main` to `origin`.
+- VPS `/opt/dubaonongsan` pulled to `9295176`.
+- Frontend build + prerender completed on VPS.
+- `docker compose config` passed.
+- `caddy validate --config /etc/caddy/Caddyfile` passed.
+- Rebuilt and restarted `api` and `worker`.
+- Restarted `caddy` because Caddy admin reload endpoint is disabled in the container.
+
+**Production smoke output summary**:
+
+```text
+https://dubaonongsan.com/
+status=200 content-type=text/html; charset=utf-8
+
+https://dubaonongsan.com/llms.txt
+status=200 content-type=text/plain; charset=utf-8
+body starts: # Dự báo nông sản (dubaonongsan.com)
+
+https://dubaonongsan.com/du-bao-gia/sau_rieng
+status=200 content-type=text/html; charset=utf-8
+Link: </api/v1/llm-content/forecast/sau_rieng>; rel="alternate"; type="text/markdown"
+
+https://api.dubaonongsan.com/api/v1/llm-content/forecast/sau_rieng
+status=200 content-type=text/markdown; charset=utf-8
+X-Robots-Tag: index, follow
+
+https://dubaonongsan.com/api/v1/llm-content/forecast/sau_rieng
+status=200 content-type=text/markdown; charset=utf-8
+X-Robots-Tag: index, follow
+
+https://api.dubaonongsan.com/api/v1/llm-content/guides?limit=3
+status=200 content-type=text/markdown; charset=utf-8
+X-Robots-Tag: index, follow
+
+https://api.dubaonongsan.com/api/v1/llm-content/news?limit=3
+status=200 content-type=text/markdown; charset=utf-8
+X-Robots-Tag: index, follow
+
+https://api.dubaonongsan.com/api/v1/health/scrape
+status=200
+body: {"status":"ok","last_success_at":"2026-05-18T04:43:11.750513+00:00","age_minutes":9.6,"expected_interval_minutes":120}
+
+https://api.dubaonongsan.com/health
+status=200 content-type=application/json
+X-Robots-Tag: noindex, nofollow, noarchive
+```
+
+**Production service status after deploy**:
+
+- `api`: up, healthy
+- `worker`: up, healthy
+- `caddy`: up after restart
 
 ## Task L1.4 - Prerender `/tin-tuc` index with 30 news
 
