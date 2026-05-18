@@ -17,6 +17,7 @@ from app.api.analytics import router as analytics_router
 from app.api.auth import router as auth_router
 from app.api.content import router as content_router
 from app.api.fertilizer import router as fertilizer_router
+from app.api.llm_content import router as llm_content_router
 from app.api.metadata import router as metadata_router
 from app.api.ops import router as ops_router
 from app.api.public import router as public_router
@@ -126,6 +127,7 @@ app.include_router(metadata_router)
 app.include_router(analytics_router)
 app.include_router(public_router)
 app.include_router(ops_router)
+app.include_router(llm_content_router)
 
 
 @app.middleware("http")
