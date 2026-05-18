@@ -52,6 +52,15 @@
 		header X-Robots-Tag "index, follow"
 	}
 
+	handle /api/v1/llm-content/* {
+		reverse_proxy api:8010 {
+			header_up X-Real-IP {remote_host}
+			header_up X-Forwarded-For {remote_host}
+			header_up X-Forwarded-Proto {scheme}
+		}
+		header X-Robots-Tag "index, follow"
+	}
+
 	handle /api/* {
 		reverse_proxy api:8010 {
 			header_up X-Real-IP {remote_host}
@@ -175,6 +184,12 @@ EOF
 
 	redir /api/v1/sitemap.xml https://dubaonongsan.com/sitemap.xml permanent
 
+	@llmContent path /api/v1/llm-content/*
+	header @llmContent X-Robots-Tag "index, follow"
+
+	@nonLlmApi not path /api/v1/llm-content/*
+	header @nonLlmApi X-Robots-Tag "noindex, nofollow, noarchive"
+
 	reverse_proxy api:8010 {
 		header_up X-Real-IP {remote_host}
 		header_up X-Forwarded-For {remote_host}
@@ -191,7 +206,6 @@ EOF
 		Referrer-Policy "strict-origin-when-cross-origin"
 		Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
 		Content-Security-Policy "default-src 'none'; frame-ancestors 'none'"
-		X-Robots-Tag "noindex, nofollow, noarchive"
 		-Server
 		-X-Powered-By
 	}
