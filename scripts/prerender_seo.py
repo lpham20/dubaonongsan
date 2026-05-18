@@ -526,7 +526,21 @@ def _build_news_index_body(heading: str, desc: str) -> str:
                 )
             sections.append("</ul>")
     else:
-        sections.append("<p>Chưa có tin mới.</p>")
+        sections.append(
+            "<h2>Nhóm tin theo dõi thường xuyên</h2>"
+            "<ul>"
+            "<li>Giá nông sản: sầu riêng, cà phê, hồ tiêu, lúa và các mặt hàng chủ lực theo vùng.</li>"
+            "<li>Xuất khẩu: đơn hàng, kiểm dịch, tiêu chuẩn vùng trồng, logistics và biến động thị trường nhập khẩu.</li>"
+            "<li>Vật tư đầu vào: phân bón, thuốc bảo vệ thực vật, giống, chi phí tưới và nhân công.</li>"
+            "<li>Chính sách: quy định địa phương, truy xuất nguồn gốc, mã số vùng trồng và tiêu chuẩn chất lượng.</li>"
+            "</ul>"
+            "<p>Khi API tin tức tạm thời chưa phản hồi trong lúc prerender, trang vẫn mô tả rõ phạm vi bản tin để crawler "
+            "hiểu đây là trung tâm cập nhật tin thị trường nông nghiệp, không phải trang rỗng. Bản SPA phía client sẽ tải "
+            "danh sách tin mới nhất khi người dùng mở trang bằng trình duyệt.</p>"
+            "<p>Độc giả có thể dùng trang này để theo dõi các tín hiệu ảnh hưởng trực tiếp tới quyết định bán hàng, giữ hàng, "
+            "lên lịch thu hoạch hoặc chuẩn bị vật tư. Mỗi bản tin trên dubaonongsan.com luôn giữ liên kết về nguồn gốc để "
+            "người đọc kiểm tra bối cảnh đầy đủ trước khi hành động.</p>"
+        )
 
     sections.append(
         "<h2>Mô tả bản tin thị trường</h2>"
@@ -655,6 +669,9 @@ def _build_forecast_body(crop: str, crop_label: str, title: str, desc: str) -> s
         "loại (A/B/C) và mức chợ đầu mối. Mô hình dự báo 30 ngày sử dụng kết hợp "
         "machine learning gradient boosting và phân tích chuỗi thời gian để ước lượng "
         "biến động giá kỳ vọng kèm khoảng tin cậy.</p>"
+        f"<p>Khi bảng giá hoặc forecast của {html.escape(crop_label)} chưa tải được trong lúc prerender, "
+        "trang vẫn cung cấp mô tả dữ liệu, phạm vi vùng trồng, cách đọc giá thấp nhất/cao nhất, "
+        "và cảnh báo rằng giá thực tế cần được đối chiếu với nguồn thu mua tại địa phương trước khi ra quyết định.</p>"
         f'<p>Để xem chi tiết thuật toán, truy cập '
         f'<a href="{SITE_BASE}/thuat-toan-du-bao">trang giải thích thuật toán dự báo</a>.</p>'
     )
@@ -771,6 +788,9 @@ def _build_fertilizer_methodology_body(title: str, desc: str) -> str:
 <li>Đất dốc &gt; 15%: chia nhiều lần bón nhỏ để giảm rửa trôi.</li>
 <li>Tránh bón phân vào thời điểm mưa to dự báo trong 24h.</li>
 </ul>
+
+<h2>Cách đọc kết quả</h2>
+<p>Kết quả khuyến nghị cần được đọc theo ba lớp: lượng dinh dưỡng nguyên chất, lịch chia đợt bón và cảnh báo an toàn. Nếu đất quá chua, thiếu hữu cơ hoặc có nguy cơ rửa trôi cao, người dùng nên xử lý nền đất trước khi tăng lượng N-P-K. Nếu năng suất mục tiêu quá cao so với tuổi cây hoặc mật độ thực tế, hệ thống ưu tiên cảnh báo để tránh bón dư gây sốc rễ, cháy lá hoặc tăng sâu bệnh.</p>
 
 <h2>Hạn chế</h2>
 <p>Công cụ là khung tham chiếu. Quyết định cuối cùng cần kết hợp với phân tích đất cập nhật trong năm, kinh nghiệm thực tế của vườn và tư vấn của kỹ sư nông học địa phương.</p>
