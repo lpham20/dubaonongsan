@@ -662,6 +662,121 @@ def _build_forecast_body(crop: str, crop_label: str, title: str, desc: str) -> s
     return "\n".join(sections)
 
 
+def _build_methodology_body(title: str, desc: str) -> str:
+    """Static content explaining the forecast algorithm."""
+    return f"""<main>
+<h1>{html.escape(title)}</h1>
+<p>{html.escape(desc)}</p>
+
+<h2>Nguồn dữ liệu đầu vào</h2>
+<ul>
+<li><strong>Giá lịch sử</strong>: scrape hàng ngày từ banggianongsan.com, baonghean.vn, congthuong.vn, baohatinh.vn, sở công thương Đắk Lắk, vietnamvn.com, coffee market.</li>
+<li><strong>Thời tiết</strong>: Open-Meteo API cho từng tỉnh trọng điểm (nhiệt độ tối đa, lượng mưa, độ ẩm).</li>
+<li><strong>Khối lượng giao dịch</strong>: trích xuất từ các bài viết có khối lượng được công bố.</li>
+<li><strong>Chỉ số chín</strong>: dữ liệu cảm biến IoT từ một số vùng pilot, cập nhật qua endpoint maturity-telemetry.</li>
+<li><strong>Báo cáo của nông dân</strong>: giá địa phương được người dùng báo qua form, dùng để cross-check, không đưa vào training trực tiếp.</li>
+</ul>
+
+<h2>Cách dự báo</h2>
+<p>Hiện tại mô hình dự báo dùng baseline statistical kết hợp với gradient boosting (LightGBM khi có đủ artifact). Khi tích lũy đủ ≥ 1000 điểm/series, sẽ chuyển sang LSTM deep learning. Quy trình:</p>
+<ol>
+<li>Lấy cửa sổ 60 ngày gần nhất cho cặp (vùng, giống) đang xem.</li>
+<li>Tính lag features (giá 1, 2, 3, 7, 14, 30 ngày trước), rolling mean và std (7, 14, 30 ngày), slope tuyến tính 14 ngày.</li>
+<li>Bổ sung tín hiệu mùa vụ (tháng, ngày trong tuần, giai đoạn Tết) và tín hiệu thời tiết lag.</li>
+<li>Mô hình trả 30 giá trị giá kỳ vọng cho 30 ngày kế tiếp.</li>
+<li>Áp dụng giới hạn dưới (price floor) để tránh dự báo phi lý sau biến động lớn.</li>
+</ol>
+
+<h2>Khoảng tin cậy</h2>
+<p>Khoảng tin cậy (confidence interval) được ước tính từ độ biến động (volatility) cửa sổ 30 ngày gần nhất, scale theo giá hiện tại. Mặc định khoảng ±8% cho sầu riêng, cà phê, hồ tiêu; ±5.5% cho lúa do biến động thấp hơn.</p>
+
+<h2>Đo độ chính xác</h2>
+<ul>
+<li><strong>RMSE (Root Mean Squared Error)</strong>: căn bậc hai của trung bình bình phương sai số. Nhạy với outlier lớn. Đo bằng VND/kg.</li>
+<li><strong>MAE (Mean Absolute Error)</strong>: trung bình độ lớn sai số tuyệt đối. Robust hơn RMSE.</li>
+<li>Backtest trượt: mỗi đợt retrain (mặc định 24h/lần) chạy backtest với cửa sổ 60-ngày-train, 30-ngày-test trên dữ liệu lịch sử.</li>
+<li>Số mẫu backtest và số series được đánh giá hiển thị tại endpoint <code>/api/v1/analytics/model-metrics</code>.</li>
+</ul>
+
+<h2>Hạn chế</h2>
+<ul>
+<li>Mô hình không nắm bắt được sự kiện bất thường (kiểm dịch, lệnh cấm xuất khẩu đột ngột, thiên tai lớn).</li>
+<li>Dữ liệu phụ thuộc nguồn scrape — nếu nguồn thay đổi HTML hoặc dừng cập nhật, dự báo lệch.</li>
+<li>Forecast càng xa, sai số càng tăng. Ngày 1-7 đáng tin cậy hơn ngày 21-30.</li>
+<li>Không áp dụng cho mục đích giao dịch tài chính — chỉ tham khảo định hướng cho nông dân và thương lái.</li>
+</ul>
+
+<h2>Cập nhật mô hình</h2>
+<p>Mô hình được retrain định kỳ 24 giờ một lần qua scheduler nội bộ. Khi có model mới, artifact được atomic-swap để tránh API đọc file dở. Phiên bản model hiện tại có thể xem qua endpoint <code>/api/v1/analytics/model-metrics</code> field <code>model_kind</code>.</p>
+</main>"""
+
+
+def _build_fertilizer_methodology_body(title: str, desc: str) -> str:
+    """Static content explaining fertilizer recommendation logic."""
+    return f"""<main>
+<h1>{html.escape(title)}</h1>
+<p>{html.escape(desc)}</p>
+
+<h2>Nguyên lý tính nhu cầu N-P-K</h2>
+<p>Lượng phân khuyến nghị dựa trên cân bằng nutrient: nhu cầu cây trồng = năng suất mục tiêu × hệ số hấp thu - lượng có sẵn trong đất × hệ số hiệu suất.</p>
+<ul>
+<li><strong>Đạm (N)</strong>: tính theo năng suất mục tiêu, có hiệu chỉnh theo OC% (đất giàu hữu cơ giảm N) và lượng mưa (mưa nhiều tăng N do rửa trôi).</li>
+<li><strong>Lân (P2O5)</strong>: tính theo P dễ tiêu trong đất, hiệu chỉnh theo pH (đất chua giảm hiệu suất P).</li>
+<li><strong>Kali (K2O)</strong>: tính theo K trao đổi và CEC, hiệu chỉnh theo loại đất (đất cát giảm CEC).</li>
+</ul>
+
+<h2>Bảng tham chiếu khoa học</h2>
+<ul>
+<li>Cà phê vối: WASI 2016, IPI 2015 — dose 220-330 kg N/ha/năm tuỳ texture.</li>
+<li>Hồ tiêu: IPI 2018 — dose 200-300 kg N/ha/năm.</li>
+<li>Sầu riêng: WASI 2025 — dose 250-400 kg N/ha/năm cho cây kinh doanh.</li>
+</ul>
+
+<h2>Phân tích đất cần thiết</h2>
+<p>Để khuyến nghị chính xác, cần mẫu đất phân tích:</p>
+<ol>
+<li>pH KCl và pH H2O (đo bằng máy pH meter).</li>
+<li>OC% (carbon hữu cơ) bằng phương pháp Walkley-Black.</li>
+<li>N tổng (Kjeldahl).</li>
+<li>P dễ tiêu (Bray II cho đất chua Tây Nguyên hoặc Mehlich-3).</li>
+<li>K trao đổi (NH4OAc 1M).</li>
+<li>Ca, Mg trao đổi và CEC.</li>
+</ol>
+
+<h2>Chia lịch bón</h2>
+<p>Lượng tổng được chia thành 3-5 đợt bón tuỳ giai đoạn:</p>
+<ol>
+<li>Đầu mùa mưa (tháng 4-5): 30-40% tổng N + 50% P + 30% K.</li>
+<li>Giữa mùa mưa (tháng 7-8): 30-35% N + 30% K.</li>
+<li>Cuối mùa mưa / chuẩn bị ra hoa (tháng 9-10): 25-30% N + 50% P + 30% K.</li>
+<li>Nuôi trái / dưỡng quả (tuỳ cây): 10-15% N + 10% K + có thể bổ sung canxi, boron.</li>
+</ol>
+
+<h2>Quy đổi sang phân thương mại</h2>
+<p>Hệ thống tự quy đổi lượng nguyên chất N-P-K sang:</p>
+<ul>
+<li>Urea 46% N</li>
+<li>SA (sulfate ammonium) 21% N + 24% S</li>
+<li>DAP 18-46-0</li>
+<li>NPK 16-16-8, 20-20-15, 15-15-15</li>
+<li>Kali clorua (MOP) 60% K2O</li>
+<li>Sulfate kali (SOP) 50% K2O cho cây nhạy với Cl</li>
+</ul>
+<p>Kết quả hiển thị số bao 50kg/ha kèm thương hiệu nếu user chỉ định.</p>
+
+<h2>Cảnh báo và lưu ý</h2>
+<ul>
+<li>Nếu pH KCl &lt; 4.5: khuyến cáo bón vôi (1-2 tấn CaCO3/ha) trước khi bón phân.</li>
+<li>Nếu OC &lt; 1%: cần bón hữu cơ (phân chuồng hoai, vermicompost) 5-10 tấn/ha.</li>
+<li>Đất dốc &gt; 15%: chia nhiều lần bón nhỏ để giảm rửa trôi.</li>
+<li>Tránh bón phân vào thời điểm mưa to dự báo trong 24h.</li>
+</ul>
+
+<h2>Hạn chế</h2>
+<p>Công cụ là khung tham chiếu. Quyết định cuối cùng cần kết hợp với phân tích đất cập nhật trong năm, kinh nghiệm thực tế của vườn và tư vấn của kỹ sư nông học địa phương.</p>
+</main>"""
+
+
 def render_static_pages() -> list[tuple[str, str | None]]:
     crops = {
         "sau_rieng": "sầu riêng",
@@ -833,9 +948,15 @@ def render_static_pages() -> list[tuple[str, str | None]]:
                 (crumb, canonical),
             ]
         )
+        if filename == "methodology.html":
+            body = _build_methodology_body(title, desc)
+        elif filename == "fertilizer-methodology.html":
+            body = _build_fertilizer_methodology_body(title, desc)
+        else:
+            body = f"<main><h1>{html.escape(title)}</h1><p>{html.escape(desc)}</p></main>"
         _write(
             OUTPUT / filename,
-            _page(title, desc, canonical, f"<main><h1>{html.escape(title)}</h1><p>{html.escape(desc)}</p></main>", [web_page_schema, breadcrumb_schema]),
+            _page(title, desc, canonical, body, [web_page_schema, breadcrumb_schema]),
         )
         urls.append((canonical, today))
 
