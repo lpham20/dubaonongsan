@@ -379,6 +379,79 @@ def render_guides() -> list[tuple[str, str | None]]:
     return urls
 
 
+def _build_home_body(heading: str, desc: str) -> str:
+    """Build body for homepage with top movers and latest news."""
+    crops = [
+        ("sau_rieng", "sầu riêng"),
+        ("ca_phe", "cà phê"),
+        ("ho_tieu", "hồ tiêu"),
+        ("lua", "lúa"),
+    ]
+
+    sections = [
+        f"<main><h1>{html.escape(heading)}</h1>",
+        f"<p>{html.escape(desc)}</p>",
+        "<h2>Dự báo giá theo nông sản</h2>",
+        "<ul>",
+    ]
+    for crop_key, crop_name in crops:
+        sections.append(
+            f'<li><a href="{SITE_BASE}/du-bao-gia/{crop_key}">'
+            f"Giá {html.escape(crop_name)} hôm nay và dự báo 30 ngày</a></li>"
+        )
+    sections.append("</ul>")
+
+    movers = _fetch_top_movers("sau_rieng")
+    gainers = movers.get("gainers", [])[:5]
+    losers = movers.get("losers", [])[:5]
+    if gainers:
+        sections.append("<h2>Vùng tăng giá mạnh nhất (sầu riêng)</h2><ul>")
+        for mover in gainers:
+            price = int(mover.get("latest_price_vnd") or mover.get("price_vnd") or 0)
+            change = float(mover.get("change_pct") or 0)
+            sections.append(
+                f"<li>{html.escape(str(mover.get('variety') or mover.get('crop_name') or ''))} tại "
+                f"{html.escape(str(mover.get('province') or mover.get('region') or ''))}: "
+                f"{price:,} VND/kg (+{change:.1f}%)</li>"
+            )
+        sections.append("</ul>")
+    if losers:
+        sections.append("<h2>Vùng giảm giá mạnh nhất (sầu riêng)</h2><ul>")
+        for mover in losers:
+            price = int(mover.get("latest_price_vnd") or mover.get("price_vnd") or 0)
+            change = float(mover.get("change_pct") or 0)
+            sections.append(
+                f"<li>{html.escape(str(mover.get('variety') or mover.get('crop_name') or ''))} tại "
+                f"{html.escape(str(mover.get('province') or mover.get('region') or ''))}: "
+                f"{price:,} VND/kg ({change:.1f}%)</li>"
+            )
+        sections.append("</ul>")
+
+    news = _fetch_news_for_index(limit=10)
+    if news:
+        sections.append("<h2>Tin nông nghiệp mới nhất</h2><ul>")
+        for item in news:
+            slug = _news_slug(item)
+            title = item.get("title") or "Tin"
+            summary = (item.get("summary") or item.get("excerpt") or "")[:200]
+            sections.append(
+                f'<li><a href="{SITE_BASE}/tin-tuc/{slug}">'
+                f"{html.escape(title)}</a>: {html.escape(summary)}</li>"
+            )
+        sections.append("</ul>")
+
+    sections.append(
+        "<h2>Về dubaonongsan.com</h2>"
+        "<p>dubaonongsan.com là nền tảng dự báo giá nông sản Việt Nam, "
+        "cập nhật giá theo vùng trồng và giống, kèm dự báo 30 ngày dùng mô hình "
+        "machine learning. Dữ liệu được scrape hằng ngày từ các nguồn công khai "
+        "như banggianongsan.com, baonghean.vn, congthuong.vn, và cập nhật trong "
+        "khung 6h-22h GMT+7.</p>"
+    )
+    sections.append("</main>")
+    return "\n".join(sections)
+
+
 def render_static_pages() -> list[tuple[str, str | None]]:
     crops = {
         "sau_rieng": "sầu riêng",
@@ -449,7 +522,17 @@ def render_static_pages() -> list[tuple[str, str | None]]:
                     },
                 },
             ]
-        body = f"<main><h1>{html.escape(heading)}</h1><p>{html.escape(desc)}</p></main>"
+
+        if filename == "home.html":
+            body = _build_home_body(heading, desc)
+        elif filename == "news.html":
+            body = _build_news_index_body(heading, desc)
+        elif filename == "guides.html":
+            body = _build_guides_index_body(heading, desc)
+        elif filename == "fertilizer.html":
+            body = _build_fertilizer_index_body(heading, desc)
+        else:
+            body = f"<main><h1>{html.escape(heading)}</h1><p>{html.escape(desc)}</p></main>"
         _write(OUTPUT / filename, _page(title, desc, canonical, body, schema, og_type="website"))
         urls.append((canonical, today))
 
