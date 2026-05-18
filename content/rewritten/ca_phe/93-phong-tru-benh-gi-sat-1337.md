@@ -1,7 +1,7 @@
 ---
 post_id: 93
 slug: phong-tru-benh-gi-sat-1337
-title: Phòng trừ bệnh gỉ sắt cho cà phê
+title: Phòng trừ bênh gỉ sắt cho cà phê
 summary: Gỉ sắt (Hemileia vastatrix) là bệnh nguy hiểm nhất với cà phê thế giới, gây mất 30-70% năng suất khi bùng phát. Hướng dẫn nhận biết sớm, lịch phun phòng theo.
 crop_type: ca_phe
 category: Phòng sâu bệnh cà phê

@@ -1,7 +1,7 @@
 ---
 post_id: 105
 slug: ky-thuat-tia-canh-va-tao-tan-cho-cay-cam-1366
-title: Kỹ thuật tỉa cành và tạo tán cho cây cam
+title: Kỹ thuật tỉa cành và tạo tán cho cây Cam
 summary: Vườn cam không được tỉa cành đúng cách có năng suất giảm 30-50% sau 5-7 năm. Hướng dẫn tạo tán cơ bản năm 1-3 và tỉa cành định kỳ cho cây kinh doanh, áp dụng.
 crop_type: cam
 category: Chăm sóc cây cam
