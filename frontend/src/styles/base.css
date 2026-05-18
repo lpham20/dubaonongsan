@@ -1071,3 +1071,20 @@ select {
   color: #53635b;
   font-weight: 700;
 }
+
+/* SEO prerender content - visually hidden but accessible to crawlers/AI agents.
+   Standard accessibility pattern: off-screen positioning keeps content parseable
+   by screen readers and AI parsers while staying invisible to users. */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  left: -10000px !important;
+  top: 0 !important;
+}
