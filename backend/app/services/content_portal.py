@@ -12,6 +12,7 @@ from sqlalchemy import desc, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.cache import invalidate_cache
 from app.core.config import get_settings
 from app.models import GuidePost, NewsArticle
 
@@ -33,6 +34,9 @@ HAINONG_EXCLUDED_IMAGE_TERMS = {
     "imgpsh",
     "logo",
 }
+
+GUIDE_TARGET_MIN_WORDS = 700
+GUIDE_DEPTH_MARKER = "Ngưỡng kiểm tra nhanh"
 
 NEWS_SOURCES = [
     {
@@ -246,10 +250,31 @@ class ContentPortalService:
             with _guide_seed_lock:
                 if not self.db.scalar(select(GuidePost.post_id).limit(1)):
                     self.seed_guides()
+        self.ensure_guide_depth()
         stmt = select(GuidePost).order_by(desc(GuidePost.published_at))
         if crop:
             stmt = stmt.where((GuidePost.crop_type == crop) | (GuidePost.crop_type.is_(None)))
         return self.db.scalars(stmt.limit(limit)).all()
+
+    def ensure_guide_depth(self, force: bool = False) -> dict:
+        rows = self.db.scalars(select(GuidePost).limit(2000)).all()
+        updated = 0
+        for row in rows:
+            if not force and not _guide_needs_depth_upgrade(row.content):
+                continue
+            plant = _guide_plant_label(row)
+            row.content = _expanded_guide_content(
+                title=row.title,
+                plant=plant,
+                summary=row.summary,
+                existing_content=row.content,
+            )
+            updated += 1
+        if updated:
+            self.db.commit()
+            invalidate_cache("guides")
+            invalidate_cache("guide-detail")
+        return {"checked": len(rows), "updated": updated, "target_min_words": GUIDE_TARGET_MIN_WORDS}
 
     def seed_fallback_news(self) -> None:
         now = datetime.now(UTC)
@@ -1417,6 +1442,256 @@ def _has_normalized_term(value: str, terms: set[str]) -> bool:
         if re.search(pattern, value):
             return True
     return False
+
+
+def _guide_needs_depth_upgrade(content: str | None) -> bool:
+    text = content or ""
+    return len(text.split()) < GUIDE_TARGET_MIN_WORDS or GUIDE_DEPTH_MARKER not in text
+
+
+def _guide_plant_label(row: GuidePost) -> str:
+    crop_map = {
+        "sau_rieng": "Sầu riêng",
+        "ca_phe": "Cà phê",
+        "lua": "Lúa",
+        "ho_tieu": "Hồ tiêu",
+        "mit": "Mít",
+        "thanh_long": "Thanh long",
+        "cam": "Cam",
+        "xoai": "Xoài",
+        "chom_chom": "Chôm chôm",
+    }
+    if row.crop_type in crop_map:
+        return crop_map[row.crop_type]
+    plant = _plant_from_title(f"{row.title} {row.category} {row.summary}")
+    return plant if plant != "Cây trồng" else "Cây trồng"
+
+
+def _technical_guide_content(
+    title: str,
+    plant: str,
+    source_url: str,
+    source_text: str,
+    image_urls: list[str] | None = None,
+) -> str:
+    image_lines = [f"IMAGE::{url}" for url in (image_urls or [])[:3]]
+    return _expanded_guide_content(
+        title=title,
+        plant=plant,
+        summary=_guide_summary(title, plant),
+        existing_content="\n".join([*image_lines, source_text or ""]),
+        source_text=source_text,
+        source_url=source_url,
+    )
+
+
+def _expanded_guide_content(
+    title: str,
+    plant: str,
+    summary: str,
+    existing_content: str | None = None,
+    source_text: str | None = None,
+    source_url: str | None = None,
+) -> str:
+    normalized = _normalize_ascii(f"{title} {summary}")
+    plant_name = plant.lower()
+    topic = title.strip() if _mentions_plant(title, plant) else f"{title.strip()} cho {plant_name}"
+    image_lines = _preserved_image_lines(existing_content)
+    field_note = _field_note_from_source(source_text or existing_content or "")
+    sections = [
+        "Mục tiêu thực hành",
+        (
+            f"Bài này hướng dẫn người trồng triển khai chủ đề {topic.lower()} theo dạng quy trình có thể làm ngay tại vườn. "
+            f"Trọng tâm không chỉ là biết nên làm gì, mà còn biết làm lúc nào, kiểm tra bằng dấu hiệu nào và khi nào cần dừng để tránh làm cây bị sốc. "
+            f"{summary.strip()}"
+        ),
+        *image_lines,
+        "Khi nào áp dụng",
+        _when_to_apply(normalized, plant),
+        "Chuẩn bị trước khi làm",
+        *[f"- {point}" for point in _preparation_points(normalized, plant)],
+        "Quy trình làm tại vườn",
+        *[f"- {point}" for point in _execution_steps(normalized, plant)],
+        GUIDE_DEPTH_MARKER,
+        *[f"- {point}" for point in _checkpoints(normalized, plant)],
+        "Lịch theo dõi sau khi làm",
+        *[f"- {point}" for point in _follow_up_schedule(normalized, plant)],
+        "Lỗi thường gặp và cách sửa",
+        *[f"- {point}" for point in _common_mistakes(normalized, plant)],
+        "Vật tư và dụng cụ nên chuẩn bị",
+        *[f"- {point}" for point in _supply_points(normalized, plant)],
+        "Ghi chép bắt buộc",
+        (
+            f"Ghi ngày thực hiện, lô vườn/ruộng, tuổi cây, giống, tình trạng trước khi làm, thao tác đã thực hiện, vật tư đã dùng và kết quả sau 3-7 ngày. "
+            f"Với {plant_name}, nên chụp cùng một góc trước và sau xử lý để so sánh màu lá, tán, rễ, hoa hoặc trái. "
+            f"{field_note}"
+        ),
+        "Khi nào cần dừng và hỏi kỹ thuật viên",
+        (
+            "Dừng mở rộng ra toàn bộ diện tích nếu cây héo nhanh, rụng hoa/trái non nhiều, vết bệnh lan nhanh, rễ có mùi hôi hoặc đất bị úng kéo dài. "
+            "Trong trường hợp phải dùng thuốc bảo vệ thực vật, chỉ dùng sản phẩm còn được phép lưu hành, đúng đối tượng, đúng thời gian cách ly và theo hướng dẫn trên nhãn hoặc khuyến cáo địa phương."
+        ),
+    ]
+    if source_url:
+        sections.extend(
+            [
+                "Ghi chú nguồn tham khảo",
+                f"Nội dung được biên tập thành quy trình thực hành riêng cho Dự báo nông sản; không thay thế khuyến cáo chính thức tại địa phương. Tham khảo thêm: {source_url}",
+            ]
+        )
+    return "\n".join(sections)
+
+
+def _preserved_image_lines(content: str | None) -> list[str]:
+    lines = []
+    for line in (content or "").splitlines():
+        line = line.strip()
+        if line.startswith("IMAGE::") and line.removeprefix("IMAGE::").strip() and line not in lines:
+            lines.append(line)
+        if len(lines) >= 3:
+            break
+    return lines
+
+
+def _preparation_points(normalized_title: str, plant: str) -> list[str]:
+    plant_name = plant.lower()
+    points = [
+        f"Chia khu {plant_name} thành từng lô nhỏ để kiểm tra; không đánh giá cả vườn bằng một vài cây ở mép đường hoặc gần nguồn nước.",
+        "Chuẩn bị sổ ghi chép, điện thoại chụp ảnh, thước đo hoặc que đánh dấu vị trí để quay lại đúng điểm kiểm tra sau xử lý.",
+        "Kiểm tra thời tiết 3-5 ngày tới; tránh thao tác mạnh ngay trước mưa lớn, nắng gắt kéo dài hoặc giai đoạn cây đang suy rõ.",
+    ]
+    if _has_normalized_term(normalized_title, {"phong tru", "benh", "rep", "ray", "mot", "oc", "chuot"}):
+        points.extend(
+            [
+                "Đánh dấu cây bị nặng, cây mới chớm và cây khỏe để so sánh; cách này giúp biết biện pháp đang chặn được bệnh hay chỉ làm sạch phần nhìn thấy.",
+                "Vệ sinh dụng cụ cắt tỉa, chuẩn bị bao thu gom bộ phận bệnh và tránh kéo mầm bệnh từ lô này sang lô khác.",
+            ]
+        )
+    elif _has_normalized_term(normalized_title, {"giong", "dat", "trong", "gieo", "u hat", "tai canh", "ho trong"}):
+        points.extend(
+            [
+                "Kiểm tra nguồn giống, bầu rễ, cổ rễ và dấu hiệu sâu bệnh trước khi đưa cây ra ruộng/vườn.",
+                "Đào thử một vài điểm để xem tầng đất, độ thoát nước và tàn dư rễ cũ; không xuống giống đại trà khi đất còn úng hoặc còn nguồn bệnh rõ.",
+            ]
+        )
+    elif _has_normalized_term(normalized_title, {"tuoi", "nuoc", "han", "man"}):
+        points.extend(
+            [
+                "Kiểm tra ẩm độ ở tầng rễ hoạt động thay vì chỉ nhìn mặt đất; mặt đất khô chưa chắc tầng rễ đã thiếu nước.",
+                "Dọn thông rãnh thoát, điểm gom nước và khu vực quanh gốc trước khi tưới hoặc trước đợt mưa lớn.",
+            ]
+        )
+    else:
+        points.extend(
+            [
+                "Chọn một lô nhỏ để làm trước, ghi kết quả rồi mới mở rộng; cách này giảm rủi ro khi điều kiện vườn không đồng đều.",
+                "Tra lại lịch bón phân, tưới nước, phun thuốc và thời điểm ra hoa/thu hoạch gần nhất để tránh thao tác chồng chéo.",
+            ]
+        )
+    return points
+
+
+def _execution_steps(normalized_title: str, plant: str) -> list[str]:
+    base = _guide_points(normalized_title, plant)
+    if _has_normalized_term(normalized_title, {"phong tru", "benh", "rep", "ray", "mot", "oc", "chuot"}):
+        return [
+            *base,
+            "Xử lý theo thứ tự: khoanh vùng, vệ sinh nguồn bệnh, điều chỉnh nước/tán/cỏ dại, sau đó mới cân nhắc biện pháp hóa học khi mật số hoặc tốc độ lan vượt ngưỡng chịu đựng.",
+            "Không trộn nhiều loại thuốc hoặc tăng liều theo cảm tính; nếu cần dùng thuốc, chọn hoạt chất đúng đối tượng, luân phiên nhóm tác động và tuân thủ thời gian cách ly.",
+            "Sau xử lý, giữ lại một vài điểm đối chứng nhỏ nếu an toàn để biết biện pháp nào thực sự có hiệu quả trong điều kiện vườn của mình.",
+        ]
+    if _has_normalized_term(normalized_title, {"giong", "dat", "trong", "gieo", "u hat", "tai canh", "ho trong"}):
+        return [
+            *base,
+            "Làm đất/hố theo hướng thoát nước trước, dinh dưỡng sau; cây lâu năm chết nhiều trong năm đầu thường do úng, rễ yếu hoặc đất chưa ổn định hơn là thiếu phân.",
+            "Xuống giống vào thời điểm đất đủ ẩm nhưng không sũng nước; sau trồng cần che nắng, cố định cây và kiểm tra nghiêng đổ sau mưa gió.",
+            "Dặm cây sớm khi cây chết hoặc chậm phát triển rõ, tránh để khoảng trống lâu làm vườn không đồng đều về sau.",
+        ]
+    if _has_normalized_term(normalized_title, {"tuoi", "nuoc", "han", "man"}):
+        return [
+            *base,
+            "Tưới chậm để nước thấm vào vùng rễ, tránh tưới mạnh làm trôi mặt đất hoặc tạo vũng quanh cổ rễ.",
+            "Khi gặp mặn hoặc hạn, ưu tiên giữ ẩm ổn định, che phủ và giảm thao tác gây sốc; không ép cây ra đọt/ra hoa khi nền nước chưa ổn.",
+            "Sau mưa lớn, kiểm tra thoát nước ngay trong 24 giờ đầu vì nhiều bệnh rễ bùng lên từ giai đoạn đất bí khí kéo dài.",
+        ]
+    if _has_normalized_term(normalized_title, {"tia", "tao tan", "thu phan", "ra hoa", "thap den", "buoc day"}):
+        return [
+            *base,
+            "Làm từng lượt nhẹ, ưu tiên phần bệnh, phần khuất sáng hoặc phần cạnh tranh rõ; không thay đổi quá mạnh bộ tán trong một lần.",
+            "Với thao tác liên quan hoa/trái, ghi ngày bắt đầu, tỷ lệ đậu và vị trí cành mang trái để quyết định giữ hay tỉa ở đợt sau.",
+            "Dụng cụ cắt, buộc, thụ phấn hoặc đỡ trái cần sạch và thao tác dứt khoát để giảm vết thương không cần thiết.",
+        ]
+    if _has_normalized_term(normalized_title, {"thu hoach"}):
+        return [
+            *base,
+            "Lên lịch thu theo lô và theo độ chín, không gom tất cả về một ngày nếu nhân công, điểm tập kết hoặc xe vận chuyển chưa sẵn.",
+            "Phân loại ngay tại vườn/ruộng theo kích cỡ, độ chín, lỗi cơ học và lỗi sâu bệnh để tránh làm giảm giá cả lô hàng.",
+            "Ghi sản lượng theo từng lô để mùa sau biết lô nào cần cải tạo đất, nước, giống hoặc quy trình chăm sóc.",
+        ]
+    return [
+        *base,
+        "Thực hiện theo thứ tự quan sát - xử lý nhỏ - theo dõi - mở rộng; tránh làm đồng loạt khi chưa biết phản ứng của cây.",
+        "Nếu có nhiều cách làm, chỉ thay đổi một yếu tố chính trong mỗi lần thử để biết nguyên nhân tạo ra kết quả.",
+        "Luôn giữ một khoảng thời gian theo dõi sau thao tác trước khi bón/phun/tưới thêm, vì cây cần thời gian phản ứng.",
+    ]
+
+
+def _checkpoints(normalized_title: str, plant: str) -> list[str]:
+    plant_name = plant.lower()
+    if _has_normalized_term(normalized_title, {"phong tru", "benh", "rep", "ray", "mot", "oc", "chuot"}):
+        return [
+            "Tỷ lệ cây có triệu chứng mới phải giảm hoặc ít nhất không lan nhanh sau 3-7 ngày.",
+            "Vết bệnh cũ có thể chưa mất ngay, nhưng mép vết bệnh không nên tiếp tục mở rộng mạnh.",
+            "Mật số sâu/rệp/mọt ở điểm đánh dấu phải giảm rõ so với trước xử lý; nếu không giảm, cần xem lại đúng đối tượng và cách phun/xử lý.",
+            f"Cây {plant_name} không được héo thêm, cháy lá hoặc rụng hoa/trái non bất thường sau khi can thiệp.",
+        ]
+    if _has_normalized_term(normalized_title, {"giong", "dat", "trong", "gieo", "u hat", "tai canh", "ho trong"}):
+        return [
+            "Sau 7-14 ngày, cây phải đứng vững, lá không héo kéo dài và bầu rễ không bị úng/thối.",
+            "Tỷ lệ cây chết hoặc chậm phát triển cần được ghi theo lô; nếu tập trung ở một vùng, ưu tiên kiểm tra đất và nước tại vùng đó.",
+            "Cây mới trồng không nên bị nắng táp, gió lay mạnh hoặc đọng nước quanh cổ rễ.",
+            "Nếu lô có trên một nhóm cây xấu giống nhau, chưa vội bón thêm phân mà kiểm tra rễ, đất và nguồn giống trước.",
+        ]
+    if _has_normalized_term(normalized_title, {"tuoi", "nuoc", "han", "man"}):
+        return [
+            "Đất vùng rễ đủ ẩm nhưng không bết dính, không có mùi yếm khí và không đọng nước lâu quanh gốc.",
+            "Lá phục hồi độ căng trong ngày mát; nếu vẫn rũ sau tưới, cần kiểm tra rễ hoặc bệnh đất.",
+            "Đọt non/hoa/trái non không rụng tăng bất thường sau thay đổi lịch tưới.",
+            "Rãnh thoát hoạt động tốt sau mưa, không để nước đứng quá lâu ở vùng rễ.",
+        ]
+    return [
+        f"Cây {plant_name} giữ màu lá ổn định, không xuất hiện triệu chứng sốc mới sau thao tác.",
+        "Kết quả phải đo được bằng số liệu đơn giản: tỷ lệ cây đạt, tỷ lệ bệnh, số trái giữ lại, sản lượng hoặc chi phí theo lô.",
+        "Nếu kết quả khác nhau giữa các lô, ưu tiên tìm nguyên nhân ở đất, nước, tuổi cây, giống và lịch chăm sóc trước đó.",
+        "Chỉ mở rộng quy trình khi lô thử nghiệm cho kết quả ổn định qua ít nhất một lần kiểm tra lại.",
+    ]
+
+
+def _follow_up_schedule(normalized_title: str, plant: str) -> list[str]:
+    plant_name = plant.lower()
+    return [
+        "Sau 24 giờ: kiểm tra nhanh dấu hiệu sốc, úng, héo, cháy lá hoặc tổn thương cơ học do thao tác.",
+        "Sau 3-5 ngày: quay lại đúng điểm đã chụp ảnh ban đầu, so sánh triệu chứng, màu lá, độ ẩm đất và mức lan của vấn đề.",
+        "Sau 7-14 ngày: đánh giá hiệu quả bằng số liệu theo lô; nếu chưa đạt, điều chỉnh nguyên nhân chính thay vì làm thêm nhiều biện pháp cùng lúc.",
+        f"Cuối tháng hoặc cuối giai đoạn: tổng hợp chi phí, công lao động và kết quả để biến kinh nghiệm trên {plant_name} thành quy trình riêng của trang trại.",
+    ]
+
+
+def _supply_points(normalized_title: str, plant: str) -> list[str]:
+    supplies = [
+        "Sổ hoặc file ghi chép lô vườn, điện thoại chụp ảnh, bút đánh dấu và thẻ ghi ngày xử lý.",
+        "Dụng cụ vệ sinh, kéo/cưa/túi thu gom tàn dư nếu có thao tác cắt tỉa hoặc loại bỏ bộ phận bệnh.",
+        "Đồ bảo hộ cá nhân khi tiếp xúc đất, phân, thuốc hoặc vật tư có nguy cơ kích ứng.",
+    ]
+    if _has_normalized_term(normalized_title, {"tuoi", "nuoc", "han", "man"}):
+        supplies.append("Dụng cụ kiểm tra ẩm đất đơn giản hoặc que thăm đất, vật liệu che phủ sạch và dụng cụ khơi rãnh thoát nước.")
+    elif _has_normalized_term(normalized_title, {"giong", "dat", "trong", "gieo", "u hat", "tai canh", "ho trong"}):
+        supplies.append("Cây giống/giống có nguồn rõ, vật liệu cố định cây, vật liệu che nắng tạm thời và dụng cụ kiểm tra rễ/bầu.")
+    elif _has_normalized_term(normalized_title, {"phong tru", "benh", "rep", "ray", "mot", "oc", "chuot"}):
+        supplies.append("Kính lúp cầm tay nếu có, túi mẫu bệnh, bẫy/biện pháp cơ học phù hợp và danh sách thuốc được phép dùng tại địa phương.")
+    else:
+        supplies.append("Bản đồ lô hoặc sơ đồ vườn để đánh dấu vị trí đã xử lý và vị trí cần kiểm tra lại.")
+    return supplies
 
 
 def _field_note_from_source(source_text: str) -> str:
