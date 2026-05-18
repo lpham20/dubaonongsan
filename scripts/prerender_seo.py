@@ -543,6 +543,45 @@ def _build_news_index_body(heading: str, desc: str) -> str:
     return "\n".join(sections)
 
 
+def _build_fertilizer_index_body(heading: str, desc: str) -> str:
+    """Build body for /khuyen-nghi-bon-phan. Static content explains the tool."""
+    return f"""<main>
+<h1>{html.escape(heading)}</h1>
+<p>{html.escape(desc)}</p>
+
+<h2>Cây trồng được hỗ trợ</h2>
+<ul>
+<li><strong>Cà phê vối Robusta</strong>: phù hợp đất bazan đỏ Tây Nguyên, granite xám, gneiss. Tham chiếu WASI 2016, IPI 2015.</li>
+<li><strong>Hồ tiêu</strong>: bazan đỏ, acrisol. Tham chiếu IPI 2018.</li>
+<li><strong>Sầu riêng</strong>: bazan đỏ, đất phù sa. Tham chiếu WASI 2025.</li>
+</ul>
+
+<h2>Dữ liệu đầu vào</h2>
+<ul>
+<li>Mẫu đất: texture, pH KCl, pH H2O, OC%, N%, P dễ tiêu (Bray II / Mehlich-3), K trao đổi (NH4OAc), Ca/Mg trao đổi, CEC.</li>
+<li>Năng suất mục tiêu (tấn/ha/năm) và mật độ cây/ha.</li>
+<li>Bối cảnh: vị trí (tỉnh, độ cao), khí hậu (lượng mưa, tưới tiêu), độ dốc, số năm canh tác.</li>
+<li>Tuỳ chọn: lượng phân hữu cơ sẵn có, thương hiệu phân ưu tiên.</li>
+</ul>
+
+<h2>Đầu ra của công cụ</h2>
+<ul>
+<li>Tổng nhu cầu N-P2O5-K2O kg/ha/năm + lượng vôi bón.</li>
+<li>Chia lịch bón theo giai đoạn sinh trưởng (đầu mùa, giữa mùa, cuối mùa, nuôi trái).</li>
+<li>Quy đổi sang phân thương mại (NPK 16-16-8, urea, kali clorua, MOP, DAP) kèm số bao 50kg/ha.</li>
+<li>Cảnh báo an toàn: dư đạm, thiếu kali, đất chua, đất kiềm, rủi ro rửa trôi mùa mưa.</li>
+<li>Giải thích logic tính toán và nguồn tham chiếu khoa học.</li>
+</ul>
+
+<h2>Phương pháp luận</h2>
+<p>Khuyến nghị bón phân dựa trên balance NPK: nhu cầu cây - cung từ đất - hiệu suất sử dụng. Hệ số điều chỉnh tính theo texture đất, OC%, pH, năng suất mục tiêu, lượng mưa và độ dốc. Chi tiết thuật toán tại
+<a href="{SITE_BASE}/thuat-toan-bon-phan">trang giải thích thuật toán bón phân</a>.</p>
+
+<h2>Lưu ý quan trọng</h2>
+<p>Công cụ chỉ mang tính tham khảo. Quyết định cuối cùng cần dựa trên kết quả phân tích đất gần nhất tại vườn, kinh nghiệm thực tế, và tư vấn của kỹ sư nông nghiệp địa phương. Không thay thế cho khuyến cáo của Viện Khoa học Nông nghiệp.</p>
+</main>"""
+
+
 def render_static_pages() -> list[tuple[str, str | None]]:
     crops = {
         "sau_rieng": "sầu riêng",
