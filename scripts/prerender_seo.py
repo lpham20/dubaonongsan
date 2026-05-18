@@ -82,6 +82,63 @@ def _json(path: str, limit: int) -> list[dict]:
         return []
 
 
+def _fetch_guides_for_index(limit: int = 30) -> list[dict]:
+    """Fetch top guides for index page. Returns compact dict list."""
+    try:
+        data = _json("/api/v1/content/guides", limit)
+        return data[:limit]
+    except Exception as exc:
+        print(f"SEO warning: fetch guides failed: {exc}")
+        return []
+
+
+def _fetch_news_for_index(limit: int = 30) -> list[dict]:
+    """Fetch top news for index page."""
+    try:
+        data = _json("/api/v1/content/news", limit)
+        return data[:limit]
+    except Exception as exc:
+        print(f"SEO warning: fetch news failed: {exc}")
+        return []
+
+
+def _fetch_prices_for_crop(crop: str, limit: int = 20) -> list[dict]:
+    """Fetch current price board for crop. Endpoint /analytics/daily-price-board is public."""
+    try:
+        url = f"{API_BASE}/api/v1/analytics/daily-price-board?crop={crop}&limit={limit}"
+        request = Request(
+            url,
+            headers={
+                "Accept": "application/json",
+                "User-Agent": "DubaonongsanSEOPrerender/1.0",
+            },
+        )
+        with urlopen(request, timeout=20) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+        return payload if isinstance(payload, list) else []
+    except Exception as exc:
+        print(f"SEO warning: fetch prices for {crop} failed: {exc}")
+        return []
+
+
+def _fetch_top_movers(crop: str) -> dict:
+    """Fetch top gainers/losers for homepage."""
+    try:
+        url = f"{API_BASE}/api/v1/analytics/top-movers?crop={crop}&limit=5"
+        request = Request(
+            url,
+            headers={
+                "Accept": "application/json",
+                "User-Agent": "DubaonongsanSEOPrerender/1.0",
+            },
+        )
+        with urlopen(request, timeout=20) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except Exception as exc:
+        print(f"SEO warning: fetch top-movers for {crop} failed: {exc}")
+        return {"gainers": [], "losers": []}
+
+
 def _asset_tags() -> str:
     index_html_path = DIST / "index.html"
     if not index_html_path.exists():
