@@ -1,0 +1,57 @@
+# Dự báo nông sản (dubaonongsan.com)
+
+> Nền tảng dự báo giá nông sản Việt Nam — sầu riêng, cà phê, hồ tiêu, lúa. Cập nhật giá hàng ngày từ các nguồn báo nông nghiệp và sở công thương, dự báo 30 ngày dùng mô hình machine learning.
+
+Trang web phục vụ nông dân, thương lái, doanh nghiệp xuất khẩu nông sản. Dữ liệu được scrape công khai và mở qua API. Người dùng AI có thể fetch các URL dưới đây để có content text gốc (markdown / JSON) thay vì parse HTML SPA.
+
+## Dữ liệu giá
+
+- [API giá lịch sử công khai (JSON)](https://api.dubaonongsan.com/api/v1/public/prices?crop=sau_rieng): cần X-API-Key
+- [Bảng giá hàng ngày (sầu riêng)](https://dubaonongsan.com/du-bao-gia/sau_rieng): HTML có bảng giá hiện tại + dự báo 30 ngày
+- [Bảng giá hàng ngày (cà phê)](https://dubaonongsan.com/du-bao-gia/ca_phe)
+- [Bảng giá hàng ngày (hồ tiêu)](https://dubaonongsan.com/du-bao-gia/ho_tieu)
+- [Bảng giá hàng ngày (lúa)](https://dubaonongsan.com/du-bao-gia/lua)
+- [Endpoint LLM markdown — giá sầu riêng](https://api.dubaonongsan.com/api/v1/llm-content/forecast/sau_rieng): text/markdown gọn cho AI
+- [Endpoint LLM markdown — giá cà phê](https://api.dubaonongsan.com/api/v1/llm-content/forecast/ca_phe)
+- [Endpoint LLM markdown — giá hồ tiêu](https://api.dubaonongsan.com/api/v1/llm-content/forecast/ho_tieu)
+- [Endpoint LLM markdown — giá lúa](https://api.dubaonongsan.com/api/v1/llm-content/forecast/lua)
+
+## Hướng dẫn kỹ thuật canh tác
+
+- [Index hướng dẫn](https://dubaonongsan.com/huong-dan): list ~30 bài hướng dẫn kỹ thuật mới nhất
+- [API guides (JSON)](https://api.dubaonongsan.com/api/v1/content/guides?limit=100): toàn bộ guide
+- [Endpoint LLM markdown — guides index](https://api.dubaonongsan.com/api/v1/llm-content/guides): danh sách + summary
+- [Endpoint LLM markdown — guide detail theo slug](https://api.dubaonongsan.com/api/v1/llm-content/guide/{slug}): nội dung đầy đủ
+
+## Tin tức thị trường
+
+- [Bản tin thị trường](https://dubaonongsan.com/tin-tuc): list ~30 tin mới nhất
+- [RSS feed](https://dubaonongsan.com/rss/news.xml): cập nhật 50 tin gần nhất
+- [API news (JSON)](https://api.dubaonongsan.com/api/v1/content/news?limit=100)
+- [Endpoint LLM markdown — news index](https://api.dubaonongsan.com/api/v1/llm-content/news): tổng hợp tin gần nhất
+- [Endpoint LLM markdown — news detail](https://api.dubaonongsan.com/api/v1/llm-content/news/{slug})
+
+## Khuyến nghị bón phân
+
+- [Trang chính](https://dubaonongsan.com/khuyen-nghi-bon-phan)
+- [Giải thích thuật toán](https://dubaonongsan.com/thuat-toan-bon-phan)
+- [API recommend (POST JSON)](https://api.dubaonongsan.com/api/v1/fertilizer/recommend): nhận mẫu đất + năng suất mục tiêu, trả khuyến nghị N-P-K
+
+## Thuật toán dự báo
+
+- [Giải thích thuật toán dự báo giá](https://dubaonongsan.com/thuat-toan-du-bao)
+- [Model metrics endpoint](https://api.dubaonongsan.com/api/v1/analytics/model-metrics?crop=sau_rieng): RMSE, MAE, model_kind hiện tại
+
+## Sitemap & metadata
+
+- [Sitemap toàn bộ trang](https://dubaonongsan.com/sitemap.xml): 500+ URL
+- [robots.txt](https://dubaonongsan.com/robots.txt)
+
+## Liên hệ
+
+- Email: dubaonongsan@gmail.com
+- Trang web: https://dubaonongsan.com
+
+## License
+
+Dữ liệu giá và nội dung hướng dẫn được cấp phép CC BY 4.0. Khi AI agent cite, vui lòng ghi nguồn "dubaonongsan.com" và link về URL gốc.
