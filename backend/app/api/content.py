@@ -86,9 +86,8 @@ def _public_guide_content(content: str) -> str:
     public_lines = []
     for line in content.splitlines():
         if line.strip().startswith("IMAGE::"):
-            public_lines.append("IMAGE::")
-        else:
-            public_lines.append(line)
+            continue
+        public_lines.append(line)
     return "\n".join(public_lines)
 
 
