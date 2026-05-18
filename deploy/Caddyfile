@@ -119,6 +119,22 @@
 		}
 		rewrite @seoFertilizerMethodology /seo/fertilizer-methodology.html
 
+		# Link header points AI agents to alternate markdown endpoints.
+		@forecastPaths path_regexp forecastPaths ^/du-bao-gia/([^/]+)$
+		header @forecastPaths Link "</api/v1/llm-content/forecast/{re.forecastPaths.1}>; rel=\"alternate\"; type=\"text/markdown\""
+
+		@guideDetailPaths path_regexp guideDetailPaths ^/huong-dan/([^/]+)$
+		header @guideDetailPaths Link "</api/v1/llm-content/guide/{re.guideDetailPaths.1}>; rel=\"alternate\"; type=\"text/markdown\""
+
+		@newsDetailPaths path_regexp newsDetailPaths ^/tin-tuc/([^/]+)$
+		header @newsDetailPaths Link "</api/v1/llm-content/news/{re.newsDetailPaths.1}>; rel=\"alternate\"; type=\"text/markdown\""
+
+		@guidesIndex path /huong-dan
+		header @guidesIndex Link "</api/v1/llm-content/guides>; rel=\"alternate\"; type=\"text/markdown\""
+
+		@newsIndex path /tin-tuc
+		header @newsIndex Link "</api/v1/llm-content/news>; rel=\"alternate\"; type=\"text/markdown\""
+
 		@html {
 			path *.html
 		}
