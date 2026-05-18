@@ -22,6 +22,7 @@ category, crop_type and tags after the draft has passed review.
 from __future__ import annotations
 
 import argparse
+from datetime import UTC, datetime
 import re
 import sys
 from pathlib import Path
@@ -33,6 +34,7 @@ BACKEND = ROOT / "backend"
 if str(BACKEND) not in sys.path:
     sys.path.insert(0, str(BACKEND))
 
+from app.core.cache import invalidate_cache  # noqa: E402
 from app.db import SessionLocal  # noqa: E402
 from app.models import GuidePost  # noqa: E402
 from sqlalchemy import select  # noqa: E402
@@ -137,10 +139,14 @@ def import_one(path: Path, dry_run: bool) -> str:
         guide.crop_type = str(meta["crop_type"]).strip() or None
         guide.category = str(meta["category"]).strip()
         guide.tags = _tags_to_db(meta["tags"])
+        guide.published_at = datetime.now(UTC)
         if dry_run:
             db.rollback()
             return f"DRY-RUN ok: #{post_id} {guide.slug}"
         db.commit()
+        invalidate_cache("guides")
+        invalidate_cache(f"guide:{guide.slug}")
+        invalidate_cache("llm-guides-index")
         return f"Imported: #{post_id} {guide.slug}"
 
 
