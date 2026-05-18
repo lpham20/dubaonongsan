@@ -2,7 +2,7 @@
 post_id: 87
 slug: phong-tru-sau-duc-than-1334
 title: Phòng trừ sâu đục thân cho cà phê
-summary: Sâu đục thân cà phê đục đường ngầm trong thân, làm cây yếu rồi chết khô. Mỗi cây mất có thể tương đương 4-5 năm năng suất. Hướng dẫn phát hiện sớm và xử lý.
+summary: Sâu đục thân cà phê đục đường ngầm trong thân, làm cây yếu rồi chết khô. Mỗi cây mất có thể tương đương 4-5 năm năng suất. Hướng dẫn phát hiện sớm và xử lý cây bị sâu cho vườn Tây Nguyên.
 crop_type: ca_phe
 category: Phòng sâu bệnh cà phê
 tags:
@@ -10,8 +10,8 @@ tags:
   - phong-sau-benh
   - tay-nguyen
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Sâu đục thân cà phê *Xylotrechus quadripes* phá ngầm trong thân, đến lúc thấy cây vàng héo là khó cứu. Khác sâu đục thân tiêu (vẫn có thể tiêm thuốc cứu), sâu đục thân cà phê khi đã phá thân chính thường mất cây. Vườn có 5-10 phần trăm cây bị sâu mỗi năm là dấu hiệu nguy hiểm — cần xử lý quy trình toàn vườn.
@@ -135,34 +135,6 @@ Khi 5 phần trăm cây trở lên bị sâu trong vườn:
 
 - *Phòng trừ sâu đục thân trên cà phê* — Viện Khoa học Kỹ thuật Nông Lâm nghiệp Tây Nguyên (tên viết tắt WASI), 2022.
 - *Quản lý sâu hại cà phê* — Cục Bảo vệ Thực vật, 2023.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô cà phê: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Xử lý sự cố thường gặp
-Nếu cây cà phê xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Bảng kiểm nhanh tại vườn
-| Hạng mục | Cách kiểm tra | Khi cần chú ý |
-|---|---|---|
-| Sức cây cà phê | Quan sát lá, đọt, rễ/cổ rễ và tốc độ phục hồi | Cây héo, vàng lá, rụng hoa/trái hoặc phục hồi chậm |
-| Nước và đất | Kiểm tra ẩm độ tầng rễ, điểm đọng nước và mặt đất | Đất bí, nứt sâu hoặc đọng nước lâu |
-| Sâu bệnh | Chọn điểm đại diện để ghi tỷ lệ có triệu chứng | Triệu chứng lan nhanh sau 3-7 ngày |
-| Thời tiết | Xem dự báo 3-5 ngày trước thao tác lớn | Tránh mưa lớn, nắng gắt hoặc gió mạnh |
-
-## Checklist áp dụng
-- [ ] Xác định đúng lô, giống, tuổi cây và tình trạng hiện tại.
-- [ ] Chụp ảnh hoặc ghi chú điểm đại diện trước khi làm.
-- [ ] Kiểm tra nước, đất, thời tiết và sâu bệnh trước thao tác.
-- [ ] Làm thử trên diện tích nhỏ nếu điều kiện vườn chưa đồng đều.
-- [ ] Theo dõi lại sau 3-7 ngày và ghi kết quả trước khi mở rộng.
 
 ## 9. Bài liên quan
 

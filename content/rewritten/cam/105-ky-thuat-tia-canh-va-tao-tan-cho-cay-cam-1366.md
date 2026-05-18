@@ -2,7 +2,7 @@
 post_id: 105
 slug: ky-thuat-tia-canh-va-tao-tan-cho-cay-cam-1366
 title: Kỹ thuật tỉa cành và tạo tán cho cây Cam
-summary: Vườn cam không được tỉa cành đúng cách có năng suất giảm 30-50% sau 5-7 năm. Hướng dẫn tạo tán cơ bản năm 1-3 và tỉa cành định kỳ cho cây kinh doanh, áp dụng.
+summary: Vườn cam không được tỉa cành đúng cách có năng suất giảm 30-50% sau 5-7 năm. Hướng dẫn tạo tán cơ bản năm 1-3 và tỉa cành định kỳ cho cây kinh doanh, áp dụng cho cam sành Hà Giang và cam xoàn Đồng bằng sông Cửu Long.
 crop_type: cam
 category: Chăm sóc cây cam
 tags:
@@ -10,8 +10,8 @@ tags:
   - tia-canh
   - quan-ly-vuon
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Tỉa cành và tạo tán không phải "cắt cho gọn" mà là kỹ thuật quan trọng giúp cây cam có khung cành chắc, ánh sáng vào đều tán, năng suất ổn định. Vườn không tỉa thường có cành chồng chéo, tán dày, năng suất giảm dần qua mỗi năm. Bài này hướng dẫn hai giai đoạn — tạo tán năm 1-3 và tỉa cành định kỳ cho cây kinh doanh.
@@ -165,27 +165,6 @@ Tỉa cành làm cây "sốc nhẹ". Cần kết hợp với chăm sóc:
 
 - *Quy trình kỹ thuật trồng và chăm sóc cam* — Viện Cây ăn quả miền Nam, 2023.
 - *Kỹ thuật tỉa cành cây ăn quả có múi* — Cục Trồng trọt, 2022.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô cam: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Xử lý sự cố thường gặp
-Nếu cây cam xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Bảng kiểm nhanh tại vườn
-| Hạng mục | Cách kiểm tra | Khi cần chú ý |
-|---|---|---|
-| Sức cây cam | Quan sát lá, đọt, rễ/cổ rễ và tốc độ phục hồi | Cây héo, vàng lá, rụng hoa/trái hoặc phục hồi chậm |
-| Nước và đất | Kiểm tra ẩm độ tầng rễ, điểm đọng nước và mặt đất | Đất bí, nứt sâu hoặc đọng nước lâu |
-| Sâu bệnh | Chọn điểm đại diện để ghi tỷ lệ có triệu chứng | Triệu chứng lan nhanh sau 3-7 ngày |
-| Thời tiết | Xem dự báo 3-5 ngày trước thao tác lớn | Tránh mưa lớn, nắng gắt hoặc gió mạnh |
 
 ## 10. Bài liên quan
 

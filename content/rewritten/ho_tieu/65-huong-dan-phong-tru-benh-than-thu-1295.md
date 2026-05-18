@@ -2,7 +2,7 @@
 post_id: 65
 slug: huong-dan-phong-tru-benh-than-thu-1295
 title: Hướng dẫn phòng trừ bệnh thán thư cho tiêu
-summary: Thán thư (Colletotrichum gloeosporioides) là nguyên nhân chính làm rụng hoa, rụng quả non hồ tiêu — có thể mất 20-40% năng suất. Hướng dẫn nhận biết trên 3 bộ.
+summary: Thán thư (Colletotrichum gloeosporioides) là nguyên nhân chính làm rụng hoa, rụng quả non hồ tiêu — có thể mất 20-40% năng suất. Hướng dẫn nhận biết trên 3 bộ phận cây, phòng theo mùa và phác đồ xử lý khi mới phát hiện.
 crop_type: ho_tieu
 category: Phòng sâu bệnh hồ tiêu
 tags:
@@ -12,8 +12,8 @@ tags:
   - ra-hoa
   - dau-trai
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Khác chết nhanh, thán thư không giết cây nhưng "bóp" năng suất ngầm. Vườn bị thán thư mạn tính có thể vẫn xanh tốt nhưng chuỗi hạt thưa, nhiều hạt lép, sản lượng thật thấp hơn tiềm năng 30-50%. Bài này không nói lý thuyết chung mà tập trung vào 3 thời điểm thán thư đặc biệt nguy hiểm và cách xử lý cụ thể.
@@ -145,34 +145,6 @@ Sau 2-3 năm dữ liệu, bạn sẽ dự báo được pattern riêng vườn m
 - *Phòng trừ bệnh trên hồ tiêu* — Cục Bảo vệ Thực vật, 2022.
 - *Sổ tay kỹ thuật hồ tiêu xuất khẩu* — Hiệp hội Hồ tiêu Việt Nam (VPA), 2023.
 - *Quản lý thán thư trên cây có múi và cây công nghiệp* — Viện BVTV, 2021.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô hồ tiêu: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Chuẩn bị trước khi làm
-- [ ] Chia vườn/ruộng thành từng lô nhỏ để theo dõi riêng.
-- [ ] Chụp ảnh hiện trạng trước khi xử lý.
-- [ ] Ghi ngày, thời tiết, giống, tuổi cây và tình trạng đất/nước.
-- [ ] Chuẩn bị dụng cụ sạch, vật tư đúng mục tiêu và nguồn nước đủ dùng.
-- [ ] Làm thử trên diện tích nhỏ nếu lô chưa đồng đều hoặc cây đang suy.
-
-## Xử lý sự cố thường gặp
-Nếu cây hồ tiêu xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Bảng kiểm nhanh tại vườn
-| Hạng mục | Cách kiểm tra | Khi cần chú ý |
-|---|---|---|
-| Sức cây hồ tiêu | Quan sát lá, đọt, rễ/cổ rễ và tốc độ phục hồi | Cây héo, vàng lá, rụng hoa/trái hoặc phục hồi chậm |
-| Nước và đất | Kiểm tra ẩm độ tầng rễ, điểm đọng nước và mặt đất | Đất bí, nứt sâu hoặc đọng nước lâu |
-| Sâu bệnh | Chọn điểm đại diện để ghi tỷ lệ có triệu chứng | Triệu chứng lan nhanh sau 3-7 ngày |
-| Thời tiết | Xem dự báo 3-5 ngày trước thao tác lớn | Tránh mưa lớn, nắng gắt hoặc gió mạnh |
 
 ## 9. Bài liên quan
 

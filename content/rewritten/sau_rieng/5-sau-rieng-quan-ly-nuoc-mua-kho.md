@@ -2,7 +2,7 @@
 post_id: 5
 slug: sau-rieng-quan-ly-nuoc-mua-kho
 title: "Quản lý nước mùa khô cho sầu riêng: giữ ẩm đều, tránh sốc cây"
-summary: Sầu riêng nhạy với dao động nước hơn mọi loại cây ăn quả khác. Hướng dẫn cách đọc ẩm đất theo tầng rễ, lịch tưới đúng chu kỳ và biện pháp che phủ giữ ẩm cho.
+summary: Sầu riêng nhạy với dao động nước hơn mọi loại cây ăn quả khác. Hướng dẫn cách đọc ẩm đất theo tầng rễ, lịch tưới đúng chu kỳ và biện pháp che phủ giữ ẩm cho vườn miền Tây và Đông Nam Bộ trong mùa khô.
 crop_type: sau_rieng
 category: Chăm sóc sầu riêng
 tags:
@@ -11,8 +11,8 @@ tags:
   - tuoi-nuoc
   - tay-nam-bo
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Mùa khô là khoảng thời gian dễ nhất để vườn sầu riêng "tự huỷ" nếu chủ vườn không đọc đúng ẩm đất. Khác cà phê có thể chịu khô vài tuần, sầu riêng chỉ cần một đợt khô đột ngột 3-5 ngày là đủ để rụng lá già hàng loạt, cây yếu kéo dài cả vụ. Bài này tập hợp nguyên tắc quản lý nước riêng cho sầu riêng — không phải áp dụng chung công thức cây ăn quả nhiệt đới.
@@ -136,17 +136,6 @@ Cuối mùa khô (tháng 4-5), tổng kết: lượng nước đã tưới một
 
 - *Quy trình kỹ thuật canh tác sầu riêng vùng Đồng bằng sông Cửu Long* — Viện Cây ăn quả miền Nam, 2023.
 - *Quản lý nước cho cây ăn quả vùng xâm nhập mặn* — Cục Trồng trọt phối hợp với Viện Khoa học Thuỷ lợi miền Nam, 2022.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô sầu riêng: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Bảng kiểm nhanh tại vườn
-| Hạng mục | Cách kiểm tra | Khi cần chú ý |
-|---|---|---|
-| Sức cây sầu riêng | Quan sát lá, đọt, rễ/cổ rễ và tốc độ phục hồi | Cây héo, vàng lá, rụng hoa/trái hoặc phục hồi chậm |
-| Nước và đất | Kiểm tra ẩm độ tầng rễ, điểm đọng nước và mặt đất | Đất bí, nứt sâu hoặc đọng nước lâu |
-| Sâu bệnh | Chọn điểm đại diện để ghi tỷ lệ có triệu chứng | Triệu chứng lan nhanh sau 3-7 ngày |
-| Thời tiết | Xem dự báo 3-5 ngày trước thao tác lớn | Tránh mưa lớn, nắng gắt hoặc gió mạnh |
 
 ## 9. Bài liên quan
 

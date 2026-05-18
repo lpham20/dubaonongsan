@@ -2,7 +2,7 @@
 post_id: 10
 slug: sau-rieng-quan-ly-rep-sap-sau-duc-trai
 title: Quản lý rệp sáp và sâu đục trái sầu riêng theo hướng IPM
-summary: Rệp sáp và sâu đục trái là hai sâu hại tốn kém nhất trên sầu riêng giai đoạn nuôi trái. Hướng dẫn nhận biết, ngưỡng phun và phối hợp biện pháp sinh học - cơ.
+summary: Rệp sáp và sâu đục trái là hai sâu hại tốn kém nhất trên sầu riêng giai đoạn nuôi trái. Hướng dẫn nhận biết, ngưỡng phun và phối hợp biện pháp sinh học - cơ học - thuốc cho vườn miền Tây và Đông Nam Bộ.
 crop_type: sau_rieng
 category: Phòng sâu bệnh sầu riêng
 tags:
@@ -12,8 +12,8 @@ tags:
   - nuoi-trai
   - tay-nam-bo
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Rệp sáp và sâu đục trái khác nhau về cơ chế tấn công nhưng cùng làm hỏng giá trị thương mại trái sầu riêng. Vườn phòng tốt giảm thiệt hại dưới 5 phần trăm. Vườn phun thuốc liên tục không có kế hoạch — vẫn mất 15-25 phần trăm + tốn chi phí + tăng dư lượng thuốc trong trái. Bài này hướng dẫn quản lý hai sâu hại theo nguyên tắc dịch hại tổng hợp.
@@ -174,29 +174,6 @@ Vườn thường có cả hai sâu hại cùng lúc. Quản lý phối hợp:
 
 - *Quản lý dịch hại tổng hợp trên cây ăn quả nhiệt đới* — Viện Cây ăn quả miền Nam, 2023.
 - *Phòng trừ sâu hại sầu riêng* — Cục Bảo vệ Thực vật, 2022.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô sầu riêng: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Chuẩn bị trước khi làm
-- [ ] Chia vườn/ruộng thành từng lô nhỏ để theo dõi riêng.
-- [ ] Chụp ảnh hiện trạng trước khi xử lý.
-- [ ] Ghi ngày, thời tiết, giống, tuổi cây và tình trạng đất/nước.
-- [ ] Chuẩn bị dụng cụ sạch, vật tư đúng mục tiêu và nguồn nước đủ dùng.
-- [ ] Làm thử trên diện tích nhỏ nếu lô chưa đồng đều hoặc cây đang suy.
-
-## Quy trình tóm tắt để áp dụng
-Thực hiện theo thứ tự: khảo sát hiện trạng, chọn lô làm trước, xử lý đúng thời điểm, theo dõi phản ứng sau 3-7 ngày rồi mới mở rộng. Không nên làm đồng loạt toàn bộ diện tích khi chưa biết cây phản ứng ra sao.
-
-## Xử lý sự cố thường gặp
-Nếu cây sầu riêng xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
 
 ## 9. Bài liên quan
 

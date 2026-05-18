@@ -2,7 +2,7 @@
 post_id: 100
 slug: phong-tru-ruoi-vang-duc-trai-1360
 title: Phòng trừ ruồi vàng đục trái cho xoài
-summary: Ruồi vàng có thể làm hỏng 30-60% sản lượng xoài nếu không phòng. Hướng dẫn bao trái đúng cách, bẫy pheromone, bẫy chất dẫn dụ và quản lý vệ sinh vườn cho vùng.
+summary: Ruồi vàng có thể làm hỏng 30-60% sản lượng xoài nếu không phòng. Hướng dẫn bao trái đúng cách, bẫy pheromone, bẫy chất dẫn dụ và quản lý vệ sinh vườn cho vùng trồng xoài Đồng bằng sông Cửu Long.
 crop_type: xoai
 category: Phòng sâu bệnh cây xoài
 tags:
@@ -11,8 +11,8 @@ tags:
   - dau-trai
   - tay-nam-bo
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Ruồi vàng (*Bactrocera dorsalis* và *Bactrocera correcta*) là kẻ thù lớn nhất của xoài Đồng bằng sông Cửu Long. Trái bị đục không chỉ mất giá trị thương mại mà còn bị thị trường xuất khẩu Mỹ, Nhật, Hàn Quốc, Úc từ chối hoàn toàn. Bài này tập trung vào ba biện pháp hiệu quả nhất — bao trái, bẫy pheromone và vệ sinh vườn — đã được nông dân Tiền Giang, Đồng Tháp áp dụng thành công.
@@ -157,37 +157,6 @@ Khi mật độ ruồi tăng nhanh — bao trái cẩn thận hơn và tăng s�
 - *Phòng trừ ruồi đục trái trên cây ăn quả* — Cục Bảo vệ Thực vật, 2022.
 - *Sổ tay kỹ thuật trồng xoài xuất khẩu* — Viện Cây ăn quả miền Nam, 2023.
 - *Bao trái xoài cho xuất khẩu* — Cục Trồng trọt, 2021.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô xoài: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Chuẩn bị trước khi làm
-- [ ] Chia vườn/ruộng thành từng lô nhỏ để theo dõi riêng.
-- [ ] Chụp ảnh hiện trạng trước khi xử lý.
-- [ ] Ghi ngày, thời tiết, giống, tuổi cây và tình trạng đất/nước.
-- [ ] Chuẩn bị dụng cụ sạch, vật tư đúng mục tiêu và nguồn nước đủ dùng.
-- [ ] Làm thử trên diện tích nhỏ nếu lô chưa đồng đều hoặc cây đang suy.
-
-## Quy trình tóm tắt để áp dụng
-Thực hiện theo thứ tự: khảo sát hiện trạng, chọn lô làm trước, xử lý đúng thời điểm, theo dõi phản ứng sau 3-7 ngày rồi mới mở rộng. Không nên làm đồng loạt toàn bộ diện tích khi chưa biết cây phản ứng ra sao.
-
-## Xử lý sự cố thường gặp
-Nếu cây xoài xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Bảng kiểm nhanh tại vườn
-| Hạng mục | Cách kiểm tra | Khi cần chú ý |
-|---|---|---|
-| Sức cây xoài | Quan sát lá, đọt, rễ/cổ rễ và tốc độ phục hồi | Cây héo, vàng lá, rụng hoa/trái hoặc phục hồi chậm |
-| Nước và đất | Kiểm tra ẩm độ tầng rễ, điểm đọng nước và mặt đất | Đất bí, nứt sâu hoặc đọng nước lâu |
-| Sâu bệnh | Chọn điểm đại diện để ghi tỷ lệ có triệu chứng | Triệu chứng lan nhanh sau 3-7 ngày |
-| Thời tiết | Xem dự báo 3-5 ngày trước thao tác lớn | Tránh mưa lớn, nắng gắt hoặc gió mạnh |
 
 ## 10. Bài liên quan
 

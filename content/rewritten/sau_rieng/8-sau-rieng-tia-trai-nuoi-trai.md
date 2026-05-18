@@ -2,7 +2,7 @@
 post_id: 8
 slug: sau-rieng-tia-trai-nuoi-trai
 title: "Tỉa trái và nuôi trái sầu riêng: giữ sản lượng vừa sức cây"
-summary: Tỉa trái sầu riêng quyết định 50-60% chất lượng và năng suất kinh tế thực sự. Cây ôm 150 trái không thể bằng 80 trái chất lượng. Hướng dẫn ba lần tỉa và quy.
+summary: Tỉa trái sầu riêng quyết định 50-60% chất lượng và năng suất kinh tế thực sự. Cây ôm 150 trái không thể bằng 80 trái chất lượng. Hướng dẫn ba lần tỉa và quy trình nuôi trái cho vườn Tây Nam Bộ và Đông Nam Bộ.
 crop_type: sau_rieng
 category: Chăm sóc sầu riêng
 tags:
@@ -12,8 +12,8 @@ tags:
   - dau-trai
   - tay-nam-bo
   - nang-cao
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Sai lầm phổ biến nhất ở vườn sầu riêng mới làm là tham giữ trái. Cây ôm 150-200 trái cho mùa "đẹp" trên ảnh nhưng trái nhỏ, cơm không đều, giá bán thấp, vụ sau cây kiệt sức. Cây giữ 60-100 trái chất lượng cao có thể bán giá cao hơn 30-50 phần trăm. Bài này hướng dẫn ba thời điểm tỉa trái và cách nuôi trái cuối vụ.
@@ -183,22 +183,6 @@ Dữ liệu vài vụ giúp tinh chỉnh quy tắc tỉa trái cho vườn riên
 
 - *Kỹ thuật canh tác sầu riêng* — Viện Cây ăn quả miền Nam, 2023.
 - *Hướng dẫn tỉa hoa, tỉa quả sầu riêng* — Cục Trồng trọt, 2022.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô sầu riêng: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Quy trình tóm tắt để áp dụng
-Thực hiện theo thứ tự: khảo sát hiện trạng, chọn lô làm trước, xử lý đúng thời điểm, theo dõi phản ứng sau 3-7 ngày rồi mới mở rộng. Không nên làm đồng loạt toàn bộ diện tích khi chưa biết cây phản ứng ra sao.
-
-## Xử lý sự cố thường gặp
-Nếu cây sầu riêng xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
 
 ## 11. Bài liên quan
 

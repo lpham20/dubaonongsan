@@ -2,7 +2,7 @@
 post_id: 86
 slug: phong-tru-rep-sap-hai-qua-ca-phe-1330
 title: Phòng trừ rệp sáp hại quả cà phê
-summary: Rệp sáp tấn công quả cà phê giai đoạn quả non đến chín, làm rụng quả và giảm chất lượng nhân. Hướng dẫn phòng theo mùa, biện pháp sinh học và thuốc đặc hiệu.
+summary: Rệp sáp tấn công quả cà phê giai đoạn quả non đến chín, làm rụng quả và giảm chất lượng nhân. Hướng dẫn phòng theo mùa, biện pháp sinh học và thuốc đặc hiệu cho rệp sáp quả ở Tây Nguyên.
 crop_type: ca_phe
 category: Phòng sâu bệnh cà phê
 tags:
@@ -11,8 +11,8 @@ tags:
   - tay-nguyen
   - nuoi-trai
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Rệp sáp hại quả khác rệp sáp hại rễ — tấn công trực tiếp lên chùm quả, gây rụng quả non hoặc làm quả không chín đều. Vườn bị nặng giảm 15-25 phần trăm sản lượng + chất lượng nhân kém. Bài này tập trung vào nhận biết sớm trên cụm hoa và quả non, biện pháp sinh học và phun đúng kỹ thuật.
@@ -194,29 +194,6 @@ Khi vườn có trên 30 phần trăm chùm bị rệp:
 
 - *Phòng trừ rệp sáp trên cà phê* — Viện Khoa học Kỹ thuật Nông Lâm nghiệp Tây Nguyên (tên viết tắt WASI), 2022.
 - *Quản lý dịch hại tổng hợp cho cà phê* — Cục Bảo vệ Thực vật, 2023.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô cà phê: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Chuẩn bị trước khi làm
-- [ ] Chia vườn/ruộng thành từng lô nhỏ để theo dõi riêng.
-- [ ] Chụp ảnh hiện trạng trước khi xử lý.
-- [ ] Ghi ngày, thời tiết, giống, tuổi cây và tình trạng đất/nước.
-- [ ] Chuẩn bị dụng cụ sạch, vật tư đúng mục tiêu và nguồn nước đủ dùng.
-- [ ] Làm thử trên diện tích nhỏ nếu lô chưa đồng đều hoặc cây đang suy.
-
-## Quy trình tóm tắt để áp dụng
-Thực hiện theo thứ tự: khảo sát hiện trạng, chọn lô làm trước, xử lý đúng thời điểm, theo dõi phản ứng sau 3-7 ngày rồi mới mở rộng. Không nên làm đồng loạt toàn bộ diện tích khi chưa biết cây phản ứng ra sao.
-
-## Xử lý sự cố thường gặp
-Nếu cây cà phê xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
 
 ## 11. Bài liên quan
 

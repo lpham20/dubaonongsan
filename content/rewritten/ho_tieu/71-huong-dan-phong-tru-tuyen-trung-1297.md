@@ -2,7 +2,7 @@
 post_id: 71
 slug: huong-dan-phong-tru-tuyen-trung-1297
 title: Hướng dẫn phòng trừ tuyến trùng cho tiêu
-summary: Tuyến trùng nốt sần là sinh vật siêu nhỏ trong đất, tấn công rễ tiêu, làm cây yếu dần và dễ chết do bệnh nấm phối hợp. Hướng dẫn phòng theo biện pháp sinh học.
+summary: Tuyến trùng nốt sần là sinh vật siêu nhỏ trong đất, tấn công rễ tiêu, làm cây yếu dần và dễ chết do bệnh nấm phối hợp. Hướng dẫn phòng theo biện pháp sinh học + hoá học và xử lý cây bị nặng.
 crop_type: ho_tieu
 category: Phòng sâu bệnh hồ tiêu
 tags:
@@ -12,8 +12,8 @@ tags:
   - tay-nguyen
   - dong-nam-bo
   - nang-cao
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Tuyến trùng là một trong "ba kẻ thù lớn" của hồ tiêu — cùng với *Phytophthora* (chết nhanh) và *Fusarium* (chết chậm). Khác hai cái trên có triệu chứng rõ, tuyến trùng phá ngầm trong đất, làm cây yếu dần qua nhiều năm. Vườn không quản lý tuyến trùng có năng suất giảm 20-40 phần trăm dù chăm sóc tốt mặt trên. Bài này hướng dẫn nhận biết, phòng và xử lý.
@@ -168,37 +168,6 @@ Khi trên 70 phần trăm cây có nốt sần + năng suất giảm sâu:
 - *Quản lý tuyến trùng trên hồ tiêu* — Cục Bảo vệ Thực vật, 2022.
 - *Phòng trừ bệnh chết chậm hồ tiêu (tuyến trùng + nấm)* — Viện Bảo vệ Thực vật, 2023.
 - *Sổ tay kỹ thuật hồ tiêu bền vững* — Hiệp hội Hồ tiêu Việt Nam (tên viết tắt VPA), 2022.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô hồ tiêu: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Quy trình tóm tắt để áp dụng
-Thực hiện theo thứ tự: khảo sát hiện trạng, chọn lô làm trước, xử lý đúng thời điểm, theo dõi phản ứng sau 3-7 ngày rồi mới mở rộng. Không nên làm đồng loạt toàn bộ diện tích khi chưa biết cây phản ứng ra sao.
-
-## Xử lý sự cố thường gặp
-Nếu cây hồ tiêu xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Bảng kiểm nhanh tại vườn
-| Hạng mục | Cách kiểm tra | Khi cần chú ý |
-|---|---|---|
-| Sức cây hồ tiêu | Quan sát lá, đọt, rễ/cổ rễ và tốc độ phục hồi | Cây héo, vàng lá, rụng hoa/trái hoặc phục hồi chậm |
-| Nước và đất | Kiểm tra ẩm độ tầng rễ, điểm đọng nước và mặt đất | Đất bí, nứt sâu hoặc đọng nước lâu |
-| Sâu bệnh | Chọn điểm đại diện để ghi tỷ lệ có triệu chứng | Triệu chứng lan nhanh sau 3-7 ngày |
-| Thời tiết | Xem dự báo 3-5 ngày trước thao tác lớn | Tránh mưa lớn, nắng gắt hoặc gió mạnh |
-
-## Checklist áp dụng
-- [ ] Xác định đúng lô, giống, tuổi cây và tình trạng hiện tại.
-- [ ] Chụp ảnh hoặc ghi chú điểm đại diện trước khi làm.
-- [ ] Kiểm tra nước, đất, thời tiết và sâu bệnh trước thao tác.
-- [ ] Làm thử trên diện tích nhỏ nếu điều kiện vườn chưa đồng đều.
-- [ ] Theo dõi lại sau 3-7 ngày và ghi kết quả trước khi mở rộng.
 
 ## 9. Bài liên quan
 

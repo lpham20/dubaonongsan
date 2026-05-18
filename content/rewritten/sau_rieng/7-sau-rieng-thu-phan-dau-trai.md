@@ -2,7 +2,7 @@
 post_id: 7
 slug: sau-rieng-thu-phan-dau-trai
 title: "Thụ phấn và giữ trái non sầu riêng: thao tác đúng thời điểm"
-summary: Sầu riêng thụ phấn chủ yếu ban đêm, tỷ lệ đậu trái tự nhiên chỉ 20-40%. Thụ phấn bổ sung bằng tay nâng lên 60-80%. Hướng dẫn cách thực hành đúng + cách giữ.
+summary: Sầu riêng thụ phấn chủ yếu ban đêm, tỷ lệ đậu trái tự nhiên chỉ 20-40%. Thụ phấn bổ sung bằng tay nâng lên 60-80%. Hướng dẫn cách thực hành đúng + cách giữ trái non sau đậu.
 crop_type: sau_rieng
 category: Chăm sóc sầu riêng
 tags:
@@ -11,8 +11,8 @@ tags:
   - dau-trai
   - tay-nam-bo
   - nang-cao
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Sầu riêng có hoa lưỡng tính nhưng tự thụ phấn yếu. Phấn hoa khô nhanh dưới nắng và mưa, hoa nở chủ yếu vào đêm (15-22 giờ), phụ thuộc vào dơi hoa và một số côn trùng ăn đêm. Tại nhiều vườn miền Tây, thiên địch giảm khiến tỷ lệ đậu trái tự nhiên chỉ 20-40 phần trăm. Thụ phấn bổ sung bằng tay tăng tỷ lệ này lên 60-80 phần trăm, đặc biệt với giống Monthong và Musang King.
@@ -141,34 +141,6 @@ Trái non lúc bằng quả trứng vịt:
 
 - *Sinh học hoa và thụ phấn sầu riêng* — Viện Cây ăn quả miền Nam, 2022.
 - *Hướng dẫn tỉa hoa, tỉa quả và thụ phấn bổ sung cho sầu riêng* — Cục Trồng trọt, 2023.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô sầu riêng: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Xử lý sự cố thường gặp
-Nếu cây sầu riêng xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Bảng kiểm nhanh tại vườn
-| Hạng mục | Cách kiểm tra | Khi cần chú ý |
-|---|---|---|
-| Sức cây sầu riêng | Quan sát lá, đọt, rễ/cổ rễ và tốc độ phục hồi | Cây héo, vàng lá, rụng hoa/trái hoặc phục hồi chậm |
-| Nước và đất | Kiểm tra ẩm độ tầng rễ, điểm đọng nước và mặt đất | Đất bí, nứt sâu hoặc đọng nước lâu |
-| Sâu bệnh | Chọn điểm đại diện để ghi tỷ lệ có triệu chứng | Triệu chứng lan nhanh sau 3-7 ngày |
-| Thời tiết | Xem dự báo 3-5 ngày trước thao tác lớn | Tránh mưa lớn, nắng gắt hoặc gió mạnh |
-
-## Checklist áp dụng
-- [ ] Xác định đúng lô, giống, tuổi cây và tình trạng hiện tại.
-- [ ] Chụp ảnh hoặc ghi chú điểm đại diện trước khi làm.
-- [ ] Kiểm tra nước, đất, thời tiết và sâu bệnh trước thao tác.
-- [ ] Làm thử trên diện tích nhỏ nếu điều kiện vườn chưa đồng đều.
-- [ ] Theo dõi lại sau 3-7 ngày và ghi kết quả trước khi mở rộng.
 
 ## 9. Bài liên quan
 

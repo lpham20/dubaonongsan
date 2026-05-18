@@ -10,8 +10,8 @@ tags:
   - phong-sau-benh
   - dong-bang-song-cuu-long
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Rầy nâu (*Nilaparvata lugens*) là dịch hại lúa nguy hiểm số 1 tại ĐBSCL. Khác sâu cuốn lá hoặc bọ trĩ, rầy nâu có 2 tác hại song hành: hút nhựa làm "cháy rầy" + truyền virus vàng lùn. Vườn đã có virus thì thuốc trừ rầy không cứu được nữa. Bài này tập trung vào ngưỡng phun chuẩn IPM + cách xoay hoạt chất tránh kháng thuốc.
@@ -167,22 +167,6 @@ Sau 2-3 vụ, bạn sẽ biết pattern rầy nâu ở đồng mình + có khả
 - *Quản lý dịch hại tổng hợp cho lúa* — Cục Bảo vệ Thực vật, 2022.
 - *Phòng trừ rầy nâu hại lúa* — Viện Lúa ĐBSCL, 2023.
 - *Sổ tay IPM lúa* — FAO Việt Nam, 2021.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô lúa: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Quy trình tóm tắt để áp dụng
-Thực hiện theo thứ tự: khảo sát hiện trạng, chọn lô làm trước, xử lý đúng thời điểm, theo dõi phản ứng sau 3-7 ngày rồi mới mở rộng. Không nên làm đồng loạt toàn bộ diện tích khi chưa biết cây phản ứng ra sao.
-
-## Xử lý sự cố thường gặp
-Nếu cây lúa xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
 
 ## 11. Bài liên quan
 

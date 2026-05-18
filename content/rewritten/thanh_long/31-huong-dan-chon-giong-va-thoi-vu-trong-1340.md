@@ -2,7 +2,7 @@
 post_id: 31
 slug: huong-dan-chon-giong-va-thoi-vu-trong-1340
 title: Hướng dẫn chọn giống và thời vụ trồng cho thanh long
-summary: Thanh long ruột trắng và ruột đỏ có yêu cầu vùng khí hậu và đất khác nhau. Hướng dẫn so sánh hai giống, chọn thời vụ trồng phù hợp Bình Thuận, Long An và Tiền.
+summary: Thanh long ruột trắng và ruột đỏ có yêu cầu vùng khí hậu và đất khác nhau. Hướng dẫn so sánh hai giống, chọn thời vụ trồng phù hợp Bình Thuận, Long An và Tiền Giang để cây sinh trưởng tốt năm đầu.
 crop_type: thanh_long
 category: Thiết lập vườn thanh long
 tags:
@@ -10,8 +10,8 @@ tags:
   - thiet-lap-vuon
   - mua-mua
   - co-ban
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Vườn thanh long mới gặp thất bại 30-50 phần trăm nếu chọn giống không phù hợp khí hậu vùng hoặc trồng sai thời vụ. Bình Thuận có vườn thanh long ruột trắng truyền thống, trong khi ruột đỏ phát triển mạnh ở Long An, Tiền Giang. Bài này hướng dẫn cách chọn giống và quyết định thời vụ — hai quyết định nền tảng cho vườn 15-20 năm.
@@ -178,29 +178,6 @@ Chọn:
 
 - *Cẩm nang sản xuất thanh long bền vững* — Viện Cây ăn quả miền Nam, 2023.
 - *Sản xuất thanh long xuất khẩu* — Cục Trồng trọt, 2022.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô thanh long: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Quy trình tóm tắt để áp dụng
-Thực hiện theo thứ tự: khảo sát hiện trạng, chọn lô làm trước, xử lý đúng thời điểm, theo dõi phản ứng sau 3-7 ngày rồi mới mở rộng. Không nên làm đồng loạt toàn bộ diện tích khi chưa biết cây phản ứng ra sao.
-
-## Xử lý sự cố thường gặp
-Nếu cây thanh long xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Checklist áp dụng
-- [ ] Xác định đúng lô, giống, tuổi cây và tình trạng hiện tại.
-- [ ] Chụp ảnh hoặc ghi chú điểm đại diện trước khi làm.
-- [ ] Kiểm tra nước, đất, thời tiết và sâu bệnh trước thao tác.
-- [ ] Làm thử trên diện tích nhỏ nếu điều kiện vườn chưa đồng đều.
-- [ ] Theo dõi lại sau 3-7 ngày và ghi kết quả trước khi mở rộng.
 
 ## 9. Bài liên quan
 

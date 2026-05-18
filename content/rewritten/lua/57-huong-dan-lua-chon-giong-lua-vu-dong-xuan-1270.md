@@ -2,7 +2,7 @@
 post_id: 57
 slug: huong-dan-lua-chon-giong-lua-vu-dong-xuan-1270
 title: Hướng dẫn lựa chọn giống lúa vụ Đông Xuân
-summary: Vụ Đông Xuân là vụ năng suất cao nhất nhưng cũng nhiều rủi ro sâu bệnh nhất. Hướng dẫn chọn giống theo bốn tiêu chí — thời vụ, kháng bệnh, năng suất, thị.
+summary: Vụ Đông Xuân là vụ năng suất cao nhất nhưng cũng nhiều rủi ro sâu bệnh nhất. Hướng dẫn chọn giống theo bốn tiêu chí — thời vụ, kháng bệnh, năng suất, thị trường — cho vùng Đồng bằng sông Cửu Long.
 crop_type: lua
 category: Cẩm nang lúa
 tags:
@@ -10,8 +10,8 @@ tags:
   - dong-bang-song-cuu-long
   - mua-lanh
   - co-ban
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Vụ Đông Xuân Đồng bằng sông Cửu Long cho năng suất 6-9 tấn mỗi héc-ta — cao nhất trong ba vụ — nhưng cũng đầy rủi ro do thời tiết lạnh sớm, sương đêm, đạo ôn bùng phát. Chọn giống đúng quyết định 30-40 phần trăm thành công vụ. Bài này hướng dẫn cách chọn giống theo bốn tiêu chí thực tế, không chỉ theo lời giới thiệu của đại lý.
@@ -144,29 +144,6 @@ Sau 2-3 vụ, bạn sẽ biết được giống nào thực sự phù hợp ru�
 - *Cẩm nang chọn giống lúa vụ Đông Xuân Đồng bằng sông Cửu Long* — Viện Lúa Đồng bằng sông Cửu Long, 2024.
 - *Danh mục giống cây trồng được phép sản xuất kinh doanh* — Cục Trồng trọt, cập nhật hằng năm.
 - *Khuyến cáo giống lúa cho vụ Đông Xuân* — Sở Nông nghiệp và Phát triển Nông thôn các tỉnh Đồng bằng sông Cửu Long, hằng năm.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô lúa: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Xử lý sự cố thường gặp
-Nếu cây lúa xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Ghi chép nên có
-Mỗi lần làm cần ghi tối thiểu: ngày, lô, diện tích, giống, tuổi cây, tình trạng trước khi làm, thao tác, vật tư, liều lượng, nhân công, thời tiết, ảnh hiện trường và kết quả sau 3-7 ngày. Với nội dung liên quan thu hoạch hoặc năng suất, ghi thêm sản lượng, tỷ lệ loại bỏ và giá bán.
-
-## Checklist áp dụng
-- [ ] Xác định đúng lô, giống, tuổi cây và tình trạng hiện tại.
-- [ ] Chụp ảnh hoặc ghi chú điểm đại diện trước khi làm.
-- [ ] Kiểm tra nước, đất, thời tiết và sâu bệnh trước thao tác.
-- [ ] Làm thử trên diện tích nhỏ nếu điều kiện vườn chưa đồng đều.
-- [ ] Theo dõi lại sau 3-7 ngày và ghi kết quả trước khi mở rộng.
 
 ## 9. Bài liên quan
 

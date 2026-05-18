@@ -2,7 +2,7 @@
 post_id: 6
 slug: sau-rieng-xu-ly-ra-hoa-an-toan
 title: "Xử lý ra hoa sầu riêng an toàn: đọc sức cây trước khi làm bông"
-summary: Xử lý ra hoa sầu riêng không phải áp dụng công thức chung. Sức cây trước khi xử lý quyết định 70% kết quả. Hướng dẫn cách đánh giá cây, chọn thời điểm và.
+summary: Xử lý ra hoa sầu riêng không phải áp dụng công thức chung. Sức cây trước khi xử lý quyết định 70% kết quả. Hướng dẫn cách đánh giá cây, chọn thời điểm và phương pháp xử lý phù hợp cho vườn miền Tây và Đông Nam Bộ.
 crop_type: sau_rieng
 category: Xử lý ra hoa sầu riêng
 tags:
@@ -11,8 +11,8 @@ tags:
   - mua-kho
   - tay-nam-bo
   - nang-cao
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Ép sầu riêng ra hoa sai thời điểm hoặc trên cây yếu là một trong những sai lầm tốn kém nhất trong canh tác sầu riêng. Cây bị ép ra hoa khi chưa sẵn sàng có thể mất 1-2 vụ năng suất sau đó. Bài này không hướng dẫn "công thức kích hoa" cụ thể mà tập trung vào bước trước đó — đánh giá sức cây và quyết định có nên xử lý ra hoa hay không.
@@ -165,34 +165,6 @@ Nông dân thường ép cây ra hoa nhiều vụ liên tiếp vì giá tốt. S
 
 - *Quy trình xử lý ra hoa sầu riêng* — Viện Cây ăn quả miền Nam, 2023.
 - *Hướng dẫn sử dụng chất điều hoà sinh trưởng trên cây ăn quả* — Cục Bảo vệ Thực vật, 2022.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô sầu riêng: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Chuẩn bị trước khi làm
-- [ ] Chia vườn/ruộng thành từng lô nhỏ để theo dõi riêng.
-- [ ] Chụp ảnh hiện trạng trước khi xử lý.
-- [ ] Ghi ngày, thời tiết, giống, tuổi cây và tình trạng đất/nước.
-- [ ] Chuẩn bị dụng cụ sạch, vật tư đúng mục tiêu và nguồn nước đủ dùng.
-- [ ] Làm thử trên diện tích nhỏ nếu lô chưa đồng đều hoặc cây đang suy.
-
-## Xử lý sự cố thường gặp
-Nếu cây sầu riêng xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Bảng kiểm nhanh tại vườn
-| Hạng mục | Cách kiểm tra | Khi cần chú ý |
-|---|---|---|
-| Sức cây sầu riêng | Quan sát lá, đọt, rễ/cổ rễ và tốc độ phục hồi | Cây héo, vàng lá, rụng hoa/trái hoặc phục hồi chậm |
-| Nước và đất | Kiểm tra ẩm độ tầng rễ, điểm đọng nước và mặt đất | Đất bí, nứt sâu hoặc đọng nước lâu |
-| Sâu bệnh | Chọn điểm đại diện để ghi tỷ lệ có triệu chứng | Triệu chứng lan nhanh sau 3-7 ngày |
-| Thời tiết | Xem dự báo 3-5 ngày trước thao tác lớn | Tránh mưa lớn, nắng gắt hoặc gió mạnh |
 
 ## 10. Bài liên quan
 

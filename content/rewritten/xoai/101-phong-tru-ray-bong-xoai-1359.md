@@ -2,7 +2,7 @@
 post_id: 101
 slug: phong-tru-ray-bong-xoai-1359
 title: Phòng trừ rầy bông xoài
-summary: Rầy bông xoài (Idioscopus clypealis) tấn công chuỗi hoa và đọt non, gây rụng hoa và làm hỏng cả vụ. Hướng dẫn nhận biết, ngưỡng phun và biện pháp phòng tổng.
+summary: Rầy bông xoài (Idioscopus clypealis) tấn công chuỗi hoa và đọt non, gây rụng hoa và làm hỏng cả vụ. Hướng dẫn nhận biết, ngưỡng phun và biện pháp phòng tổng hợp cho vườn xoài Đồng bằng sông Cửu Long.
 crop_type: xoai
 category: Phòng sâu bệnh cây xoài
 tags:
@@ -11,8 +11,8 @@ tags:
   - ra-hoa
   - tay-nam-bo
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Rầy bông xoài là sâu hại số một ở giai đoạn ra hoa. Một đợt rầy nặng có thể làm rụng 50-80 phần trăm hoa trong vài ngày — mất cả vụ. Khác sâu đục trái có thể bao trái phòng, rầy bông phải xử lý đúng lúc — phun chậm 5-7 ngày là đã muộn. Bài này hướng dẫn nhận biết sớm + phun đúng kỹ thuật + bảo vệ thụ phấn.
@@ -196,29 +196,6 @@ Lưu ý: mất hoa đợt này có thể chấp nhận. Cây sẽ ra hoa đợt 
 
 - *Phòng trừ rầy bông xoài* — Cục Bảo vệ Thực vật, 2022.
 - *Quản lý dịch hại tổng hợp trên xoài* — Viện Cây ăn quả miền Nam, 2023.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô xoài: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Chuẩn bị trước khi làm
-- [ ] Chia vườn/ruộng thành từng lô nhỏ để theo dõi riêng.
-- [ ] Chụp ảnh hiện trạng trước khi xử lý.
-- [ ] Ghi ngày, thời tiết, giống, tuổi cây và tình trạng đất/nước.
-- [ ] Chuẩn bị dụng cụ sạch, vật tư đúng mục tiêu và nguồn nước đủ dùng.
-- [ ] Làm thử trên diện tích nhỏ nếu lô chưa đồng đều hoặc cây đang suy.
-
-## Quy trình tóm tắt để áp dụng
-Thực hiện theo thứ tự: khảo sát hiện trạng, chọn lô làm trước, xử lý đúng thời điểm, theo dõi phản ứng sau 3-7 ngày rồi mới mở rộng. Không nên làm đồng loạt toàn bộ diện tích khi chưa biết cây phản ứng ra sao.
-
-## Xử lý sự cố thường gặp
-Nếu cây xoài xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
 
 ## 12. Bài liên quan
 

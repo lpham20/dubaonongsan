@@ -2,7 +2,7 @@
 post_id: 4
 slug: sau-rieng-thiet-lap-vuon-moi
 title: "Thiết lập vườn sầu riêng mới: đất, mương, bờ và cây giống"
-summary: 70% rủi ro vườn sầu riêng thất bại đến từ giai đoạn thiết lập. Hướng dẫn quyết định đầu tư đúng từ khảo sát đất, lên mô líp, chọn giống đến trồng — dựa trên.
+summary: 70% rủi ro vườn sầu riêng thất bại đến từ giai đoạn thiết lập. Hướng dẫn quyết định đầu tư đúng từ khảo sát đất, lên mô líp, chọn giống đến trồng — dựa trên kinh nghiệm vườn miền Tây và Đông Nam Bộ.
 crop_type: sau_rieng
 category: Thiết lập vườn sầu riêng
 tags:
@@ -12,8 +12,8 @@ tags:
   - tay-nam-bo
   - dong-nam-bo
   - nang-cao
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Sầu riêng không phải cây để "trồng chơi". Một sai lầm ở giai đoạn thiết lập (chọn đất sai, lên mô thấp, chọn giống không phù hợp vùng) sẽ kéo theo 5-10 năm thiệt hại. Bài này tổng hợp checklist quyết định trước khi xuống giống — phân biệt rõ vùng đất phù hợp và đất "nên tránh", giúp tránh các sai lầm tốn kém nhất.
@@ -136,30 +136,6 @@ Dữ liệu này theo cây 30 năm. Mất là không tạo lại được.
 
 - *Quy trình kỹ thuật trồng sầu riêng* — Viện Cây ăn quả miền Nam, 2023.
 - *Sổ tay kỹ thuật sầu riêng xuất khẩu* — Cục Trồng trọt, 2024.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô sầu riêng: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Xử lý sự cố thường gặp
-Nếu cây sầu riêng xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Tài liệu tham khảo
-Nội dung được biên tập thành hướng dẫn thực hành cho Dự báo nông sản, dùng để hỗ trợ người trồng ra quyết định tại vườn. Khi dùng phân bón hoặc thuốc bảo vệ thực vật, luôn ưu tiên nhãn sản phẩm, danh mục được phép lưu hành và khuyến cáo của cơ quan chuyên môn địa phương.
-
-## Bảng kiểm nhanh tại vườn
-| Hạng mục | Cách kiểm tra | Khi cần chú ý |
-|---|---|---|
-| Sức cây sầu riêng | Quan sát lá, đọt, rễ/cổ rễ và tốc độ phục hồi | Cây héo, vàng lá, rụng hoa/trái hoặc phục hồi chậm |
-| Nước và đất | Kiểm tra ẩm độ tầng rễ, điểm đọng nước và mặt đất | Đất bí, nứt sâu hoặc đọng nước lâu |
-| Sâu bệnh | Chọn điểm đại diện để ghi tỷ lệ có triệu chứng | Triệu chứng lan nhanh sau 3-7 ngày |
-| Thời tiết | Xem dự báo 3-5 ngày trước thao tác lớn | Tránh mưa lớn, nắng gắt hoặc gió mạnh |
 
 ## 9. Bài liên quan
 

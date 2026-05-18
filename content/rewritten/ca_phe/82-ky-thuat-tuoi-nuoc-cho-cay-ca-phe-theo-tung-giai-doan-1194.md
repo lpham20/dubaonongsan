@@ -2,7 +2,7 @@
 post_id: 82
 slug: ky-thuat-tuoi-nuoc-cho-cay-ca-phe-theo-tung-giai-doan-1194
 title: Kỹ thuật tưới nước cho cây cà phê theo từng giai đoạn
-summary: Tưới nước cho cà phê không chỉ là chuyện đủ nước. Mỗi giai đoạn sinh trưởng cần lượng nước và cách tưới khác nhau. Hướng dẫn theo bốn giai đoạn — sau thu.
+summary: Tưới nước cho cà phê không chỉ là chuyện đủ nước. Mỗi giai đoạn sinh trưởng cần lượng nước và cách tưới khác nhau. Hướng dẫn theo bốn giai đoạn — sau thu hoạch, kích hoa, nuôi trái, chín — phù hợp vườn Robusta tại Tây Nguyên.
 crop_type: ca_phe
 category: Chăm sóc cà phê
 tags:
@@ -12,8 +12,8 @@ tags:
   - ra-hoa
   - nuoi-trai
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Tưới đúng lượng vào đúng thời điểm quan trọng hơn việc tưới nhiều. Tưới nhầm giai đoạn — như tưới đậm khi cây vừa thu xong nhưng chưa nghỉ — có thể làm cây ra hoa sớm không kiểm soát, mất 30-50 phần trăm năng suất vụ sau. Bài này tách lịch tưới theo bốn giai đoạn cây Robusta tại Tây Nguyên, mỗi giai đoạn có nguyên tắc khác nhau.
@@ -148,27 +148,6 @@ Dữ liệu sau 2-3 năm giúp tinh chỉnh lịch tưới riêng cho vườn. K
 
 - *Quy trình kỹ thuật tưới nước cho cà phê Robusta* — Viện Khoa học Kỹ thuật Nông Lâm nghiệp Tây Nguyên (tên viết tắt WASI), 2018, cập nhật 2023.
 - *Khuyến cáo tưới nước cho cà phê vùng có hạn* — Cục Trồng trọt, 2022.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô cà phê: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Xử lý sự cố thường gặp
-Nếu cây cà phê xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Bảng kiểm nhanh tại vườn
-| Hạng mục | Cách kiểm tra | Khi cần chú ý |
-|---|---|---|
-| Sức cây cà phê | Quan sát lá, đọt, rễ/cổ rễ và tốc độ phục hồi | Cây héo, vàng lá, rụng hoa/trái hoặc phục hồi chậm |
-| Nước và đất | Kiểm tra ẩm độ tầng rễ, điểm đọng nước và mặt đất | Đất bí, nứt sâu hoặc đọng nước lâu |
-| Sâu bệnh | Chọn điểm đại diện để ghi tỷ lệ có triệu chứng | Triệu chứng lan nhanh sau 3-7 ngày |
-| Thời tiết | Xem dự báo 3-5 ngày trước thao tác lớn | Tránh mưa lớn, nắng gắt hoặc gió mạnh |
 
 ## 11. Bài liên quan
 

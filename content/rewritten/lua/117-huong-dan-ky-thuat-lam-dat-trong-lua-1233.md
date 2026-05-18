@@ -2,7 +2,7 @@
 post_id: 117
 slug: huong-dan-ky-thuat-lam-dat-trong-lua-1233
 title: Hướng dẫn kỹ thuật làm đất trồng lúa
-summary: Làm đất là khâu nền cho cả vụ lúa. Đất làm sai cho năng suất giảm 15-30% dù chăm sóc tốt sau đó. Hướng dẫn ba bước cày bừa, phơi đất, làm phẳng và cách điều.
+summary: Làm đất là khâu nền cho cả vụ lúa. Đất làm sai cho năng suất giảm 15-30% dù chăm sóc tốt sau đó. Hướng dẫn ba bước cày bừa, phơi đất, làm phẳng và cách điều chỉnh cho từng vùng đất Đồng bằng sông Cửu Long.
 crop_type: lua
 category: Cẩm nang lúa
 tags:
@@ -10,8 +10,8 @@ tags:
   - lam-dat
   - dong-bang-song-cuu-long
   - co-ban
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Đất lúa làm tốt sẽ giảm sâu bệnh, giảm cỏ dại, lúa đẻ nhánh đều. Đất làm vội cho năng suất giảm và tốn nhiều thuốc trong vụ. Bài này không hướng dẫn chung "làm đất là gì" mà tập trung vào ba bước quan trọng nhất — cày bừa, phơi đất, làm phẳng — và cách điều chỉnh theo từng loại đất phổ biến ở Đồng bằng sông Cửu Long.
@@ -199,34 +199,6 @@ Sạ tháng 11-12:
 
 - *Kỹ thuật làm đất canh tác lúa* — Viện Lúa Đồng bằng sông Cửu Long, 2022.
 - *Cẩm nang chuẩn bị đất cho vụ Đông Xuân* — Cục Trồng trọt, 2023.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô lúa: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Xử lý sự cố thường gặp
-Nếu cây lúa xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Bảng kiểm nhanh tại vườn
-| Hạng mục | Cách kiểm tra | Khi cần chú ý |
-|---|---|---|
-| Sức cây lúa | Quan sát lá, đọt, rễ/cổ rễ và tốc độ phục hồi | Cây héo, vàng lá, rụng hoa/trái hoặc phục hồi chậm |
-| Nước và đất | Kiểm tra ẩm độ tầng rễ, điểm đọng nước và mặt đất | Đất bí, nứt sâu hoặc đọng nước lâu |
-| Sâu bệnh | Chọn điểm đại diện để ghi tỷ lệ có triệu chứng | Triệu chứng lan nhanh sau 3-7 ngày |
-| Thời tiết | Xem dự báo 3-5 ngày trước thao tác lớn | Tránh mưa lớn, nắng gắt hoặc gió mạnh |
-
-## Checklist áp dụng
-- [ ] Xác định đúng lô, giống, tuổi cây và tình trạng hiện tại.
-- [ ] Chụp ảnh hoặc ghi chú điểm đại diện trước khi làm.
-- [ ] Kiểm tra nước, đất, thời tiết và sâu bệnh trước thao tác.
-- [ ] Làm thử trên diện tích nhỏ nếu điều kiện vườn chưa đồng đều.
-- [ ] Theo dõi lại sau 3-7 ngày và ghi kết quả trước khi mở rộng.
 
 ## 10. Bài liên quan
 

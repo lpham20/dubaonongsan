@@ -2,7 +2,7 @@
 post_id: 69
 slug: huong-dan-phong-tru-rep-sap-1298
 title: Hướng dẫn phòng trừ rệp sáp cho tiêu
-summary: Rệp sáp tấn công cả rễ và phần trên mặt đất của hồ tiêu, vừa hút nhựa vừa tạo nấm mốc đen. Hướng dẫn nhận biết hai dạng rệp, biện pháp sinh học và thuốc xoay.
+summary: Rệp sáp tấn công cả rễ và phần trên mặt đất của hồ tiêu, vừa hút nhựa vừa tạo nấm mốc đen. Hướng dẫn nhận biết hai dạng rệp, biện pháp sinh học và thuốc xoay vòng cho vườn Tây Nguyên và Đông Nam Bộ.
 crop_type: ho_tieu
 category: Phòng sâu bệnh hồ tiêu
 tags:
@@ -11,8 +11,8 @@ tags:
   - tay-nguyen
   - dong-nam-bo
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Rệp sáp là sâu hại phổ biến trên hồ tiêu nhưng thường bị coi nhẹ vì không gây chết cây nhanh. Thực tế, rệp sáp hút nhựa làm cây yếu dần, kèm tiết mật ngọt tạo điều kiện cho nấm bồ hóng (nấm mốc đen) phủ kín lá. Vườn bị nặng giảm 15-30 phần trăm năng suất. Bài này hướng dẫn phòng theo dạng rệp + kiến đồng hành.
@@ -205,29 +205,6 @@ Cây có rệp gốc + cành lá đồng thời:
 
 - *Phòng trừ rệp sáp trên hồ tiêu* — Cục Bảo vệ Thực vật, 2022.
 - *Sổ tay quản lý sâu hại hồ tiêu* — Hiệp hội Hồ tiêu Việt Nam (tên viết tắt VPA), 2023.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô hồ tiêu: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Chuẩn bị trước khi làm
-- [ ] Chia vườn/ruộng thành từng lô nhỏ để theo dõi riêng.
-- [ ] Chụp ảnh hiện trạng trước khi xử lý.
-- [ ] Ghi ngày, thời tiết, giống, tuổi cây và tình trạng đất/nước.
-- [ ] Chuẩn bị dụng cụ sạch, vật tư đúng mục tiêu và nguồn nước đủ dùng.
-- [ ] Làm thử trên diện tích nhỏ nếu lô chưa đồng đều hoặc cây đang suy.
-
-## Quy trình tóm tắt để áp dụng
-Thực hiện theo thứ tự: khảo sát hiện trạng, chọn lô làm trước, xử lý đúng thời điểm, theo dõi phản ứng sau 3-7 ngày rồi mới mở rộng. Không nên làm đồng loạt toàn bộ diện tích khi chưa biết cây phản ứng ra sao.
-
-## Xử lý sự cố thường gặp
-Nếu cây hồ tiêu xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
 
 ## 12. Bài liên quan
 

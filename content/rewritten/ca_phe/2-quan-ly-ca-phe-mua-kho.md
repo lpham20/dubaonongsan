@@ -2,7 +2,7 @@
 post_id: 2
 slug: quan-ly-ca-phe-mua-kho
 title: "Quản lý cà phê mùa khô: nước tưới, che phủ và phục hồi cây"
-summary: Mùa khô Tây Nguyên kéo dài 5 tháng quyết định cây cà phê còn sức cho vụ ra hoa tới. Hướng dẫn cách tưới đúng ngưỡng, che phủ giữ ẩm, phục hồi sau khô hạn.
+summary: Mùa khô Tây Nguyên kéo dài 5 tháng quyết định cây cà phê còn sức cho vụ ra hoa tới. Hướng dẫn cách tưới đúng ngưỡng, che phủ giữ ẩm, phục hồi sau khô hạn — kết hợp kinh nghiệm Đắk Lắk và khuyến cáo của WASI.
 crop_type: ca_phe
 category: Chăm sóc cà phê
 tags:
@@ -12,8 +12,8 @@ tags:
   - tay-nguyen
   - phuc-hoi
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Mùa khô Tây Nguyên kéo dài từ tháng 11 đến tháng 4 năm sau là khoảng thời gian dài nhất + khắc nghiệt nhất với cây cà phê Robusta. Tưới sai cách hoặc bỏ che phủ một mùa có thể làm cây "đi vào ngủ" nửa năm — không chết nhưng không cho năng suất. Bài này tổng hợp 4 việc lớn cần làm theo timeline mùa khô, dựa trên hướng dẫn của Viện WASI và quan sát thực tế tại các vườn Đắk Lắk, Gia Lai.
@@ -135,23 +135,6 @@ Dữ liệu này quý hơn nhiều so với "kinh nghiệm chung". Năm sau bạ
 
 - *Quy trình kỹ thuật chăm sóc cà phê Robusta giai đoạn kinh doanh* — Viện Khoa học Kỹ thuật Nông Lâm nghiệp Tây Nguyên (WASI), 2016 cập nhật 2023.
 - *Khuyến cáo bón phân cho cà phê theo kết quả phân tích đất* — IPI (International Potash Institute), 2015.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô cà phê: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Xử lý sự cố thường gặp
-Nếu cây cà phê xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Ghi chép nên có
-Mỗi lần làm cần ghi tối thiểu: ngày, lô, diện tích, giống, tuổi cây, tình trạng trước khi làm, thao tác, vật tư, liều lượng, nhân công, thời tiết, ảnh hiện trường và kết quả sau 3-7 ngày. Với nội dung liên quan thu hoạch hoặc năng suất, ghi thêm sản lượng, tỷ lệ loại bỏ và giá bán.
-
-## Bảng kiểm nhanh tại vườn
-| Hạng mục | Cách kiểm tra | Khi cần chú ý |
-|---|---|---|
-| Sức cây cà phê | Quan sát lá, đọt, rễ/cổ rễ và tốc độ phục hồi | Cây héo, vàng lá, rụng hoa/trái hoặc phục hồi chậm |
-| Nước và đất | Kiểm tra ẩm độ tầng rễ, điểm đọng nước và mặt đất | Đất bí, nứt sâu hoặc đọng nước lâu |
-| Sâu bệnh | Chọn điểm đại diện để ghi tỷ lệ có triệu chứng | Triệu chứng lan nhanh sau 3-7 ngày |
-| Thời tiết | Xem dự báo 3-5 ngày trước thao tác lớn | Tránh mưa lớn, nắng gắt hoặc gió mạnh |
 
 ## 9. Bài liên quan
 

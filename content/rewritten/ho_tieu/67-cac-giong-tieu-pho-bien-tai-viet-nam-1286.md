@@ -2,7 +2,7 @@
 post_id: 67
 slug: cac-giong-tieu-pho-bien-tai-viet-nam-1286
 title: Các giống tiêu phổ biến tại Việt Nam
-summary: Việt Nam có khoảng 20 giống hồ tiêu được trồng thương mại, mỗi giống phù hợp vùng khác nhau. So sánh 6 giống chính theo năng suất, kháng bệnh, chất lượng và.
+summary: Việt Nam có khoảng 20 giống hồ tiêu được trồng thương mại, mỗi giống phù hợp vùng khác nhau. So sánh 6 giống chính theo năng suất, kháng bệnh, chất lượng và giá trị thị trường để chọn giống phù hợp vườn.
 crop_type: ho_tieu
 category: Cẩm nang hồ tiêu
 tags:
@@ -11,8 +11,8 @@ tags:
   - tay-nguyen
   - dong-nam-bo
   - co-ban
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Khi quyết định trồng tiêu hoặc tái canh, chọn giống là quyết định đầu tư dài hạn 15-20 năm. Mỗi giống tiêu Việt Nam có ưu nhược điểm riêng — không có "giống tốt nhất" áp dụng được mọi vùng. Bài này so sánh 6 giống thương mại phổ biến nhất theo các tiêu chí thực tế, giúp chủ vườn ra quyết định phù hợp đất, vùng và mục tiêu kinh tế.
@@ -172,32 +172,6 @@ Giống đặc sản Lý Sơn, Quảng Ngãi.
 - *Cẩm nang giống tiêu Việt Nam* — Hiệp hội Hồ tiêu Việt Nam (tên viết tắt VPA), 2023.
 - *Khuyến cáo giống tiêu cho từng vùng* — Cục Trồng trọt + Viện Khoa học Kỹ thuật Nông Lâm nghiệp Tây Nguyên, 2022.
 - *Sổ tay kỹ thuật hồ tiêu bền vững* — Viện Bảo vệ Thực vật, 2021.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô hồ tiêu: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Chuẩn bị trước khi làm
-- [ ] Chia vườn/ruộng thành từng lô nhỏ để theo dõi riêng.
-- [ ] Chụp ảnh hiện trạng trước khi xử lý.
-- [ ] Ghi ngày, thời tiết, giống, tuổi cây và tình trạng đất/nước.
-- [ ] Chuẩn bị dụng cụ sạch, vật tư đúng mục tiêu và nguồn nước đủ dùng.
-- [ ] Làm thử trên diện tích nhỏ nếu lô chưa đồng đều hoặc cây đang suy.
-
-## Quy trình tóm tắt để áp dụng
-Thực hiện theo thứ tự: khảo sát hiện trạng, chọn lô làm trước, xử lý đúng thời điểm, theo dõi phản ứng sau 3-7 ngày rồi mới mở rộng. Không nên làm đồng loạt toàn bộ diện tích khi chưa biết cây phản ứng ra sao.
-
-## Xử lý sự cố thường gặp
-Nếu cây hồ tiêu xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Ghi chép nên có
-Mỗi lần làm cần ghi tối thiểu: ngày, lô, diện tích, giống, tuổi cây, tình trạng trước khi làm, thao tác, vật tư, liều lượng, nhân công, thời tiết, ảnh hiện trường và kết quả sau 3-7 ngày. Với nội dung liên quan thu hoạch hoặc năng suất, ghi thêm sản lượng, tỷ lệ loại bỏ và giá bán.
 
 ## 8. Bài liên quan
 

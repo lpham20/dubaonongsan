@@ -2,7 +2,7 @@
 post_id: 55
 slug: huong-dan-phong-tru-benh-dao-on-1219
 title: Hướng dẫn phòng trừ bệnh đạo ôn cho lúa
-summary: Đạo ôn (Pyricularia oryzae) tấn công lúa ở 2 giai đoạn — đạo ôn lá lúc đẻ nhánh và đạo ôn cổ bông lúc trổ. Bài này phân biệt rõ 2 dạng, cách dự báo bùng phát.
+summary: Đạo ôn (Pyricularia oryzae) tấn công lúa ở 2 giai đoạn — đạo ôn lá lúc đẻ nhánh và đạo ôn cổ bông lúc trổ. Bài này phân biệt rõ 2 dạng, cách dự báo bùng phát theo thời tiết và phác đồ phòng-trị cho vụ đông xuân ĐBSCL.
 crop_type: lua
 category: Phòng sâu bệnh lúa
 tags:
@@ -11,8 +11,8 @@ tags:
   - dong-bang-song-cuu-long
   - mua-lanh
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Đạo ôn là bệnh nguy hiểm nhất với lúa ở ĐBSCL vụ đông xuân, có thể làm thất thu 30-70% nếu để bùng đợt 2 (đạo ôn cổ bông). Khác bài hướng dẫn chung, bài này phân tách 2 giai đoạn bệnh + cung cấp dự báo dựa trên thời tiết để chủ động xử lý trước khi triệu chứng rõ trên đồng.
@@ -144,26 +144,6 @@ Sau 2 vụ ghi chép, bạn sẽ thấy pattern bùng đạo ôn của đồng r
 - *Quy trình kỹ thuật sản xuất lúa vụ Đông Xuân ĐBSCL* — Cục Trồng trọt + Viện Lúa ĐBSCL, 2023.
 - *Quản lý dịch hại tổng hợp (IPM) cho lúa* — Cục Bảo vệ Thực vật, 2022.
 - *Phòng trừ bệnh đạo ôn — sổ tay kỹ thuật* — Viện Lúa ĐBSCL, 2021.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô lúa: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Chuẩn bị trước khi làm
-- [ ] Chia vườn/ruộng thành từng lô nhỏ để theo dõi riêng.
-- [ ] Chụp ảnh hiện trạng trước khi xử lý.
-- [ ] Ghi ngày, thời tiết, giống, tuổi cây và tình trạng đất/nước.
-- [ ] Chuẩn bị dụng cụ sạch, vật tư đúng mục tiêu và nguồn nước đủ dùng.
-- [ ] Làm thử trên diện tích nhỏ nếu lô chưa đồng đều hoặc cây đang suy.
-
-## Xử lý sự cố thường gặp
-Nếu cây lúa xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
 
 ## 9. Bài liên quan
 

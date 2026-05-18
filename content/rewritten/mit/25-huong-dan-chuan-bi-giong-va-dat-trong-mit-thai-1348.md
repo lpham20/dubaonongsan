@@ -2,7 +2,7 @@
 post_id: 25
 slug: huong-dan-chuan-bi-giong-va-dat-trong-mit-thai-1348
 title: Hướng dẫn chuẩn bị giống và đất trồng mít Thái
-summary: Mít Thái phổ biến vì cho trái nhanh và dễ chăm. Tuy nhiên chọn giống và chuẩn bị đất sai ngay từ đầu sẽ kéo theo nhiều vấn đề 5-10 năm sau. Hướng dẫn quyết.
+summary: Mít Thái phổ biến vì cho trái nhanh và dễ chăm. Tuy nhiên chọn giống và chuẩn bị đất sai ngay từ đầu sẽ kéo theo nhiều vấn đề 5-10 năm sau. Hướng dẫn quyết định đất, chọn giống và lên mô líp cho vùng trồng Đồng bằng sông Cửu Long.
 crop_type: mit
 category: Thiết lập vườn mít
 tags:
@@ -11,8 +11,8 @@ tags:
   - quan-ly-dat
   - tay-nam-bo
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Mít Thái (giống Changai) cho trái nhanh, năng suất cao, có thị trường ổn định. Nhưng đất không phù hợp hoặc giống không rõ nguồn sẽ ảnh hưởng cả vòng đời cây 20-25 năm. Bài này hướng dẫn ba quyết định trước khi xuống giống — đánh giá đất, chọn giống, lên mô líp — quyết định khoảng 70 phần trăm thành công của vườn.
@@ -180,29 +180,6 @@ Bón vôi trước 30-60 ngày khi trồng để vôi tan đều và pH ổn đ�
 
 - *Quy trình kỹ thuật trồng và chăm sóc mít* — Viện Cây ăn quả miền Nam, 2022.
 - *Sản xuất mít xuất khẩu* — Cục Trồng trọt, 2023.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô mít: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Theo dõi sau khi làm
-Sau 24-48 giờ cần kiểm tra nhanh sức cây mít. Sau 3-7 ngày, quay lại đúng điểm đã chụp ảnh để so sánh. Sau 14 ngày, đánh giá lại mức phục hồi, tỷ lệ cây/trái/lá bị ảnh hưởng và quyết định có cần lặp lại thao tác hay không.
-
-## Xử lý sự cố thường gặp
-Nếu cây mít xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Checklist áp dụng
-- [ ] Xác định đúng lô, giống, tuổi cây và tình trạng hiện tại.
-- [ ] Chụp ảnh hoặc ghi chú điểm đại diện trước khi làm.
-- [ ] Kiểm tra nước, đất, thời tiết và sâu bệnh trước thao tác.
-- [ ] Làm thử trên diện tích nhỏ nếu điều kiện vườn chưa đồng đều.
-- [ ] Theo dõi lại sau 3-7 ngày và ghi kết quả trước khi mở rộng.
 
 ## 9. Bài liên quan
 

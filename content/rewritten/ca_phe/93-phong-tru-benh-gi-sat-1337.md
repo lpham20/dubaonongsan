@@ -2,7 +2,7 @@
 post_id: 93
 slug: phong-tru-benh-gi-sat-1337
 title: Phòng trừ bênh gỉ sắt cho cà phê
-summary: Gỉ sắt (Hemileia vastatrix) là bệnh nguy hiểm nhất với cà phê thế giới, gây mất 30-70% năng suất khi bùng phát. Hướng dẫn nhận biết sớm, lịch phun phòng theo.
+summary: Gỉ sắt (Hemileia vastatrix) là bệnh nguy hiểm nhất với cà phê thế giới, gây mất 30-70% năng suất khi bùng phát. Hướng dẫn nhận biết sớm, lịch phun phòng theo mùa và xử lý ổ bệnh cho vườn Robusta Tây Nguyên.
 crop_type: ca_phe
 category: Phòng sâu bệnh cà phê
 tags:
@@ -11,8 +11,8 @@ tags:
   - tay-nguyen
   - mua-mua
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Gỉ sắt từng làm cà phê Sri Lanka tuyệt diệt vào những năm 1880. Tại Việt Nam, gỉ sắt vẫn là bệnh phổ biến trên cà phê Robusta, đặc biệt vùng Lâm Đồng cao và Đắk Lắk có nhiều sương. Khác đạo ôn lúa lan nhanh trong vài ngày, gỉ sắt phát triển âm thầm qua nhiều tuần — đến lúc thấy rõ thì đã bùng diện rộng. Bài này tập trung vào nhận biết sớm và lịch phun phòng theo mùa.
@@ -174,22 +174,6 @@ Khi bệnh đã bùng phát rõ ở khu vực vườn:
 
 - *Phòng trừ bệnh trên cà phê* — Viện Khoa học Kỹ thuật Nông Lâm nghiệp Tây Nguyên (tên viết tắt WASI), 2022.
 - *Sổ tay phòng trừ bệnh gỉ sắt cà phê* — Cục Bảo vệ Thực vật, 2021.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô cà phê: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Quy trình tóm tắt để áp dụng
-Thực hiện theo thứ tự: khảo sát hiện trạng, chọn lô làm trước, xử lý đúng thời điểm, theo dõi phản ứng sau 3-7 ngày rồi mới mở rộng. Không nên làm đồng loạt toàn bộ diện tích khi chưa biết cây phản ứng ra sao.
-
-## Xử lý sự cố thường gặp
-Nếu cây cà phê xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
 
 ## 12. Bài liên quan
 

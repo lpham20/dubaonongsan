@@ -2,7 +2,7 @@
 post_id: 1
 slug: quan-ly-vuon-sau-rieng-mua-ra-hoa
 title: Quản lý vườn sầu riêng giai đoạn ra hoa và đậu trái
-summary: Giai đoạn từ mắt cua đến trái non kích thước quả trứng quyết định 70% năng suất vụ. Hướng dẫn cách đọc sức cây, kiểm soát nước, tỉa trái và phòng nấm bệnh.
+summary: Giai đoạn từ mắt cua đến trái non kích thước quả trứng quyết định 70% năng suất vụ. Hướng dẫn cách đọc sức cây, kiểm soát nước, tỉa trái và phòng nấm bệnh chính để giữ tỷ lệ đậu trái ≥ 60%.
 crop_type: sau_rieng
 category: Chăm sóc sầu riêng
 tags:
@@ -13,8 +13,8 @@ tags:
   - phong-sau-benh
   - tay-nam-bo
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Giai đoạn 45-60 ngày từ mắt cua sáng đến trái non bằng quả trứng gà là cánh cổng quyết định cả vụ sầu riêng. Bón sai đạm một lần, để khô đột ngột một đêm, hoặc bỏ tỉa trái trễ một tuần đều có thể làm rụng 40-70% trái non. Bài này ghi lại cách tôi vẫn dặn chủ vườn lúc đi tư vấn — không phải khung lý thuyết mà là dãy quyết định cần ra trong từng tuần.
@@ -146,22 +146,6 @@ Sau 2 vụ có nhật ký, vườn của bạn có "DNA" riêng — sách nào c
 - *Hướng dẫn quản lý Phytophthora trên cây ăn trái* — Cục Bảo vệ Thực vật, 2024.
 
 Liều hoạt chất bảo vệ thực vật trên bài là khung tham khảo. Luôn ưu tiên nhãn bao bì + khuyến cáo của Cục BVTV địa phương. Khi vườn có dấu hiệu lạ không khớp các mô tả ở đây — gọi kỹ sư nông học gần nhất, đừng tự thử.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô sầu riêng: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Xử lý sự cố thường gặp
-Nếu cây sầu riêng xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Tài liệu tham khảo
-Nội dung được biên tập thành hướng dẫn thực hành cho Dự báo nông sản, dùng để hỗ trợ người trồng ra quyết định tại vườn. Khi dùng phân bón hoặc thuốc bảo vệ thực vật, luôn ưu tiên nhãn sản phẩm, danh mục được phép lưu hành và khuyến cáo của cơ quan chuyên môn địa phương.
 
 ## 9. Bài liên quan
 

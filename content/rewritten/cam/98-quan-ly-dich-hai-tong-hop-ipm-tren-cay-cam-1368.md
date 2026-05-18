@@ -2,7 +2,7 @@
 post_id: 98
 slug: quan-ly-dich-hai-tong-hop-ipm-tren-cay-cam-1368
 title: Quản lý dịch hại tổng hợp IPM trên vườn Cam
-summary: Quản lý dịch hại tổng hợp trên cam không phải bỏ thuốc mà là dùng thuốc đúng lúc, đúng đối tượng, đúng liều. Hướng dẫn năm trụ cột của quản lý dịch hại tổng.
+summary: Quản lý dịch hại tổng hợp trên cam không phải bỏ thuốc mà là dùng thuốc đúng lúc, đúng đối tượng, đúng liều. Hướng dẫn năm trụ cột của quản lý dịch hại tổng hợp áp dụng cho cây cam ở Hà Giang, Hoà Bình, Đồng bằng sông Cửu Long.
 crop_type: cam
 category: Phòng sâu bệnh cây cam
 tags:
@@ -10,8 +10,8 @@ tags:
   - phong-sau-benh
   - quan-ly-vuon
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Vườn cam Việt Nam thường bị "cuốn vào vòng xoáy thuốc" — phun nhiều, sâu kháng, phun thêm. Hậu quả là chi phí tăng, chất lượng giảm, đất đai và cây yếu dần. Quản lý dịch hại tổng hợp (tên tiếng Anh viết tắt IPM) là cách phá vòng xoáy này. Bài này hướng dẫn năm trụ cột áp dụng cụ thể cho cam — không phải lý thuyết chung mà là thực hành tại vườn.
@@ -168,29 +168,6 @@ Lưu ý: thiên địch cần 1-2 năm mới phục hồi đầy đủ sau thờ
 - *Quản lý dịch hại tổng hợp trên cây có múi* — Cục Bảo vệ Thực vật, 2022.
 - *Sổ tay quản lý dịch hại tổng hợp cho cam* — Tổ chức Nông Lương Liên Hợp Quốc (FAO) Việt Nam, 2021.
 - *Phòng trừ bệnh greening trên cây có múi* — Viện Bảo vệ Thực vật, 2023.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô cam: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Chuẩn bị trước khi làm
-- [ ] Chia vườn/ruộng thành từng lô nhỏ để theo dõi riêng.
-- [ ] Chụp ảnh hiện trạng trước khi xử lý.
-- [ ] Ghi ngày, thời tiết, giống, tuổi cây và tình trạng đất/nước.
-- [ ] Chuẩn bị dụng cụ sạch, vật tư đúng mục tiêu và nguồn nước đủ dùng.
-- [ ] Làm thử trên diện tích nhỏ nếu lô chưa đồng đều hoặc cây đang suy.
-
-## Quy trình tóm tắt để áp dụng
-Thực hiện theo thứ tự: khảo sát hiện trạng, chọn lô làm trước, xử lý đúng thời điểm, theo dõi phản ứng sau 3-7 ngày rồi mới mở rộng. Không nên làm đồng loạt toàn bộ diện tích khi chưa biết cây phản ứng ra sao.
-
-## Xử lý sự cố thường gặp
-Nếu cây cam xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
 
 ## 8. Bài liên quan
 

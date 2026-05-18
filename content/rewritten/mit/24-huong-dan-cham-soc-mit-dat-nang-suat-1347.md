@@ -2,7 +2,7 @@
 post_id: 24
 slug: huong-dan-cham-soc-mit-dat-nang-suat-1347
 title: Hướng dẫn chăm sóc mít đạt năng suất
-summary: Mít Thái + mít ruột đỏ cần chăm sóc khác nhau theo từng giai đoạn. Hướng dẫn lịch tưới, bón phân, tỉa cành, tỉa trái và xử lý 3 vấn đề năng suất hay gặp.
+summary: Mít Thái + mít ruột đỏ cần chăm sóc khác nhau theo từng giai đoạn. Hướng dẫn lịch tưới, bón phân, tỉa cành, tỉa trái và xử lý 3 vấn đề năng suất hay gặp — dành cho vườn mít ĐBSCL và Đông Nam Bộ.
 crop_type: mit
 category: Chăm sóc mít
 tags:
@@ -11,8 +11,8 @@ tags:
   - tia-canh
   - tay-nam-bo
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Mít là cây dễ trồng nhưng khó cho năng suất ổn định. Nhiều vườn mít Thái lãng phí tiềm năng vì chăm sóc không đúng giai đoạn — đặc biệt bỏ qua bước tỉa trái + bón đợt nuôi trái. Bài này hướng dẫn lịch chăm sóc theo 4 giai đoạn cây + 3 vấn đề năng suất hay gặp.
@@ -187,27 +187,6 @@ Cách khắc phục:
 
 - *Quy trình kỹ thuật trồng và chăm sóc mít* — Viện Cây ăn quả miền Nam, 2022.
 - *Sản xuất mít xuất khẩu* — Cục Trồng trọt, 2023.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô mít: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Xử lý sự cố thường gặp
-Nếu cây mít xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Bảng kiểm nhanh tại vườn
-| Hạng mục | Cách kiểm tra | Khi cần chú ý |
-|---|---|---|
-| Sức cây mít | Quan sát lá, đọt, rễ/cổ rễ và tốc độ phục hồi | Cây héo, vàng lá, rụng hoa/trái hoặc phục hồi chậm |
-| Nước và đất | Kiểm tra ẩm độ tầng rễ, điểm đọng nước và mặt đất | Đất bí, nứt sâu hoặc đọng nước lâu |
-| Sâu bệnh | Chọn điểm đại diện để ghi tỷ lệ có triệu chứng | Triệu chứng lan nhanh sau 3-7 ngày |
-| Thời tiết | Xem dự báo 3-5 ngày trước thao tác lớn | Tránh mưa lớn, nắng gắt hoặc gió mạnh |
 
 ## 9. Bài liên quan
 

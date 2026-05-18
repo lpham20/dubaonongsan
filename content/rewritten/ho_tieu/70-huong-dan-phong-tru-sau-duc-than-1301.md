@@ -2,7 +2,7 @@
 post_id: 70
 slug: huong-dan-phong-tru-sau-duc-than-1301
 title: Hướng dẫn phòng trừ sâu đục thân cho tiêu
-summary: Sâu đục thân (Lophobaris piperis) ăn ngầm bên trong thân tiêu, làm cây yếu rồi chết khô. Khó phát hiện trước khi quá muộn. Hướng dẫn nhận biết dấu hiệu sớm.
+summary: Sâu đục thân (Lophobaris piperis) ăn ngầm bên trong thân tiêu, làm cây yếu rồi chết khô. Khó phát hiện trước khi quá muộn. Hướng dẫn nhận biết dấu hiệu sớm, biện pháp phòng và xử lý cây bị sâu cho vườn Tây Nguyên.
 crop_type: ho_tieu
 category: Phòng sâu bệnh hồ tiêu
 tags:
@@ -10,8 +10,8 @@ tags:
   - phong-sau-benh
   - tay-nguyen
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Sâu đục thân hồ tiêu là kẻ thù lặng lẽ — không gây triệu chứng rõ ngoài, chỉ phát hiện khi cây bắt đầu khô cành. Đặc trưng phá ngầm trong thân làm cây mất khả năng vận chuyển nhựa. Một trụ bị sâu nặng có thể chết trong 6-12 tháng. Bài này tập trung vào ba dấu hiệu phát hiện sớm và phòng theo vòng đời sâu.
@@ -158,37 +158,6 @@ Khi vườn có 10 phần trăm trở lên trụ bị sâu:
 
 - *Phòng trừ sâu đục thân trên hồ tiêu* — Cục Bảo vệ Thực vật, 2022.
 - *Quản lý dịch hại tổng hợp cho hồ tiêu* — Hiệp hội Hồ tiêu Việt Nam (tên viết tắt VPA), 2023.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô hồ tiêu: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Quy trình tóm tắt để áp dụng
-Thực hiện theo thứ tự: khảo sát hiện trạng, chọn lô làm trước, xử lý đúng thời điểm, theo dõi phản ứng sau 3-7 ngày rồi mới mở rộng. Không nên làm đồng loạt toàn bộ diện tích khi chưa biết cây phản ứng ra sao.
-
-## Xử lý sự cố thường gặp
-Nếu cây hồ tiêu xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Bảng kiểm nhanh tại vườn
-| Hạng mục | Cách kiểm tra | Khi cần chú ý |
-|---|---|---|
-| Sức cây hồ tiêu | Quan sát lá, đọt, rễ/cổ rễ và tốc độ phục hồi | Cây héo, vàng lá, rụng hoa/trái hoặc phục hồi chậm |
-| Nước và đất | Kiểm tra ẩm độ tầng rễ, điểm đọng nước và mặt đất | Đất bí, nứt sâu hoặc đọng nước lâu |
-| Sâu bệnh | Chọn điểm đại diện để ghi tỷ lệ có triệu chứng | Triệu chứng lan nhanh sau 3-7 ngày |
-| Thời tiết | Xem dự báo 3-5 ngày trước thao tác lớn | Tránh mưa lớn, nắng gắt hoặc gió mạnh |
-
-## Checklist áp dụng
-- [ ] Xác định đúng lô, giống, tuổi cây và tình trạng hiện tại.
-- [ ] Chụp ảnh hoặc ghi chú điểm đại diện trước khi làm.
-- [ ] Kiểm tra nước, đất, thời tiết và sâu bệnh trước thao tác.
-- [ ] Làm thử trên diện tích nhỏ nếu điều kiện vườn chưa đồng đều.
-- [ ] Theo dõi lại sau 3-7 ngày và ghi kết quả trước khi mở rộng.
 
 ## 9. Bài liên quan
 

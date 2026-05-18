@@ -2,7 +2,7 @@
 post_id: 76
 slug: thiet-ke-he-thong-cay-chan-gio-che-bong-cho-cay-tieu-1289
 title: Thiết kế hệ thống cây chắn gió, che bóng cho cây tiêu
-summary: Hồ tiêu cần che bóng vừa phải (40-50%) và chắn gió để giảm sốc cây. Hướng dẫn chọn loại cây trồng xen, bố trí và thiết kế cho vườn tiêu Tây Nguyên và Đông Nam.
+summary: Hồ tiêu cần che bóng vừa phải (40-50%) và chắn gió để giảm sốc cây. Hướng dẫn chọn loại cây trồng xen, bố trí và thiết kế cho vườn tiêu Tây Nguyên và Đông Nam Bộ.
 crop_type: ho_tieu
 category: Thiết lập vườn hồ tiêu
 tags:
@@ -12,8 +12,8 @@ tags:
   - chan-gio
   - tay-nguyen
   - nang-cao
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Hồ tiêu là cây leo bán bóng — cần ánh sáng nhưng không chịu được nắng trực tiếp toàn ngày. Vườn tiêu không có cây che bóng hoặc che bóng quá nhiều đều cho năng suất thấp. Bài này hướng dẫn thiết kế hệ thống che bóng và chắn gió đúng cách — quyết định mật độ cây phụ trợ, chọn loại cây, và bố trí phù hợp vùng trồng.
@@ -157,37 +157,6 @@ Một số trường hợp cây phụ trợ làm hại tiêu thay vì giúp:
 - *Thiết kế vườn hồ tiêu bền vững* — Viện Khoa học Kỹ thuật Nông Lâm nghiệp Tây Nguyên (tên viết tắt WASI), 2021.
 - *Sổ tay kỹ thuật hồ tiêu xuất khẩu* — Hiệp hội Hồ tiêu Việt Nam (tên viết tắt VPA), 2022.
 - *Hệ thống cây phụ trợ trong canh tác hồ tiêu* — Cục Trồng trọt, 2023.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô hồ tiêu: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Chuẩn bị trước khi làm
-- [ ] Chia vườn/ruộng thành từng lô nhỏ để theo dõi riêng.
-- [ ] Chụp ảnh hiện trạng trước khi xử lý.
-- [ ] Ghi ngày, thời tiết, giống, tuổi cây và tình trạng đất/nước.
-- [ ] Chuẩn bị dụng cụ sạch, vật tư đúng mục tiêu và nguồn nước đủ dùng.
-- [ ] Làm thử trên diện tích nhỏ nếu lô chưa đồng đều hoặc cây đang suy.
-
-## Quy trình tóm tắt để áp dụng
-Thực hiện theo thứ tự: khảo sát hiện trạng, chọn lô làm trước, xử lý đúng thời điểm, theo dõi phản ứng sau 3-7 ngày rồi mới mở rộng. Không nên làm đồng loạt toàn bộ diện tích khi chưa biết cây phản ứng ra sao.
-
-## Xử lý sự cố thường gặp
-Nếu cây hồ tiêu xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Bảng kiểm nhanh tại vườn
-| Hạng mục | Cách kiểm tra | Khi cần chú ý |
-|---|---|---|
-| Sức cây hồ tiêu | Quan sát lá, đọt, rễ/cổ rễ và tốc độ phục hồi | Cây héo, vàng lá, rụng hoa/trái hoặc phục hồi chậm |
-| Nước và đất | Kiểm tra ẩm độ tầng rễ, điểm đọng nước và mặt đất | Đất bí, nứt sâu hoặc đọng nước lâu |
-| Sâu bệnh | Chọn điểm đại diện để ghi tỷ lệ có triệu chứng | Triệu chứng lan nhanh sau 3-7 ngày |
-| Thời tiết | Xem dự báo 3-5 ngày trước thao tác lớn | Tránh mưa lớn, nắng gắt hoặc gió mạnh |
 
 ## 10. Bài liên quan
 

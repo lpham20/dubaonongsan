@@ -2,7 +2,7 @@
 post_id: 41
 slug: ky-thuat-tai-canh-cay-ca-phe-1280
 title: Kỹ thuật tái canh cây cà phê
-summary: Tái canh cà phê không phải "nhổ trồng lại". Tỷ lệ thất bại nếu làm sai có thể đến 60%. Hướng dẫn quy trình 24-36 tháng từ luân canh đất, chọn giống tái canh.
+summary: Tái canh cà phê không phải "nhổ trồng lại". Tỷ lệ thất bại nếu làm sai có thể đến 60%. Hướng dẫn quy trình 24-36 tháng từ luân canh đất, chọn giống tái canh, đến chăm sóc 2 năm đầu — theo khuyến cáo WASI.
 crop_type: ca_phe
 category: Tái canh cà phê
 tags:
@@ -11,8 +11,8 @@ tags:
   - quan-ly-dat
   - tay-nguyen
   - nang-cao
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Tây Nguyên có hơn 100.000 ha cà phê cần tái canh giai đoạn 2020-2030, nhưng thực tế nhiều vườn tái canh thất bại — cây mới chết hàng loạt do đất "bệnh" tích lũy từ vườn cũ. Bài này hướng dẫn quy trình tái canh chuẩn theo Viện WASI: KHÔNG trồng lại ngay sau nhổ vườn cũ. Phải có 2-3 năm luân canh + cải tạo đất + chọn giống đúng.
@@ -141,27 +141,6 @@ Dữ liệu này quý cho quyết định tái canh đợt tiếp.
 - *Quy trình tái canh cà phê vùng Tây Nguyên* — Viện WASI, 2018 cập nhật 2024.
 - *Khuyến nghị giống cà phê Robusta* — Cục Trồng trọt + WASI, 2023.
 - *Quản lý tuyến trùng trong tái canh cà phê* — IPI, 2020.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô cà phê: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Xử lý sự cố thường gặp
-Nếu cây cà phê xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Bảng kiểm nhanh tại vườn
-| Hạng mục | Cách kiểm tra | Khi cần chú ý |
-|---|---|---|
-| Sức cây cà phê | Quan sát lá, đọt, rễ/cổ rễ và tốc độ phục hồi | Cây héo, vàng lá, rụng hoa/trái hoặc phục hồi chậm |
-| Nước và đất | Kiểm tra ẩm độ tầng rễ, điểm đọng nước và mặt đất | Đất bí, nứt sâu hoặc đọng nước lâu |
-| Sâu bệnh | Chọn điểm đại diện để ghi tỷ lệ có triệu chứng | Triệu chứng lan nhanh sau 3-7 ngày |
-| Thời tiết | Xem dự báo 3-5 ngày trước thao tác lớn | Tránh mưa lớn, nắng gắt hoặc gió mạnh |
 
 ## 9. Bài liên quan
 

@@ -2,7 +2,7 @@
 post_id: 38
 slug: huong-dan-cham-soc-thanh-long-1346
 title: Hướng dẫn chăm sóc thanh long
-summary: Thanh long cho năng suất ổn định 25-40 tấn/ha nếu chăm đúng. Hướng dẫn lịch tưới, bón phân, tỉa cành và quản lý ra hoa tự nhiên theo vòng đời cây cho vườn.
+summary: Thanh long cho năng suất ổn định 25-40 tấn/ha nếu chăm đúng. Hướng dẫn lịch tưới, bón phân, tỉa cành và quản lý ra hoa tự nhiên theo vòng đời cây cho vườn Bình Thuận và Long An.
 crop_type: thanh_long
 category: Chăm sóc thanh long
 tags:
@@ -11,8 +11,8 @@ tags:
   - bon-phan
   - tia-canh
   - co-ban
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Khác cây ăn quả khác, thanh long có thể cho 6-10 vụ mỗi năm khi ra hoa tự nhiên — không cần ép. Quản lý đúng cách giúp năng suất ổn định nhiều năm liền. Bài này hướng dẫn lịch chăm sóc theo bốn việc chính — tưới nước, bón phân, tỉa cành và theo dõi ra hoa — phù hợp vườn thương mại tại Bình Thuận, Long An.
@@ -188,27 +188,6 @@ Nguyên nhân:
 
 - *Quy trình chăm sóc thanh long thương mại* — Viện Cây ăn quả miền Nam, 2023.
 - *Sản xuất thanh long bền vững* — Cục Trồng trọt, 2022.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô thanh long: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Xử lý sự cố thường gặp
-Nếu cây thanh long xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Bảng kiểm nhanh tại vườn
-| Hạng mục | Cách kiểm tra | Khi cần chú ý |
-|---|---|---|
-| Sức cây thanh long | Quan sát lá, đọt, rễ/cổ rễ và tốc độ phục hồi | Cây héo, vàng lá, rụng hoa/trái hoặc phục hồi chậm |
-| Nước và đất | Kiểm tra ẩm độ tầng rễ, điểm đọng nước và mặt đất | Đất bí, nứt sâu hoặc đọng nước lâu |
-| Sâu bệnh | Chọn điểm đại diện để ghi tỷ lệ có triệu chứng | Triệu chứng lan nhanh sau 3-7 ngày |
-| Thời tiết | Xem dự báo 3-5 ngày trước thao tác lớn | Tránh mưa lớn, nắng gắt hoặc gió mạnh |
 
 ## 8. Bài liên quan
 

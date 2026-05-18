@@ -2,7 +2,7 @@
 post_id: 94
 slug: ky-thuat-trong-cay-chan-gio-va-che-bong-1282
 title: Kỹ thuật trồng cây chắn gió và che bóng cho cà phê
-summary: Cà phê Robusta cần che bóng 30-40% và chắn gió để giảm bốc hơi, hạn chế cháy lá mùa khô. Hướng dẫn chọn loại cây, bố trí và quản lý hệ thống che bóng cho vườn.
+summary: Cà phê Robusta cần che bóng 30-40% và chắn gió để giảm bốc hơi, hạn chế cháy lá mùa khô. Hướng dẫn chọn loại cây, bố trí và quản lý hệ thống che bóng cho vườn Tây Nguyên.
 crop_type: ca_phe
 category: Thiết lập vườn cà phê
 tags:
@@ -12,8 +12,8 @@ tags:
   - chan-gio
   - tay-nguyen
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Cà phê Robusta tự nhiên sống dưới tán rừng. Cây trồng nơi nắng trực tiếp toàn ngày có năng suất 4-5 tấn nhân mỗi héc-ta nhưng tuổi thọ giảm. Cây trồng với hệ thống che bóng phù hợp đạt 3,5-4,5 tấn nhân nhưng tuổi thọ 25-30 năm, ít sâu bệnh, ít tốn nước tưới. Bài này hướng dẫn thiết kế hệ thống che bóng và chắn gió tối ưu cho vườn Tây Nguyên.
@@ -161,37 +161,6 @@ Cách chính xác hơn: dùng máy đo cường độ ánh sáng (tên tiếng A
 
 - *Hệ thống cây phụ trợ trong canh tác cà phê* — Viện Khoa học Kỹ thuật Nông Lâm nghiệp Tây Nguyên (tên viết tắt WASI), 2020.
 - *Cẩm nang trồng cà phê dưới tán rừng* — Cục Trồng trọt, 2023.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô cà phê: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Quy trình tóm tắt để áp dụng
-Thực hiện theo thứ tự: khảo sát hiện trạng, chọn lô làm trước, xử lý đúng thời điểm, theo dõi phản ứng sau 3-7 ngày rồi mới mở rộng. Không nên làm đồng loạt toàn bộ diện tích khi chưa biết cây phản ứng ra sao.
-
-## Xử lý sự cố thường gặp
-Nếu cây cà phê xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Bảng kiểm nhanh tại vườn
-| Hạng mục | Cách kiểm tra | Khi cần chú ý |
-|---|---|---|
-| Sức cây cà phê | Quan sát lá, đọt, rễ/cổ rễ và tốc độ phục hồi | Cây héo, vàng lá, rụng hoa/trái hoặc phục hồi chậm |
-| Nước và đất | Kiểm tra ẩm độ tầng rễ, điểm đọng nước và mặt đất | Đất bí, nứt sâu hoặc đọng nước lâu |
-| Sâu bệnh | Chọn điểm đại diện để ghi tỷ lệ có triệu chứng | Triệu chứng lan nhanh sau 3-7 ngày |
-| Thời tiết | Xem dự báo 3-5 ngày trước thao tác lớn | Tránh mưa lớn, nắng gắt hoặc gió mạnh |
-
-## Checklist áp dụng
-- [ ] Xác định đúng lô, giống, tuổi cây và tình trạng hiện tại.
-- [ ] Chụp ảnh hoặc ghi chú điểm đại diện trước khi làm.
-- [ ] Kiểm tra nước, đất, thời tiết và sâu bệnh trước thao tác.
-- [ ] Làm thử trên diện tích nhỏ nếu điều kiện vườn chưa đồng đều.
-- [ ] Theo dõi lại sau 3-7 ngày và ghi kết quả trước khi mở rộng.
 
 ## 11. Bài liên quan
 

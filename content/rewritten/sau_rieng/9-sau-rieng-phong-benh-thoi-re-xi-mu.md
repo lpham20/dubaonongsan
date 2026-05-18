@@ -2,7 +2,7 @@
 post_id: 9
 slug: sau-rieng-phong-benh-thoi-re-xi-mu
 title: Phòng bệnh thối rễ, xì mủ trên sầu riêng từ quản lý nước và cổ rễ
-summary: Thối rễ xì mủ (Phytophthora palmivora) là nguyên nhân chết cây sầu riêng số 1 ở Tây Nam Bộ. Phòng tốt hơn trị — bài tập trung vào quản lý nước, cổ rễ và phun.
+summary: Thối rễ xì mủ (Phytophthora palmivora) là nguyên nhân chết cây sầu riêng số 1 ở Tây Nam Bộ. Phòng tốt hơn trị — bài tập trung vào quản lý nước, cổ rễ và phun phòng định kỳ.
 crop_type: sau_rieng
 category: Phòng sâu bệnh sầu riêng
 tags:
@@ -11,8 +11,8 @@ tags:
   - quan-ly-dat
   - tay-nam-bo
   - nang-cao
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Vườn sầu riêng Tây Nam Bộ năm nào cũng có vài cây chết vì thối rễ xì mủ. Bệnh do nấm tảo *Phytophthora palmivora* gây ra — tấn công ngầm từ rễ rồi lên cổ rễ. Đến lúc thấy thân xì mủ là cây đã mất 50-70 phần trăm rễ, khó cứu. Bài này tập trung vào phòng — ba điều kiện gây bệnh đều có thể kiểm soát từ chăm sóc hằng ngày.
@@ -193,37 +193,6 @@ Tỷ lệ cứu thấp. Quyết định kinh tế:
 
 - *Quản lý Phytophthora trên cây ăn quả nhiệt đới* — Viện Cây ăn quả miền Nam, 2023.
 - *Phòng trừ bệnh xì mủ sầu riêng* — Cục Bảo vệ Thực vật, 2022.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô sầu riêng: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Chuẩn bị trước khi làm
-- [ ] Chia vườn/ruộng thành từng lô nhỏ để theo dõi riêng.
-- [ ] Chụp ảnh hiện trạng trước khi xử lý.
-- [ ] Ghi ngày, thời tiết, giống, tuổi cây và tình trạng đất/nước.
-- [ ] Chuẩn bị dụng cụ sạch, vật tư đúng mục tiêu và nguồn nước đủ dùng.
-- [ ] Làm thử trên diện tích nhỏ nếu lô chưa đồng đều hoặc cây đang suy.
-
-## Quy trình tóm tắt để áp dụng
-Thực hiện theo thứ tự: khảo sát hiện trạng, chọn lô làm trước, xử lý đúng thời điểm, theo dõi phản ứng sau 3-7 ngày rồi mới mở rộng. Không nên làm đồng loạt toàn bộ diện tích khi chưa biết cây phản ứng ra sao.
-
-## Xử lý sự cố thường gặp
-Nếu cây sầu riêng xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Bảng kiểm nhanh tại vườn
-| Hạng mục | Cách kiểm tra | Khi cần chú ý |
-|---|---|---|
-| Sức cây sầu riêng | Quan sát lá, đọt, rễ/cổ rễ và tốc độ phục hồi | Cây héo, vàng lá, rụng hoa/trái hoặc phục hồi chậm |
-| Nước và đất | Kiểm tra ẩm độ tầng rễ, điểm đọng nước và mặt đất | Đất bí, nứt sâu hoặc đọng nước lâu |
-| Sâu bệnh | Chọn điểm đại diện để ghi tỷ lệ có triệu chứng | Triệu chứng lan nhanh sau 3-7 ngày |
-| Thời tiết | Xem dự báo 3-5 ngày trước thao tác lớn | Tránh mưa lớn, nắng gắt hoặc gió mạnh |
 
 ## 10. Bài liên quan
 

@@ -2,7 +2,7 @@
 post_id: 61
 slug: huong-dan-phong-tru-benh-chay-bia-la-lua-1220
 title: Hướng dẫn phòng trừ bệnh cháy bìa lá lúa
-summary: Cháy bìa lá (Xanthomonas oryzae) là bệnh do vi khuẩn, lan nhanh qua nước và gió. Cây giảm quang hợp, năng suất giảm 20-50%. Hướng dẫn phòng theo giống và quản.
+summary: Cháy bìa lá (Xanthomonas oryzae) là bệnh do vi khuẩn, lan nhanh qua nước và gió. Cây giảm quang hợp, năng suất giảm 20-50%. Hướng dẫn phòng theo giống và quản lý nước, hoạt chất chứa kháng sinh nông nghiệp.
 crop_type: lua
 category: Phòng sâu bệnh lúa
 tags:
@@ -11,8 +11,8 @@ tags:
   - dong-bang-song-cuu-long
   - mua-mua
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Khác đạo ôn và đốm vằn là bệnh do nấm, cháy bìa lá lúa là bệnh do vi khuẩn *Xanthomonas oryzae pv. oryzae*. Đặc trưng — lá bị cháy từ chóp đầu xuống, viền cháy ngoằn ngoèo. Bệnh lan nhanh trong mưa to và gió mạnh. Thuốc nấm thông thường không có tác dụng — phải dùng thuốc kháng sinh nông nghiệp hoặc đồng. Bài này phân tích kỹ điều kiện phát + phòng theo lớp.
@@ -171,29 +171,6 @@ Vườn có trên 30 phần trăm lá nhiễm + diện rộng:
 
 - *Phòng trừ bệnh cháy bìa lá lúa* — Viện Lúa Đồng bằng sông Cửu Long, 2023.
 - *Sổ tay quản lý dịch hại lúa* — Cục Bảo vệ Thực vật, 2022.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô lúa: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Chuẩn bị trước khi làm
-- [ ] Chia vườn/ruộng thành từng lô nhỏ để theo dõi riêng.
-- [ ] Chụp ảnh hiện trạng trước khi xử lý.
-- [ ] Ghi ngày, thời tiết, giống, tuổi cây và tình trạng đất/nước.
-- [ ] Chuẩn bị dụng cụ sạch, vật tư đúng mục tiêu và nguồn nước đủ dùng.
-- [ ] Làm thử trên diện tích nhỏ nếu lô chưa đồng đều hoặc cây đang suy.
-
-## Quy trình tóm tắt để áp dụng
-Thực hiện theo thứ tự: khảo sát hiện trạng, chọn lô làm trước, xử lý đúng thời điểm, theo dõi phản ứng sau 3-7 ngày rồi mới mở rộng. Không nên làm đồng loạt toàn bộ diện tích khi chưa biết cây phản ứng ra sao.
-
-## Xử lý sự cố thường gặp
-Nếu cây lúa xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
 
 ## 10. Bài liên quan
 

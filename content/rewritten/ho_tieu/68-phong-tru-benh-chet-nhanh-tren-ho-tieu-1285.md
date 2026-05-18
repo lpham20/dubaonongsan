@@ -2,7 +2,7 @@
 post_id: 68
 slug: phong-tru-benh-chet-nhanh-tren-ho-tieu-1285
 title: Phòng trừ bệnh chết nhanh trên hồ tiêu
-summary: Chết nhanh (Phytophthora capsici) là bệnh nguy hiểm nhất với hồ tiêu — cây có thể chết trong 7-14 ngày. Hướng dẫn nhận biết sớm 4 triệu chứng đặc trưng, biện.
+summary: Chết nhanh (Phytophthora capsici) là bệnh nguy hiểm nhất với hồ tiêu — cây có thể chết trong 7-14 ngày. Hướng dẫn nhận biết sớm 4 triệu chứng đặc trưng, biện pháp phòng theo IPM và phác đồ xử lý khi mới phát hiện.
 crop_type: ho_tieu
 category: Phòng sâu bệnh hồ tiêu
 tags:
@@ -12,8 +12,8 @@ tags:
   - mua-mua
   - tay-nguyen
   - nang-cao
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Bệnh chết nhanh trên hồ tiêu do nấm *Phytophthora capsici* gây ra là loại bệnh "không có vacxin chữa cháy" — phát hiện muộn 5-7 ngày, cây hầu như không cứu được. Bài này không nói về tất cả các bệnh tiêu, chỉ tập trung vào chết nhanh: cách nhận biết khi cây còn cứu được, biện pháp phòng vùng có dịch và phác đồ xử lý cụ thể.
@@ -132,27 +132,6 @@ Vẽ sơ đồ vườn đánh dấu vị trí từng ổ bệnh. Vụ sau, vùng
 - *Quy trình phòng trừ bệnh chết nhanh, chết chậm trên hồ tiêu* — Cục Bảo vệ Thực vật, 2020 cập nhật 2023.
 - *Hồ tiêu bền vững — sổ tay kỹ thuật* — Hiệp hội Hồ tiêu Việt Nam (VPA), 2022.
 - *Quản lý Phytophthora trên cây công nghiệp* — IPI, 2018.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô hồ tiêu: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Chuẩn bị trước khi làm
-- [ ] Chia vườn/ruộng thành từng lô nhỏ để theo dõi riêng.
-- [ ] Chụp ảnh hiện trạng trước khi xử lý.
-- [ ] Ghi ngày, thời tiết, giống, tuổi cây và tình trạng đất/nước.
-- [ ] Chuẩn bị dụng cụ sạch, vật tư đúng mục tiêu và nguồn nước đủ dùng.
-- [ ] Làm thử trên diện tích nhỏ nếu lô chưa đồng đều hoặc cây đang suy.
-
-## Xử lý sự cố thường gặp
-Nếu cây hồ tiêu xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Bảng kiểm nhanh tại vườn
-| Hạng mục | Cách kiểm tra | Khi cần chú ý |
-|---|---|---|
-| Sức cây hồ tiêu | Quan sát lá, đọt, rễ/cổ rễ và tốc độ phục hồi | Cây héo, vàng lá, rụng hoa/trái hoặc phục hồi chậm |
-| Nước và đất | Kiểm tra ẩm độ tầng rễ, điểm đọng nước và mặt đất | Đất bí, nứt sâu hoặc đọng nước lâu |
-| Sâu bệnh | Chọn điểm đại diện để ghi tỷ lệ có triệu chứng | Triệu chứng lan nhanh sau 3-7 ngày |
-| Thời tiết | Xem dự báo 3-5 ngày trước thao tác lớn | Tránh mưa lớn, nắng gắt hoặc gió mạnh |
 
 ## 9. Bài liên quan
 

@@ -2,7 +2,7 @@
 post_id: 30
 slug: phong-tru-benh-than-thu-tren-thanh-long-1354
 title: Phòng trừ bệnh thán thư trên thanh long
-summary: Thán thư trên thanh long do nấm Colletotrichum gây ra, tấn công cành, nụ hoa và quả non. Hướng dẫn phân biệt với đốm đen rỉ sắt, phòng theo mùa và phác đồ xử.
+summary: Thán thư trên thanh long do nấm Colletotrichum gây ra, tấn công cành, nụ hoa và quả non. Hướng dẫn phân biệt với đốm đen rỉ sắt, phòng theo mùa và phác đồ xử lý cho vườn Bình Thuận, Long An.
 crop_type: thanh_long
 category: Phòng sâu bệnh thanh long
 tags:
@@ -11,8 +11,8 @@ tags:
   - mua-mua
   - dau-trai
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Thán thư là một trong hai bệnh phổ biến nhất trên thanh long, cùng với đốm đen. Nhiều nhà vườn nhầm hai bệnh này dù nguyên nhân và cách xử lý khác nhau. Bài này tập trung vào thán thư — phân biệt rõ với đốm đen, hướng dẫn phòng theo mùa và xử lý ổ bệnh sớm để bảo vệ năng suất cho vườn thanh long ruột trắng và ruột đỏ.
@@ -157,29 +157,6 @@ Xoay 3 hoạt chất khác nhau giữa các lần phun để giảm rủi ro n�
 - *Phòng trừ bệnh trên thanh long* — Viện Cây ăn quả miền Nam, 2023.
 - *Sổ tay kỹ thuật thanh long xuất khẩu* — Cục Trồng trọt, 2022.
 - *Quản lý bệnh trên cây ăn quả nhiệt đới* — Viện Bảo vệ Thực vật, 2021.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô thanh long: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Chuẩn bị trước khi làm
-- [ ] Chia vườn/ruộng thành từng lô nhỏ để theo dõi riêng.
-- [ ] Chụp ảnh hiện trạng trước khi xử lý.
-- [ ] Ghi ngày, thời tiết, giống, tuổi cây và tình trạng đất/nước.
-- [ ] Chuẩn bị dụng cụ sạch, vật tư đúng mục tiêu và nguồn nước đủ dùng.
-- [ ] Làm thử trên diện tích nhỏ nếu lô chưa đồng đều hoặc cây đang suy.
-
-## Quy trình tóm tắt để áp dụng
-Thực hiện theo thứ tự: khảo sát hiện trạng, chọn lô làm trước, xử lý đúng thời điểm, theo dõi phản ứng sau 3-7 ngày rồi mới mở rộng. Không nên làm đồng loạt toàn bộ diện tích khi chưa biết cây phản ứng ra sao.
-
-## Xử lý sự cố thường gặp
-Nếu cây thanh long xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
 
 ## 10. Bài liên quan
 

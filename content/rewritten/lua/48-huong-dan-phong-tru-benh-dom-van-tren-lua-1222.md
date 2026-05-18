@@ -2,7 +2,7 @@
 post_id: 48
 slug: huong-dan-phong-tru-benh-dom-van-tren-lua-1222
 title: Hướng dẫn phòng trừ bệnh đốm vằn trên lúa
-summary: Đốm vằn (Rhizoctonia solani) tấn công lúa giai đoạn đẻ nhánh đến trổ, gây cháy lá và thối thân. Hướng dẫn phòng theo lịch bón đạm và phun đúng ngưỡng cho lúa.
+summary: Đốm vằn (Rhizoctonia solani) tấn công lúa giai đoạn đẻ nhánh đến trổ, gây cháy lá và thối thân. Hướng dẫn phòng theo lịch bón đạm và phun đúng ngưỡng cho lúa Đồng bằng sông Cửu Long.
 crop_type: lua
 category: Phòng sâu bệnh lúa
 tags:
@@ -10,8 +10,8 @@ tags:
   - phong-sau-benh
   - dong-bang-song-cuu-long
   - trung-binh
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Đốm vằn (còn gọi là bệnh khô vằn) do nấm *Rhizoctonia solani* gây ra, là bệnh phổ biến thứ hai trên lúa Đồng bằng sông Cửu Long sau đạo ôn. Đặc điểm — nấm tồn tại trong đất, lây qua tiếp xúc giữa các thân lúa, bùng mạnh khi sạ dày và bón đạm cao. Bài này tập trung vào ngưỡng phun, hoạt chất phù hợp và biện pháp giảm bùng phát qua quản lý ruộng.
@@ -164,22 +164,6 @@ Nếu bệnh đã đến giai đoạn trổ và lan rộng — chấp nhận thi
 
 - *Quản lý bệnh đốm vằn trên lúa* — Viện Lúa Đồng bằng sông Cửu Long, 2023.
 - *Sổ tay phòng trừ bệnh hại lúa* — Cục Bảo vệ Thực vật, 2022.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô lúa: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Quy trình tóm tắt để áp dụng
-Thực hiện theo thứ tự: khảo sát hiện trạng, chọn lô làm trước, xử lý đúng thời điểm, theo dõi phản ứng sau 3-7 ngày rồi mới mở rộng. Không nên làm đồng loạt toàn bộ diện tích khi chưa biết cây phản ứng ra sao.
-
-## Xử lý sự cố thường gặp
-Nếu cây lúa xấu nhanh sau thao tác, dừng mở rộng ngay. Kiểm tra lại nước, rễ, thời tiết, liều lượng, cách phun/bón/tưới và khả năng nhầm đối tượng. Với lô bị úng hoặc khô hạn, xử lý nền trước rồi mới tính đến phân, thuốc hoặc thao tác mạnh.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
 
 ## 11. Bài liên quan
 

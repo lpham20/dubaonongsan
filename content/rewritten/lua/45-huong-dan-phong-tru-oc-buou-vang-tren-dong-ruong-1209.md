@@ -2,7 +2,7 @@
 post_id: 45
 slug: huong-dan-phong-tru-oc-buou-vang-tren-dong-ruong-1209
 title: Hướng dẫn phòng trừ ốc bươu vàng trên đồng ruộng cho lúa
-summary: Ốc bươu vàng cắn phá lúa non, mất giống trong 7-10 ngày đầu sạ. Hướng dẫn phòng tập trung vào ba mặt — chuẩn bị đất, lịch nước, biện pháp cơ học và sinh học.
+summary: Ốc bươu vàng cắn phá lúa non, mất giống trong 7-10 ngày đầu sạ. Hướng dẫn phòng tập trung vào ba mặt — chuẩn bị đất, lịch nước, biện pháp cơ học và sinh học — thay vì chỉ dựa vào thuốc.
 crop_type: lua
 category: Phòng sâu bệnh lúa
 tags:
@@ -12,8 +12,8 @@ tags:
   - gieo-sa
   - dong-bang-song-cuu-long
   - co-ban
-keep_title: True
-keep_slug: True
+keep_title: true
+keep_slug: true
 ---
 
 **Tóm tắt**: Ốc bươu vàng là dịch hại đầu vụ phổ biến nhất ở Đồng bằng sông Cửu Long. Một đợt ốc nặng có thể cắn sạch lúa non trong một đêm, mất toàn bộ giống đã sạ. Nhưng dùng thuốc trừ ốc nhiều cũng gây hại cho cá đồng, tôm cua tự nhiên. Bài này hướng dẫn cách phòng tổng hợp, ưu tiên biện pháp cơ học và quản lý nước — chỉ dùng thuốc khi mật độ quá cao.
@@ -139,34 +139,6 @@ Sau 2-3 vụ, bạn sẽ biết được mức độ ốc tự nhiên ở ruộn
 - *Quản lý ốc bươu vàng trên đồng ruộng* — Cục Bảo vệ Thực vật, 2021.
 - *Sổ tay quản lý dịch hại tổng hợp cho lúa* — Tổ chức Nông Lương Liên Hợp Quốc (tên viết tắt FAO) Việt Nam, 2020.
 - *Khuyến cáo phòng ốc bươu vàng tại Đồng bằng sông Cửu Long* — Viện Lúa Đồng bằng sông Cửu Long, 2022.
-
-## Bối cảnh kỹ thuật cần nhớ
-Trước khi áp dụng, cần nhìn bài này trong bối cảnh thực tế của lô lúa: giống, tuổi cây, sức rễ, nước, đất, thời tiết và lịch chăm sóc trước đó. Cùng một thao tác có thể cho kết quả khác nhau nếu nền vườn không giống nhau.
-
-## Chuẩn bị trước khi làm
-- [ ] Chia vườn/ruộng thành từng lô nhỏ để theo dõi riêng.
-- [ ] Chụp ảnh hiện trạng trước khi xử lý.
-- [ ] Ghi ngày, thời tiết, giống, tuổi cây và tình trạng đất/nước.
-- [ ] Chuẩn bị dụng cụ sạch, vật tư đúng mục tiêu và nguồn nước đủ dùng.
-- [ ] Làm thử trên diện tích nhỏ nếu lô chưa đồng đều hoặc cây đang suy.
-
-## Quy trình tóm tắt để áp dụng
-Thực hiện theo thứ tự: khảo sát hiện trạng, chọn lô làm trước, xử lý đúng thời điểm, theo dõi phản ứng sau 3-7 ngày rồi mới mở rộng. Không nên làm đồng loạt toàn bộ diện tích khi chưa biết cây phản ứng ra sao.
-
-## Lỗi thường gặp cần tránh
-- Làm theo một công thức cố định cho mọi lô dù đất, nước và sức cây khác nhau.
-- Chỉ xử lý phần nhìn thấy mà bỏ qua nguyên nhân nền như rễ yếu, đất bí, úng hoặc khô.
-- Không ghi ngày và ảnh trước/sau nên không biết biện pháp nào tạo ra kết quả.
-- Tăng liều phân/thuốc khi chưa xác định đúng nguyên nhân.
-- Không quay lại kiểm tra sau 3-7 ngày, để vấn đề lan rộng rồi mới xử lý.
-
-## Bảng kiểm nhanh tại vườn
-| Hạng mục | Cách kiểm tra | Khi cần chú ý |
-|---|---|---|
-| Sức cây lúa | Quan sát lá, đọt, rễ/cổ rễ và tốc độ phục hồi | Cây héo, vàng lá, rụng hoa/trái hoặc phục hồi chậm |
-| Nước và đất | Kiểm tra ẩm độ tầng rễ, điểm đọng nước và mặt đất | Đất bí, nứt sâu hoặc đọng nước lâu |
-| Sâu bệnh | Chọn điểm đại diện để ghi tỷ lệ có triệu chứng | Triệu chứng lan nhanh sau 3-7 ngày |
-| Thời tiết | Xem dự báo 3-5 ngày trước thao tác lớn | Tránh mưa lớn, nắng gắt hoặc gió mạnh |
 
 ## 9. Bài liên quan
 
