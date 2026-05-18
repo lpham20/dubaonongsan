@@ -582,6 +582,86 @@ def _build_fertilizer_index_body(heading: str, desc: str) -> str:
 </main>"""
 
 
+def _build_forecast_body(crop: str, crop_label: str, title: str, desc: str) -> str:
+    """Build body for /du-bao-gia/{crop} with current price table and forecast preview."""
+    sections = [
+        f"<main><h1>{html.escape(title)}</h1>",
+        f"<p>{html.escape(desc)}</p>",
+    ]
+
+    prices = _fetch_prices_for_crop(crop, limit=20)
+    if prices:
+        sections.append(f"<h2>Giá {html.escape(crop_label)} hiện tại theo vùng và giống</h2>")
+        sections.append("<table>")
+        sections.append(
+            "<thead><tr><th>Tỉnh</th><th>Vùng</th><th>Giống</th>"
+            "<th>Loại</th><th>Giá min (VND/kg)</th><th>Giá max (VND/kg)</th>"
+            "<th>Ngày cập nhật</th></tr></thead>"
+        )
+        sections.append("<tbody>")
+        for price in prices:
+            timestamp = (price.get("timestamp") or "")[:10]
+            sections.append(
+                "<tr>"
+                f"<td>{html.escape(str(price.get('province') or ''))}</td>"
+                f"<td>{html.escape(str(price.get('region') or ''))}</td>"
+                f"<td>{html.escape(str(price.get('variety') or ''))}</td>"
+                f"<td>{html.escape(str(price.get('quality_grade') or ''))}</td>"
+                f"<td>{int(price.get('min_price_vnd') or 0):,}</td>"
+                f"<td>{int(price.get('max_price_vnd') or 0):,}</td>"
+                f"<td>{html.escape(timestamp)}</td>"
+                "</tr>"
+            )
+        sections.append("</tbody></table>")
+    else:
+        sections.append(f"<p>Dữ liệu giá {html.escape(crop_label)} đang được cập nhật.</p>")
+
+    try:
+        url = f"{API_BASE}/api/v1/analytics/forecast-30-days?crop={crop}&region_id=1&variety=1"
+        request = Request(
+            url,
+            headers={
+                "Accept": "application/json",
+                "User-Agent": "DubaonongsanSEOPrerender/1.0",
+            },
+        )
+        with urlopen(request, timeout=20) as response:
+            forecast = json.loads(response.read().decode("utf-8"))
+        if isinstance(forecast, list) and forecast:
+            sections.append(f"<h2>Dự báo giá {html.escape(crop_label)} 30 ngày tới (vùng trọng điểm)</h2>")
+            sections.append("<ul>")
+            indices = [0, 1, 2, 3, 4, 5, 6, 13, 20, 29]
+            for index in indices:
+                if index >= len(forecast):
+                    break
+                point = forecast[index]
+                ts = (point.get("timestamp") or "")[:10]
+                fp = int(point.get("forecast_price_vnd") or 0)
+                lo = int(point.get("confidence_low_vnd") or 0)
+                hi = int(point.get("confidence_high_vnd") or 0)
+                sections.append(
+                    f"<li>Ngày {ts}: dự báo {fp:,} VND/kg "
+                    f"(khoảng tin cậy {lo:,} - {hi:,})</li>"
+                )
+            sections.append("</ul>")
+    except Exception as exc:
+        print(f"SEO warning: fetch forecast for {crop} failed: {exc}")
+
+    sections.append(
+        f"<h2>Về dữ liệu giá {html.escape(crop_label)}</h2>"
+        f"<p>Giá {html.escape(crop_label)} được dubaonongsan.com cập nhật hàng ngày "
+        "từ các nguồn công khai bao gồm bảng giá nông sản, báo nông nghiệp địa phương, "
+        "sở công thương các tỉnh trọng điểm. Dữ liệu được phân loại theo giống, vùng, "
+        "loại (A/B/C) và mức chợ đầu mối. Mô hình dự báo 30 ngày sử dụng kết hợp "
+        "machine learning gradient boosting và phân tích chuỗi thời gian để ước lượng "
+        "biến động giá kỳ vọng kèm khoảng tin cậy.</p>"
+        f'<p>Để xem chi tiết thuật toán, truy cập '
+        f'<a href="{SITE_BASE}/thuat-toan-du-bao">trang giải thích thuật toán dự báo</a>.</p>'
+    )
+    sections.append("</main>")
+    return "\n".join(sections)
+
+
 def render_static_pages() -> list[tuple[str, str | None]]:
     crops = {
         "sau_rieng": "sầu riêng",
@@ -713,7 +793,13 @@ def render_static_pages() -> list[tuple[str, str | None]]:
         )
         _write(
             OUTPUT / "forecast" / f"{crop}.html",
-            _page(title, desc, canonical, f"<main><h1>{html.escape(title)}</h1><p>{html.escape(desc)}</p></main>", [dataset_schema, web_page_schema, breadcrumb_schema]),
+            _page(
+                title,
+                desc,
+                canonical,
+                _build_forecast_body(crop, label, title, desc),
+                [dataset_schema, web_page_schema, breadcrumb_schema],
+            ),
         )
         urls.append((canonical, today))
 
