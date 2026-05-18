@@ -203,6 +203,7 @@ class GuidePost(Base):
     title: Mapped[str] = mapped_column(String(300), nullable=False)
     crop_type: Mapped[str | None] = mapped_column(String(30), index=True)
     category: Mapped[str] = mapped_column(String(100), index=True)
+    tags: Mapped[str | None] = mapped_column(String(500))
     summary: Mapped[str] = mapped_column(Text, nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     author: Mapped[str] = mapped_column(String(120), default="Ban kỹ thuật Dự báo nông sản")

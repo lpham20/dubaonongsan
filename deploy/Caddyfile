@@ -14,6 +14,7 @@
 
 {$FRONTEND_DOMAIN} {
 	encode zstd gzip
+	import redirects.caddy
 
 	@wwwHost host www.dubaonongsan.com
 	redir @wwwHost https://dubaonongsan.com{uri} permanent

@@ -183,6 +183,7 @@ class GuidePostOut(BaseModel):
     title: str
     crop_type: str | None
     category: str
+    tags: str | None = None
     summary: str
     content: str
     author: str

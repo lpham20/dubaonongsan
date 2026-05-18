@@ -75,6 +75,7 @@ def _guide_out(guide: GuidePost) -> dict:
         "title": guide.title,
         "crop_type": guide.crop_type,
         "category": guide.category,
+        "tags": guide.tags,
         "summary": guide.summary,
         "content": _public_guide_content(guide.content),
         "author": guide.author,

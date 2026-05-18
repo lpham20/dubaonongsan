@@ -109,6 +109,7 @@ services:
       - "443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./redirects.caddy:/etc/caddy/redirects.caddy:ro
       - ../frontend/dist:/var/www/frontend:ro
       - caddy_data:/data
       - caddy_config:/config
