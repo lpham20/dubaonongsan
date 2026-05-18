@@ -252,7 +252,7 @@ def _page(
   {asset_tags}
 </head>
 <body>
-  <div id="seo-prerender" hidden>{body}</div>
+  <div id="seo-prerender" class="visually-hidden" aria-hidden="true">{body}</div>
   <div id="root"></div>
 </body>
 </html>"""
