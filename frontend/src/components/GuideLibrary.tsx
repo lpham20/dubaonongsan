@@ -27,6 +27,14 @@ type GuideView = GuidePost & {
   section: "Cẩm nang" | "Chăm sóc";
 };
 
+type GuideBlock = {
+  heading: string;
+  body: string[];
+  bullets: string[];
+  tables: string[][][];
+  images: { url: string; index: number }[];
+};
+
 const FAMILY_ORDER = ["Cây ăn quả", "Cây công nghiệp", "Cây lương thực", "Cây trồng khác"];
 
 const CROP_META: Record<string, { plant: string; family: string }> = {
@@ -311,20 +319,35 @@ function GuideContent({ content, postId }: { content: string; postId: number }) 
     .split(/\n+/)
     .map((line) => line.trim())
     .filter((line) => line && !line.toLowerCase().startsWith("nguồn"));
-  const blocks: { heading: string; body: string[]; bullets: string[]; images: { url: string; index: number }[] }[] = [];
-  let current: { heading: string; body: string[]; bullets: string[]; images: { url: string; index: number }[] } | null = null;
+  const blocks: GuideBlock[] = [];
+  let current: GuideBlock | null = null;
+  let activeTable: string[][] | null = null;
   let imageIndex = 0;
 
   for (const line of lines) {
-    if (isGuideHeading(line)) {
-      current = { heading: line, body: [], bullets: [], images: [] };
+    const heading = normalizeGuideHeading(line);
+    if (heading) {
+      current = { heading, body: [], bullets: [], tables: [], images: [] };
       blocks.push(current);
+      activeTable = null;
       continue;
     }
     if (!current) {
-      current = { heading: "Ghi chú kỹ thuật", body: [], bullets: [], images: [] };
+      current = { heading: "Ghi chú kỹ thuật", body: [], bullets: [], tables: [], images: [] };
       blocks.push(current);
     }
+    if (line.startsWith("|")) {
+      const cells = parseTableRow(line);
+      if (cells.length && !cells.every((cell) => /^:?-{3,}:?$/.test(cell))) {
+        if (!activeTable) {
+          activeTable = [];
+          current.tables.push(activeTable);
+        }
+        activeTable.push(cells);
+      }
+      continue;
+    }
+    activeTable = null;
     if (line.startsWith("IMAGE::")) {
       current.images.push({ url: line.slice("IMAGE::".length), index: imageIndex++ });
       continue;
@@ -342,8 +365,9 @@ function GuideContent({ content, postId }: { content: string; postId: number }) 
         <section key={block.heading}>
           <h3>{block.heading}</h3>
           {block.body.map((line) => (
-            <p key={line}>{line}</p>
+            <p key={line}>{renderInlineMarkdown(line)}</p>
           ))}
+          {block.tables.map((table, index) => renderMarkdownTable(table, index))}
           {block.images.length ? (
             <div className="guide-image-grid">
               {block.images.map((image) => (
@@ -365,7 +389,7 @@ function GuideContent({ content, postId }: { content: string; postId: number }) 
           {block.bullets.length ? (
             <ul>
               {block.bullets.map((line) => (
-                <li key={line}>{line}</li>
+                <li key={line}>{renderInlineMarkdown(line)}</li>
               ))}
             </ul>
           ) : null}
@@ -472,6 +496,16 @@ function guideImageUrl(postId: number, imageIndex: number) {
   return `/api/v1/content/guide-images/${postId}/${imageIndex}`;
 }
 
+function normalizeGuideHeading(line: string) {
+  if (isGuideHeading(line)) return line;
+  if (!line.startsWith("#")) return null;
+  const heading = line
+    .replace(/^#{2,3}\s+/, "")
+    .replace(/^\d+(?:\.\d+)?\.\s*/, "")
+    .trim();
+  return heading || null;
+}
+
 function isGuideHeading(line: string) {
   return [
     "Mục tiêu",
@@ -481,6 +515,54 @@ function isGuideHeading(line: string) {
     "Lỗi cần tránh",
     "Ghi chép nên có"
   ].includes(line);
+}
+
+function parseTableRow(line: string) {
+  return line
+    .split("|")
+    .map((cell) => cell.trim())
+    .filter(Boolean);
+}
+
+function renderMarkdownTable(table: string[][], index: number) {
+  if (!table.length) return null;
+  const [head, ...rows] = table;
+  return (
+    <div className="guide-markdown-table" key={`table-${index}`}>
+      <table>
+        <thead>
+          <tr>{head.map((cell) => <th key={cell}>{renderInlineMarkdown(cell)}</th>)}</tr>
+        </thead>
+        <tbody>
+          {rows.map((row, rowIndex) => (
+            <tr key={`${rowIndex}-${row.join("|")}`}>
+              {head.map((_, cellIndex) => <td key={cellIndex}>{renderInlineMarkdown(row[cellIndex] ?? "")}</td>)}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function renderInlineMarkdown(text: string) {
+  const cleaned = text.replace(/^\[[ xX]\]\s*/, "");
+  const parts = cleaned.split(/(\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g).filter(Boolean);
+  return parts.map((part, index) => {
+    const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (link) {
+      const [, label, href] = link;
+      return href.startsWith("/") ? (
+        <Link to={href} key={`${part}-${index}`}>{label}</Link>
+      ) : (
+        <a href={href} key={`${part}-${index}`} target="_blank" rel="noreferrer">{label}</a>
+      );
+    }
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={`${part}-${index}`}>{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
 }
 
 function GuideFamilyArt({ family }: { family: string }) {

@@ -1130,3 +1130,59 @@
     max-width: 100%;
   }
 }
+
+.guide-markdown-table {
+  width: 100%;
+  overflow-x: auto;
+  margin: 14px 0 18px;
+  border: 1px solid var(--color-border, #d8e2d8);
+  border-radius: 10px;
+  background: var(--color-surface, #fff);
+}
+
+.guide-markdown-table table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  font-family: var(--font-sans);
+  font-size: 14px;
+}
+
+.guide-markdown-table th,
+.guide-markdown-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border, #d8e2d8);
+  text-align: left;
+  vertical-align: top;
+}
+
+.guide-markdown-table th {
+  background: var(--accent-soft, #d9efe4);
+  color: var(--accent-deep, #0d4b38);
+  font-size: 12px;
+  font-weight: var(--fw-black, 800);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.guide-markdown-table tr:last-child td {
+  border-bottom: 0;
+}
+
+@media (max-width: 860px) {
+  .guide-markdown-table {
+    margin-left: -2px;
+    margin-right: -2px;
+    border-radius: 8px;
+  }
+
+  .guide-markdown-table table {
+    min-width: 560px;
+    font-size: 13px;
+  }
+
+  .guide-markdown-table th,
+  .guide-markdown-table td {
+    padding: 9px 10px;
+  }
+}
