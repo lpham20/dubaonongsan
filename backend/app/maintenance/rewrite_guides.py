@@ -86,21 +86,50 @@ def _crop(row: GuidePost) -> str | None:
 
 
 def _topic(title: str) -> str:
+    raw = title.casefold()
     text = _ascii(title)
-    if any(term in text for term in ("benh", "sau", "rep", "mot", "ray", "oc", "chuot", "tuyen trung", "dao on", "than thu")):
-        return "phong-sau-benh"
-    if any(term in text for term in ("tuoi", "nuoc", "han", "man", "tieu nuoc")):
+
+    def has_ascii_phrase(*phrases: str) -> bool:
+        padded = f" {text} "
+        return any(f" {phrase} " in padded for phrase in phrases)
+
+    def has_raw(*phrases: str) -> bool:
+        return any(phrase in raw for phrase in phrases)
+
+    if has_ascii_phrase("tuoi", "nuoc", "han", "mua kho", "man", "tieu nuoc", "thoat nuoc", "ngap ung"):
         return "tuoi-nuoc"
-    if any(term in text for term in ("giong", "dat", "trong", "gieo", "u hat", "tai canh", "ho trong", "bau uom")):
+    if has_ascii_phrase("giong", "dat", "trong", "gieo", "u hat", "tai canh", "ho trong", "bau uom"):
         return "giong-dat-trong"
-    if any(term in text for term in ("ra hoa", "thu phan", "dau trai", "tia hoa", "tia qua", "thap den")):
+    if has_ascii_phrase("ra hoa", "thu phan", "dau trai", "tia trai", "tia hoa", "tia qua", "thap den", "nuoi trai"):
         return "ra-hoa-dau-trai"
-    if any(term in text for term in ("tia canh", "tao tan", "chan gio", "che bong", "buoc day", "xuong cay")):
+    if has_ascii_phrase("tia canh", "tao tan", "chan gio", "che bong", "che phu", "buoc day", "xuong cay", "phuc hoi"):
         return "tao-tan-cham-soc"
-    if "thu hoach" in text:
+    if has_ascii_phrase("thu hoach", "phan loai", "bao quan"):
         return "thu-hoach"
-    if any(term in text for term in ("co dai", "ipm", "quan ly dich hai", "1 phai 5 giam")):
+    if has_ascii_phrase("co dai", "ipm", "quan ly dich hai", "1 phai 5 giam"):
         return "quan-ly-vuon"
+    # Use accented Vietnamese for pest/disease terms to avoid false positives:
+    # "sầu riêng" is not "sâu", and "nước" must not match "ốc".
+    if has_raw(
+        "bệnh",
+        "sâu",
+        "rệp",
+        "mọt",
+        "rầy",
+        "ốc",
+        "chuột",
+        "tuyến trùng",
+        "đạo ôn",
+        "thán thư",
+        "nấm",
+        "vàng lá",
+        "thối rễ",
+        "đục thân",
+        "đục quả",
+        "khô cành",
+        "khô quả",
+    ):
+        return "phong-sau-benh"
     return "cham-soc"
 
 
