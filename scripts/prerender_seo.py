@@ -498,6 +498,51 @@ def _build_guides_index_body(heading: str, desc: str) -> str:
     return "\n".join(sections)
 
 
+def _build_news_index_body(heading: str, desc: str) -> str:
+    """Build body for /tin-tuc index with the latest 30 news articles."""
+    sections = [
+        f"<main><h1>{html.escape(heading)}</h1>",
+        f"<p>{html.escape(desc)}</p>",
+    ]
+
+    news = _fetch_news_for_index(limit=30)
+    if news:
+        by_category: dict[str, list[dict]] = {}
+        for item in news:
+            category = item.get("category") or "Tin nông nghiệp"
+            by_category.setdefault(category, []).append(item)
+
+        for category, items in by_category.items():
+            sections.append(f"<h2>{html.escape(category)}</h2><ul>")
+            for item in items:
+                slug = _news_slug(item)
+                title = item.get("title") or "Tin"
+                summary = (item.get("summary") or item.get("excerpt") or "")[:300]
+                source = item.get("source_name") or ""
+                sections.append(
+                    f'<li><a href="{SITE_BASE}/tin-tuc/{slug}">'
+                    f"<strong>{html.escape(title)}</strong></a> "
+                    f"({html.escape(source)}): {html.escape(summary)}</li>"
+                )
+            sections.append("</ul>")
+    else:
+        sections.append("<p>Chưa có tin mới.</p>")
+
+    sections.append(
+        "<h2>Mô tả bản tin thị trường</h2>"
+        "<p>Tin tức dubaonongsan.com tổng hợp từ các nguồn báo nông nghiệp Việt Nam "
+        "như Báo Nông nghiệp và Môi trường, Vinanet, Báo Công Thương, Báo Nghệ An, "
+        "Báo Hà Tĩnh, Sở Công Thương Đắk Lắk. Mỗi bài có liên kết về nguồn gốc, "
+        "cập nhật 3 giờ một lần để theo kịp biến động giá và chính sách thị trường.</p>"
+        "<p>Trang tin tức ưu tiên các chủ đề có tác động đến giá nông sản, xuất khẩu, "
+        "vật tư đầu vào, thời tiết, vùng trồng và chính sách quản lý. Nội dung index "
+        "giúp crawler không chạy JavaScript vẫn đọc được nhóm tin, nguồn tin và tóm tắt "
+        "trước khi đi vào từng bài chi tiết.</p>"
+    )
+    sections.append("</main>")
+    return "\n".join(sections)
+
+
 def render_static_pages() -> list[tuple[str, str | None]]:
     crops = {
         "sau_rieng": "sầu riêng",
