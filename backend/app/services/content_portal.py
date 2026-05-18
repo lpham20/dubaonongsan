@@ -250,7 +250,6 @@ class ContentPortalService:
             with _guide_seed_lock:
                 if not self.db.scalar(select(GuidePost.post_id).limit(1)):
                     self.seed_guides()
-        self.ensure_guide_depth()
         stmt = select(GuidePost).order_by(desc(GuidePost.published_at))
         if crop:
             stmt = stmt.where((GuidePost.crop_type == crop) | (GuidePost.crop_type.is_(None)))
