@@ -452,6 +452,52 @@ def _build_home_body(heading: str, desc: str) -> str:
     return "\n".join(sections)
 
 
+def _build_guides_index_body(heading: str, desc: str) -> str:
+    """Build body for /huong-dan index with the latest 30 guides."""
+    sections = [
+        f"<main><h1>{html.escape(heading)}</h1>",
+        f"<p>{html.escape(desc)}</p>",
+    ]
+
+    guides = _fetch_guides_for_index(limit=30)
+    if guides:
+        by_category: dict[str, list[dict]] = {}
+        for guide in guides:
+            category = guide.get("category") or "Hướng dẫn khác"
+            by_category.setdefault(category, []).append(guide)
+
+        for category, items in by_category.items():
+            sections.append(f"<h2>{html.escape(category)}</h2><ul>")
+            for guide in items:
+                slug = _public_guide_slug(guide.get("slug") or "")
+                if not slug:
+                    continue
+                title = guide.get("title") or "Hướng dẫn"
+                summary = (guide.get("summary") or "")[:250]
+                sections.append(
+                    f'<li><a href="{SITE_BASE}/huong-dan/{slug}">'
+                    f"<strong>{html.escape(title)}</strong></a>: "
+                    f"{html.escape(summary)}</li>"
+                )
+            sections.append("</ul>")
+    else:
+        sections.append("<p>Thư viện hướng dẫn đang được xây dựng.</p>")
+
+    sections.append(
+        "<h2>Mô tả thư viện</h2>"
+        "<p>Thư viện hướng dẫn dubaonongsan.com bao gồm các bài viết kỹ thuật "
+        "canh tác, quản lý vườn, xử lý sâu bệnh, kế hoạch bón phân, thu hoạch "
+        "và bảo quản nông sản tại Việt Nam. Mỗi bài cung cấp mục tiêu, thời điểm "
+        "áp dụng, cách làm tại vườn, theo dõi sau khi làm và các lỗi cần tránh.</p>"
+        "<p>Nội dung được tổ chức theo nhóm cây trồng và nhóm thao tác để người đọc "
+        "có thể nhanh chóng tìm quy trình phù hợp với vườn, ruộng hoặc lô sản xuất "
+        "đang quản lý. Các bài hướng dẫn ưu tiên ngôn ngữ thực hành, có checklist "
+        "kiểm tra, dấu hiệu cần quan sát và khuyến nghị ghi chép sau khi áp dụng.</p>"
+    )
+    sections.append("</main>")
+    return "\n".join(sections)
+
+
 def render_static_pages() -> list[tuple[str, str | None]]:
     crops = {
         "sau_rieng": "sầu riêng",
