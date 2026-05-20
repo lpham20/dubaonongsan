@@ -473,6 +473,16 @@
   line-height: var(--lh-snug);
 }
 
+.detail-body h4 {
+  margin: 1.25em 0 0.35em;
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 19px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0;
+  line-height: var(--lh-snug);
+}
+
 .guide-body ul,
 .guide-body ol,
 .detail-body ul,

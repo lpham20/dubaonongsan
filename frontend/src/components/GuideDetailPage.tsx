@@ -19,6 +19,7 @@ type GuideBlock = {
 };
 
 type GuideContentItem =
+  | { type: "subheading"; text: string; level: 3 | 4 }
   | { type: "paragraph"; text: string }
   | { type: "blockquote"; lines: string[] }
   | { type: "bullets"; items: string[] }
@@ -140,6 +141,10 @@ function GuideArticleContent({ guide }: { guide: GuidePost }) {
 }
 
 function renderGuideItem(item: GuideContentItem, index: number, guide: GuidePost, heading: string) {
+  if (item.type === "subheading") {
+    const HeadingTag = item.level === 4 ? "h4" : "h3";
+    return <HeadingTag key={index}>{renderInlineMarkdown(item.text)}</HeadingTag>;
+  }
   if (item.type === "paragraph") return <p key={index}>{renderInlineMarkdown(item.text)}</p>;
   if (item.type === "blockquote") {
     return (
@@ -219,7 +224,7 @@ function safeParseGuideBlocks(guide: GuidePost) {
   }
 }
 
-function parseGuideBlocks(content: string) {
+function parseGuideBlocks(content: string): GuideBlock[] {
   const blocks: GuideBlock[] = [];
   let current: GuideBlock | null = null;
   let activeTable: string[][] | null = null;
@@ -243,8 +248,14 @@ function parseGuideBlocks(content: string) {
     }
     const heading = normalizeGuideHeading(line);
     if (heading) {
-      current = { heading, items: [], body: [], bullets: [], tables: [], images: [] };
-      blocks.push(current);
+      if (heading.level <= 2 || !current) {
+        current = { heading: heading.text, items: [], body: [], bullets: [], tables: [], images: [] };
+        blocks.push(current);
+      } else {
+        const subheadingLevel = heading.level >= 4 ? 4 : 3;
+        current.items.push({ type: "subheading", text: heading.text, level: subheadingLevel });
+        current.body.push(heading.text);
+      }
       activeTable = null;
       activeBullets = null;
       activeOrdered = null;
@@ -329,13 +340,14 @@ function parseGuideBlocks(content: string) {
 }
 
 function normalizeGuideHeading(line: string) {
-  if (HOWTO_HEADINGS.includes(line)) return line;
-  if (!line.startsWith("#")) return null;
-  const heading = line
-    .replace(/^#{1,6}\s+/, "")
+  if (HOWTO_HEADINGS.includes(line)) return { text: line, level: 2 as const };
+  const match = line.match(/^(#{1,6})\s+(.+)$/);
+  if (!match) return null;
+  const level = Math.min(Math.max(match[1].length, 2), 4) as 2 | 3 | 4;
+  const text = match[2]
     .replace(/^\d+(?:\.\d+)?\.\s*/, "")
     .trim();
-  return heading || null;
+  return text ? { text, level } : null;
 }
 
 function parseTableRow(line: string) {
