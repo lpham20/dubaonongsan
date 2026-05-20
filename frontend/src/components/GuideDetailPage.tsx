@@ -11,11 +11,20 @@ const HOWTO_HEADINGS = ["Mục tiêu", "Khi nào áp dụng", "Cách làm tại 
 
 type GuideBlock = {
   heading: string;
+  items: GuideContentItem[];
   body: string[];
   bullets: string[];
   tables: string[][][];
   images: { url: string; index: number }[];
 };
+
+type GuideContentItem =
+  | { type: "paragraph"; text: string }
+  | { type: "blockquote"; lines: string[] }
+  | { type: "bullets"; items: string[] }
+  | { type: "ordered"; items: string[] }
+  | { type: "table"; rows: string[][] }
+  | { type: "image"; url: string; index: number };
 
 export function GuideDetailPage({ slug }: { slug: string }) {
   const [guide, setGuide] = useState<GuidePost | null>(null);
@@ -123,34 +132,56 @@ function GuideArticleContent({ guide }: { guide: GuidePost }) {
       {blocks.map((block) => (
         <section key={block.heading}>
           <h2>{block.heading}</h2>
-          {block.body.map((paragraph, index) => (
-            <p key={index}>{renderInlineMarkdown(paragraph)}</p>
-          ))}
-          {block.tables.map((table, index) => renderMarkdownTable(table, index))}
-          {block.bullets.length ? (
-            <ul>
-              {block.bullets.map((bullet) => (
-                <li key={bullet}>{renderInlineMarkdown(bullet)}</li>
-              ))}
-            </ul>
-          ) : null}
-          {block.images.map((image) => (
-            <img
-              key={image.index}
-              src={`/api/v1/content/guide-images/${guide.post_id}/${image.index}`}
-              alt={`Ảnh hướng dẫn: ${guide.title} - ${block.heading}`}
-              loading="lazy"
-              decoding="async"
-              width="860"
-              height="480"
-              onError={(event) => {
-                event.currentTarget.style.display = "none";
-              }}
-            />
-          ))}
+          {block.items.map((item, index) => renderGuideItem(item, index, guide, block.heading))}
         </section>
       ))}
     </div>
+  );
+}
+
+function renderGuideItem(item: GuideContentItem, index: number, guide: GuidePost, heading: string) {
+  if (item.type === "paragraph") return <p key={index}>{renderInlineMarkdown(item.text)}</p>;
+  if (item.type === "blockquote") {
+    return (
+      <blockquote key={index}>
+        {item.lines.map((line, lineIndex) => (
+          <p key={`${lineIndex}-${line}`}>{renderInlineMarkdown(line)}</p>
+        ))}
+      </blockquote>
+    );
+  }
+  if (item.type === "bullets") {
+    return (
+      <ul key={index}>
+        {item.items.map((bullet, bulletIndex) => (
+          <li key={`${bulletIndex}-${bullet}`}>{renderInlineMarkdown(bullet)}</li>
+        ))}
+      </ul>
+    );
+  }
+  if (item.type === "ordered") {
+    return (
+      <ol key={index}>
+        {item.items.map((orderedItem, orderedIndex) => (
+          <li key={`${orderedIndex}-${orderedItem}`}>{renderInlineMarkdown(orderedItem)}</li>
+        ))}
+      </ol>
+    );
+  }
+  if (item.type === "table") return renderMarkdownTable(item.rows, index);
+  return (
+    <img
+      key={index}
+      src={`/api/v1/content/guide-images/${guide.post_id}/${item.index}`}
+      alt={`Ảnh hướng dẫn: ${guide.title} - ${heading}`}
+      loading="lazy"
+      decoding="async"
+      width="860"
+      height="480"
+      onError={(event) => {
+        event.currentTarget.style.display = "none";
+      }}
+    />
   );
 }
 
@@ -180,10 +211,11 @@ function buildHowToSchema(guide: GuidePost) {
 function safeParseGuideBlocks(guide: GuidePost) {
   try {
     const blocks = parseGuideBlocks(guide.content);
-    return blocks.length ? blocks : [{ heading: "Ghi chú kỹ thuật", body: [guide.summary], bullets: [], tables: [], images: [] }];
+    return blocks.length ? blocks : [{ heading: "Ghi chú kỹ thuật", items: [{ type: "paragraph" as const, text: guide.summary }], body: [guide.summary], bullets: [], tables: [], images: [] }];
   } catch (err) {
     console.error("[GuideDetailPage] parse failed", { slug: guide.slug, err });
-    return [{ heading: "Ghi chú kỹ thuật", body: [guide.summary || guide.title], bullets: [], tables: [], images: [] }];
+    const fallbackText = guide.summary || guide.title;
+    return [{ heading: "Ghi chú kỹ thuật", items: [{ type: "paragraph" as const, text: fallbackText }], body: [fallbackText], bullets: [], tables: [], images: [] }];
   }
 }
 
@@ -191,22 +223,36 @@ function parseGuideBlocks(content: string) {
   const blocks: GuideBlock[] = [];
   let current: GuideBlock | null = null;
   let activeTable: string[][] | null = null;
+  let activeBullets: string[] | null = null;
+  let activeOrdered: string[] | null = null;
+  let activeQuote: string[] | null = null;
   let imageIndex = 0;
   const lines = content
-    .split(/\n+/)
+    .replace(/\r\n/g, "\n")
+    .split("\n")
     .map((line) => line.trim())
-    .filter((line) => line && !line.toLowerCase().startsWith("nguồn"));
+    .filter((line) => !line.toLowerCase().startsWith("nguồn"));
 
   for (const line of lines) {
+    if (!line) {
+      activeTable = null;
+      activeBullets = null;
+      activeOrdered = null;
+      activeQuote = null;
+      continue;
+    }
     const heading = normalizeGuideHeading(line);
     if (heading) {
-      current = { heading, body: [], bullets: [], tables: [], images: [] };
+      current = { heading, items: [], body: [], bullets: [], tables: [], images: [] };
       blocks.push(current);
       activeTable = null;
+      activeBullets = null;
+      activeOrdered = null;
+      activeQuote = null;
       continue;
     }
     if (!current) {
-      current = { heading: "Ghi chú kỹ thuật", body: [], bullets: [], tables: [], images: [] };
+      current = { heading: "Ghi chú kỹ thuật", items: [], body: [], bullets: [], tables: [], images: [] };
       blocks.push(current);
     }
     if (line.startsWith("|")) {
@@ -215,15 +261,69 @@ function parseGuideBlocks(content: string) {
         if (!activeTable) {
           activeTable = [];
           current.tables.push(activeTable);
+          current.items.push({ type: "table", rows: activeTable });
         }
         activeTable.push(cells);
       }
+      activeBullets = null;
+      activeOrdered = null;
+      activeQuote = null;
       continue;
     }
     activeTable = null;
-    if (line.startsWith("IMAGE::")) current.images.push({ url: line.slice("IMAGE::".length), index: imageIndex++ });
-    else if (line.startsWith("- ")) current.bullets.push(line.slice(2));
-    else current.body.push(line);
+    if (line.startsWith("IMAGE::")) {
+      const image = { url: line.slice("IMAGE::".length).trim(), index: imageIndex++ };
+      current.images.push(image);
+      current.items.push({ type: "image", ...image });
+      activeBullets = null;
+      activeOrdered = null;
+      activeQuote = null;
+      continue;
+    }
+    if (line.startsWith(">")) {
+      const quote = line.replace(/^>+\s*/, "").trim();
+      if (quote) {
+        current.body.push(quote);
+        if (!activeQuote) {
+          activeQuote = [];
+          current.items.push({ type: "blockquote", lines: activeQuote });
+        }
+        activeQuote.push(quote);
+      }
+      activeBullets = null;
+      activeOrdered = null;
+      continue;
+    }
+    const orderedMatch = line.match(/^\d+\.\s+(.*)$/);
+    if (orderedMatch) {
+      const value = orderedMatch[1].trim();
+      current.bullets.push(value);
+      if (!activeOrdered) {
+        activeOrdered = [];
+        current.items.push({ type: "ordered", items: activeOrdered });
+      }
+      activeOrdered.push(value);
+      activeBullets = null;
+      activeQuote = null;
+      continue;
+    }
+    if (line.startsWith("- ")) {
+      const value = line.slice(2).trim();
+      current.bullets.push(value);
+      if (!activeBullets) {
+        activeBullets = [];
+        current.items.push({ type: "bullets", items: activeBullets });
+      }
+      activeBullets.push(value);
+      activeOrdered = null;
+      activeQuote = null;
+      continue;
+    }
+    current.body.push(line);
+    current.items.push({ type: "paragraph", text: line });
+    activeBullets = null;
+    activeOrdered = null;
+    activeQuote = null;
   }
   return blocks;
 }
@@ -232,7 +332,7 @@ function normalizeGuideHeading(line: string) {
   if (HOWTO_HEADINGS.includes(line)) return line;
   if (!line.startsWith("#")) return null;
   const heading = line
-    .replace(/^#{2,3}\s+/, "")
+    .replace(/^#{1,6}\s+/, "")
     .replace(/^\d+(?:\.\d+)?\.\s*/, "")
     .trim();
   return heading || null;
