@@ -481,6 +481,20 @@
   padding-left: 1.4em;
 }
 
+.detail-body blockquote {
+  margin: 0 0 1em;
+  padding: 12px 14px;
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-xs);
+  background: color-mix(in srgb, var(--accent-soft) 45%, transparent);
+}
+
+.detail-body blockquote p {
+  margin: 0.25em 0;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
 .guide-body li::marker,
 .detail-body li::marker {
   color: var(--accent);

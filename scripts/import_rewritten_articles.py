@@ -16,12 +16,12 @@ keep_slug: true
 ---
 Markdown body...
 
-The importer refuses to change title or slug. It updates only summary, content,
+The importer refuses to change slug. It updates title, summary, content,
 category, crop_type and tags after the draft has passed review.
 
 Web formatting rule:
-- Markdown emphasis markers (*) are removed before writing to the database.
-- Markdown blockquote lines (>) are converted to regular bullet lines (-).
+- Reviewed markdown body is stored as-is, apart from newline normalization.
+- Rendering concerns live in the frontend and SEO prerenderer.
 """
 from __future__ import annotations
 
@@ -118,27 +118,10 @@ def _tags_to_db(value: Any) -> str:
     return str(value).strip()
 
 
-def _strip_emphasis_markers(value: str) -> str:
-    """Remove markdown emphasis markers that should not appear on the public site."""
-
-    return value.replace("*", "").strip()
-
-
 def _format_body_for_web(body: str) -> str:
-    """Convert reviewed markdown body to the plain structured format used by guide pages."""
+    """Keep reviewed markdown intact while normalizing line endings."""
 
-    formatted_lines: list[str] = []
-    for raw_line in body.replace("\r\n", "\n").splitlines():
-        line = raw_line.rstrip()
-        stripped = line.lstrip()
-        leading_space = line[: len(line) - len(stripped)]
-        if stripped.startswith(">"):
-            quote = stripped.lstrip(">").strip()
-            if quote:
-                formatted_lines.append(f"{leading_space}- {_strip_emphasis_markers(quote)}")
-            continue
-        formatted_lines.append(_strip_emphasis_markers(line))
-    return "\n".join(formatted_lines).strip()
+    return body.replace("\r\n", "\n").strip()
 
 
 def import_one(path: Path, dry_run: bool) -> str:
@@ -156,12 +139,11 @@ def import_one(path: Path, dry_run: bool) -> str:
         guide = db.scalar(select(GuidePost).where(GuidePost.post_id == post_id))
         if guide is None:
             raise ValueError(f"{path}: guide post #{post_id} not found")
-        if guide.title != meta["title"]:
-            raise ValueError(f"{path}: title mismatch, refuses to change existing title")
         if guide.slug != meta["slug"]:
             raise ValueError(f"{path}: slug mismatch, refuses to change existing slug")
 
-        guide.summary = _strip_emphasis_markers(str(meta["summary"]))
+        guide.title = str(meta["title"]).strip()
+        guide.summary = str(meta["summary"]).strip()
         guide.content = _format_body_for_web(body)
         guide.crop_type = str(meta["crop_type"]).strip() or None
         guide.category = str(meta["category"]).strip()
@@ -173,7 +155,9 @@ def import_one(path: Path, dry_run: bool) -> str:
         db.commit()
         invalidate_cache("guides")
         invalidate_cache(f"guide:{guide.slug}")
+        invalidate_cache("guide-detail")
         invalidate_cache("llm-guides-index")
+        invalidate_cache("llm-guide-detail")
         return f"Imported: #{post_id} {guide.slug}"
 
 

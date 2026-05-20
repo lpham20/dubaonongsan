@@ -187,6 +187,121 @@ def _json_ld(value: object) -> str:
     )
 
 
+def _inline_markdown(value: str) -> str:
+    parts = re.split(r"(\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))", value)
+    rendered: list[str] = []
+    for part in parts:
+        if not part:
+            continue
+        link = re.match(r"^\[([^\]]+)\]\(([^)]+)\)$", part)
+        if link:
+            label, href = link.groups()
+            rendered.append(f'<a href="{html.escape(href, quote=True)}">{html.escape(label)}</a>')
+            continue
+        if part.startswith("**") and part.endswith("**"):
+            rendered.append(f"<strong>{html.escape(part[2:-2])}</strong>")
+            continue
+        rendered.append(html.escape(part))
+    return "".join(rendered)
+
+
+def _table_row(line: str) -> list[str]:
+    return [cell.strip() for cell in line.split("|") if cell.strip()]
+
+
+def _table_html(rows: list[list[str]]) -> str:
+    if not rows:
+        return ""
+    head, *body = rows
+    head_html = "".join(f"<th>{_inline_markdown(cell)}</th>" for cell in head)
+    body_html = "\n".join(
+        "<tr>" + "".join(f"<td>{_inline_markdown(row[index] if index < len(row) else '')}</td>" for index in range(len(head))) + "</tr>"
+        for row in body
+    )
+    return f"<table><thead><tr>{head_html}</tr></thead><tbody>{body_html}</tbody></table>"
+
+
+def _guide_markdown_to_html(content: str) -> str:
+    output: list[str] = []
+    active_list: str | None = None
+    active_quote: list[str] = []
+    active_table: list[list[str]] = []
+
+    def close_list() -> None:
+        nonlocal active_list
+        if active_list:
+            output.append(f"</{active_list}>")
+            active_list = None
+
+    def close_quote() -> None:
+        nonlocal active_quote
+        if active_quote:
+            output.append("<blockquote>" + "".join(f"<p>{_inline_markdown(line)}</p>" for line in active_quote) + "</blockquote>")
+            active_quote = []
+
+    def close_table() -> None:
+        nonlocal active_table
+        if active_table:
+            output.append(_table_html(active_table))
+            active_table = []
+
+    def close_all() -> None:
+        close_table()
+        close_quote()
+        close_list()
+
+    for raw_line in content.replace("\r\n", "\n").splitlines():
+        line = raw_line.strip()
+        if not line or line.lower().startswith("nguồn"):
+            close_all()
+            continue
+        if line.startswith("IMAGE::"):
+            close_all()
+            continue
+        heading = re.match(r"^(#{1,6})\s+(.+)$", line)
+        if heading:
+            close_all()
+            level = min(max(len(heading.group(1)), 2), 4)
+            text = re.sub(r"^\d+(?:\.\d+)?\.\s*", "", heading.group(2)).strip()
+            output.append(f"<h{level}>{_inline_markdown(text)}</h{level}>")
+            continue
+        if line.startswith("|"):
+            cells = _table_row(line)
+            if cells and not all(re.fullmatch(r":?-{3,}:?", cell) for cell in cells):
+                close_quote()
+                close_list()
+                active_table.append(cells)
+            continue
+        close_table()
+        if line.startswith(">"):
+            close_list()
+            quote = line.replace(">", "", 1).strip()
+            if quote:
+                active_quote.append(quote)
+            continue
+        close_quote()
+        ordered = re.match(r"^\d+\.\s+(.+)$", line)
+        bullet = re.match(r"^[-*]\s+(.+)$", line)
+        if ordered:
+            if active_list != "ol":
+                close_list()
+                output.append("<ol>")
+                active_list = "ol"
+            output.append(f"<li>{_inline_markdown(ordered.group(1).strip())}</li>")
+            continue
+        if bullet:
+            if active_list != "ul":
+                close_list()
+                output.append("<ul>")
+                active_list = "ul"
+            output.append(f"<li>{_inline_markdown(bullet.group(1).strip())}</li>")
+            continue
+        close_list()
+        output.append(f"<p>{_inline_markdown(line)}</p>")
+    close_all()
+    return "\n".join(output)
+
+
 def _page(
     title: str,
     description: str,
@@ -338,14 +453,9 @@ def render_guides() -> list[tuple[str, str | None]]:
         canonical = f"{SITE_BASE}/huong-dan/{slug}"
         title = guide.get("title") or "Hướng dẫn kỹ thuật"
         summary = guide.get("summary") or title
-        clean_lines = [
-            line
-            for line in (guide.get("content") or "").splitlines()
-            if not line.strip().startswith("IMAGE::")
-        ]
-        content = html.escape("\n".join(clean_lines)).replace("\n", "<br />")
+        content = _guide_markdown_to_html(guide.get("content") or "")
         published_at = guide.get("published_at") or guide.get("updated_at")
-        body = f"<article><h1>{html.escape(title)}</h1><p>{html.escape(summary)}</p><div>{content}</div></article>"
+        body = f"<article><h1>{html.escape(title)}</h1><p>{html.escape(summary)}</p>{content}</article>"
         guide_schema = {
             "@context": "https://schema.org",
             "@type": "HowTo",
