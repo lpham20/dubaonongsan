@@ -1,6 +1,6 @@
 ---
 post_id: 102
-slug: phong-tru-sau-duc-than-78c511cd-8ed2-4078-88f2-10f5d0fcf20f-1364
+slug: phong-tru-sau-duc-than-xen-toc-xoai-1364
 title: Phòng trừ sâu đục thân (xén tóc) Xoài
 summary: Sâu đục thân xoài do xén tóc gây hại, ấu trùng đục trong thân và cành làm cây suy, khô cành, thậm chí chết cây. Hướng dẫn nhận biết lỗ đục, mạt gỗ và xử lý theo hướng IPM cho vườn xoài thương mại.
 crop_type: xoai

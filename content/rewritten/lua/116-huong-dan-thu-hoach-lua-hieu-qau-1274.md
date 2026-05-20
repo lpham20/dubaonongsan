@@ -1,7 +1,7 @@
 ---
 post_id: 116
 slug: huong-dan-thu-hoach-lua-hieu-qau-1274
-title: Hướng dẫn thu hoạch lúa hiệu qảu
+title: Hướng dẫn thu hoạch lúa hiệu quả
 summary: Thu hoạch lúa đúng lúc giúp giảm hạt xanh, hạn chế rụng hạt, giảm gạo gãy và giữ chất lượng sau xay xát. Thời điểm tốt nhất thường là khi 80-95 phần trăm hạt trên bông đã vàng.
 crop_type: lua
 category: Cẩm nang lúa
