@@ -1,4 +1,91 @@
 # Content rewrite canonical guide redirects.
+@trailingSlash path_regexp trailingSlash ^/(tin-tuc|huong-dan|du-bao-gia|khuyen-nghi-bon-phan|bao-cao-nang-suat|thuat-toan-du-bao)(.*)/$
+redir @trailingSlash /{re.trailingSlash.1}{re.trailingSlash.2} permanent
+
+@oldGuidePrefix path_regexp oldGuidePrefix ^/huong-dan/(?:hainong|hai-nong|hai_nong)-(.+)$
+redir @oldGuidePrefix /huong-dan/{re.oldGuidePrefix.1} permanent
+
+@oldNewsCategory path_regexp oldNewsCategory ^/tin-tuc/category/.+$
+redir @oldNewsCategory /tin-tuc permanent
+
+@legacyHome {
+	path /
+	query section=home
+}
+redir @legacyHome / permanent
+
+@legacyNews {
+	path /
+	query section=news
+}
+redir @legacyNews /tin-tuc permanent
+
+@legacyGuides {
+	path /
+	query section=guides
+}
+redir @legacyGuides /huong-dan permanent
+
+@legacyFertilizer {
+	path /
+	query section=fertilizer
+}
+redir @legacyFertilizer /khuyen-nghi-bon-phan permanent
+
+@legacyAnalyticsDurian {
+	path /
+	query section=analytics crop=sau_rieng
+}
+redir @legacyAnalyticsDurian /du-bao-gia/sau_rieng permanent
+
+@legacyAnalyticsCoffee {
+	path /
+	query section=analytics crop=ca_phe
+}
+redir @legacyAnalyticsCoffee /du-bao-gia/ca_phe permanent
+
+@legacyAnalyticsPepper {
+	path /
+	query section=analytics crop=ho_tieu
+}
+redir @legacyAnalyticsPepper /du-bao-gia/ho_tieu permanent
+
+@legacyAnalyticsRice {
+	path /
+	query section=analytics crop=lua
+}
+redir @legacyAnalyticsRice /du-bao-gia/lua permanent
+
+@legacyAnalyticsDefault {
+	path /
+	query section=analytics
+}
+redir @legacyAnalyticsDefault /du-bao-gia/sau_rieng permanent
+
+@guideCropQuery {
+	path /huong-dan
+	query crop=*
+}
+redir @guideCropQuery /huong-dan permanent
+
+@guidePlantQuery {
+	path /huong-dan
+	query cay=*
+}
+redir @guidePlantQuery /huong-dan permanent
+
+@fertilizerCropQuery {
+	path /khuyen-nghi-bon-phan
+	query crop=*
+}
+redir @fertilizerCropQuery /khuyen-nghi-bon-phan permanent
+
+@fertilizerPlantQuery {
+	path /khuyen-nghi-bon-phan
+	query cay=*
+}
+redir @fertilizerPlantQuery /khuyen-nghi-bon-phan permanent
+
 redir /du-bao-gia/sau-rieng /du-bao-gia/sau_rieng permanent
 redir /du-bao-gia/ca-phe /du-bao-gia/ca_phe permanent
 redir /du-bao-gia/ho-tieu /du-bao-gia/ho_tieu permanent

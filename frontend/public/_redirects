@@ -5,6 +5,10 @@
 /du-bao-gia/ca-phe           /du-bao-gia/ca_phe                 301
 /du-bao-gia/ho-tieu          /du-bao-gia/ho_tieu                301
 /thuat-toan-bon-phan         /khuyen-nghi-bon-phan/logic        301
+/huong-dan/hainong-:slug     /huong-dan/:slug                   301
+/huong-dan/hai-nong-:slug    /huong-dan/:slug                   301
+/huong-dan/hai_nong-:slug    /huong-dan/:slug                   301
+/tin-tuc/category/*          /tin-tuc                           301
 
 /tin-tuc/gia-sau-rieng        /seo/news-views/gia-sau-rieng.html    200
 /tin-tuc/gia-ca-phe           /seo/news-views/gia-ca-phe.html       200

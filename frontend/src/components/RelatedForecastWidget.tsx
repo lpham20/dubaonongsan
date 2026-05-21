@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, BarChart3, BookOpenCheck, Newspaper } from "./icons";
 import type { CropType } from "../lib/api";
-import { categoryPath, forecastPath } from "../lib/seo";
+import { forecastPath } from "../lib/seo";
 
 const topicToCrop: Array<{ match: string[]; crop: CropType; label: string }> = [
   { match: ["cà phê", "ca phe", "robusta", "arabica"], crop: "ca_phe", label: "cà phê" },
@@ -23,12 +23,12 @@ export function RelatedForecastWidget({ text }: { text: string }) {
         Giá {matched.label} hôm nay và dự báo 30 ngày
         <ArrowRight size={15} />
       </Link>
-      <Link to={`/huong-dan?cay=${matched.crop}`}>
+      <Link to="/huong-dan">
         <BookOpenCheck size={16} />
         Hướng dẫn kỹ thuật trồng {matched.label}
         <ArrowRight size={15} />
       </Link>
-      <Link to={categoryPath(matched.label)}>
+      <Link to="/tin-tuc">
         <Newspaper size={16} />
         Tin tức {matched.label} mới nhất
         <ArrowRight size={15} />
