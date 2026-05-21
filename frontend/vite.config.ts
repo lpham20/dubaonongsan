@@ -27,7 +27,7 @@ export default defineConfig({
             urlPattern: /^https:\/\/api\.dubaonongsan\.com\/api\/v1\/content\//,
             handler: "StaleWhileRevalidate",
             options: {
-              cacheName: "content-api-v1",
+              cacheName: "content-api-v2",
               expiration: { maxEntries: 100, maxAgeSeconds: 60 * 30 },
               cacheableResponse: { statuses: [0, 200] }
             }
