@@ -276,6 +276,15 @@ def test_content_portal_returns_news_and_guides(client):
     assert any("sầu riêng" in item["title"].lower() for item in guides.json())
 
 
+def test_sitemap_includes_static_seo_routes(client):
+    response = client.get("/api/v1/sitemap.xml")
+    assert response.status_code == 200
+    body = response.text
+    assert "https://dubaonongsan.com/khuyen-nghi-bon-phan" in body
+    assert "https://dubaonongsan.com/khuyen-nghi-bon-phan/logic" in body
+    assert "https://dubaonongsan.com/bao-cao-nang-suat" in body
+
+
 def test_news_filter_rejects_offtopic_finance_and_electricity():
     from datetime import UTC, datetime
 
