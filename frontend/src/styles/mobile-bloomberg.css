@@ -3697,6 +3697,53 @@
   }
 }
 
+/* Final guide article hierarchy override.
+   This file is imported last, so these rules lock the guide detail hierarchy
+   against older broad h2/h3 rules elsewhere in the stylesheet bundle. */
+.guide-detail-page .guide-detail-body section > h2 {
+  margin: 1.55em 0 0.6em !important;
+  padding-bottom: 8px !important;
+  border-bottom: 1px solid var(--color-border) !important;
+  font-size: clamp(25px, 2.2vw, 31px) !important;
+  font-weight: var(--fw-black, 800) !important;
+  line-height: 1.16 !important;
+}
+
+.guide-detail-page .guide-detail-body section > h3 {
+  margin: 1.15em 0 0.45em !important;
+  padding-bottom: 0 !important;
+  border-bottom: 0 !important;
+  font-size: clamp(19px, 1.35vw, 22px) !important;
+  font-weight: var(--fw-bold, 700) !important;
+  line-height: 1.28 !important;
+}
+
+.guide-detail-page .guide-detail-body section > h4 {
+  margin: 1em 0 0.35em !important;
+  padding-bottom: 0 !important;
+  border-bottom: 0 !important;
+  font-size: clamp(17px, 1.1vw, 19px) !important;
+  font-weight: var(--fw-bold, 700) !important;
+  line-height: 1.32 !important;
+}
+
+@media (max-width: 860px) {
+  .guide-detail-page .guide-detail-body section > h2 {
+    font-size: 22px !important;
+    line-height: 1.2 !important;
+  }
+
+  .guide-detail-page .guide-detail-body section > h3 {
+    font-size: 18px !important;
+    line-height: 1.28 !important;
+  }
+
+  .guide-detail-page .guide-detail-body section > h4 {
+    font-size: 16.5px !important;
+    line-height: 1.32 !important;
+  }
+}
+
 @media (max-width: 390px) {
   .finance-news-page .news-row-card {
     grid-template-columns: 94px minmax(0, 1fr) !important;
