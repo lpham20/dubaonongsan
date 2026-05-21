@@ -83,6 +83,7 @@ export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics }: Props)
           <a href="/du-bao-gia/ca_phe">Dự báo giá cà phê</a>
           <a href="/du-bao-gia/ho_tieu">Dự báo giá hồ tiêu</a>
           <a href="/khuyen-nghi-bon-phan">Khuyến nghị bón phân</a>
+          <a href="/bao-cao-nang-suat">Báo cáo năng suất</a>
         </details>
 
         <details className="footer-subscribe site-footer-section" aria-label="Đăng ký nhận tin" open={!isMobile}>

@@ -16,7 +16,7 @@ const steps = [
   },
   {
     title: "4. Quy đổi sang phân thương mại",
-    text: "Sau khi có lượng hoạt chất N, P2O5 và K2O, hệ thống quy đổi sang Urê 46% N, DAP 18-46 và Kali KCl 60%. Với sầu riêng giai đoạn nuôi trái, kali được ưu tiên chuyển sang Kali sunphat K2SO4."
+    text: "Sau khi có lượng hoạt chất N, P2O5 và K2O, hệ thống quy đổi sang Urê 46% N, DAP 18-46 và nguồn kali phù hợp. Với sầu riêng giai đoạn nuôi trái, nếu chọn KCl hệ thống tự đổi sang K2SO4."
   }
 ];
 
@@ -61,7 +61,7 @@ export function FertilizerMethodology() {
           <span className="method-kicker"><ClipboardCheck size={18} /> Quy đổi phân thương mại</span>
           <h2>Cách đổi hoạt chất sang kg phân/ha</h2>
           <div className="formula-card">
-            DAP = P2O5 / 0,46; Đạm từ DAP = DAP x 0,18; Urê = phần Đạm còn lại / 0,463; Kali KCl = K2O / 0,60
+            DAP = P2O5 / 0,46; Đạm từ DAP = DAP x 0,18; Urê = phần Đạm còn lại / 0,463; Kali KCl = K2O / 0,60 hoặc K2SO4 = K2O / 0,50
           </div>
           <p>
             Ví dụ nếu cần 100 kg P2O5/ha, hệ thống quy đổi khoảng 217 kg DAP/ha. Lượng đạm có sẵn trong DAP sẽ được trừ trước khi tính thêm Urê, để tránh bón thừa đạm.
@@ -72,12 +72,33 @@ export function FertilizerMethodology() {
           <article>
             <ShieldCheck size={20} />
             <h3>Chặn ngưỡng an toàn</h3>
-            <p>Liều N, P2O5 và K2O được kiểm tra lại bằng trần an toàn. Nếu vượt quá ngưỡng, hệ thống hạ về mức bảo thủ và hiển thị cảnh báo.</p>
+            <p>Sầu riêng kinh doanh được chặn ở N tối đa 300 kg/ha/năm, P2O5 tối đa 200 kg/ha/năm và K2O tối đa 250 kg/ha/năm. Hồ tiêu nếu P đất vượt 96 mg P/kg sẽ tạm ngưng P2O5.</p>
           </article>
           <article>
             <Leaf size={20} />
             <h3>Không thay thế tư vấn tại vườn</h3>
             <p>Kết quả là khuyến nghị tham khảo. Với vườn có biểu hiện bệnh rễ, suy cây, pH quá thấp hoặc dữ liệu đất thiếu, người dùng nên đối chiếu thêm phân tích lá và kiểm tra thực địa.</p>
+          </article>
+        </section>
+
+        <section>
+          <span className="method-kicker"><ClipboardCheck size={18} /> Lịch chia đợt chính</span>
+          <h2>Cà phê Robusta sau thu hoạch cần có lân nền</h2>
+          <p>
+            Với cà phê kinh doanh, đợt sau thu hoạch tháng 1-2 dùng 15% N, 50% P2O5 và 15% K2O để phục hồi cây và tạo nền rễ trước mùa mưa. Ba đợt còn lại là đầu mùa mưa, giữa mùa mưa và cuối mùa mưa; tổng các đợt luôn bằng 100% từng chất.
+          </p>
+        </section>
+
+        <section className="method-note-grid">
+          <article>
+            <ShieldCheck size={20} />
+            <h3>Huy hiệu độ tin cậy</h3>
+            <p>Cà phê: Đã hiệu chuẩn. Hồ tiêu: Hiệu chuẩn một phần. Sầu riêng: Tham chiếu quốc tế. Huy hiệu này phản ánh mức chắc của bộ ngưỡng cây trồng, không phải cam kết năng suất.</p>
+          </article>
+          <article>
+            <Leaf size={20} />
+            <h3>Cơ sở sầu riêng</h3>
+            <p>Sầu riêng dùng khung 1,0-1,8 kg N/cây/năm cho vườn kinh doanh, tương đương khoảng 150-270 kg N/ha tại mật độ 150 cây/ha, tham chiếu từ Poovarodom & Tawinteung, DRIS 2024 và tài liệu Thai DOA/ĐBSCL.</p>
           </article>
         </section>
       </div>

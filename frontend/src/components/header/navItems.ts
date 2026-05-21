@@ -1,4 +1,4 @@
-import { BookOpenCheck, Calculator, Coffee, Leaf, Newspaper, Sprout } from "../icons";
+import { BookOpenCheck, Calculator, ClipboardCheck, Coffee, Leaf, Newspaper, Sprout } from "../icons";
 import type { LucideIcon } from "../icons";
 import type { MainSection, NewsView } from "./types";
 
@@ -10,10 +10,11 @@ export const newsMenuItems: { value: NewsView; label: string; Icon: LucideIcon }
 ];
 
 export const fertilizerMenuItems: {
-  value: Extract<MainSection, "fertilizer" | "fertilizerMethodology">;
+  value: Extract<MainSection, "fertilizer" | "fertilizerMethodology" | "yieldFeedback">;
   label: string;
   Icon: LucideIcon;
 }[] = [
   { value: "fertilizer", label: "Khuyến nghị bón phân", Icon: Calculator },
-  { value: "fertilizerMethodology", label: "Giải thích logic cách tính", Icon: BookOpenCheck }
+  { value: "fertilizerMethodology", label: "Giải thích logic cách tính", Icon: BookOpenCheck },
+  { value: "yieldFeedback", label: "Báo cáo năng suất", Icon: ClipboardCheck }
 ];

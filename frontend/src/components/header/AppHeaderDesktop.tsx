@@ -104,7 +104,7 @@ export function AppHeaderDesktop({
                 key={item.value}
                 className={[
                   "nav-dropdown",
-                  section === "fertilizer" || section === "fertilizerMethodology" ? "active" : "",
+                  section === "fertilizer" || section === "fertilizerMethodology" || section === "yieldFeedback" ? "active" : "",
                   fertilizerMenuOpen ? "open" : ""
                 ].filter(Boolean).join(" ")}
               >

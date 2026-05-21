@@ -3862,10 +3862,11 @@
   .fertilizer-page > .fertilizer-advisor-hero,
   .fertilizer-page > .fertilizer-method-hero,
   .fertilizer-page > .fertilizer-layout,
+  .fertilizer-page > .yield-feedback-layout,
   .fertilizer-page > .fertilizer-methodology-article {
     box-sizing: border-box !important;
-    width: min(100%, calc(100vw - 32px)) !important;
-    max-width: calc(100vw - 32px) !important;
+    width: min(100%, calc(100vw - 48px)) !important;
+    max-width: calc(100vw - 48px) !important;
   }
 
   .fertilizer-page .fertilizer-advisor-hero {
@@ -3914,6 +3915,9 @@
   .fertilizer-page .fertilizer-summary,
   .fertilizer-page .fertilizer-panel,
   .fertilizer-page .fertilizer-empty {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
     border-radius: var(--radius-md) !important;
   }
 

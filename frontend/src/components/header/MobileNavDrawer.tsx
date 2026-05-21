@@ -83,7 +83,7 @@ export function MobileNavDrawer({
     if (!drawerOpen) return;
     if (section === "news") {
       setMobileGroup("news");
-    } else if (section === "fertilizer" || section === "fertilizerMethodology") {
+    } else if (section === "fertilizer" || section === "fertilizerMethodology" || section === "yieldFeedback") {
       setMobileGroup("fertilizer");
     } else if (section === "analytics" || section === "methodology") {
       setMobileGroup("price");
@@ -167,7 +167,7 @@ export function MobileNavDrawer({
           <MobileAccordion
             title="Khuyến nghị bón phân"
             open={mobileGroup === "fertilizer"}
-            active={section === "fertilizer" || section === "fertilizerMethodology"}
+            active={section === "fertilizer" || section === "fertilizerMethodology" || section === "yieldFeedback"}
             onToggle={() => setMobileGroup(mobileGroup === "fertilizer" ? null : "fertilizer")}
           >
             {fertilizerMenuItems.map((item) => (

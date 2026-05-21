@@ -79,6 +79,14 @@ def run_retrain_job(
     return PlatformJobService(db).run_retrain()
 
 
+@router.post("/platform/jobs/yield-feedback-reminder")
+def run_yield_feedback_reminder_job(
+    _: AppUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> dict:
+    return PlatformJobService(db).run_yield_feedback_reminder()
+
+
 @router.post(
     "/sensors/maturity-telemetry",
     response_model=SensorTelemetryOut,

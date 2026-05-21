@@ -246,11 +246,13 @@ export type UserPriceReport = {
 };
 
 export type FertilizerCrop = "robusta_coffee" | "black_pepper" | "durian";
-export type FertilizerStage = "mature_kinh_doanh" | "establishment_y1" | "establishment_y2" | "establishment_y3" | "establishment_y4" | "establishment_y5" | "fruit_fill";
+export type FertilizerStage = "mature_kinh_doanh" | "establishment_y1" | "establishment_y2" | "establishment_y3" | "establishment_y4" | "establishment_y5" | "fruit_set" | "fruit_fill";
 export type SoilTexture = "basaltic_red" | "grey_granite" | "gneiss" | "acrisol" | "alluvial";
+export type FertilizerKSource = "kcl" | "k2so4" | "kno3";
 
 export type FertilizerRequest = {
   crop: FertilizerCrop;
+  variety?: string | null;
   growth_stage: FertilizerStage;
   yield_target_t_ha: number | null;
   tree_density_per_ha: number | null;
@@ -261,6 +263,7 @@ export type FertilizerRequest = {
     total_n_pct: number | null;
     available_p_method: "bray_ii" | "mehlich_3";
     available_p_mg_per_100g: number | null;
+    available_p_mg_per_kg?: number | null;
     exchangeable_k_method: "nh4oac";
     exchangeable_k2o_mg_per_100g: number | null;
     cec_cmolc_per_kg: number | null;
@@ -270,7 +273,7 @@ export type FertilizerRequest = {
   location?: { province?: string | null; district?: string | null; elevation_m?: number | null };
   climate?: { annual_rainfall_mm?: number | null; irrigation_available?: boolean | null } | null;
   field?: { slope_pct?: number | null; years_under_current_crop?: number | null } | null;
-  preferences?: { language?: "vi" | "en"; include_product_mix?: boolean; preferred_brand?: string | null; organic_available_t_ha?: number | null };
+  preferences?: { language?: "vi" | "en"; include_product_mix?: boolean; preferred_brand?: string | null; preferred_k_source?: FertilizerKSource | null; organic_available_t_ha?: number | null };
 };
 
 export type FertilizerWarning = {
@@ -282,10 +285,13 @@ export type FertilizerWarning = {
 
 export type FertilizerRecommendation = {
   request_id: string;
+  session_id?: string;
+  session_code?: string;
   timestamp: string;
   engine_version: string;
   knowledge_base_version: string;
   crop: FertilizerCrop;
+  variety?: string | null;
   crop_name_vi: string;
   calibration_status: string;
   soil_categorization: Record<string, unknown>;
@@ -312,6 +318,9 @@ export type FertilizerRecommendation = {
       split_index: number;
       name_vi: string;
       calendar_window: string;
+      n_pct: number;
+      p2o5_pct: number;
+      k2o_pct: number;
       n_kg_ha: number;
       p2o5_kg_ha: number;
       k2o_kg_ha: number;
@@ -324,9 +333,36 @@ export type FertilizerRecommendation = {
       products: { sku: string; name_vi: string; kg_ha_yr: number; bags_50kg_ha: number }[];
     }[];
   };
-  confidence: { overall: string; data_quality_score: number; calibration_basis: string[]; limitations: string[]; missing_inputs: string[] };
+  confidence: {
+    overall: string;
+    calibration_tier?: string;
+    score?: number;
+    badge_vi?: string;
+    badge_icon?: string;
+    explain_vi?: string;
+    data_quality_score: number;
+    calibration_basis: string[];
+    limitations: string[];
+    missing_inputs: string[];
+  };
   warnings: FertilizerWarning[];
   rationale: { calculation_trace: string[]; sources_cited: { id: string; title: string }[] };
+};
+
+export type YieldFeedbackPayload = {
+  actual_yield_t_ha: number;
+  harvest_date?: string | null;
+  fertilizer_followed_pct?: number | null;
+  rating?: number | null;
+  note?: string | null;
+  contact_phone?: string | null;
+};
+
+export type YieldFeedbackResponse = {
+  session_id: string;
+  session_code: string;
+  feedback_id: number;
+  message: string;
 };
 
 const DEFAULT_API_BASE_URL = import.meta.env.PROD ? "https://api.dubaonongsan.com" : "";
@@ -642,6 +678,13 @@ export function recommendFertilizer(payload: FertilizerRequest, token: string, s
   return authJson<FertilizerRecommendation>("/api/v1/fertilizer/recommend", token, {
     method: "POST",
     signal,
+    body: JSON.stringify(payload)
+  });
+}
+
+export function submitYieldFeedback(sessionCode: string, payload: YieldFeedbackPayload) {
+  return requestJson<YieldFeedbackResponse>(`/api/v1/sessions/${encodeURIComponent(sessionCode)}/feedback`, {
+    method: "POST",
     body: JSON.stringify(payload)
   });
 }

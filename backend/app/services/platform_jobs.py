@@ -21,7 +21,7 @@ from app.core.config import get_settings
 from app.db import SessionLocal
 from app.ingestion.service import PriceIngestionService
 from app.ml_engine.evaluator import ForecastEvaluator
-from app.models import DailyMarketPrice, DurianVariety, ModelTrainingRun, PlatformJobRun, ProductionRegion
+from app.models import DailyMarketPrice, DurianVariety, ModelTrainingRun, PlatformJobRun, ProductionRegion, RecommendationSession, YieldFeedback
 from app.services.content_portal import ContentPortalService
 from app.services.crop_catalog import CROP_TYPES, ensure_crop_catalog
 from app.services.market_intelligence import MarketIntelligenceService
@@ -139,6 +139,32 @@ class PlatformJobService:
                 self.db.commit()
                 summary = {"models": results}
                 invalidate_cache()
+                self._finish_job(job, "thành công", summary)
+                return summary
+            except Exception as exc:
+                self.db.rollback()
+                job = self.db.get(PlatformJobRun, job.job_id) or job
+                self._finish_job(job, "lỗi", None, str(exc))
+                raise
+
+    def run_yield_feedback_reminder(self) -> dict:
+        with job_lock("yield_feedback_reminder"):
+            job = self._start_job("yield_feedback_reminder")
+            try:
+                cutoff = datetime.now(UTC) - timedelta(days=21)
+                pending = self.db.scalars(
+                    select(RecommendationSession)
+                    .outerjoin(YieldFeedback, YieldFeedback.session_id == RecommendationSession.session_id)
+                    .where(YieldFeedback.feedback_id.is_(None))
+                    .where(RecommendationSession.created_at <= cutoff)
+                    .order_by(RecommendationSession.created_at.desc())
+                    .limit(200)
+                ).all()
+                summary = {
+                    "pending_sessions": len(pending),
+                    "sample_session_codes": [item.session_id[:8].upper() for item in pending[:20]],
+                    "note": "Email/SMS chưa cấu hình; job giữ danh sách phiên cần nhắc để Tier 2 có dữ liệu năng suất.",
+                }
                 self._finish_job(job, "thành công", summary)
                 return summary
             except Exception as exc:
@@ -316,6 +342,16 @@ class JobScheduler:
             next_run_time=datetime.now(SCHEDULER_TZ) + timedelta(minutes=settings.retrain_interval_minutes),
             replace_existing=True,
         )
+        cls._scheduler.add_job(
+            cls._run_with_session,
+            "cron",
+            day=1,
+            hour=7,
+            minute=30,
+            args=["yield_feedback_reminder"],
+            id="yield_feedback_reminder_monthly",
+            replace_existing=True,
+        )
         cls._scheduler.start()
 
     @classmethod
@@ -339,6 +375,8 @@ class JobScheduler:
                     service.run_retrain()
                 elif job == "weather":
                     service.run_weather()
+                elif job == "yield_feedback_reminder":
+                    service.run_yield_feedback_reminder()
             except Exception:
                 logger.exception("Scheduled job %s failed", job)
 

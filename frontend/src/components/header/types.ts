@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import type { LucideIcon } from "../icons";
 import type { CropType } from "../../lib/api";
 
-export type MainSection = "home" | "analytics" | "news" | "guides" | "fertilizer" | "fertilizerMethodology" | "methodology";
+export type MainSection = "home" | "analytics" | "news" | "guides" | "fertilizer" | "fertilizerMethodology" | "yieldFeedback" | "methodology";
 export type AuthMode = "login" | "register";
 export type NewsView = "latest" | "sau_rieng" | "ca_phe" | "ho_tieu";
 

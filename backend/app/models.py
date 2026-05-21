@@ -1,5 +1,7 @@
-from datetime import datetime
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint
+from datetime import date, datetime
+from typing import Any
+
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, JSON, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -151,6 +153,77 @@ class WatchlistItem(Base):
     user: Mapped[AppUser] = relationship(back_populates="watchlist")
     region: Mapped[ProductionRegion] = relationship()
     variety: Mapped[DurianVariety] = relationship()
+
+
+class RecommendationSession(Base):
+    __tablename__ = "recommendation_sessions"
+
+    session_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("app_users.user_id", ondelete="SET NULL"), index=True)
+    crop: Mapped[str] = mapped_column(String(40), index=True)
+    variety: Mapped[str | None] = mapped_column(String(80), index=True)
+    growth_stage: Mapped[str | None] = mapped_column(String(50), index=True)
+    province: Mapped[str | None] = mapped_column(String(100), index=True)
+    soil_texture: Mapped[str | None] = mapped_column(String(50))
+    yield_target_t_ha: Mapped[float | None] = mapped_column(Numeric(8, 2))
+    tree_density_per_ha: Mapped[int | None] = mapped_column(Integer)
+    annual_n_kg_ha: Mapped[float | None] = mapped_column(Numeric(8, 2))
+    annual_p2o5_kg_ha: Mapped[float | None] = mapped_column(Numeric(8, 2))
+    annual_k2o_kg_ha: Mapped[float | None] = mapped_column(Numeric(8, 2))
+    confidence_tier: Mapped[str | None] = mapped_column(String(20), index=True)
+    confidence_score: Mapped[float | None] = mapped_column(Numeric(4, 2))
+    engine_version: Mapped[str | None] = mapped_column(String(40))
+    knowledge_base_version: Mapped[str | None] = mapped_column(String(100))
+    request_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    response_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    ip_address: Mapped[str | None] = mapped_column(String(64))
+    user_agent: Mapped[str | None] = mapped_column(String(500))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    created_date: Mapped[date | None] = mapped_column(Date, index=True)
+
+    feedback: Mapped["YieldFeedback | None"] = relationship(back_populates="session", cascade="all, delete-orphan")
+    leaf_analyses: Mapped[list["LeafAnalysis"]] = relationship(back_populates="session", cascade="all, delete-orphan")
+
+
+class YieldFeedback(Base):
+    __tablename__ = "yield_feedback"
+
+    feedback_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    session_id: Mapped[str] = mapped_column(ForeignKey("recommendation_sessions.session_id", ondelete="CASCADE"), unique=True, index=True)
+    crop: Mapped[str] = mapped_column(String(40), index=True)
+    variety: Mapped[str | None] = mapped_column(String(80), index=True)
+    actual_yield_t_ha: Mapped[float] = mapped_column(Numeric(8, 2))
+    harvest_date: Mapped[date | None] = mapped_column(Date)
+    yield_unit: Mapped[str] = mapped_column(String(20), default="t_ha")
+    fertilizer_followed_pct: Mapped[float | None] = mapped_column(Numeric(5, 2))
+    rating: Mapped[int | None] = mapped_column(Integer)
+    note: Mapped[str | None] = mapped_column(Text)
+    contact_phone: Mapped[str | None] = mapped_column(String(40))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+
+    session: Mapped[RecommendationSession] = relationship(back_populates="feedback")
+
+
+class LeafAnalysis(Base):
+    __tablename__ = "leaf_analysis"
+
+    analysis_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    session_id: Mapped[str | None] = mapped_column(ForeignKey("recommendation_sessions.session_id", ondelete="SET NULL"), index=True)
+    crop: Mapped[str] = mapped_column(String(40), index=True)
+    variety: Mapped[str | None] = mapped_column(String(80), index=True)
+    sample_date: Mapped[date | None] = mapped_column(Date, index=True)
+    n_pct: Mapped[float | None] = mapped_column(Numeric(6, 3))
+    p_pct: Mapped[float | None] = mapped_column(Numeric(6, 3))
+    k_pct: Mapped[float | None] = mapped_column(Numeric(6, 3))
+    ca_pct: Mapped[float | None] = mapped_column(Numeric(6, 3))
+    mg_pct: Mapped[float | None] = mapped_column(Numeric(6, 3))
+    b_mg_kg: Mapped[float | None] = mapped_column(Numeric(8, 2))
+    zn_mg_kg: Mapped[float | None] = mapped_column(Numeric(8, 2))
+    lab_name: Mapped[str | None] = mapped_column(String(160))
+    raw_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+
+    session: Mapped[RecommendationSession | None] = relationship(back_populates="leaf_analyses")
 
 
 class PlatformJobRun(Base):

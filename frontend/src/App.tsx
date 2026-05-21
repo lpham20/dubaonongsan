@@ -96,6 +96,9 @@ const FertilizerAdvisor = lazy(() =>
 const FertilizerMethodology = lazy(() =>
   import("./components/FertilizerMethodology").then(({ FertilizerMethodology }) => ({ default: FertilizerMethodology }))
 );
+const YieldFeedbackPage = lazy(() =>
+  import("./components/YieldFeedbackPage").then(({ YieldFeedbackPage }) => ({ default: YieldFeedbackPage }))
+);
 const NotFoundPage = lazy(() => import("./components/NotFoundPage").then(({ NotFoundPage }) => ({ default: NotFoundPage })));
 const ProductionPanel = lazy(() =>
   import("./components/ProductionPanel").then(({ ProductionPanel }) => ({ default: ProductionPanel }))
@@ -116,7 +119,7 @@ const cropLabels: Record<CropType, string> = {
   lua: "lúa"
 };
 
-type MainSection = "home" | "analytics" | "news" | "guides" | "fertilizer" | "fertilizerMethodology" | "methodology";
+type MainSection = "home" | "analytics" | "news" | "guides" | "fertilizer" | "fertilizerMethodology" | "yieldFeedback" | "methodology";
 type AnalyticsTab = "chart" | "analysis" | "technical" | "data";
 type NewsView = "latest" | "sau_rieng" | "ca_phe" | "ho_tieu";
 type PriceNewsView = Exclude<NewsView, "latest">;
@@ -128,7 +131,7 @@ type InitialRoute = {
   guideSlug: string;
   notFound: boolean;
 };
-const validSections: MainSection[] = ["home", "analytics", "news", "guides", "fertilizer", "fertilizerMethodology", "methodology"];
+const validSections: MainSection[] = ["home", "analytics", "news", "guides", "fertilizer", "fertilizerMethodology", "yieldFeedback", "methodology"];
 const validCrops: CropType[] = ["sau_rieng", "ca_phe", "ho_tieu", "lua"];
 const validNewsViews: NewsView[] = ["latest", "sau_rieng", "ca_phe", "ho_tieu"];
 const gatedAnalyticsTabs: AnalyticsTab[] = ["analysis", "technical", "data"];
@@ -195,6 +198,7 @@ function getInitialRoute(pathnameInput = window.location.pathname, search = wind
   }
   if (parts[0] === "khuyen-nghi-bon-phan" && parts[1] === "logic") return { ...fallback, section: "fertilizerMethodology" };
   if (parts[0] === "khuyen-nghi-bon-phan") return { ...fallback, section: "fertilizer" };
+  if (parts[0] === "bao-cao-nang-suat") return { ...fallback, section: "yieldFeedback" };
   if (parts[0] === "thuat-toan-du-bao") return { ...fallback, section: "methodology" };
   return { ...fallback, notFound: true };
 }
@@ -225,6 +229,8 @@ function routeToUrl(route: InitialRoute) {
     path = "/khuyen-nghi-bon-phan";
   } else if (route.section === "fertilizerMethodology") {
     path = "/khuyen-nghi-bon-phan/logic";
+  } else if (route.section === "yieldFeedback") {
+    path = "/bao-cao-nang-suat";
   } else if (route.section === "methodology") {
     path = "/thuat-toan-du-bao";
   }
@@ -444,7 +450,9 @@ function RoutedApp() {
     const route = getInitialRoute(location.pathname, location.search);
     const canonicalUrl = routeToUrl(route);
     const canonicalWithSearch =
-      route.section === "news" && !route.newsSlug && location.search ? `${canonicalUrl}${location.search}` : canonicalUrl;
+      (route.section === "news" && !route.newsSlug && location.search) || (route.section === "yieldFeedback" && location.search)
+        ? `${canonicalUrl}${location.search}`
+        : canonicalUrl;
     const currentUrl = `${location.pathname}${location.search}`;
     if (!route.notFound && canonicalWithSearch !== currentUrl) {
       navigate(canonicalWithSearch, { replace: true });
@@ -1051,6 +1059,7 @@ function RoutedApp() {
         />
       ) : null}
       {!notFound && section === "fertilizerMethodology" ? <FertilizerMethodology /> : null}
+      {!notFound && section === "yieldFeedback" ? <YieldFeedbackPage /> : null}
       {!notFound && section === "methodology" ? <ForecastMethodology /> : null}
       </Suspense>
       <SiteFooter

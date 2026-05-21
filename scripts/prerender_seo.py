@@ -695,7 +695,7 @@ def _build_fertilizer_index_body(heading: str, desc: str) -> str:
 <ul>
 <li><strong>Cà phê vối Robusta</strong>: phù hợp đất bazan đỏ Tây Nguyên, granite xám, gneiss. Tham chiếu WASI 2016, IPI 2015.</li>
 <li><strong>Hồ tiêu</strong>: bazan đỏ, acrisol. Tham chiếu IPI 2018.</li>
-<li><strong>Sầu riêng</strong>: bazan đỏ, đất phù sa. Tham chiếu WASI 2025.</li>
+<li><strong>Sầu riêng</strong>: bazan đỏ, đất phù sa. Tham chiếu Poovarodom & Tawinteung, DRIS 2024 và tài liệu Thai DOA/ĐBSCL.</li>
 </ul>
 
 <h2>Dữ liệu đầu vào</h2>
@@ -719,8 +719,33 @@ def _build_fertilizer_index_body(heading: str, desc: str) -> str:
 <p>Khuyến nghị bón phân dựa trên balance NPK: nhu cầu cây - cung từ đất - hiệu suất sử dụng. Hệ số điều chỉnh tính theo texture đất, OC%, pH, năng suất mục tiêu, lượng mưa và độ dốc. Chi tiết thuật toán tại
 <a href="{SITE_BASE}/khuyen-nghi-bon-phan/logic">trang giải thích thuật toán bón phân</a>.</p>
 
+<h2>Dữ liệu hiệu chỉnh sau vụ</h2>
+<p>Sau khi tính khuyến nghị, hệ thống tạo mã phiên 8 ký tự để người trồng gửi báo cáo năng suất tại
+<a href="{SITE_BASE}/bao-cao-nang-suat">trang báo cáo năng suất</a>. Dữ liệu này dùng cho bước chuẩn bị Tier 2.</p>
+
 <h2>Lưu ý quan trọng</h2>
 <p>Công cụ chỉ mang tính tham khảo. Quyết định cuối cùng cần dựa trên kết quả phân tích đất gần nhất tại vườn, kinh nghiệm thực tế, và tư vấn của kỹ sư nông nghiệp địa phương. Không thay thế cho khuyến cáo của Viện Khoa học Nông nghiệp.</p>
+</main>"""
+
+
+def _build_yield_feedback_body(heading: str, desc: str) -> str:
+    """Build static body for /bao-cao-nang-suat."""
+    return f"""<main>
+<h1>{html.escape(heading)}</h1>
+<p>{html.escape(desc)}</p>
+
+<h2>Dữ liệu cần gửi</h2>
+<ul>
+<li>Mã khuyến nghị 8 ký tự được hiển thị sau khi tính khuyến nghị bón phân.</li>
+<li>Năng suất thực tế sau thu hoạch theo tấn/ha.</li>
+<li>Ngày thu hoạch, mức làm theo khuyến nghị, đánh giá và ghi chú hiện trường nếu có.</li>
+</ul>
+
+<h2>Mục đích sử dụng</h2>
+<p>Dữ liệu báo cáo năng suất được nối với phiên khuyến nghị trước đó để tạo bộ dữ liệu huấn luyện Tier 2. Hệ thống dùng dữ liệu này để so sánh lượng N-P-K đã khuyến nghị với kết quả thực tế theo cây trồng, giống, vùng và điều kiện đất.</p>
+
+<h2>Lưu ý riêng tư</h2>
+<p>Thông tin liên hệ là tuỳ chọn, chỉ dùng khi cần hỏi thêm bối cảnh vườn. Người dùng có thể gửi lại cùng một mã phiên để cập nhật báo cáo mới nhất.</p>
 </main>"""
 
 
@@ -874,7 +899,7 @@ def _build_fertilizer_methodology_body(title: str, desc: str) -> str:
 <ul>
 <li>Cà phê vối: WASI 2016, IPI 2015 — dose 220-330 kg N/ha/năm tuỳ texture.</li>
 <li>Hồ tiêu: IPI 2018 — dose 200-300 kg N/ha/năm.</li>
-<li>Sầu riêng: WASI 2025 — dose 250-400 kg N/ha/năm cho cây kinh doanh.</li>
+<li>Sầu riêng: Poovarodom & Tawinteung, DRIS 2024, Thai DOA/ĐBSCL — 1,0-1,8 kg N/cây/năm, tương đương khoảng 150-270 kg N/ha tại mật độ 150 cây/ha.</li>
 </ul>
 
 <h2>Phân tích đất cần thiết</h2>
@@ -891,10 +916,10 @@ def _build_fertilizer_methodology_body(title: str, desc: str) -> str:
 <h2>Chia lịch bón</h2>
 <p>Lượng tổng được chia thành 3-5 đợt bón tuỳ giai đoạn:</p>
 <ol>
-<li>Đầu mùa mưa (tháng 4-5): 30-40% tổng N + 50% P + 30% K.</li>
-<li>Giữa mùa mưa (tháng 7-8): 30-35% N + 30% K.</li>
-<li>Cuối mùa mưa / chuẩn bị ra hoa (tháng 9-10): 25-30% N + 50% P + 30% K.</li>
-<li>Nuôi trái / dưỡng quả (tuỳ cây): 10-15% N + 10% K + có thể bổ sung canxi, boron.</li>
+<li>Cà phê sau thu hoạch (tháng 1-2): 15% N + 50% P2O5 + 15% K2O.</li>
+<li>Cà phê đầu mùa mưa (tháng 5-6): 30% N + 25% P2O5 + 25% K2O.</li>
+<li>Cà phê giữa mùa mưa (tháng 7-8): 30% N + 15% P2O5 + 30% K2O.</li>
+<li>Cà phê cuối mùa mưa (tháng 9-10): 25% N + 10% P2O5 + 30% K2O.</li>
 </ol>
 
 <h2>Quy đổi sang phân thương mại</h2>
@@ -904,8 +929,8 @@ def _build_fertilizer_methodology_body(title: str, desc: str) -> str:
 <li>SA (sulfate ammonium) 21% N + 24% S</li>
 <li>DAP 18-46-0</li>
 <li>NPK 16-16-8, 20-20-15, 15-15-15</li>
-<li>Kali clorua (MOP) 60% K2O</li>
-<li>Sulfate kali (SOP) 50% K2O cho cây nhạy với Cl</li>
+<li>Kali clorua (MOP) 60% K2O cho giai đoạn phù hợp.</li>
+<li>Sulfate kali (SOP) 50% K2O cho sầu riêng giai đoạn nuôi trái hoặc cây nhạy với Cl.</li>
 </ul>
 <p>Kết quả hiển thị số bao 50kg/ha kèm thương hiệu nếu user chỉ định.</p>
 
@@ -915,6 +940,8 @@ def _build_fertilizer_methodology_body(title: str, desc: str) -> str:
 <li>Nếu OC &lt; 1%: cần bón hữu cơ (phân chuồng hoai, vermicompost) 5-10 tấn/ha.</li>
 <li>Đất dốc &gt; 15%: chia nhiều lần bón nhỏ để giảm rửa trôi.</li>
 <li>Tránh bón phân vào thời điểm mưa to dự báo trong 24h.</li>
+<li>Hồ tiêu nếu P đất vượt 96 mg P/kg: tạm ngưng P2O5.</li>
+<li>Sầu riêng giai đoạn nuôi trái: không dùng KCl; hệ thống tự đổi sang K2SO4 nếu người dùng chọn KCl.</li>
 </ul>
 
 <h2>Cách đọc kết quả</h2>
@@ -963,6 +990,13 @@ def render_static_pages() -> list[tuple[str, str | None]]:
             "Công cụ tham khảo nhu cầu N-P-K, chia lịch bón phân và cảnh báo an toàn theo cây trồng, tuổi cây và năng suất mục tiêu.",
             "Khuyến nghị bón phân",
         ),
+        (
+            "yield-feedback.html",
+            f"{SITE_BASE}/bao-cao-nang-suat",
+            "Báo cáo năng suất sau khuyến nghị bón phân",
+            "Gửi năng suất thực tế sau khi dùng khuyến nghị bón phân để chuẩn bị dữ liệu hiệu chỉnh Tier 2.",
+            "Báo cáo năng suất",
+        ),
     ]
     for filename, canonical, title, desc, heading in landing_pages:
         schema: dict | list[dict] = {
@@ -1004,6 +1038,8 @@ def render_static_pages() -> list[tuple[str, str | None]]:
             body = _build_guides_index_body(heading, desc)
         elif filename == "fertilizer.html":
             body = _build_fertilizer_index_body(heading, desc)
+        elif filename == "yield-feedback.html":
+            body = _build_yield_feedback_body(heading, desc)
         else:
             body = f"<main><h1>{html.escape(heading)}</h1><p>{html.escape(desc)}</p></main>"
         _write(OUTPUT / filename, _page(title, desc, canonical, body, schema, og_type="website"))
@@ -1157,6 +1193,7 @@ def write_sitemap(urls: list[tuple[str, str | None]]) -> None:
         (f"{SITE_BASE}/huong-dan", today),
         (f"{SITE_BASE}/khuyen-nghi-bon-phan", today),
         (f"{SITE_BASE}/khuyen-nghi-bon-phan/logic", today),
+        (f"{SITE_BASE}/bao-cao-nang-suat", today),
     ]
     all_urls = []
     seen: set[str] = set()

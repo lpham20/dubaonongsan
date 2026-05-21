@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { AlertTriangle, Calculator, ClipboardCheck, Gauge, Leaf, PackageCheck, Ruler, ShieldAlert, Sprout } from "./icons";
 import { SeoHead } from "./SeoHead";
-import { recommendFertilizer, type FertilizerCrop, type FertilizerRecommendation, type FertilizerRequest, type FertilizerStage, type SoilTexture } from "../lib/api";
+import { recommendFertilizer, type FertilizerCrop, type FertilizerKSource, type FertilizerRecommendation, type FertilizerRequest, type FertilizerStage, type SoilTexture } from "../lib/api";
 
 const cropOptions: { value: FertilizerCrop; label: string; defaultDensity: number; defaultYield: number; texture: SoilTexture }[] = [
   { value: "robusta_coffee", label: "Cà phê Robusta", defaultDensity: 1100, defaultYield: 3.5, texture: "basaltic_red" },
@@ -16,6 +16,7 @@ const stageOptions: { value: FertilizerStage; label: string }[] = [
   { value: "establishment_y3", label: "Kiến thiết năm 3" },
   { value: "establishment_y4", label: "Kiến thiết năm 4" },
   { value: "establishment_y5", label: "Kiến thiết năm 5" },
+  { value: "fruit_set", label: "Sầu riêng đậu trái" },
   { value: "fruit_fill", label: "Sầu riêng nuôi trái" }
 ];
 
@@ -27,9 +28,19 @@ const textureOptions: { value: SoilTexture; label: string }[] = [
   { value: "alluvial", label: "Đất phù sa" }
 ];
 
+const durianVarieties = ["Ri6", "Monthong", "TR4", "TR9", "Musang King", "Khác"];
+
+const kSourceOptions: { value: FertilizerKSource; label: string }[] = [
+  { value: "kcl", label: "KCl 60%" },
+  { value: "k2so4", label: "K2SO4 50%" },
+  { value: "kno3", label: "KNO3" }
+];
+
 type FormState = {
   crop: FertilizerCrop;
+  variety: string;
   growth_stage: FertilizerStage;
+  preferred_k_source: FertilizerKSource;
   yield_target_t_ha: string;
   tree_density_per_ha: string;
   texture: SoilTexture;
@@ -53,7 +64,9 @@ type FertilizerAdvisorProps = {
 
 const initialForm: FormState = {
   crop: "robusta_coffee",
+  variety: "",
   growth_stage: "mature_kinh_doanh",
+  preferred_k_source: "kcl",
   yield_target_t_ha: "3.5",
   tree_density_per_ha: "1100",
   texture: "basaltic_red",
@@ -79,6 +92,7 @@ export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdviso
   const total = result?.recommendation.annual_total;
   const confidenceLabel = useMemo(() => {
     if (!result) return "Chưa tính";
+    if (result.confidence.badge_vi) return result.confidence.badge_vi;
     if (result.confidence.overall === "high") return "Cao";
     if (result.confidence.overall === "medium") return "Trung bình";
     return "Thấp";
@@ -93,9 +107,11 @@ export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdviso
     setForm((current) => ({
       ...current,
       crop,
+      variety: crop === "durian" ? current.variety || "Ri6" : "",
       texture: option.texture,
       yield_target_t_ha: String(option.defaultYield),
       tree_density_per_ha: String(option.defaultDensity),
+      preferred_k_source: crop === "durian" ? current.preferred_k_source : "kcl",
       growth_stage: crop === "durian" && current.growth_stage === "establishment_y5" ? "establishment_y5" : "mature_kinh_doanh"
     }));
   }
@@ -111,6 +127,7 @@ export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdviso
     try {
       const payload: FertilizerRequest = {
         crop: form.crop,
+        variety: form.crop === "durian" ? form.variety || "Ri6" : null,
         growth_stage: form.growth_stage,
         yield_target_t_ha: numberOrNull(form.yield_target_t_ha),
         tree_density_per_ha: numberOrNull(form.tree_density_per_ha),
@@ -130,7 +147,12 @@ export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdviso
         location: { province: form.province || null },
         climate: { annual_rainfall_mm: numberOrNull(form.annual_rainfall_mm), irrigation_available: form.irrigation_available },
         field: { slope_pct: numberOrNull(form.slope_pct), years_under_current_crop: numberOrNull(form.years_under_current_crop) },
-        preferences: { language: "vi", include_product_mix: true, preferred_brand: form.growth_stage === "fruit_fill" ? "phu_my_kcl_60" : null }
+        preferences: {
+          language: "vi",
+          include_product_mix: true,
+          preferred_brand: kSourceToBrand(form.preferred_k_source),
+          preferred_k_source: form.preferred_k_source
+        }
       };
       setResult(await recommendFertilizer(payload, authToken));
     } catch (err) {
@@ -184,6 +206,22 @@ export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdviso
                 {stageOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
               </select>
             </label>
+            {form.crop === "durian" ? (
+              <div className="fertilizer-two">
+                <label>
+                  Giống sầu riêng
+                  <select value={form.variety || "Ri6"} onChange={(event) => update("variety", event.target.value)}>
+                    {durianVarieties.map((item) => <option key={item} value={item}>{item}</option>)}
+                  </select>
+                </label>
+                <label>
+                  Nguồn kali dự kiến
+                  <select value={form.preferred_k_source} onChange={(event) => update("preferred_k_source", event.target.value as FertilizerKSource)}>
+                    {kSourceOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                  </select>
+                </label>
+              </div>
+            ) : null}
             <div className="fertilizer-two">
               <label>
                 Năng suất mục tiêu (tấn/ha)
@@ -245,9 +283,12 @@ export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdviso
               <h2>{total ? `${total.n_kg_ha} - ${total.p2o5_kg_ha} - ${total.k2o_kg_ha}` : "Chưa có kết quả"}</h2>
               <p>kg hoạt chất/ha/năm: Đạm N - Lân P2O5 - Kali K2O</p>
             </div>
-            <div className={`fertilizer-confidence confidence-${result?.confidence.overall ?? "none"}`}>
+            <div
+              className={`fertilizer-confidence confidence-${result?.confidence.calibration_tier ?? result?.confidence.overall ?? "none"}`}
+              title={result?.confidence.explain_vi ?? undefined}
+            >
               <ShieldAlert size={18} />
-              Độ tin cậy: {confidenceLabel}
+              {result ? confidenceLabel : `Độ tin cậy: ${confidenceLabel}`}
             </div>
             {!result ? (
               <div className="fertilizer-preview-list" aria-label="Kết quả sẽ gồm">
@@ -265,6 +306,23 @@ export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdviso
                 <Kpi label="Lân P2O5" value={result.recommendation.annual_total.p2o5_kg_ha} before={result.recommendation.annual_total.p2o5_kg_ha_before_adjustment} />
                 <Kpi label="Kali K2O" value={result.recommendation.annual_total.k2o_kg_ha} before={result.recommendation.annual_total.k2o_kg_ha_before_adjustment} />
                 <Kpi label="Vôi" value={result.recommendation.annual_total.lime_kg_ha} unit="kg/ha" />
+              </section>
+
+              <section className="fertilizer-panel fertilizer-session-panel">
+                <h3><ClipboardCheck size={17} /> Mã phiên và độ tin cậy</h3>
+                <div className="fertilizer-session-row">
+                  <div>
+                    <span>Mã khuyến nghị</span>
+                    <strong>{result.session_code ?? result.request_id.slice(0, 8).toUpperCase()}</strong>
+                  </div>
+                  <a href={`/bao-cao-nang-suat?sid=${encodeURIComponent(result.session_code ?? result.request_id.slice(0, 8).toUpperCase())}`}>
+                    Báo cáo năng suất sau thu hoạch
+                  </a>
+                </div>
+                <p>
+                  {result.confidence.explain_vi ?? "Độ tin cậy phụ thuộc cây trồng, dữ liệu đất nhập vào và mức hiệu chỉnh đang có."}{" "}
+                  <a href="/khuyen-nghi-bon-phan/logic">Xem cách hiệu chuẩn</a>
+                </p>
               </section>
 
               <section className="fertilizer-panel">
@@ -371,6 +429,12 @@ function factorName(name: string) {
   if (normalized.includes("age")) return "Tuổi vườn";
   if (normalized.includes("organic")) return "Chất hữu cơ";
   return name;
+}
+
+function kSourceToBrand(value: FertilizerKSource) {
+  if (value === "k2so4") return "phu_my_k2so4_50";
+  if (value === "kno3") return "potassium_nitrate_13_0_46";
+  return "phu_my_kcl_60";
 }
 
 function numberOrNull(value: string): number | null {

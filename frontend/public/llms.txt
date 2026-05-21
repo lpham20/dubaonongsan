@@ -35,6 +35,7 @@ Trang web phục vụ nông dân, thương lái, doanh nghiệp xuất khẩu n�
 
 - [Trang chính](https://dubaonongsan.com/khuyen-nghi-bon-phan)
 - [Giải thích thuật toán](https://dubaonongsan.com/khuyen-nghi-bon-phan/logic)
+- [Báo cáo năng suất sau khuyến nghị](https://dubaonongsan.com/bao-cao-nang-suat)
 - [API recommend (POST JSON)](https://api.dubaonongsan.com/api/v1/fertilizer/recommend): cần đăng nhập, nhận mẫu đất + năng suất mục tiêu, trả khuyến nghị N-P-K
 
 ## Thuật toán dự báo

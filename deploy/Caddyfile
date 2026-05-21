@@ -30,7 +30,7 @@
 	}
 
 	@seoHtml {
-		path / /tin-tuc /huong-dan /khuyen-nghi-bon-phan /thuat-toan-du-bao /khuyen-nghi-bon-phan/logic /tin-tuc/* /huong-dan/* /du-bao-gia/*
+		path / /tin-tuc /huong-dan /khuyen-nghi-bon-phan /bao-cao-nang-suat /thuat-toan-du-bao /khuyen-nghi-bon-phan/logic /tin-tuc/* /huong-dan/* /du-bao-gia/*
 	}
 	header @seoHtml Cache-Control "public, max-age=300, stale-while-revalidate=60"
 
@@ -106,6 +106,11 @@
 			path /khuyen-nghi-bon-phan
 		}
 		rewrite @seoFertilizer /seo/fertilizer.html
+
+		@seoYieldFeedback {
+			path /bao-cao-nang-suat
+		}
+		rewrite @seoYieldFeedback /seo/yield-feedback.html
 
 		@seoNewsViews path_regexp seoNewsViews ^/tin-tuc/(gia-sau-rieng|gia-ca-phe|gia-ho-tieu)$
 		rewrite @seoNewsViews /seo/news-views/{re.seoNewsViews.1}.html

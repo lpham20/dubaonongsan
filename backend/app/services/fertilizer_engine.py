@@ -7,8 +7,37 @@ from typing import Any
 from uuid import uuid4
 
 
-ENGINE_VERSION = "1.0.0"
-KNOWLEDGE_BASE_VERSION = "wasi-2016+ipi-2018+wasi-2025"
+ENGINE_VERSION = "1.1.0"
+KNOWLEDGE_BASE_VERSION = "wasi-2016+ipi-2018+durian-dris-2025"
+
+DEFAULT_SAFETY_CAPS = {"n": 500, "p2o5": 250, "k2o": 600}
+DURIAN_SAFETY_CAPS = {"n": 300, "p2o5": 200, "k2o": 250}
+PEPPER_P_EXCESS_THRESHOLD_MG_P_KG = 96.0
+P2O5_MG_100G_TO_P_MG_KG = 4.36
+
+CONFIDENCE_BADGES = {
+    "high": {
+        "badge_vi": "Đã hiệu chuẩn",
+        "badge_icon": "green",
+        "explain_vi": "Cà phê Robusta dùng ngưỡng và liều đã hiệu chỉnh theo tài liệu WASI/IPI cho Tây Nguyên.",
+    },
+    "medium": {
+        "badge_vi": "Hiệu chuẩn một phần",
+        "badge_icon": "yellow",
+        "explain_vi": "Hồ tiêu có nền tham chiếu khu vực nhưng vẫn cần đối chiếu bệnh rễ, tuổi vườn và phân tích lá.",
+    },
+    "low": {
+        "badge_vi": "Tham chiếu quốc tế",
+        "badge_icon": "red",
+        "explain_vi": "Sầu riêng đang dùng ngưỡng vay mượn từ DRIS/quốc tế; nên cập nhật bằng dữ liệu năng suất và phân tích lá tại vườn.",
+    },
+}
+
+K_SOURCE_PRODUCTS = {
+    "kcl": ("phu_my_kcl_60", "Kali clorua KCl 60%", 0.60),
+    "k2so4": ("phu_my_k2so4_50", "Kali sunphat K2SO4", 0.50),
+    "kno3": ("potassium_nitrate_13_0_46", "Kali nitrat KNO3", 0.46),
+}
 
 
 @dataclass(frozen=True)
@@ -84,7 +113,7 @@ CROPS: dict[str, dict[str, Any]] = {
         "textures": ["basaltic_red", "acrisol"],
         "thresholds": {
             "n": {"low_max": 0.10, "high_min": 0.20, "unit": "pct", "source": "IISR / WASI extension"},
-            "p": {"low_max": 6.0, "high_min": 10.0, "unit": "mg_p2o5_per_100g", "source": "Sarawak / WASI 2025"},
+            "p": {"low_max": 6.0, "high_min": 10.0, "unit": "mg_p2o5_per_100g", "source": "Sarawak / WASI extension"},
             "k": {"low_max": 15.0, "high_min": 25.0, "unit": "mg_k2o_per_100g", "source": "WASI pepper"},
         },
         "dose": {
@@ -116,7 +145,7 @@ CROPS: dict[str, dict[str, Any]] = {
         "ph_optimum": (5.0, 6.0),
         "lime": {"base": 500, "per_half": 500, "cap": 2000},
         "organic_t_ha": (10, 20),
-        "sources": ["WASI Pepper Research and Development Center", "IPI/SFRI 2016-2018", "WASI 2025"],
+        "sources": ["WASI Pepper Research and Development Center", "IPI/SFRI 2016-2018", "Sarawak pepper nutrient references"],
     },
     "durian": {
         "name_vi": "Sầu riêng",
@@ -131,10 +160,10 @@ CROPS: dict[str, dict[str, Any]] = {
             "k": {"low_max": 80.0, "high_min": 250.0, "unit": "mg_k_per_kg", "source": "Thai / Mekong Delta DRIS"},
         },
         "per_tree": {
-            "baseline_kg_tree": 200,
-            "low": _dose((1.8, 2.2), (1.4, 1.8), (1.3, 1.6)),
-            "medium": _dose((1.4, 1.8), (1.0, 1.4), (1.0, 1.3)),
-            "high": _dose((1.0, 1.4), (0.7, 1.0), (0.7, 1.0)),
+            "baseline_kg_tree": 100,
+            "low": _dose((1.5, 1.8), (1.1, 1.4), (1.0, 1.3)),
+            "medium": _dose((1.2, 1.5), (0.9, 1.1), (0.8, 1.0)),
+            "high": _dose((1.0, 1.2), (0.7, 0.9), (0.7, 0.8)),
         },
         "yield_increment_per_100kg_tree": {"n": 0.6, "p2o5": 0.3, "k2o": 0.5},
         "establishment_per_tree": {
@@ -153,7 +182,7 @@ CROPS: dict[str, dict[str, Any]] = {
         "ph_optimum": (5.5, 6.5),
         "lime": {"base": 1000, "per_half": 500, "cap": 2500},
         "organic_kg_tree": (20, 30),
-        "sources": ["Poovarodom & Tawinteung", "Horticulturae 2024 DRIS norms", "Commercial Tay Nguyen extension"],
+        "sources": ["Poovarodom & Tawinteung", "Horticulturae 2024 DRIS norms", "Thai DOA / Mekong Delta DRIS reference"],
     },
 }
 
@@ -179,6 +208,7 @@ def recommend(payload: dict[str, Any]) -> dict[str, Any]:
     trace: list[str] = []
     soil = payload["soil"]
     stage = payload.get("growth_stage", "mature_kinh_doanh")
+    preferences = dict(payload.get("preferences") or {})
     tree_density = payload.get("tree_density_per_ha") or kb.get("default_tree_density", 1100)
     yield_target = payload.get("yield_target_t_ha")
     missing_critical: list[str] = []
@@ -221,7 +251,8 @@ def recommend(payload: dict[str, Any]) -> dict[str, Any]:
     if clamped:
         warnings.append(_warning("warning", "ADJUSTMENT_FACTORS_CLAMPED", "Hệ số hiệu chỉnh đã được chặn trong khoảng an toàn 0,6-1,4 để tránh liều bón cực đoan."))
 
-    _apply_safety(crop_key, adjusted, soil, p_value, warnings, trace, stage, payload.get("preferences", {}))
+    _apply_safety(crop_key, adjusted, soil, p_value, warnings, trace, stage, preferences)
+    k_source = _effective_k_source(crop_key, stage, preferences, warnings, trace)
     lime = _lime_kg_ha(kb, soil["ph_kcl"])
     if soil["ph_kcl"] < kb["ph_optimum"][0]:
         warnings.append(_warning("warning", f"PH_BELOW_{str(kb['ph_optimum'][0]).replace('.', '_')}", f"pH KCl {soil['ph_kcl']:g} thấp hơn vùng tối ưu {kb['ph_optimum'][0]}-{kb['ph_optimum'][1]}. Nên bón vôi khoảng {lime} kg/ha trước mùa mưa."))
@@ -231,7 +262,7 @@ def recommend(payload: dict[str, Any]) -> dict[str, Any]:
         warnings.append(_warning("warning", "PEPPER_DISEASE_REGION", "Vườn tiêu Tây Nguyên có rủi ro chết nhanh/chết chậm. Không tăng liều mạnh nếu chưa kiểm tra Phytophthora/Fusarium."))
 
     confidence = _confidence(kb, missing_critical, factors, warnings)
-    splits = _splits(kb, adjusted, crop_key, stage)
+    splits = _splits(kb, adjusted, crop_key, stage, k_source)
     organic = _organic_recommendation(crop_key, kb, tree_density)
 
     return _clean_response_text({
@@ -240,6 +271,7 @@ def recommend(payload: dict[str, Any]) -> dict[str, Any]:
         "engine_version": ENGINE_VERSION,
         "knowledge_base_version": KNOWLEDGE_BASE_VERSION,
         "crop": crop_key,
+        "variety": payload.get("variety"),
         "crop_name_vi": kb["name_vi"],
         "calibration_status": kb["calibration_status"],
         "soil_categorization": {
@@ -277,7 +309,7 @@ def recommend(payload: dict[str, Any]) -> dict[str, Any]:
                 "rationale_en": "Deterministic recommendation from soil category, yield target and conservative adjustment factors.",
             },
             "splits": splits,
-            "product_mix_options": [_product_mix(adjusted, crop_key, stage, warnings)],
+            "product_mix_options": [_product_mix(adjusted, crop_key, stage, warnings, k_source)],
         },
         "confidence": confidence,
         "warnings": warnings,
@@ -305,6 +337,9 @@ def _available_p_for_crop(crop: str, soil: dict[str, Any], warnings: list[dict[s
     value = soil.get("available_p_mg_per_100g")
     if soil.get("available_p_mg_per_kg") is not None:
         value = soil["available_p_mg_per_kg"]
+        if crop in {"robusta_coffee", "black_pepper"}:
+            value = value / P2O5_MG_100G_TO_P_MG_KG
+            trace.append("P mg/kg được quy đổi xấp xỉ sang mg P2O5/100g để phân loại cà phê/tiêu.")
     if value is None:
         return None
     if soil.get("available_p_method") == "mehlich_3":
@@ -312,8 +347,20 @@ def _available_p_for_crop(crop: str, soil: dict[str, Any], warnings: list[dict[s
         warnings.append(_warning("info", "METHOD_CONVERSION_USED", "P Mehlich-3 được quy đổi bảo thủ sang Bray II tương đương trước khi phân loại."))
         trace.append("Quy đổi P Mehlich-3 x 0,8 -> Bray II tương đương")
     if crop == "durian" and soil.get("available_p_mg_per_kg") is None:
-        value = value * 4.36
+        value = value * P2O5_MG_100G_TO_P_MG_KG
         trace.append("Sầu riêng dùng ngưỡng mg P/kg; P2O5 mg/100g được quy đổi xấp xỉ sang mg P/kg.")
+    return value
+
+
+def _available_p_mg_p_per_kg(soil: dict[str, Any]) -> float | None:
+    if soil.get("available_p_mg_per_kg") is not None:
+        value = float(soil["available_p_mg_per_kg"])
+    elif soil.get("available_p_mg_per_100g") is not None:
+        value = float(soil["available_p_mg_per_100g"]) * P2O5_MG_100G_TO_P_MG_KG
+    else:
+        return None
+    if soil.get("available_p_method") == "mehlich_3":
+        value *= 0.8
     return value
 
 
@@ -473,7 +520,7 @@ def _compose_factors(factors: list[Factor]) -> tuple[float, float, float, bool]:
 
 
 def _apply_safety(crop: str, dose: dict[str, int], soil: dict[str, Any], p_value: float | None, warnings: list[dict[str, str]], trace: list[str], stage: str, preferences: dict[str, Any]) -> None:
-    caps = {"n": 500, "p2o5": 250, "k2o": 600}
+    caps = DURIAN_SAFETY_CAPS if crop == "durian" else DEFAULT_SAFETY_CAPS
     for key, cap in caps.items():
         if dose[key] > cap:
             warnings.append(_warning("warning", f"{key.upper()}_CAP_EXCEEDED", f"Liều {key.upper()} vượt ngưỡng an toàn {cap} kg/ha/năm; hệ thống đã chặn về {cap}."))
@@ -481,14 +528,41 @@ def _apply_safety(crop: str, dose: dict[str, int], soil: dict[str, Any], p_value
             dose[key] = cap
     if soil["ph_kcl"] < 4.0:
         warnings.append(_warning("critical", "PH_BELOW_4_0", "pH dưới 4,0: hiệu quả phân bón sẽ bị giới hạn mạnh nếu chưa xử lý vôi/hữu cơ."))
-    if crop == "black_pepper" and p_value is not None and p_value > 22:
+    pepper_p_mg_kg = _available_p_mg_p_per_kg(soil) if crop == "black_pepper" else None
+    if crop == "black_pepper" and pepper_p_mg_kg is not None and pepper_p_mg_kg > PEPPER_P_EXCESS_THRESHOLD_MG_P_KG:
         dose["p2o5"] = 0
-        warnings.append(_warning("warning", "PEPPER_P_EXCESS", "P trong đất tiêu đang cao; khuyến nghị tạm ngưng lân để tránh tích lũy và tăng rủi ro bệnh rễ."))
-        trace.append("Hồ tiêu P cao -> p2o5=0")
-    if crop == "durian" and (stage == "fruit_fill" or preferences.get("preferred_brand") == "phu_my_kcl_60"):
-        warnings.append(_warning("critical", "DURIAN_NO_KCL_FRUIT_FILL", "Sầu riêng giai đoạn nuôi trái không dùng KCl; ưu tiên K2SO4 hoặc KNO3."))
+        warnings.append(_warning("warning", "PEPPER_P_EXCESS", "P trong đất tiêu vượt 96 mg P/kg; khuyến nghị tạm ngưng lân để tránh tích lũy và tăng rủi ro bệnh rễ."))
+        trace.append(f"Hồ tiêu P={pepper_p_mg_kg:.1f} mg P/kg > 96 -> p2o5=0")
     if soil["ph_kcl"] < 4 and (soil.get("total_n_pct") or 0) < 0.05 and (soil.get("organic_carbon_pct") or 99) < 1.0:
         warnings.append(_warning("warning", "ANOMALOUS_SOIL_PROFILE", "Tổ hợp pH rất thấp, N rất thấp và OC thấp bất thường; nên kiểm tra lại mẫu đất trước khi bón liều cao."))
+
+
+def _requested_k_source(preferences: dict[str, Any]) -> str | None:
+    value = (preferences.get("preferred_k_source") or "").strip().lower()
+    if value in K_SOURCE_PRODUCTS:
+        return value
+    brand = (preferences.get("preferred_brand") or "").strip().lower()
+    if "k2so4" in brand or "sop" in brand or "sunphat" in brand:
+        return "k2so4"
+    if "kno3" in brand or "nitrat" in brand:
+        return "kno3"
+    if "kcl" in brand or "mop" in brand or "clorua" in brand:
+        return "kcl"
+    return None
+
+
+def _effective_k_source(crop: str, stage: str, preferences: dict[str, Any], warnings: list[dict[str, str]], trace: list[str]) -> str:
+    requested = _requested_k_source(preferences)
+    if crop == "durian" and stage == "fruit_fill":
+        if requested == "kcl":
+            warnings.append(_warning("critical", "DURIAN_NO_KCL_FRUIT_FILL", "Sầu riêng giai đoạn nuôi trái không dùng KCl; hệ thống đã đổi nguồn kali sang K2SO4."))
+            trace.append("Sầu riêng fruit_fill: nguồn KCl không được phép -> dùng K2SO4.")
+            return "k2so4"
+        if requested in {"k2so4", "kno3"}:
+            return requested
+        trace.append("Sầu riêng fruit_fill: không chọn nguồn kali -> mặc định dùng K2SO4.")
+        return "k2so4"
+    return requested or "kcl"
 
 
 def _lime_kg_ha(kb: dict[str, Any], ph: float) -> int:
@@ -508,20 +582,20 @@ def _organic_recommendation(crop: str, kb: dict[str, Any], density: int) -> dict
     low, high = kb["organic_t_ha"]
     return {"organic_t_ha": round((low + high) / 2)}
 
-def _product_lines(dose: dict[str, int], crop: str, stage: str) -> list[dict[str, Any]]:
+def _product_lines(dose: dict[str, int], crop: str, stage: str, k_source: str = "kcl") -> list[dict[str, Any]]:
     dap = dose["p2o5"] / 0.46 if dose["p2o5"] else 0
     n_from_dap = dap * 0.18
     urea = max(0, (dose["n"] - n_from_dap) / 0.463)
-    k_sku = "phu_my_k2so4_50" if crop == "durian" and stage == "fruit_fill" else "phu_my_kcl_60"
-    k_rate = dose["k2o"] / (0.50 if k_sku.endswith("50") else 0.60) if dose["k2o"] else 0
+    k_sku, k_name, k_grade = K_SOURCE_PRODUCTS.get(k_source, K_SOURCE_PRODUCTS["kcl"])
+    k_rate = dose["k2o"] / k_grade if dose["k2o"] else 0
     return [
         {"sku": "phu_my_urea_46n", "name_vi": "Urê 46% N", "kg_ha_yr": round(urea), "bags_50kg_ha": round(urea / 50, 1)},
         {"sku": "phu_my_dap_18_46", "name_vi": "DAP 18-46", "kg_ha_yr": round(dap), "bags_50kg_ha": round(dap / 50, 1)},
-        {"sku": k_sku, "name_vi": "Kali sunphat K2SO4" if k_sku.endswith("50") else "Kali clorua KCl 60%", "kg_ha_yr": round(k_rate), "bags_50kg_ha": round(k_rate / 50, 1)},
+        {"sku": k_sku, "name_vi": k_name, "kg_ha_yr": round(k_rate), "bags_50kg_ha": round(k_rate / 50, 1)},
     ]
 
 
-def _splits(kb: dict[str, Any], dose: dict[str, int], crop: str, stage: str) -> list[dict[str, Any]]:
+def _splits(kb: dict[str, Any], dose: dict[str, int], crop: str, stage: str, k_source: str = "kcl") -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for index, (name_vi, _name_en, window, n_pct, p_pct, k_pct) in enumerate(kb["splits"], start=1):
         split_dose = {
@@ -535,21 +609,25 @@ def _splits(kb: dict[str, Any], dose: dict[str, int], crop: str, stage: str) -> 
                 "name_vi": name_vi,
                 "name_en": name_vi,
                 "calendar_window": window,
+                "n_pct": n_pct,
+                "p2o5_pct": p_pct,
+                "k2o_pct": k_pct,
                 "n_kg_ha": split_dose["n"],
                 "p2o5_kg_ha": split_dose["p2o5"],
                 "k2o_kg_ha": split_dose["k2o"],
                 "notes_vi": "Bón theo rãnh mép tán, lấp đất sau bón; không bón tập trung khi đất khô.",
                 "notes_en": "Bón theo rãnh mép tán, lấp đất sau bón; không bón tập trung khi đất khô.",
-                "commercial_products": _product_lines(split_dose, crop, stage),
+                "commercial_products": _product_lines(split_dose, crop, stage, k_source),
             }
         )
     return rows
 
 
-def _product_mix(dose: dict[str, int], crop: str, stage: str, warnings: list[dict[str, str]]) -> dict[str, Any]:
-    products = _product_lines(dose, crop, stage)
-    if any(product["sku"] == "phu_my_k2so4_50" for product in products):
-        warnings.append(_warning("info", "K_SOURCE_CHANGED", "Đã đổi nguồn kali sang K2SO4 cho sầu riêng giai đoạn nuôi trái."))
+def _product_mix(dose: dict[str, int], crop: str, stage: str, warnings: list[dict[str, str]], k_source: str = "kcl") -> dict[str, Any]:
+    products = _product_lines(dose, crop, stage, k_source)
+    if crop == "durian" and stage == "fruit_fill" and any(product["sku"] == "phu_my_k2so4_50" for product in products):
+        if not any(warning["code"] == "K_SOURCE_CHANGED" for warning in warnings):
+            warnings.append(_warning("info", "K_SOURCE_CHANGED", "Nguồn kali đang dùng K2SO4 cho sầu riêng giai đoạn nuôi trái."))
     return {
         "option_id": 1,
         "label_vi": "Phương án quy đổi phân đơn",
@@ -565,8 +643,13 @@ def _confidence(kb: dict[str, Any], missing_critical: list[str], factors: list[F
     anomalies = [w for w in warnings if w["code"] in {"ANOMALOUS_SOIL_PROFILE", "PH_BELOW_4_0"}]
     score = max(0.1, min(1.0, base - 0.10 * len(missing_critical) - 0.05 * len(missing_context) - 0.10 * len(anomalies)))
     tier = "high" if score >= 0.75 else "medium" if score >= 0.50 else "low"
+    calibration_tier = kb["confidence"]
+    badge = CONFIDENCE_BADGES[calibration_tier]
     return {
         "overall": tier,
+        "calibration_tier": calibration_tier,
+        "score": round(score, 2),
+        **badge,
         "data_quality_score": round(score, 2),
         "calibration_basis": kb["sources"],
         "limitations": ["Khuyến nghị được tính bằng bộ quy tắc cố định, cần đối chiếu phân tích lá và điều kiện vườn thực tế."],

@@ -1,3 +1,4 @@
+from copy import deepcopy
 import os
 
 os.environ["MARKETAI_DATABASE_URL"] = "sqlite:///:memory:"
@@ -122,7 +123,77 @@ def test_fertilizer_recommendation_requires_login(client, test_password):
         json=FERTILIZER_RECOMMENDATION_PAYLOAD,
     )
     assert response.status_code == 200
-    assert "recommendation" in response.json()
+    payload = response.json()
+    assert "recommendation" in payload
+    assert len(payload["session_id"]) == 36
+    assert len(payload["session_code"]) == 8
+
+    feedback = client.post(
+        f"/api/v1/sessions/{payload['session_code']}/feedback",
+        json={
+            "actual_yield_t_ha": 3.8,
+            "harvest_date": "2026-12-10",
+            "fertilizer_followed_pct": 85,
+            "rating": 4,
+            "note": "Vườn làm theo phần lớn khuyến nghị.",
+        },
+    )
+    assert feedback.status_code == 201
+    assert feedback.json()["session_code"] == payload["session_code"]
+
+
+def test_fertilizer_tier1_agronomy_rules():
+    from app.services.fertilizer_engine import recommend
+
+    coffee = recommend(deepcopy(FERTILIZER_RECOMMENDATION_PAYLOAD))
+    coffee_splits = coffee["recommendation"]["splits"]
+    assert sum(item["n_pct"] for item in coffee_splits) == 100
+    assert sum(item["p2o5_pct"] for item in coffee_splits) == 100
+    assert sum(item["k2o_pct"] for item in coffee_splits) == 100
+    post_harvest = coffee_splits[0]
+    assert post_harvest["calendar_window"] == "Tháng 1-2"
+    assert (post_harvest["n_pct"], post_harvest["p2o5_pct"], post_harvest["k2o_pct"]) == (15, 50, 15)
+    assert coffee["confidence"]["calibration_tier"] == "high"
+    assert coffee["confidence"]["badge_vi"] == "Đã hiệu chuẩn"
+
+    durian = deepcopy(FERTILIZER_RECOMMENDATION_PAYLOAD)
+    durian.update({"crop": "durian", "variety": "Ri6", "yield_target_t_ha": 25, "tree_density_per_ha": 150})
+    durian["soil"]["texture"] = "basaltic_red"
+    durian["soil"]["available_p_mg_per_kg"] = 18
+    durian_result = recommend(durian)
+    durian_total = durian_result["recommendation"]["annual_total"]
+    assert durian_total["n_kg_ha"] <= 300
+    assert durian_total["p2o5_kg_ha"] <= 200
+    assert durian_total["k2o_kg_ha"] <= 250
+    assert durian_result["confidence"]["calibration_tier"] == "low"
+    assert durian_result["confidence"]["badge_vi"] == "Tham chiếu quốc tế"
+    assert all("WASI 2025" not in item["title"] for item in durian_result["rationale"]["sources_cited"])
+
+    pepper = deepcopy(FERTILIZER_RECOMMENDATION_PAYLOAD)
+    pepper.update({"crop": "black_pepper", "yield_target_t_ha": 3, "tree_density_per_ha": 1600})
+    pepper["soil"]["texture"] = "basaltic_red"
+    pepper["soil"]["available_p_mg_per_100g"] = None
+    pepper["soil"]["available_p_mg_per_kg"] = 110
+    pepper_result = recommend(pepper)
+    assert pepper_result["recommendation"]["annual_total"]["p2o5_kg_ha"] == 0
+    assert any(warning["code"] == "PEPPER_P_EXCESS" for warning in pepper_result["warnings"])
+    assert pepper_result["confidence"]["calibration_tier"] == "medium"
+
+    fruit_fill = deepcopy(durian)
+    fruit_fill["growth_stage"] = "fruit_fill"
+    fruit_fill["preferences"] = {"language": "vi", "include_product_mix": True, "preferred_k_source": "kcl"}
+    fruit_fill_result = recommend(fruit_fill)
+    fruit_fill_products = fruit_fill_result["recommendation"]["product_mix_options"][0]["products"]
+    assert any(product["sku"] == "phu_my_k2so4_50" for product in fruit_fill_products)
+    assert any(warning["code"] == "DURIAN_NO_KCL_FRUIT_FILL" for warning in fruit_fill_result["warnings"])
+
+    fruit_set = deepcopy(durian)
+    fruit_set["growth_stage"] = "fruit_set"
+    fruit_set["preferences"] = {"language": "vi", "include_product_mix": True, "preferred_k_source": "kcl"}
+    fruit_set_result = recommend(fruit_set)
+    fruit_set_products = fruit_set_result["recommendation"]["product_mix_options"][0]["products"]
+    assert any(product["sku"] == "phu_my_kcl_60" for product in fruit_set_products)
+    assert not any(warning["code"] == "DURIAN_NO_KCL_FRUIT_FILL" for warning in fruit_set_result["warnings"])
 
 
 def test_public_api_requires_key(client):
@@ -156,6 +227,7 @@ def test_admin_endpoints_reject_anonymous_and_non_admin_users(client, test_passw
         "/api/v1/platform/jobs/data-quality",
         "/api/v1/platform/jobs/news",
         "/api/v1/platform/jobs/retrain",
+        "/api/v1/platform/jobs/yield-feedback-reminder",
         "/api/v1/ingestion/backfill-model-ready",
     ]
     for route in protected_routes:
