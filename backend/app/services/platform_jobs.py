@@ -24,6 +24,7 @@ from app.ml_engine.evaluator import ForecastEvaluator
 from app.models import DailyMarketPrice, DurianVariety, ModelTrainingRun, PlatformJobRun, ProductionRegion, RecommendationSession, YieldFeedback
 from app.services.content_portal import ContentPortalService
 from app.services.crop_catalog import CROP_TYPES, ensure_crop_catalog
+from app.services.auth import cleanup_expired_revoked_tokens
 from app.services.market_intelligence import MarketIntelligenceService
 from app.services.model_ready_backfill import ModelReadyBackfillService
 from app.services.public_price_calibration import PublicPriceCalibrationService
@@ -171,6 +172,20 @@ class PlatformJobService:
                 self.db.rollback()
                 job = self.db.get(PlatformJobRun, job.job_id) or job
                 self._finish_job(job, "lỗi", None, str(exc))
+                raise
+
+    def run_revoked_token_cleanup(self) -> dict:
+        with job_lock("revoked_token_cleanup"):
+            job = self._start_job("revoked_token_cleanup")
+            try:
+                deleted = cleanup_expired_revoked_tokens(self.db)
+                summary = {"deleted": deleted}
+                self._finish_job(job, "thanh cong", summary)
+                return summary
+            except Exception as exc:
+                self.db.rollback()
+                job = self.db.get(PlatformJobRun, job.job_id) or job
+                self._finish_job(job, "loi", None, str(exc))
                 raise
 
     def latest_jobs(self, limit: int = 20) -> list[PlatformJobRun]:
@@ -352,6 +367,15 @@ class JobScheduler:
             id="yield_feedback_reminder_monthly",
             replace_existing=True,
         )
+        cls._scheduler.add_job(
+            cls._run_with_session,
+            "cron",
+            hour=3,
+            minute=20,
+            args=["revoked_token_cleanup"],
+            id="revoked_token_cleanup_daily",
+            replace_existing=True,
+        )
         cls._scheduler.start()
 
     @classmethod
@@ -377,6 +401,8 @@ class JobScheduler:
                     service.run_weather()
                 elif job == "yield_feedback_reminder":
                     service.run_yield_feedback_reminder()
+                elif job == "revoked_token_cleanup":
+                    service.run_revoked_token_cleanup()
             except Exception:
                 logger.exception("Scheduled job %s failed", job)
 

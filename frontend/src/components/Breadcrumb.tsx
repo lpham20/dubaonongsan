@@ -30,7 +30,7 @@ export function Breadcrumb({ items }: { items: Item[] }) {
           ))}
         </ol>
       </nav>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }} />
+      <script type="application/ld+json" nonce="dubaonongsan-jsonld" dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }} />
     </>
   );
 }

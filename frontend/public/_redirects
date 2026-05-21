@@ -1,11 +1,6 @@
 # Prerendered HTML for SEO bots and users hitting deep URLs directly
 # Cloudflare Pages: 200 = rewrite; URL stays the same, content from destination is served.
 
-/du-bao-gia/sau-rieng        /du-bao-gia/sau_rieng              301
-/du-bao-gia/ca-phe           /du-bao-gia/ca_phe                 301
-/du-bao-gia/ho-tieu          /du-bao-gia/ho_tieu                301
-/logic                       /khuyen-nghi-bon-phan/logic        301
-/thuat-toan-bon-phan         /khuyen-nghi-bon-phan/logic        301
 /huong-dan/hainong-:slug     /huong-dan/:slug                   301
 /huong-dan/hai-nong-:slug    /huong-dan/:slug                   301
 /huong-dan/hai_nong-:slug    /huong-dan/:slug                   301
@@ -20,6 +15,16 @@
 /thuat-toan-du-bao             /seo/methodology.html             200
 /khuyen-nghi-bon-phan/logic    /seo/fertilizer-methodology.html  200
 /bao-cao-nang-suat             /seo/yield-feedback.html          200
+
+# BEGIN synced from deploy/redirects.caddy
+/du-bao-gia/sau-rieng              /du-bao-gia/sau_rieng                  301
+/du-bao-gia/ca-phe                 /du-bao-gia/ca_phe                     301
+/du-bao-gia/ho-tieu                /du-bao-gia/ho_tieu                    301
+/logic                             /khuyen-nghi-bon-phan/logic            301
+/thuat-toan-bon-phan               /khuyen-nghi-bon-phan/logic            301
+/huong-dan/quy-trinh-ngam-u-hat-giong-lua-vu-dong-xuan-cc6c9ecf-d4f9-47e9-80a3-994335288ba4-1271 /huong-dan/quy-trinh-ngam-u-hat-giong-lua-vu-dong-xuan-1234 301
+/huong-dan/phong-tru-sau-duc-than-78c511cd-8ed2-4078-88f2-10f5d0fcf20f-1364 /huong-dan/phong-tru-sau-duc-than-xen-toc-xoai-1364 301
+# END synced from deploy/redirects.caddy
 
 # Static SPA fallback must be last.
 /*                             /index.html                       200

@@ -2,17 +2,19 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import secrets
 from datetime import UTC, datetime, timedelta
 
 import bcrypt
 import jwt
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.db import get_db
-from app.models import AppUser
+from app.models import AppUser, RevokedToken
 
 
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -56,14 +58,15 @@ def create_access_token(user: AppUser) -> str:
         "iat": now,
         "exp": now + timedelta(minutes=settings.auth_token_minutes),
         "iss": JWT_ISSUER,
+        "jti": secrets.token_urlsafe(16),
     }
     return jwt.encode(payload, settings.auth_token_secret, algorithm=JWT_ALGORITHM)
 
 
-def decode_access_token(token: str) -> dict:
+def decode_access_token(token: str, db: Session | None = None, verify_revoked: bool = True) -> dict:
     settings = get_settings()
     try:
-        return jwt.decode(
+        payload = jwt.decode(
             token,
             settings.auth_token_secret,
             algorithms=[JWT_ALGORITHM],
@@ -71,6 +74,34 @@ def decode_access_token(token: str) -> dict:
         )
     except jwt.PyJWTError as exc:
         raise HTTPException(status_code=401, detail="Token không hợp lệ") from exc
+    if db is not None and verify_revoked:
+        jti = payload.get("jti")
+        if jti and db.get(RevokedToken, str(jti)) is not None:
+            raise HTTPException(status_code=401, detail="Token da duoc dang xuat")
+    return payload
+
+
+def revoke_access_token(db: Session, token: str, user: AppUser) -> None:
+    payload = decode_access_token(token, db=db, verify_revoked=False)
+    jti = payload.get("jti")
+    exp = payload.get("exp")
+    if not jti or exp is None:
+        return
+    db.add(
+        RevokedToken(
+            jti=str(jti),
+            user_id=user.user_id,
+            revoked_at=datetime.now(UTC),
+            expires_at=datetime.fromtimestamp(int(exp), tz=UTC),
+        )
+    )
+    db.commit()
+
+
+def cleanup_expired_revoked_tokens(db: Session) -> int:
+    result = db.execute(delete(RevokedToken).where(RevokedToken.expires_at <= datetime.now(UTC)))
+    db.commit()
+    return int(result.rowcount or 0)
 
 
 def current_user(
@@ -79,7 +110,7 @@ def current_user(
 ) -> AppUser:
     if credentials is None:
         raise HTTPException(status_code=401, detail="Cần đăng nhập")
-    payload = decode_access_token(credentials.credentials)
+    payload = decode_access_token(credentials.credentials, db=db)
     user = db.get(AppUser, int(payload["sub"]))
     if user is None:
         raise HTTPException(status_code=401, detail="Tài khoản không tồn tại")

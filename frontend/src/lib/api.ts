@@ -420,6 +420,15 @@ function errorMessageFromPayload(payload: unknown, fallback: string) {
 }
 
 async function parseJsonResponse<T>(response: Response): Promise<T> {
+  if (response.status === 204) {
+    if (!response.ok) {
+      throw new ApiRequestError(`${response.status} ${response.statusText}`.trim(), {
+        status: response.status,
+        transient: false
+      });
+    }
+    return undefined as T;
+  }
   const contentType = response.headers.get("content-type") ?? "";
   const expectsJson = contentType.toLowerCase().includes("application/json");
   const fallback = `${response.status} ${response.statusText}`.trim();
@@ -602,6 +611,10 @@ export function register(email: string, password: string, displayName?: string) 
   return getAuth("/api/v1/auth/register", { email, password, display_name: displayName });
 }
 
+export function logout(token: string) {
+  return authJson<void>("/api/v1/auth/logout", token, { method: "POST" });
+}
+
 function getAuth(url: string, payload: Record<string, string | undefined>) {
   return requestJson<AuthSession>(url, {
     method: "POST",
@@ -682,8 +695,8 @@ export function recommendFertilizer(payload: FertilizerRequest, token: string, s
   });
 }
 
-export function submitYieldFeedback(sessionCode: string, payload: YieldFeedbackPayload) {
-  return requestJson<YieldFeedbackResponse>(`/api/v1/sessions/${encodeURIComponent(sessionCode)}/feedback`, {
+export function submitYieldFeedback(sessionCode: string, payload: YieldFeedbackPayload, token: string) {
+  return authJson<YieldFeedbackResponse>(`/api/v1/sessions/${encodeURIComponent(sessionCode)}/feedback`, token, {
     method: "POST",
     body: JSON.stringify(payload)
   });

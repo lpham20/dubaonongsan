@@ -1,4 +1,5 @@
 from copy import deepcopy
+from datetime import UTC, datetime, timedelta
 import os
 
 os.environ["MARKETAI_DATABASE_URL"] = "sqlite:///:memory:"
@@ -7,13 +8,31 @@ os.environ["MARKETAI_START_SCHEDULER_IN_API"] = "false"
 from fastapi.testclient import TestClient
 import pytest
 
+from app.db import SessionLocal
 from app.main import app
+from app.models import AppUser, RevokedToken
+from app.services.auth import create_access_token, hash_password
 
 
 @pytest.fixture()
 def client():
     with TestClient(app) as test_client:
         yield test_client
+
+
+def create_user_token(email: str, password: str = "StrongPass123", *, is_admin: bool = False) -> tuple[str, int]:
+    with SessionLocal() as db:
+        user = AppUser(
+            email=email,
+            display_name=email.split("@", 1)[0],
+            password_hash=hash_password(password),
+            created_at=datetime.now(UTC),
+            is_admin=is_admin,
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return create_access_token(user), user.user_id
 
 
 FERTILIZER_RECOMMENDATION_PAYLOAD = {
@@ -130,6 +149,7 @@ def test_fertilizer_recommendation_requires_login(client, test_password):
 
     feedback = client.post(
         f"/api/v1/sessions/{payload['session_code']}/feedback",
+        headers={"Authorization": f"Bearer {token}"},
         json={
             "actual_yield_t_ha": 3.8,
             "harvest_date": "2026-12-10",
@@ -140,6 +160,95 @@ def test_fertilizer_recommendation_requires_login(client, test_password):
     )
     assert feedback.status_code == 201
     assert feedback.json()["session_code"] == payload["session_code"]
+
+
+def test_yield_feedback_requires_auth_and_owner(client):
+    owner_token, _ = create_user_token("feedback-owner@example.com")
+    other_token, _ = create_user_token("feedback-other@example.com")
+
+    recommendation = client.post(
+        "/api/v1/fertilizer/recommend",
+        headers={"Authorization": f"Bearer {owner_token}"},
+        json=FERTILIZER_RECOMMENDATION_PAYLOAD,
+    )
+    assert recommendation.status_code == 200
+    session_code = recommendation.json()["session_code"]
+
+    payload = {
+        "actual_yield_t_ha": 3.6,
+        "harvest_date": "2026-12-15",
+        "fertilizer_followed_pct": 90,
+        "rating": 5,
+        "contact_phone": "0912345678",
+    }
+
+    anonymous = client.post(f"/api/v1/sessions/{session_code}/feedback", json=payload)
+    assert anonymous.status_code == 401
+
+    other_user = client.post(
+        f"/api/v1/sessions/{session_code}/feedback",
+        headers={"Authorization": f"Bearer {other_token}"},
+        json=payload,
+    )
+    assert other_user.status_code == 403
+
+    wildcard = client.post(
+        f"/api/v1/sessions/{session_code[:7]}_/feedback",
+        headers={"Authorization": f"Bearer {owner_token}"},
+        json=payload,
+    )
+    assert wildcard.status_code == 404
+
+    owner = client.post(
+        f"/api/v1/sessions/{session_code}/feedback",
+        headers={"Authorization": f"Bearer {owner_token}"},
+        json=payload,
+    )
+    assert owner.status_code == 201
+
+
+def test_login_lockout_after_5_failed_attempts(client):
+    create_user_token("lockout@example.com", "CorrectPass123")
+    for _ in range(5):
+        response = client.post(
+            "/api/v1/auth/login",
+            json={"email": "lockout@example.com", "password": "wrong-password"},
+        )
+        assert response.status_code == 401
+
+    response = client.post(
+        "/api/v1/auth/login",
+        json={"email": "lockout@example.com", "password": "CorrectPass123"},
+    )
+    assert response.status_code == 429
+
+
+def test_logout_revokes_token_and_cleanup_job(client):
+    token, user_id = create_user_token("logout@example.com")
+    assert client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"}).status_code == 200
+
+    logout = client.post("/api/v1/auth/logout", headers={"Authorization": f"Bearer {token}"})
+    assert logout.status_code == 204
+    assert client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"}).status_code == 401
+
+    admin_token, _ = create_user_token("cleanup-admin@example.com", is_admin=True)
+    with SessionLocal() as db:
+        db.add(
+            RevokedToken(
+                jti="expired-test-token",
+                user_id=user_id,
+                revoked_at=datetime.now(UTC) - timedelta(days=2),
+                expires_at=datetime.now(UTC) - timedelta(days=1),
+            )
+        )
+        db.commit()
+
+    cleanup = client.post(
+        "/api/v1/platform/jobs/revoked-token-cleanup",
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    assert cleanup.status_code == 200
+    assert cleanup.json()["deleted"] >= 1
 
 
 def test_fertilizer_tier1_agronomy_rules():
@@ -228,6 +337,7 @@ def test_admin_endpoints_reject_anonymous_and_non_admin_users(client, test_passw
         "/api/v1/platform/jobs/news",
         "/api/v1/platform/jobs/retrain",
         "/api/v1/platform/jobs/yield-feedback-reminder",
+        "/api/v1/platform/jobs/revoked-token-cleanup",
         "/api/v1/ingestion/backfill-model-ready",
     ]
     for route in protected_routes:
@@ -253,6 +363,8 @@ def test_sensor_webhook_requires_iot_key(client):
 
 def test_image_proxy_blocks_private_or_untrusted_hosts(client):
     response = client.get("/api/v1/content/image-proxy?url=http://127.0.0.1/test.jpg")
+    assert response.status_code == 403
+    response = client.get("/api/v1/content/image-proxy?url=https://attacker.com/test.jpg")
     assert response.status_code == 403
 
 

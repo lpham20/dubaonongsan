@@ -175,6 +175,10 @@ def _tags(crop: str, topic: str) -> str:
     return ",".join(deduped[:7])
 
 
+def _public_guide_slug(slug: str) -> str:
+    return re.sub(r"^(hainong|hai-nong|hai_nong)-+", "", slug or "", flags=re.IGNORECASE)
+
+
 def _topic_specific_steps(topic: str, crop_label: str) -> list[str]:
     plant = crop_label
     if topic == "phong-sau-benh":
@@ -362,6 +366,7 @@ def rewrite_all(apply: bool) -> dict:
             row.content = _content(row, crop, topic, summary)
             row.crop_type = crop
             row.tags = _tags(crop, topic)
+            row.public_slug = _public_guide_slug(row.slug)
             row.published_at = now
             errors = _verify(row)
             if errors:
@@ -378,6 +383,7 @@ def rewrite_all(apply: bool) -> dict:
             invalidate_cache("guide-detail")
             invalidate_cache("llm-guides-index")
             invalidate_cache("llm-guide-detail")
+            invalidate_cache("sitemap-xml")
         else:
             db.rollback()
         return {"ok": True, "dry_run": not apply, "updated": updated, "skipped": skipped, "checked": len(rows)}

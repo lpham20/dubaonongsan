@@ -19,12 +19,16 @@ const managedMetaSelectors = [
   "meta[property='og:type']",
   "meta[property='og:url']",
   "meta[property='og:image']",
+  "meta[property='og:image:type']",
+  "meta[property='og:image:width']",
+  "meta[property='og:image:height']",
   "meta[name='twitter:title']",
   "meta[name='twitter:description']",
   "meta[name='twitter:image']",
   "meta[property='article:published_time']",
   "link[rel='canonical']"
 ];
+const JSON_LD_NONCE = "dubaonongsan-jsonld";
 
 export function SeoHead({
   title,
@@ -41,13 +45,18 @@ export function SeoHead({
 
   useInsertionEffect(() => {
     document.title = fullTitle;
-    managedMetaSelectors.forEach((selector) => document.head.querySelector(selector)?.remove());
+    managedMetaSelectors.forEach((selector) => {
+      document.head.querySelectorAll(selector).forEach((element) => element.remove());
+    });
     upsertMeta("name", "description", fullDescription);
     upsertMeta("property", "og:title", fullTitle);
     upsertMeta("property", "og:description", fullDescription);
     upsertMeta("property", "og:type", type);
     upsertMeta("property", "og:url", fullCanonical);
     upsertMeta("property", "og:image", image);
+    upsertMeta("property", "og:image:type", image.endsWith(".webp") ? "image/webp" : "image/jpeg");
+    upsertMeta("property", "og:image:width", "1200");
+    upsertMeta("property", "og:image:height", "630");
     upsertMeta("name", "twitter:title", fullTitle);
     upsertMeta("name", "twitter:description", fullDescription);
     upsertMeta("name", "twitter:image", image);
@@ -66,6 +75,7 @@ export function SeoHead({
         <script
           key={index}
           type="application/ld+json"
+          nonce={JSON_LD_NONCE}
           dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
         />
       ))}

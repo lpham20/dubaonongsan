@@ -108,7 +108,7 @@ class YieldFeedbackRequest(BaseModel):
     fertilizer_followed_pct: float | None = Field(default=None, ge=0, le=100)
     rating: int | None = Field(default=None, ge=1, le=5)
     note: str | None = Field(default=None, max_length=2000)
-    contact_phone: str | None = Field(default=None, max_length=40)
+    contact_phone: str | None = Field(default=None, max_length=20, pattern=r"^(?:\+?84|0)[0-9]{8,11}$")
 
 
 class YieldFeedbackResponse(BaseModel):
@@ -141,10 +141,16 @@ def fertilizer_recommendation(
 
 @router.post("/sessions/{session_id}/feedback", response_model=YieldFeedbackResponse, status_code=201)
 @router.post("/fertilizer/sessions/{session_id}/feedback", response_model=YieldFeedbackResponse, status_code=201, include_in_schema=False)
-def submit_yield_feedback(session_id: str, payload: YieldFeedbackRequest, db: Session = Depends(get_db)) -> YieldFeedbackResponse:
+def submit_yield_feedback(
+    session_id: str,
+    payload: YieldFeedbackRequest,
+    user: AppUser = Depends(current_user),
+    db: Session = Depends(get_db),
+) -> YieldFeedbackResponse:
     feedback = save_yield_feedback(
         db,
         session_code=session_id,
+        user=user,
         actual_yield_t_ha=payload.actual_yield_t_ha,
         harvest_date=payload.harvest_date,
         fertilizer_followed_pct=payload.fertilizer_followed_pct,

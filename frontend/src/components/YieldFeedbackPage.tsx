@@ -1,6 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { ClipboardCheck, Leaf } from "./icons";
 import { SeoHead } from "./SeoHead";
+import { useAuth } from "../contexts/AuthContext";
 import { submitYieldFeedback, type YieldFeedbackResponse } from "../lib/api";
 
 type FormState = {
@@ -13,10 +15,8 @@ type FormState = {
   note: string;
 };
 
-const initialSessionCode = new URLSearchParams(window.location.search).get("sid") ?? "";
-
-const initialForm: FormState = {
-  session_code: initialSessionCode,
+const emptyForm: FormState = {
+  session_code: "",
   actual_yield_t_ha: "",
   harvest_date: "",
   fertilizer_followed_pct: "",
@@ -26,11 +26,18 @@ const initialForm: FormState = {
 };
 
 export function YieldFeedbackPage() {
-  const [form, setForm] = useState<FormState>(initialForm);
+  const location = useLocation();
+  const { token } = useAuth();
+  const [form, setForm] = useState<FormState>(emptyForm);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<YieldFeedbackResponse | null>(null);
   const sessionPreview = useMemo(() => form.session_code.trim().slice(0, 8).toUpperCase(), [form.session_code]);
+
+  useEffect(() => {
+    const sid = new URLSearchParams(location.search).get("sid") ?? "";
+    setForm((current) => ({ ...current, session_code: sid }));
+  }, [location.search]);
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -49,6 +56,10 @@ export function YieldFeedbackPage() {
       setError("Vui lòng nhập năng suất thực tế theo tấn/ha.");
       return;
     }
+    if (!token) {
+      setError("Vui long dang nhap hoac dang ky tai khoan truoc khi gui bao cao nang suat.");
+      return;
+    }
     setBusy(true);
     try {
       const payload = {
@@ -59,7 +70,7 @@ export function YieldFeedbackPage() {
         contact_phone: form.contact_phone.trim() || null,
         note: form.note.trim() || null
       };
-      setResult(await submitYieldFeedback(sessionCode, payload));
+      setResult(await submitYieldFeedback(sessionCode, payload, token));
     } catch (err) {
       console.warn("[YieldFeedbackPage] feedback failed", err);
       setError(err instanceof Error ? err.message : "Không gửi được báo cáo năng suất lúc này.");

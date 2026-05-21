@@ -132,8 +132,19 @@ class AppUser(Base):
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, server_default="0", index=True)
+    failed_login_attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False, server_default="0")
+    locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     watchlist: Mapped[list["WatchlistItem"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+
+
+class RevokedToken(Base):
+    __tablename__ = "revoked_tokens"
+
+    jti: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_users.user_id"), index=True)
+    revoked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
 
 
 class WatchlistItem(Base):
@@ -264,6 +275,7 @@ class NewsArticle(Base):
     excerpt: Mapped[str | None] = mapped_column(Text)
     category: Mapped[str] = mapped_column(String(80), default="Tin nông nghiệp", index=True)
     image_url: Mapped[str | None] = mapped_column(String(800))
+    public_slug: Mapped[str | None] = mapped_column(String(180), index=True)
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True)
     scraped_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
 
@@ -273,6 +285,7 @@ class GuidePost(Base):
 
     post_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     slug: Mapped[str] = mapped_column(String(180), unique=True, index=True)
+    public_slug: Mapped[str | None] = mapped_column(String(180), index=True)
     title: Mapped[str] = mapped_column(String(300), nullable=False)
     crop_type: Mapped[str | None] = mapped_column(String(30), index=True)
     category: Mapped[str] = mapped_column(String(100), index=True)

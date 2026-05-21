@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { Link } from "react-router-dom";
 import { CalendarClock, Gauge, Sprout } from "./icons";
 import { Breadcrumb } from "./Breadcrumb";
@@ -128,19 +128,27 @@ export function GuideDetailPage({ slug }: { slug: string }) {
 
 function GuideArticleContent({ guide }: { guide: GuidePost }) {
   const blocks = safeParseGuideBlocks(guide);
+  const [failedImages, setFailedImages] = useState<Set<number>>(() => new Set());
   return (
     <div className="detail-body guide-detail-body">
       {blocks.map((block) => (
         <section key={block.heading}>
           <h2>{block.heading}</h2>
-          {block.items.map((item, index) => renderGuideItem(item, index, guide, block.heading))}
+          {block.items.map((item, index) => renderGuideItem(item, index, guide, block.heading, failedImages, setFailedImages))}
         </section>
       ))}
     </div>
   );
 }
 
-function renderGuideItem(item: GuideContentItem, index: number, guide: GuidePost, heading: string) {
+function renderGuideItem(
+  item: GuideContentItem,
+  index: number,
+  guide: GuidePost,
+  heading: string,
+  failedImages: Set<number>,
+  setFailedImages: Dispatch<SetStateAction<Set<number>>>
+) {
   if (item.type === "subheading") {
     const HeadingTag = item.level === 4 ? "h4" : "h3";
     return <HeadingTag key={index}>{renderInlineMarkdown(item.text)}</HeadingTag>;
@@ -174,6 +182,7 @@ function renderGuideItem(item: GuideContentItem, index: number, guide: GuidePost
     );
   }
   if (item.type === "table") return renderMarkdownTable(item.rows, index);
+  if (failedImages.has(item.index)) return null;
   return (
     <img
       key={index}
@@ -183,9 +192,7 @@ function renderGuideItem(item: GuideContentItem, index: number, guide: GuidePost
       decoding="async"
       width="860"
       height="480"
-      onError={(event) => {
-        event.currentTarget.style.display = "none";
-      }}
+      onError={() => setFailedImages((current) => new Set(current).add(item.index))}
     />
   );
 }

@@ -852,7 +852,13 @@ function paginationItems(activePage: number, pageCount: number) {
 }
 
 function topicFromPath(): NewsTopic {
-  const slug = decodeURIComponent(window.location.pathname).split("/").filter(Boolean).at(-1) ?? "";
+  let pathname = window.location.pathname;
+  try {
+    pathname = decodeURIComponent(pathname);
+  } catch {
+    pathname = window.location.pathname;
+  }
+  const slug = pathname.split("/").filter(Boolean).at(-1) ?? "";
   const map: Record<string, NewsTopic> = {
     "ca-phe": "Cà phê",
     "sau-rieng": "Sầu riêng",

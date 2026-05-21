@@ -144,6 +144,10 @@ def _format_body_for_web(body: str) -> str:
     return "\n".join(formatted_lines).strip()
 
 
+def _public_guide_slug(slug: str) -> str:
+    return re.sub(r"^(hainong|hai-nong|hai_nong)-+", "", slug or "", flags=re.IGNORECASE)
+
+
 def import_one(path: Path, dry_run: bool) -> str:
     meta, body = parse_frontmatter(path)
     missing = REQUIRED_FIELDS - meta.keys()
@@ -168,6 +172,7 @@ def import_one(path: Path, dry_run: bool) -> str:
         guide.crop_type = str(meta["crop_type"]).strip() or None
         guide.category = str(meta["category"]).strip()
         guide.tags = _tags_to_db(meta["tags"])
+        guide.public_slug = _public_guide_slug(guide.slug)
         guide.published_at = datetime.now(UTC)
         if dry_run:
             db.rollback()
@@ -178,6 +183,7 @@ def import_one(path: Path, dry_run: bool) -> str:
         invalidate_cache("guide-detail")
         invalidate_cache("llm-guides-index")
         invalidate_cache("llm-guide-detail")
+        invalidate_cache("sitemap-xml")
         return f"Imported: #{post_id} {guide.slug}"
 
 

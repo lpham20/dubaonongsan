@@ -3,6 +3,8 @@ import html
 import ipaddress
 import re
 import socket
+import threading
+from contextlib import contextmanager
 from urllib.parse import urlparse
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
@@ -41,6 +43,7 @@ ALLOWED_IMAGE_HOSTS = {
 }
 MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
 SITE_BASE = "https://dubaonongsan.com"
+_DNS_PIN_LOCK = threading.Lock()
 
 
 def _slug_text(value: str) -> str:
@@ -61,6 +64,8 @@ def _slug_from_url(url: str, fallback: str = "bai-viet") -> str:
 
 
 def _news_slug(article: NewsArticle) -> str:
+    if article.public_slug:
+        return article.public_slug
     return f"{article.article_id}-{_slug_from_url(article.source_url, article.title)}"
 
 
@@ -71,7 +76,7 @@ def _public_guide_slug(slug: str) -> str:
 def _guide_out(guide: GuidePost) -> dict:
     return {
         "post_id": guide.post_id,
-        "slug": _public_guide_slug(guide.slug),
+        "slug": guide.public_slug or _public_guide_slug(guide.slug),
         "title": guide.title,
         "crop_type": guide.crop_type,
         "category": guide.category,
@@ -114,6 +119,9 @@ def news(
 @router.get("/content/news/{slug}", response_model=NewsArticleOut)
 @cached(prefix="news-detail", ttl_seconds=900)
 def news_detail(slug: str, db: Session = Depends(get_db)) -> NewsArticle:
+    article = db.scalar(select(NewsArticle).where(NewsArticle.public_slug == slug))
+    if article:
+        return article
     article_id_part = slug.split("-", 1)[0]
     if article_id_part.isdigit():
         article = db.scalar(select(NewsArticle).where(NewsArticle.article_id == int(article_id_part)))
@@ -135,6 +143,7 @@ def scrape_news(
     summary = ContentPortalService(db).scrape_news()
     invalidate_cache("news")
     invalidate_cache("news-detail")
+    invalidate_cache("sitemap-xml")
     return summary
 
 
@@ -151,10 +160,13 @@ def guides(
 @router.get("/content/guides/{slug}", response_model=GuidePostOut)
 @cached(prefix="guide-detail", ttl_seconds=1800)
 def guide_detail(slug: str, db: Session = Depends(get_db)) -> dict:
+    public_slug = _public_guide_slug(slug)
+    guide = db.scalar(select(GuidePost).where(GuidePost.public_slug == public_slug))
+    if guide is not None:
+        return _guide_out(guide)
     candidate_slugs = {slug, f"hainong-{slug}"}
     guide = db.scalar(select(GuidePost).where(GuidePost.slug.in_(candidate_slugs)))
     if guide is None:
-        public_slug = _public_guide_slug(slug)
         guide = db.scalar(select(GuidePost).where(GuidePost.slug.in_({public_slug, f"hainong-{public_slug}"})))
     if guide is None:
         id_match = re.match(r"^.*-(\d+)$", slug)
@@ -180,6 +192,7 @@ def guide_detail(slug: str, db: Session = Depends(get_db)) -> dict:
 
 @router.get("/sitemap.xml", include_in_schema=False)
 @router.head("/sitemap.xml", include_in_schema=False)
+@cached(prefix="sitemap-xml", ttl_seconds=900)
 def sitemap(db: Session = Depends(get_db)) -> Response:
     urls: list[tuple[str, str, str, str | None]] = [
         (f"{SITE_BASE}/", "1.0", "daily", None),
@@ -198,7 +211,7 @@ def sitemap(db: Session = Depends(get_db)) -> Response:
     guides_rows = db.scalars(select(GuidePost).order_by(GuidePost.published_at.desc()).limit(1000)).all()
     for guide in guides_rows:
         lastmod = guide.published_at.date().isoformat() if guide.published_at else None
-        urls.append((f"{SITE_BASE}/huong-dan/{_public_guide_slug(guide.slug)}", "0.7", "monthly", lastmod))
+        urls.append((f"{SITE_BASE}/huong-dan/{guide.public_slug or _public_guide_slug(guide.slug)}", "0.7", "monthly", lastmod))
 
     articles = ContentPortalService(db).latest_news(limit=500)
     for article in articles:
@@ -330,21 +343,46 @@ def report_local_price(
     }
 
 
-def _is_private_ip(host: str) -> bool:
-    try:
-        for info in socket.getaddrinfo(host, None):
-            ip = ipaddress.ip_address(info[4][0])
-            if any(ip in network for network in PRIVATE_NETWORKS):
-                return True
-    except (socket.gaierror, ValueError):
-        return True
-    return False
-
-
 def _is_allowed_image_host(host: str) -> bool:
-    # The proxy is not open: URLs must already exist in GuidePost.content, private
-    # networks are blocked below, redirects are disabled, and response size is capped.
-    return bool(host)
+    if not host:
+        return False
+    clean_host = host.lower().strip().rstrip(".")
+    return clean_host in ALLOWED_IMAGE_HOSTS or any(clean_host.endswith(f".{allowed}") for allowed in ALLOWED_IMAGE_HOSTS)
+
+
+def _resolve_public_ip(host: str) -> str | None:
+    try:
+        infos = socket.getaddrinfo(host, None)
+    except socket.gaierror:
+        return None
+    if not infos:
+        return None
+    for info in infos:
+        try:
+            ip = ipaddress.ip_address(info[4][0])
+        except ValueError:
+            return None
+        if any(ip in network for network in PRIVATE_NETWORKS):
+            return None
+    return infos[0][4][0]
+
+
+@contextmanager
+def _pinned_dns(host: str, public_ip: str):
+    original_getaddrinfo = socket.getaddrinfo
+    clean_host = host.lower().strip().rstrip(".")
+
+    def pinned_getaddrinfo(name, port, *args, **kwargs):
+        if str(name).lower().strip().rstrip(".") == clean_host:
+            return original_getaddrinfo(public_ip, port, *args, **kwargs)
+        return original_getaddrinfo(name, port, *args, **kwargs)
+
+    with _DNS_PIN_LOCK:
+        socket.getaddrinfo = pinned_getaddrinfo
+        try:
+            yield
+        finally:
+            socket.getaddrinfo = original_getaddrinfo
 
 
 @router.get("/content/guide-images/{post_id}/{image_index}")
@@ -375,7 +413,8 @@ def guide_image_proxy(
     host = parsed.hostname or ""
     if not _is_allowed_image_host(host):
         raise HTTPException(status_code=403, detail="Host ảnh không được phép")
-    if _is_private_ip(host):
+    public_ip = _resolve_public_ip(host)
+    if public_ip is None:
         raise HTTPException(status_code=403, detail="URL trỏ tới network nội bộ")
 
     known_image = db.scalar(
@@ -387,16 +426,17 @@ def guide_image_proxy(
         raise HTTPException(status_code=404, detail="Ảnh không nằm trong thư viện hướng dẫn")
 
     try:
-        upstream = requests.get(
-            image_url,
-            timeout=12,
-            stream=True,
-            allow_redirects=False,
-            headers={
-                "User-Agent": "Mozilla/5.0 (compatible; MarketAI/1.0)",
-                "Accept": "image/avif,image/webp,image/apng,image/*",
-            },
-        )
+        with _pinned_dns(host, public_ip):
+            upstream = requests.get(
+                image_url,
+                timeout=12,
+                stream=True,
+                allow_redirects=False,
+                headers={
+                    "User-Agent": "Mozilla/5.0 (compatible; MarketAI/1.0)",
+                    "Accept": "image/avif,image/webp,image/apng,image/*",
+                },
+            )
         upstream.raise_for_status()
         content_length = int(upstream.headers.get("content-length", 0))
         if content_length > MAX_IMAGE_SIZE_BYTES:

@@ -169,7 +169,12 @@ function getInitialNewsView(search = window.location.search): NewsView {
 }
 
 function getInitialRoute(pathnameInput = window.location.pathname, search = window.location.search): InitialRoute {
-  const pathname = decodeURIComponent(pathnameInput).replace(/\/+$/, "") || "/";
+  let pathname: string;
+  try {
+    pathname = decodeURIComponent(pathnameInput).replace(/\/+$/, "") || "/";
+  } catch {
+    pathname = pathnameInput.replace(/\/+$/, "") || "/";
+  }
   const fallback: InitialRoute = {
     section: getInitialSection(search),
     crop: getInitialCrop(search),

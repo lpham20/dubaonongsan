@@ -124,6 +124,22 @@ class ContentPortalService:
     def __init__(self, db: Session) -> None:
         self.db = db
 
+    def _sync_public_slugs(self) -> bool:
+        changed = False
+        for guide in self.db.scalars(select(GuidePost).limit(3000)).all():
+            public_slug = _public_guide_slug_value(guide.slug)[:180]
+            if guide.public_slug != public_slug:
+                guide.public_slug = public_slug
+                changed = True
+        for article in self.db.scalars(select(NewsArticle).limit(5000)).all():
+            public_slug = _news_public_slug_value(article)
+            if public_slug and article.public_slug != public_slug:
+                article.public_slug = public_slug
+                changed = True
+        if changed:
+            self.db.commit()
+        return changed
+
     def latest_news(self, limit: int = 24, category: str | None = None) -> list[NewsArticle]:
         stmt = select(NewsArticle).order_by(desc(NewsArticle.published_at), desc(NewsArticle.scraped_at))
         if category:
@@ -215,6 +231,7 @@ class ContentPortalService:
         try:
             self.db.commit()
             self._normalize_news_records()
+            self._sync_public_slugs()
         except IntegrityError:
             self.db.rollback()
             inserted = 0
@@ -225,6 +242,8 @@ class ContentPortalService:
             self.seed_fallback_news()
         if inserted == 0 and updated == 0 and unchanged == 0:
             self.seed_fallback_news()
+        if inserted or updated or cleanup["deleted"]:
+            invalidate_cache("sitemap-xml")
         return {"inserted": inserted, "updated": updated, "unchanged": unchanged, "deleted": cleanup["deleted"], "errors": errors}
 
     def cleanup_news_archive(self) -> dict:
@@ -243,6 +262,7 @@ class ContentPortalService:
             seen_titles.add(title_key)
         if deleted:
             self.db.commit()
+            invalidate_cache("sitemap-xml")
         return {"deleted": deleted}
 
     def guides(self, crop: str | None = None, limit: int = 120) -> list[GuidePost]:
@@ -271,8 +291,10 @@ class ContentPortalService:
             updated += 1
         if updated:
             self.db.commit()
+            self._sync_public_slugs()
             invalidate_cache("guides")
             invalidate_cache("guide-detail")
+            invalidate_cache("sitemap-xml")
         return {"checked": len(rows), "updated": updated, "target_min_words": GUIDE_TARGET_MIN_WORDS}
 
     def seed_fallback_news(self) -> None:
@@ -327,6 +349,10 @@ class ContentPortalService:
             else:
                 self.db.add(NewsArticle(**item))
         self.db.commit()
+        self._sync_public_slugs()
+        invalidate_cache("news")
+        invalidate_cache("news-detail")
+        invalidate_cache("sitemap-xml")
 
     def seed_guides(self) -> None:
         now = datetime.now(UTC)
@@ -432,6 +458,10 @@ Tối thiểu cần có ngày, lô, thao tác, vật tư, liều lượng, nhân
                 existing.content = item["content"]
                 existing.author = item["author"]
         self.db.commit()
+        self._sync_public_slugs()
+        invalidate_cache("guides")
+        invalidate_cache("guide-detail")
+        invalidate_cache("sitemap-xml")
         self.seed_hainong_guides()
 
     def seed_hainong_guides(self) -> None:
@@ -448,6 +478,10 @@ Tối thiểu cần có ngày, lô, thao tác, vật tư, liều lượng, nhân
             if not self.db.scalar(select(GuidePost).where(GuidePost.slug == item["slug"])):
                 self.db.add(GuidePost(**item))
         self.db.commit()
+        self._sync_public_slugs()
+        invalidate_cache("guides")
+        invalidate_cache("guide-detail")
+        invalidate_cache("sitemap-xml")
 
     def _fetch_hainong_catalogues(self) -> list[dict]:
         response = requests.get(
@@ -1224,6 +1258,25 @@ def _slugify(value: str) -> str:
     normalized = _normalize_ascii(value)
     normalized = re.sub(r"[^a-z0-9]+", "-", normalized)
     return normalized.strip("-") or "bai-viet-ky-thuat"
+
+
+def _public_guide_slug_value(slug: str) -> str:
+    return re.sub(r"^(hainong|hai-nong|hai_nong)-+", "", slug or "", flags=re.IGNORECASE)
+
+
+def _slug_from_source_url(url: str, fallback: str) -> str:
+    try:
+        tail = urlparse(url or "").path.rstrip("/").split("/")[-1] or fallback
+    except Exception:
+        tail = fallback
+    tail = re.sub(r"\.(html?|aspx?)$", "", tail.split("?", 1)[0], flags=re.IGNORECASE)
+    return _slugify(tail)
+
+
+def _news_public_slug_value(article: NewsArticle) -> str | None:
+    if not article.article_id:
+        return None
+    return f"{article.article_id}-{_slug_from_source_url(article.source_url, article.title)}"[:180]
 
 
 def _guide_category(section: str, plant: str) -> str:

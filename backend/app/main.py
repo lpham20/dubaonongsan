@@ -21,6 +21,7 @@ from app.api.llm_content import router as llm_content_router
 from app.api.metadata import router as metadata_router
 from app.api.ops import router as ops_router
 from app.api.public import router as public_router
+from app.api.security import router as security_router
 from app.core.config import get_settings
 from app.core.rate_limit import limiter
 from app.db import init_db
@@ -128,6 +129,7 @@ app.include_router(analytics_router)
 app.include_router(public_router)
 app.include_router(ops_router)
 app.include_router(llm_content_router)
+app.include_router(security_router)
 
 
 @app.middleware("http")
@@ -138,10 +140,11 @@ async def request_id_middleware(request: Request, call_next):
     response = await call_next(request)
     duration_ms = (time.perf_counter() - start) * 1000
     response.headers["X-Request-ID"] = request_id
+    safe_path = request.url.path.replace("\n", "\\n").replace("\r", "\\r")
     logger.info(
         "request_completed method=%s path=%s status=%s duration_ms=%.2f request_id=%s",
         request.method,
-        request.url.path,
+        safe_path,
         response.status_code,
         duration_ms,
         request_id,

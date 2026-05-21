@@ -1,12 +1,12 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
-import { login as apiLogin, register as apiRegister, type AuthSession, type AuthUser } from "../lib/api";
+import { login as apiLogin, logout as apiLogout, register as apiRegister, type AuthSession, type AuthUser } from "../lib/api";
 
 type AuthContextValue = {
   token: string;
   user: AuthUser | null;
   signIn: (email: string, password: string) => Promise<AuthSession>;
   signUp: (email: string, password: string, displayName: string) => Promise<AuthSession>;
-  signOut: () => void;
+  signOut: () => Promise<void>;
 };
 
 const TOKEN_KEY = "agri_price.token";
@@ -46,7 +46,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return session;
   }
 
-  function signOut() {
+  async function signOut() {
+    const currentToken = token;
+    if (currentToken) {
+      await apiLogout(currentToken).catch((err) => {
+        console.warn("[AuthContext] logout failed", err);
+      });
+    }
     setToken("");
     setUser(null);
     sessionStorage.removeItem(TOKEN_KEY);

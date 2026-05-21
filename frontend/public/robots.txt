@@ -1,7 +1,8 @@
 User-agent: *
 Allow: /
+Allow: /api/v1/llm-content/
+Allow: /api/v1/rss/news.xml
 Disallow: /api/
-Disallow: /api/v1/
 Disallow: /*.json$
 Disallow: /*?utm_*
 Disallow: /*?fbclid=*

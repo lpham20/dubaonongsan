@@ -13,7 +13,7 @@ export function AppHeader(props: AppHeaderProps) {
     <>
       <strong>{user.display_name}</strong>
       <span>{user.email}</span>
-      <button type="button" onClick={signOut}>Đăng xuất</button>
+      <button type="button" onClick={() => void signOut()}>Đăng xuất</button>
     </>
   ) : (
     <>

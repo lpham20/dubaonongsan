@@ -87,6 +87,14 @@ def run_yield_feedback_reminder_job(
     return PlatformJobService(db).run_yield_feedback_reminder()
 
 
+@router.post("/platform/jobs/revoked-token-cleanup")
+def run_revoked_token_cleanup_job(
+    _: AppUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> dict:
+    return PlatformJobService(db).run_revoked_token_cleanup()
+
+
 @router.post(
     "/sensors/maturity-telemetry",
     response_model=SensorTelemetryOut,

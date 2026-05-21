@@ -189,7 +189,7 @@ def _schema_block(schema: dict | list[dict] | None) -> str:
         return ""
     schemas = schema if isinstance(schema, list) else [schema]
     return "\n  ".join(
-        f'<script type="application/ld+json">{_json_ld(item)}</script>'
+        f'<script type="application/ld+json" nonce="dubaonongsan-jsonld">{_json_ld(item)}</script>'
         for item in schemas
     )
 
@@ -340,18 +340,7 @@ def _page(
     if news_keywords:
         keyword_meta = f'<meta name="news_keywords" content="{html.escape(news_keywords[:240])}" />'
     asset_tags = _asset_tags()
-    fallback_script = (
-        "<script>(function(){"
-        "function ready(){var r=document.getElementById('root');return !!(r&&r.children.length);}"
-        "function removeSeo(){var s=document.getElementById('seo-prerender');if(s){s.remove();}}"
-        "var guard=setInterval(function(){if(ready()){clearInterval(guard);removeSeo();}},250);"
-        "setTimeout(function(){if(ready()){clearInterval(guard);removeSeo();return;}"
-        "var s=document.getElementById('seo-prerender');"
-        "if(s){s.removeAttribute('hidden');"
-        "s.style.cssText='max-width:760px;margin:24px auto;padding:0 16px;"
-        "font-family:system-ui,sans-serif;line-height:1.6;color:#1a1a1a';}"
-        "},5000);})();</script>"
-    )
+    fallback_script = '<script src="/inline-seo-fallback.js" defer></script>'
 
     return f"""<!doctype html>
 <html lang="vi">
@@ -378,6 +367,8 @@ def _page(
   <meta property="og:image:height" content="630" />
   <meta property="og:image" content="{SITE_BASE}/og-cover.webp" />
   <meta property="og:image:type" content="image/webp" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
   {article_meta}
   {schema_markup}

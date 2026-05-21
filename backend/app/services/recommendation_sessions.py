@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
@@ -8,7 +9,11 @@ from fastapi import HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.client_ip import get_client_ip
 from app.models import AppUser, RecommendationSession, YieldFeedback
+
+_SESSION_CODE_RE = re.compile(r"^[0-9a-f]{8}$")
+_SESSION_ID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
 
 
 def log_recommendation_session(
@@ -43,7 +48,7 @@ def log_recommendation_session(
         knowledge_base_version=result.get("knowledge_base_version"),
         request_json=payload,
         response_json=result,
-        ip_address=_client_ip(request),
+        ip_address=get_client_ip(request),
         user_agent=request.headers.get("user-agent", "")[:500] or None,
         created_at=now,
         created_date=now.date(),
@@ -58,6 +63,7 @@ def save_yield_feedback(
     db: Session,
     *,
     session_code: str,
+    user: AppUser,
     actual_yield_t_ha: float,
     harvest_date: Any = None,
     fertilizer_followed_pct: float | None = None,
@@ -68,6 +74,9 @@ def save_yield_feedback(
     session = _resolve_session(db, session_code)
     if session is None:
         raise HTTPException(status_code=404, detail="Không tìm thấy mã khuyến nghị. Vui lòng kiểm tra lại 8 ký tự đầu.")
+
+    if session.user_id != user.user_id and not bool(user.is_admin):
+        raise HTTPException(status_code=403, detail="Ban khong co quyen bao cao cho ma phien nay.")
 
     feedback = db.scalar(select(YieldFeedback).where(YieldFeedback.session_id == session.session_id))
     if feedback is None:
@@ -91,22 +100,15 @@ def save_yield_feedback(
 
 
 def _resolve_session(db: Session, session_code: str) -> RecommendationSession | None:
-    clean = session_code.strip().lower()
+    clean = (session_code or "").strip().lower()
     if not clean:
         return None
-    if len(clean) == 8:
+    if _SESSION_CODE_RE.fullmatch(clean):
         return db.scalar(
             select(RecommendationSession)
             .where(RecommendationSession.session_id.like(f"{clean}%"))
             .order_by(RecommendationSession.created_at.desc())
         )
-    return db.get(RecommendationSession, clean)
-
-
-def _client_ip(request: Request) -> str | None:
-    forwarded_for = request.headers.get("x-forwarded-for", "")
-    if forwarded_for:
-        return forwarded_for.split(",", 1)[0].strip()[:64] or None
-    if request.client:
-        return request.client.host[:64]
+    if _SESSION_ID_RE.fullmatch(clean):
+        return db.get(RecommendationSession, clean)
     return None
