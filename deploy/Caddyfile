@@ -30,7 +30,7 @@
 	}
 
 	@seoHtml {
-		path / /tin-tuc /huong-dan /khuyen-nghi-bon-phan /thuat-toan-du-bao /thuat-toan-bon-phan /khuyen-nghi-bon-phan/logic /tin-tuc/* /huong-dan/* /du-bao-gia/*
+		path / /tin-tuc /huong-dan /khuyen-nghi-bon-phan /thuat-toan-du-bao /khuyen-nghi-bon-phan/logic /tin-tuc/* /huong-dan/* /du-bao-gia/*
 	}
 	header @seoHtml Cache-Control "public, max-age=300, stale-while-revalidate=60"
 
@@ -125,7 +125,7 @@
 		rewrite @seoMethodology /seo/methodology.html
 
 		@seoFertilizerMethodology {
-			path /thuat-toan-bon-phan /khuyen-nghi-bon-phan/logic
+			path /khuyen-nghi-bon-phan/logic
 		}
 		rewrite @seoFertilizerMethodology /seo/fertilizer-methodology.html
 
@@ -175,7 +175,8 @@
 	handle /robots.txt {
 		respond <<EOF
 User-agent: *
-Disallow: /
+Allow: /api/v1/llm-content/
+Disallow: /api/
 
 Sitemap: https://dubaonongsan.com/sitemap.xml
 EOF

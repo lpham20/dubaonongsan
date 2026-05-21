@@ -1,6 +1,11 @@
 # Prerendered HTML for SEO bots and users hitting deep URLs directly
 # Cloudflare Pages: 200 = rewrite; URL stays the same, content from destination is served.
 
+/du-bao-gia/sau-rieng        /du-bao-gia/sau_rieng              301
+/du-bao-gia/ca-phe           /du-bao-gia/ca_phe                 301
+/du-bao-gia/ho-tieu          /du-bao-gia/ho_tieu                301
+/thuat-toan-bon-phan         /khuyen-nghi-bon-phan/logic        301
+
 /tin-tuc/gia-sau-rieng        /seo/news-views/gia-sau-rieng.html    200
 /tin-tuc/gia-ca-phe           /seo/news-views/gia-ca-phe.html       200
 /tin-tuc/gia-ho-tieu          /seo/news-views/gia-ho-tieu.html      200
@@ -8,7 +13,6 @@
 /huong-dan/:slug               /seo/guides/:slug.html            200
 /du-bao-gia/:crop              /seo/forecast/:crop.html          200
 /thuat-toan-du-bao             /seo/methodology.html             200
-/thuat-toan-bon-phan           /seo/fertilizer-methodology.html  200
 /khuyen-nghi-bon-phan/logic    /seo/fertilizer-methodology.html  200
 
 # Static SPA fallback must be last.

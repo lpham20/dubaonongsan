@@ -18,10 +18,28 @@ API_BASE = (
 ).rstrip("/")
 SITE_BASE = os.environ.get("SITE_BASE", "https://dubaonongsan.com").rstrip("/")
 SITE_NAME = "Dự báo nông sản"
-INDEXNOW_KEY = os.environ.get("INDEXNOW_KEY", "")
 ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "frontend" / "dist"
+PUBLIC = ROOT / "frontend" / "public"
 OUTPUT = DIST / "seo"
+
+
+def _detect_indexnow_key() -> str:
+    configured = os.environ.get("INDEXNOW_KEY", "").strip()
+    if configured:
+        return configured
+    for key_file in sorted(PUBLIC.glob("*.txt")):
+        key = key_file.stem.strip()
+        try:
+            value = key_file.read_text(encoding="utf-8").strip()
+        except OSError:
+            continue
+        if value == key and re.fullmatch(r"[A-Za-z0-9_-]{8,128}", key):
+            return key
+    return ""
+
+
+INDEXNOW_KEY = _detect_indexnow_key()
 
 
 def _slug_text(value: str) -> str:
@@ -699,7 +717,7 @@ def _build_fertilizer_index_body(heading: str, desc: str) -> str:
 
 <h2>Phương pháp luận</h2>
 <p>Khuyến nghị bón phân dựa trên balance NPK: nhu cầu cây - cung từ đất - hiệu suất sử dụng. Hệ số điều chỉnh tính theo texture đất, OC%, pH, năng suất mục tiêu, lượng mưa và độ dốc. Chi tiết thuật toán tại
-<a href="{SITE_BASE}/thuat-toan-bon-phan">trang giải thích thuật toán bón phân</a>.</p>
+<a href="{SITE_BASE}/khuyen-nghi-bon-phan/logic">trang giải thích thuật toán bón phân</a>.</p>
 
 <h2>Lưu ý quan trọng</h2>
 <p>Công cụ chỉ mang tính tham khảo. Quyết định cuối cùng cần dựa trên kết quả phân tích đất gần nhất tại vườn, kinh nghiệm thực tế, và tư vấn của kỹ sư nông nghiệp địa phương. Không thay thế cho khuyến cáo của Viện Khoa học Nông nghiệp.</p>
