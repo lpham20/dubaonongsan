@@ -3,10 +3,12 @@ from __future__ import annotations
 from datetime import date
 from typing import Literal
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, model_validator
 
 from app.core.config import get_settings
+from app.models import AppUser
+from app.services.auth import current_user
 from app.services.fertilizer_engine import ENGINE_VERSION, KNOWLEDGE_BASE_VERSION, recommend, sample_request, supported_crops
 
 
@@ -85,7 +87,7 @@ class RecommendRequest(BaseModel):
 
 @router.post("/fertilizer/recommend")
 @router.post("/recommend", include_in_schema=False)
-def fertilizer_recommendation(payload: RecommendRequest) -> dict:
+def fertilizer_recommendation(payload: RecommendRequest, _: AppUser = Depends(current_user)) -> dict:
     try:
         return recommend(payload.model_dump(mode="json"))
     except ValueError as exc:

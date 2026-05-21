@@ -638,8 +638,8 @@ export function fetchFertilizerCrops(signal?: AbortSignal) {
   );
 }
 
-export function recommendFertilizer(payload: FertilizerRequest, signal?: AbortSignal) {
-  return requestJson<FertilizerRecommendation>("/api/v1/fertilizer/recommend", {
+export function recommendFertilizer(payload: FertilizerRequest, token: string, signal?: AbortSignal) {
+  return authJson<FertilizerRecommendation>("/api/v1/fertilizer/recommend", token, {
     method: "POST",
     signal,
     body: JSON.stringify(payload)

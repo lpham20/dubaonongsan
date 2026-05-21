@@ -131,6 +131,9 @@ type InitialRoute = {
 const validSections: MainSection[] = ["home", "analytics", "news", "guides", "fertilizer", "fertilizerMethodology", "methodology"];
 const validCrops: CropType[] = ["sau_rieng", "ca_phe", "ho_tieu", "lua"];
 const validNewsViews: NewsView[] = ["latest", "sau_rieng", "ca_phe", "ho_tieu"];
+const gatedAnalyticsTabs: AnalyticsTab[] = ["analysis", "technical", "data"];
+const ANALYTICS_AUTH_MESSAGE = "Vui lòng đăng nhập hoặc đăng ký tài khoản để xem mục này.";
+const FERTILIZER_AUTH_MESSAGE = "Vui lòng đăng nhập hoặc đăng ký tài khoản trước khi tính khuyến nghị.";
 const newsViewPaths: Record<PriceNewsView, string> = {
   sau_rieng: "gia-sau-rieng",
   ca_phe: "gia-ca-phe",
@@ -295,6 +298,7 @@ function RoutedApp() {
   const [guideSlug, setGuideSlug] = useState(initialRoute.guideSlug);
   const [notFound, setNotFound] = useState(initialRoute.notFound);
   const [analyticsTab, setAnalyticsTab] = useState<AnalyticsTab>("chart");
+  const [pendingAnalyticsTab, setPendingAnalyticsTab] = useState<AnalyticsTab | null>(null);
   const [watchlist, setWatchlist] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem("agri_price.watchlist");
@@ -496,6 +500,17 @@ function RoutedApp() {
     void loadAccountData(authToken, user);
   }, [authToken, user]);
 
+  useEffect(() => {
+    if (authToken || !gatedAnalyticsTabs.includes(analyticsTab)) return;
+    setAnalyticsTab("chart");
+  }, [authToken, analyticsTab]);
+
+  useEffect(() => {
+    if (!authToken || !pendingAnalyticsTab) return;
+    setAnalyticsTab(pendingAnalyticsTab);
+    setPendingAnalyticsTab(null);
+  }, [authToken, pendingAnalyticsTab]);
+
   const latestPrice = useMemo(() => historical.at(-1)?.max_price_vnd ?? 0, [historical]);
   const visibleHistorical = useMemo(() => {
     const validDates = historical
@@ -594,6 +609,36 @@ function RoutedApp() {
     setPriceMenuOpen(false);
     setFertilizerMenuOpen(false);
     navigate(forecastPath(nextCrop));
+  }
+
+  function requestAccountAccess(message: string) {
+    setAuthMode("register");
+    setAuthOpen(true);
+    setPriceMenuOpen(false);
+    setNewsMenuOpen(false);
+    setFertilizerMenuOpen(false);
+    setError(message);
+  }
+
+  function handleAuthOpenChange(open: boolean) {
+    setAuthOpen(open);
+    if (!open) {
+      setPendingAnalyticsTab(null);
+      setError((current) =>
+        current === ANALYTICS_AUTH_MESSAGE || current === FERTILIZER_AUTH_MESSAGE ? null : current
+      );
+    }
+  }
+
+  function openAnalyticsTab(nextTab: AnalyticsTab) {
+    if (!authToken && gatedAnalyticsTabs.includes(nextTab)) {
+      setPendingAnalyticsTab(nextTab);
+      requestAccountAccess(ANALYTICS_AUTH_MESSAGE);
+      return;
+    }
+    setPendingAnalyticsTab(null);
+    setError(null);
+    setAnalyticsTab(nextTab);
   }
 
   function openNews(nextView: NewsView = "latest") {
@@ -748,7 +793,7 @@ function RoutedApp() {
         onPriceMenuOpenChange={setPriceMenuOpen}
         onNewsMenuOpenChange={setNewsMenuOpen}
         onFertilizerMenuOpenChange={setFertilizerMenuOpen}
-        onAuthOpenChange={setAuthOpen}
+        onAuthOpenChange={handleAuthOpenChange}
         onAuthModeChange={setAuthMode}
         onAuthNameChange={setAuthName}
         onAuthEmailChange={setAuthEmail}
@@ -826,10 +871,10 @@ function RoutedApp() {
           </header>
 
           <nav className="market-subnav" aria-label="Công cụ phân tích giá">
-            <button type="button" className={analyticsTab === "chart" ? "active" : ""} onClick={() => setAnalyticsTab("chart")}>Biểu đồ</button>
-            <button type="button" className={analyticsTab === "analysis" ? "active" : ""} onClick={() => setAnalyticsTab("analysis")}>Phân tích</button>
-            <button type="button" className={analyticsTab === "technical" ? "active" : ""} onClick={() => setAnalyticsTab("technical")}>Kỹ thuật</button>
-            <button type="button" className={analyticsTab === "data" ? "active" : ""} onClick={() => setAnalyticsTab("data")}>Dữ liệu</button>
+            <button type="button" className={analyticsTab === "chart" ? "active" : ""} onClick={() => openAnalyticsTab("chart")}>Biểu đồ</button>
+            <button type="button" className={analyticsTab === "analysis" ? "active" : ""} onClick={() => openAnalyticsTab("analysis")}>Phân tích</button>
+            <button type="button" className={analyticsTab === "technical" ? "active" : ""} onClick={() => openAnalyticsTab("technical")}>Kỹ thuật</button>
+            <button type="button" className={analyticsTab === "data" ? "active" : ""} onClick={() => openAnalyticsTab("data")}>Dữ liệu</button>
           </nav>
 
           <section className="control-band">
@@ -999,7 +1044,12 @@ function RoutedApp() {
       ) : null}
       {!notFound && section === "guides" && guideSlug ? <GuideDetailPage slug={guideSlug} /> : null}
       {!notFound && section === "guides" && !guideSlug ? <GuideLibrary guides={guides} /> : null}
-      {!notFound && section === "fertilizer" ? <FertilizerAdvisor /> : null}
+      {!notFound && section === "fertilizer" ? (
+        <FertilizerAdvisor
+          authToken={authToken}
+          onRequireAuth={() => requestAccountAccess(FERTILIZER_AUTH_MESSAGE)}
+        />
+      ) : null}
       {!notFound && section === "fertilizerMethodology" ? <FertilizerMethodology /> : null}
       {!notFound && section === "methodology" ? <ForecastMethodology /> : null}
       </Suspense>

@@ -46,6 +46,11 @@ type FormState = {
   province: string;
 };
 
+type FertilizerAdvisorProps = {
+  authToken: string | null;
+  onRequireAuth: () => void;
+};
+
 const initialForm: FormState = {
   crop: "robusta_coffee",
   growth_stage: "mature_kinh_doanh",
@@ -65,7 +70,7 @@ const initialForm: FormState = {
   province: "Đắk Lắk"
 };
 
-export function FertilizerAdvisor() {
+export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdvisorProps) {
   const [form, setForm] = useState<FormState>(initialForm);
   const [result, setResult] = useState<FertilizerRecommendation | null>(null);
   const [busy, setBusy] = useState(false);
@@ -96,6 +101,11 @@ export function FertilizerAdvisor() {
   }
 
   async function submit() {
+    if (!authToken) {
+      setError(null);
+      onRequireAuth();
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -122,7 +132,7 @@ export function FertilizerAdvisor() {
         field: { slope_pct: numberOrNull(form.slope_pct), years_under_current_crop: numberOrNull(form.years_under_current_crop) },
         preferences: { language: "vi", include_product_mix: true, preferred_brand: form.growth_stage === "fruit_fill" ? "phu_my_kcl_60" : null }
       };
-      setResult(await recommendFertilizer(payload));
+      setResult(await recommendFertilizer(payload, authToken));
     } catch (err) {
       console.warn("[FertilizerAdvisor] recommendation failed", err);
       setError("Không tính được khuyến nghị lúc này. Vui lòng thử lại sau ít phút.");
