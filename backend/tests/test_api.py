@@ -15,6 +15,31 @@ def client():
         yield test_client
 
 
+FERTILIZER_RECOMMENDATION_PAYLOAD = {
+    "crop": "robusta_coffee",
+    "growth_stage": "mature_kinh_doanh",
+    "yield_target_t_ha": 3.5,
+    "tree_density_per_ha": 1100,
+    "soil": {
+        "texture": "basaltic_red",
+        "ph_kcl": 4.3,
+        "organic_carbon_pct": 2.8,
+        "total_n_pct": 0.18,
+        "available_p_method": "bray_ii",
+        "available_p_mg_per_100g": 4.5,
+        "exchangeable_k_method": "nh4oac",
+        "exchangeable_k2o_mg_per_100g": 12,
+        "cec_cmolc_per_kg": 8,
+        "sample_depth_cm": 30,
+        "sample_date": "2026-05-21",
+    },
+    "location": {"province": "Dak Lak"},
+    "climate": {"annual_rainfall_mm": 1900, "irrigation_available": True},
+    "field": {"slope_pct": 5, "years_under_current_crop": 10},
+    "preferences": {"language": "vi", "include_product_mix": True},
+}
+
+
 def test_historical_prices_returns_seeded_points(client):
     response = client.get("/api/v1/analytics/historical-prices?region_id=1&variety=1&limit=5")
     assert response.status_code == 200
@@ -78,6 +103,26 @@ def test_auth_and_watchlist_flow(client, test_password):
     response = client.get("/api/v1/watchlist", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     assert response.json()[0]["label"] == "Tiền Giang - Ri6"
+
+
+def test_fertilizer_recommendation_requires_login(client, test_password):
+    response = client.post("/api/v1/fertilizer/recommend", json=FERTILIZER_RECOMMENDATION_PAYLOAD)
+    assert response.status_code == 401
+
+    response = client.post(
+        "/api/v1/auth/register",
+        json={"email": "fertilizer@example.com", "password": test_password, "display_name": "Fertilizer User"},
+    )
+    assert response.status_code == 201
+    token = response.json()["access_token"]
+
+    response = client.post(
+        "/api/v1/fertilizer/recommend",
+        headers={"Authorization": f"Bearer {token}"},
+        json=FERTILIZER_RECOMMENDATION_PAYLOAD,
+    )
+    assert response.status_code == 200
+    assert "recommendation" in response.json()
 
 
 def test_public_api_requires_key(client):
