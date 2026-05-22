@@ -159,9 +159,10 @@ export function InputPricesPage() {
       .then(([productPayload, latestPayload]) => {
         setProducts(productPayload);
         setLatest(latestPayload);
-        setProductSlug((current) => current || productPayload[0]?.slug || "");
+        const preferredLatest = latestPayload.find((row) => row.data_kind === "scraped") ?? latestPayload[0];
+        setProductSlug((current) => current || preferredLatest?.product_slug || productPayload[0]?.slug || "");
         const provinces = [...new Set(latestPayload.map((row) => row.province))].sort(COLLATOR.compare);
-        setProvince((current) => current || provinces[0] || "");
+        setProvince((current) => current || preferredLatest?.province || provinces[0] || "");
       })
       .catch((err) => {
         if (err instanceof DOMException && err.name === "AbortError") return;
