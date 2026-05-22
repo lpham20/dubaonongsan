@@ -86,6 +86,13 @@ def invalidate_model_cache(crop_type: str | None = None) -> None:
 
 def _load_tflite_module():
     try:
+        import ai_edge_litert.interpreter as litert
+
+        return litert
+    except ImportError:
+        pass
+
+    try:
         import tflite_runtime.interpreter as tflite
 
         return tflite
