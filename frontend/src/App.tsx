@@ -134,6 +134,9 @@ type MainSection =
   | "news"
   | "guides"
   | "fertilizer"
+  | "sellingTime"
+  | "arbitrage"
+  | "crossCrop"
   | "fertilizerMethodology"
   | "yieldFeedback"
   | "methodology";
@@ -156,6 +159,9 @@ const validSections: MainSection[] = [
   "news",
   "guides",
   "fertilizer",
+  "sellingTime",
+  "arbitrage",
+  "crossCrop",
   "fertilizerMethodology",
   "yieldFeedback",
   "methodology"
@@ -231,6 +237,10 @@ function getInitialRoute(pathnameInput = window.location.pathname, search = wind
     return { ...fallback, section: "analytics", crop: routeCrop };
   }
   if (parts[0] === "roi-uoc-tinh") return { ...fallback, section: "roi" };
+  if (parts[0] === "khuyen-nghi-bon-phan" && parts[1] === "roi") return { ...fallback, section: "roi" };
+  if (parts[0] === "khuyen-nghi-bon-phan" && parts[1] === "thoi-diem-ban") return { ...fallback, section: "sellingTime" };
+  if (parts[0] === "khuyen-nghi-bon-phan" && parts[1] === "chenh-lech-vung") return { ...fallback, section: "arbitrage" };
+  if (parts[0] === "khuyen-nghi-bon-phan" && parts[1] === "so-sanh-cay-trong") return { ...fallback, section: "crossCrop" };
   if (parts[0] === "khuyen-nghi-bon-phan" && parts[1] === "logic") return { ...fallback, section: "fertilizerMethodology" };
   if (parts[0] === "khuyen-nghi-bon-phan") return { ...fallback, section: "fertilizer" };
   if (parts[0] === "bao-cao-nang-suat") return { ...fallback, section: "yieldFeedback" };
@@ -266,6 +276,12 @@ function routeToUrl(route: InitialRoute) {
     path = "/roi-uoc-tinh";
   } else if (route.section === "fertilizer") {
     path = "/khuyen-nghi-bon-phan";
+  } else if (route.section === "sellingTime") {
+    path = "/khuyen-nghi-bon-phan/thoi-diem-ban";
+  } else if (route.section === "arbitrage") {
+    path = "/khuyen-nghi-bon-phan/chenh-lech-vung";
+  } else if (route.section === "crossCrop") {
+    path = "/khuyen-nghi-bon-phan/so-sanh-cay-trong";
   } else if (route.section === "fertilizerMethodology") {
     path = "/khuyen-nghi-bon-phan/logic";
   } else if (route.section === "yieldFeedback") {
@@ -1101,6 +1117,27 @@ function RoutedApp() {
       ) : null}
       {!notFound && section === "fertilizer" ? (
         <AdvisoryHub
+          authToken={authToken}
+          onRequireAuth={() => requestAccountAccess(FERTILIZER_AUTH_MESSAGE)}
+        />
+      ) : null}
+      {!notFound && section === "sellingTime" ? (
+        <AdvisoryHub
+          tool="sellingTime"
+          authToken={authToken}
+          onRequireAuth={() => requestAccountAccess(FERTILIZER_AUTH_MESSAGE)}
+        />
+      ) : null}
+      {!notFound && section === "arbitrage" ? (
+        <AdvisoryHub
+          tool="arbitrage"
+          authToken={authToken}
+          onRequireAuth={() => requestAccountAccess(FERTILIZER_AUTH_MESSAGE)}
+        />
+      ) : null}
+      {!notFound && section === "crossCrop" ? (
+        <AdvisoryHub
+          tool="crossCrop"
           authToken={authToken}
           onRequireAuth={() => requestAccountAccess(FERTILIZER_AUTH_MESSAGE)}
         />

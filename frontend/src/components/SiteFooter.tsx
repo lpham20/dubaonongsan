@@ -90,7 +90,7 @@ export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics, onOpenIn
               onOpenInputPrices();
             }}
           >
-            Giá phân bón đầu vào
+            Giá phân bón thế giới
           </a>
           <a href="/khuyen-nghi-bon-phan">Khuyến nghị bón phân</a>
           <a href="/bao-cao-nang-suat">Báo cáo năng suất</a>

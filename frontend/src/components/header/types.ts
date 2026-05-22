@@ -10,6 +10,9 @@ export type MainSection =
   | "news"
   | "guides"
   | "fertilizer"
+  | "sellingTime"
+  | "arbitrage"
+  | "crossCrop"
   | "fertilizerMethodology"
   | "yieldFeedback"
   | "methodology";

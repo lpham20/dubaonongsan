@@ -24,6 +24,7 @@ export function AppHeaderDesktop({
   onAuthOpenChange
 }: HeaderSurfaceProps) {
   const headerRef = useRef<HTMLElement | null>(null);
+  const fertilizerActive = fertilizerMenuItems.some((item) => item.value === section);
 
   const closeMenus = () => {
     onNewsMenuOpenChange(false);
@@ -104,7 +105,7 @@ export function AppHeaderDesktop({
                 key={item.value}
                 className={[
                   "nav-dropdown",
-                  section === "fertilizer" || section === "fertilizerMethodology" || section === "yieldFeedback" ? "active" : "",
+                  fertilizerActive ? "active" : "",
                   fertilizerMenuOpen ? "open" : ""
                 ].filter(Boolean).join(" ")}
               >
@@ -185,7 +186,7 @@ export function AppHeaderDesktop({
               }}
             >
               <PackageCheck size={16} />
-              Giá phân bón đầu vào
+              Giá phân bón thế giới
             </button>
             <button
               type="button"

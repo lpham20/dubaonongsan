@@ -105,7 +105,7 @@ def selling_time(payload: SellingTimeRequest, db: Session = Depends(get_db)) -> 
         "best_window": best,
         "top_5_windows": ranked,
         "confidence_score": _forecast_confidence(forecast["history_points"], forecast["model_kind"]),
-        "rationale_vi": f"Bán vào {best['date']} đang cho doanh thu ròng tốt nhất trong 30 ngày theo forecast hiện có.",
+        "rationale_vi": f"Bán vào {best['date']} đang cho doanh thu ròng tốt nhất trong 30 ngày theo dự báo hiện có.",
     }
 
 
@@ -139,8 +139,10 @@ def arbitrage(
                     {
                         "crop": crop,
                         "crop_label_vi": CROP_LABELS[crop],
-                        "from_region": source["region"],
-                        "to_region": target["region"],
+                        "from_region": source["display_name"],
+                        "to_region": target["display_name"],
+                        "from_region_name": source["region"],
+                        "to_region_name": target["region"],
                         "from_province": source["province"],
                         "to_province": target["province"],
                         "source_price_vnd_per_kg": round(source["price"], 2),
@@ -191,7 +193,7 @@ def cross_commodity(payload: CrossCommodityRequest, db: Session = Depends(get_db
         "province": region.province,
         "items": sorted(rows, key=lambda item: item["estimated_profit_vnd"], reverse=True),
         "intercropping_vi": _intercropping_notes(region.province or ""),
-        "disclaimer_vi": "Đây là so sánh tham khảo theo giá, năng suất và suitability ước tính; không thay thế khảo sát đất, nước và hợp đồng đầu ra.",
+        "disclaimer_vi": "Đây là so sánh tham khảo theo giá, năng suất và độ phù hợp ước tính; không thay thế khảo sát đất, nước và hợp đồng đầu ra.",
     }
 
 
@@ -251,6 +253,7 @@ def _latest_prices_by_region(db: Session, crop: str) -> list[dict]:
             "region_id": row.region_id,
             "region": row.region.region_name if row.region else f"Vùng {row.region_id}",
             "province": row.region.province if row.region else "",
+            "display_name": (row.region.province or row.region.region_name) if row.region else f"Vùng {row.region_id}",
             "price": float(row.max_price_vnd),
         }
         for row in latest.values()

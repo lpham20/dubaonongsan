@@ -1,4 +1,4 @@
-import { BookOpenCheck, Calculator, ClipboardCheck, Coffee, Leaf, Newspaper, Sprout } from "../icons";
+import { BarChart3, BookOpenCheck, Calculator, ClipboardCheck, Coffee, GitCompareArrows, Leaf, Newspaper, Sprout } from "../icons";
 import type { LucideIcon } from "../icons";
 import type { MainSection, NewsView } from "./types";
 
@@ -10,11 +10,15 @@ export const newsMenuItems: { value: NewsView; label: string; Icon: LucideIcon }
 ];
 
 export const fertilizerMenuItems: {
-  value: Extract<MainSection, "fertilizer" | "fertilizerMethodology" | "yieldFeedback">;
+  value: Extract<MainSection, "fertilizer" | "roi" | "sellingTime" | "arbitrage" | "crossCrop" | "fertilizerMethodology" | "yieldFeedback">;
   label: string;
   Icon: LucideIcon;
 }[] = [
   { value: "fertilizer", label: "Khuyến nghị bón phân", Icon: Calculator },
+  { value: "roi", label: "ROI nông vụ", Icon: Calculator },
+  { value: "sellingTime", label: "Thời điểm bán", Icon: BarChart3 },
+  { value: "arbitrage", label: "Chênh lệch vùng", Icon: GitCompareArrows },
+  { value: "crossCrop", label: "So sánh cây trồng", Icon: Sprout },
   { value: "fertilizerMethodology", label: "Giải thích logic cách tính", Icon: BookOpenCheck },
   { value: "yieldFeedback", label: "Báo cáo năng suất", Icon: ClipboardCheck }
 ];

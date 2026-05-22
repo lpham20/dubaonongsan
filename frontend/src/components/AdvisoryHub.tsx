@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { BarChart3, Calculator, GitCompareArrows, Leaf, RefreshCw, Sprout } from "./icons";
 import { FertilizerAdvisor } from "./FertilizerAdvisor";
-import { RoiCalculatorPage } from "./RoiCalculatorPage";
 import { SeoHead } from "./SeoHead";
 import {
   fetchArbitrage,
@@ -15,15 +14,38 @@ import {
   type SellingTimeResponse
 } from "../lib/api";
 
-type AdvisoryTab = "fertilizer" | "roi" | "sellingTime" | "arbitrage" | "crossCrop";
+export type AdvisoryTool = "fertilizer" | "sellingTime" | "arbitrage" | "crossCrop";
 
-const tabs: { value: AdvisoryTab; label: string; Icon: typeof Calculator }[] = [
-  { value: "fertilizer", label: "Bón phân", Icon: Leaf },
-  { value: "roi", label: "ROI", Icon: Calculator },
-  { value: "sellingTime", label: "Thời điểm bán", Icon: BarChart3 },
-  { value: "arbitrage", label: "Chênh lệch vùng", Icon: GitCompareArrows },
-  { value: "crossCrop", label: "So sánh cây trồng", Icon: Sprout }
-];
+const toolMeta: Record<AdvisoryTool, { kicker: string; title: string; description: string; canonical: string; Icon: typeof Calculator }> = {
+  fertilizer: {
+    kicker: "Khuyến nghị",
+    title: "Khuyến nghị bón phân",
+    description: "Tính khuyến nghị bón phân theo cây trồng, vùng sản xuất, giai đoạn sinh trưởng và dữ liệu anh tự nhập.",
+    canonical: "/khuyen-nghi-bon-phan",
+    Icon: Leaf
+  },
+  sellingTime: {
+    kicker: "Thời điểm bán",
+    title: "Chọn ngày bán theo dự báo giá",
+    description: "Xếp hạng các ngày bán tốt nhất trong 30 ngày tới theo dự báo giá nông sản và chi phí lưu kho.",
+    canonical: "/khuyen-nghi-bon-phan/thoi-diem-ban",
+    Icon: BarChart3
+  },
+  arbitrage: {
+    kicker: "Chênh lệch vùng",
+    title: "Quét chênh lệch giá theo tỉnh",
+    description: "So nhanh các cặp tỉnh có giá mua và giá bán chênh lệch sau khi trừ chi phí vận chuyển ước tính.",
+    canonical: "/khuyen-nghi-bon-phan/chenh-lech-vung",
+    Icon: GitCompareArrows
+  },
+  crossCrop: {
+    kicker: "So sánh cây trồng",
+    title: "So sánh lợi nhuận theo cây và tỉnh",
+    description: "Ước tính lợi nhuận tham khảo giữa sầu riêng, cà phê, hồ tiêu và lúa theo giá, năng suất và độ phù hợp của tỉnh.",
+    canonical: "/khuyen-nghi-bon-phan/so-sanh-cay-trong",
+    Icon: Sprout
+  }
+};
 
 const cropOptions: { value: CropType | ""; label: string }[] = [
   { value: "", label: "Tất cả" },
@@ -33,53 +55,48 @@ const cropOptions: { value: CropType | ""; label: string }[] = [
   { value: "lua", label: "Lúa" }
 ];
 
-function initialTab(): AdvisoryTab {
-  const tab = new URLSearchParams(window.location.search).get("tab") as AdvisoryTab | null;
-  return tab && tabs.some((item) => item.value === tab) ? tab : "fertilizer";
-}
-
 function formatVnd(value: number) {
   return `${Math.round(value).toLocaleString("vi-VN")} đ`;
 }
 
-export function AdvisoryHub({ authToken, onRequireAuth }: { authToken: string | null; onRequireAuth: () => void }) {
-  const [activeTab, setActiveTab] = useState<AdvisoryTab>(initialTab);
+function regionLabel(region: Region) {
+  return region.province ?? region.region_name;
+}
 
-  function openTab(next: AdvisoryTab) {
-    setActiveTab(next);
-    const params = new URLSearchParams(window.location.search);
-    params.set("tab", next);
-    window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
-  }
+export function AdvisoryHub({
+  authToken,
+  onRequireAuth,
+  tool = "fertilizer"
+}: {
+  authToken: string | null;
+  onRequireAuth: () => void;
+  tool?: AdvisoryTool;
+}) {
+  const meta = toolMeta[tool];
+  const ToolIcon = meta.Icon;
 
   return (
     <section className="advisory-page">
-      <SeoHead
-        title="Khuyến nghị nông vụ"
-        description="Bón phân, ROI, thời điểm bán, chênh lệch vùng và so sánh cây trồng trên cùng một tab khuyến nghị."
-        canonical="/khuyen-nghi-bon-phan"
-      />
-      <header className="advisory-hero">
-        <span>Khuyến nghị</span>
-        <h1>Ra quyết định nông vụ bằng số liệu</h1>
-        <p>Tab này gom bón phân, ROI, thời điểm bán và tín hiệu vùng giá. Phần phân bón thế giới vẫn nằm ở trang giá phân bón theo đúng spec.</p>
-      </header>
+      {tool !== "fertilizer" ? (
+        <>
+          <SeoHead
+            title={meta.title}
+            description={meta.description}
+            canonical={meta.canonical}
+          />
+          <header className="advisory-hero">
+            <span><ToolIcon size={17} /> {meta.kicker}</span>
+            <h1>{meta.title}</h1>
+            <p>{meta.description}</p>
+          </header>
+        </>
+      ) : null}
 
-      <div className="advisory-tabs" role="tablist" aria-label="Các công cụ khuyến nghị">
-        {tabs.map(({ value, label, Icon }) => (
-          <button key={value} type="button" className={activeTab === value ? "active" : ""} onClick={() => openTab(value)}>
-            <Icon size={17} />
-            {label}
-          </button>
-        ))}
-      </div>
-
-      <div className="advisory-content">
-        {activeTab === "fertilizer" ? <FertilizerAdvisor authToken={authToken} onRequireAuth={onRequireAuth} /> : null}
-        {activeTab === "roi" ? <RoiCalculatorPage authToken={authToken} onRequireAuth={onRequireAuth} embedded /> : null}
-        {activeTab === "sellingTime" ? <SellingTimePanel /> : null}
-        {activeTab === "arbitrage" ? <ArbitragePanel /> : null}
-        {activeTab === "crossCrop" ? <CrossCropPanel /> : null}
+      <div className={tool === "fertilizer" ? "advisory-content advisory-content--flush" : "advisory-content"}>
+        {tool === "fertilizer" ? <FertilizerAdvisor authToken={authToken} onRequireAuth={onRequireAuth} /> : null}
+        {tool === "sellingTime" ? <SellingTimePanel /> : null}
+        {tool === "arbitrage" ? <ArbitragePanel /> : null}
+        {tool === "crossCrop" ? <CrossCropPanel /> : null}
       </div>
     </section>
   );
@@ -119,7 +136,7 @@ function SellingTimePanel() {
     <section className="advisory-tool">
       <div className="advisory-tool-head">
         <h2>Thời điểm bán nông sản</h2>
-        <p>Xếp hạng 5 ngày bán tốt nhất trong 30 ngày theo forecast giá nông sản và chi phí lưu kho.</p>
+        <p>Xếp hạng 5 ngày bán tốt nhất trong 30 ngày theo dự báo giá nông sản và chi phí lưu kho.</p>
       </div>
       {error ? <div className="input-price-error">{error}</div> : null}
       <div className="advisory-form-row">
@@ -132,10 +149,10 @@ function SellingTimePanel() {
           </select>
         </label>
         <label>
-          Vùng
+          Tỉnh/vùng trồng
           <select value={regionId} onChange={(event) => setRegionId(Number(event.target.value) || "")}>
             {regions.map((region) => (
-              <option key={region.region_id} value={region.region_id}>{region.region_name}</option>
+              <option key={region.region_id} value={region.region_id}>{regionLabel(region)}</option>
             ))}
           </select>
         </label>
@@ -190,7 +207,7 @@ function ArbitragePanel() {
     <section className="advisory-tool">
       <div className="advisory-tool-head">
         <h2>Chênh lệch vùng giá</h2>
-        <p>Lọc các cặp vùng có spread sau chi phí vận chuyển ước tính.</p>
+        <p>Lọc các cặp tỉnh có chênh lệch giá sau chi phí vận chuyển ước tính.</p>
       </div>
       <div className="advisory-form-row compact">
         <label>
@@ -210,9 +227,9 @@ function ArbitragePanel() {
           <thead>
             <tr>
               <th>Cây</th>
-              <th>Từ vùng</th>
-              <th>Đến vùng</th>
-              <th>Net spread</th>
+              <th>Tỉnh giá thấp</th>
+              <th>Tỉnh giá cao</th>
+              <th>Chênh lệch ròng</th>
               <th>%</th>
             </tr>
           </thead>
@@ -239,14 +256,22 @@ function CrossCropPanel() {
   const [regionId, setRegionId] = useState<number | "">("");
   const [area, setArea] = useState(1);
   const [result, setResult] = useState<CrossCommodityResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const maxProfit = useMemo(() => Math.max(1, ...(result?.items.map((item) => Math.abs(item.estimated_profit_vnd)) ?? [1])), [result]);
 
   useEffect(() => {
     const controller = new AbortController();
-    fetchRegions("sau_rieng", controller.signal)
-      .then((items) => {
+    Promise.all(cropOptions.filter((item): item is { value: CropType; label: string } => Boolean(item.value)).map((item) => fetchRegions(item.value, controller.signal)))
+      .then((groups) => {
+        const byProvince = new Map<string, Region>();
+        groups.flat().forEach((region) => {
+          const key = region.province ?? region.region_name;
+          if (!byProvince.has(key)) byProvince.set(key, region);
+        });
+        const items = [...byProvince.values()].sort((a, b) => regionLabel(a).localeCompare(regionLabel(b), "vi-VN"));
         setRegions(items);
-        setRegionId(items[0]?.region_id || "");
+        setRegionId((current) => current || items[0]?.region_id || "");
       })
       .catch(() => setRegions([]));
     return () => controller.abort();
@@ -254,21 +279,27 @@ function CrossCropPanel() {
 
   function submit() {
     if (!regionId) return;
-    postCrossCommodity({ region_id: Number(regionId), area_hectares: area }).then(setResult);
+    setLoading(true);
+    setError(null);
+    postCrossCommodity({ region_id: Number(regionId), area_hectares: area })
+      .then(setResult)
+      .catch((err) => setError(err instanceof Error ? err.message : "Không so sánh được cây trồng."))
+      .finally(() => setLoading(false));
   }
 
   return (
     <section className="advisory-tool">
       <div className="advisory-tool-head">
         <h2>So sánh cây trồng</h2>
-        <p>So nhanh lợi nhuận tham khảo giữa 4 cây, có tính suitability vùng.</p>
+        <p>So nhanh lợi nhuận tham khảo giữa 4 cây theo giá, năng suất và độ phù hợp của tỉnh.</p>
       </div>
+      {error ? <div className="input-price-error">{error}</div> : null}
       <div className="advisory-form-row compact">
         <label>
-          Vùng
+          Tỉnh/vùng trồng
           <select value={regionId} onChange={(event) => setRegionId(Number(event.target.value) || "")}>
             {regions.map((region) => (
-              <option key={region.region_id} value={region.region_id}>{region.region_name} - {region.province}</option>
+              <option key={region.region_id} value={region.region_id}>{regionLabel(region)}</option>
             ))}
           </select>
         </label>
@@ -276,10 +307,13 @@ function CrossCropPanel() {
           Diện tích (ha)
           <input type="number" min="0.1" step="0.1" value={area} onChange={(event) => setArea(Number(event.target.value))} />
         </label>
-        <button type="button" className="roi-primary-button" onClick={submit}>So sánh</button>
+        <button type="button" className="roi-primary-button" onClick={submit} disabled={loading}>
+          {loading ? "Đang so sánh" : "So sánh"}
+        </button>
       </div>
       {result ? (
         <>
+          <p className="advisory-context">Tỉnh đang so sánh: <strong>{result.province ?? result.region_name}</strong></p>
           <div className="cross-crop-bars">
             {result.items.map((item) => (
               <article key={item.crop}>
@@ -288,7 +322,7 @@ function CrossCropPanel() {
                   <strong>{formatVnd(item.estimated_profit_vnd)}</strong>
                 </div>
                 <i style={{ width: `${Math.max(8, (Math.abs(item.estimated_profit_vnd) / maxProfit) * 100)}%` }} />
-                <small>Suitability {Math.round(item.suitability_score * 100)}% · ROI score {item.roi_score.toFixed(1)}%</small>
+                <small>Độ phù hợp {Math.round(item.suitability_score * 100)}% · Điểm ROI {item.roi_score.toFixed(1)}%</small>
               </article>
             ))}
           </div>

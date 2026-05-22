@@ -982,6 +982,27 @@ def render_static_pages() -> list[tuple[str, str | None]]:
             "Khuyến nghị bón phân",
         ),
         (
+            "selling-time.html",
+            f"{SITE_BASE}/khuyen-nghi-bon-phan/thoi-diem-ban",
+            "Thời điểm bán nông sản theo dự báo giá",
+            "Xếp hạng ngày bán tốt nhất trong 30 ngày tới theo dự báo giá nông sản và chi phí lưu kho.",
+            "Thời điểm bán",
+        ),
+        (
+            "regional-arbitrage.html",
+            f"{SITE_BASE}/khuyen-nghi-bon-phan/chenh-lech-vung",
+            "Chênh lệch giá nông sản theo tỉnh",
+            "Quét các cặp tỉnh có chênh lệch giá sau chi phí vận chuyển ước tính để tham khảo cơ hội bán hàng.",
+            "Chênh lệch vùng",
+        ),
+        (
+            "cross-crop.html",
+            f"{SITE_BASE}/khuyen-nghi-bon-phan/so-sanh-cay-trong",
+            "So sánh cây trồng theo tỉnh",
+            "So sánh lợi nhuận tham khảo giữa sầu riêng, cà phê, hồ tiêu và lúa theo giá, năng suất và độ phù hợp của tỉnh.",
+            "So sánh cây trồng",
+        ),
+        (
             "yield-feedback.html",
             f"{SITE_BASE}/bao-cao-nang-suat",
             "Báo cáo năng suất sau khuyến nghị bón phân",
@@ -1101,44 +1122,39 @@ def render_static_pages() -> list[tuple[str, str | None]]:
         urls.append((canonical, today))
 
     input_canonical = f"{SITE_BASE}/du-bao-gia/phan-bon"
-    input_title = "Giá phân bón hôm nay & xu hướng phân bón thế giới"
-    input_desc = "Theo dõi giá phân bón nội địa theo vùng giá, thương hiệu, quy cách bao và xu hướng Urê, DAP, Kali thế giới theo USD/tấn."
+    input_title = "Dự báo giá phân bón thế giới"
+    input_desc = "Theo dõi giá Urê, DAP và Kali MOP thế giới theo USD/tấn, kèm dự báo 30 ngày và mức tăng giảm mỗi ngày để tham chiếu giá phân bón địa phương."
     input_body = f"""<main>
 <h1>{html.escape(input_title)}</h1>
 <p>{html.escape(input_desc)}</p>
-<h2>Nhóm sản phẩm theo dõi</h2>
+<h2>Nhóm hàng hóa theo dõi</h2>
 <ul>
-<li>Phân đơn: Urê, DAP, Kali MOP/SOP, SA, lân nung chảy.</li>
-<li>Phân hỗn hợp: NPK 16-16-8, NPK 20-20-15, NPK 15-15-15.</li>
-<li>Phân hữu cơ: phân hữu cơ vi sinh và các dòng bao chuẩn hóa theo kg.</li>
+<li>Urê thế giới theo USD/tấn.</li>
+<li>DAP thế giới theo USD/tấn.</li>
+<li>Kali MOP thế giới theo USD/tấn.</li>
 </ul>
-<h2>Chuẩn dữ liệu</h2>
-<p>Mỗi dòng giá được chuẩn hóa theo sản phẩm, vùng giá, thương hiệu, quy cách bao, giá bao và giá quy đổi VND/kg. Dữ liệu crawler từ nguồn công khai được ưu tiên, dữ liệu tham chiếu nền chỉ dùng khi nguồn thật chưa đủ lịch sử.</p>
-<h2>Xu hướng commodity thế giới</h2>
-<p>Trang phân bón chỉ forecast Urê, DAP và Kali thế giới theo USD/tấn. Giá nội địa được giữ làm bảng giá và lịch sử tham khảo; người dùng tự áp % tăng giảm thế giới vào giá đại lý địa phương.</p>
+<h2>Cách đọc dự báo</h2>
+<p>Mỗi ngày có giá dự báo, mức đổi theo ngày và mức đổi cộng dồn so với giá tham chiếu hiện tại. Người dùng có thể lấy tỷ lệ phần trăm này làm tín hiệu đầu vào khi so với báo giá đại lý địa phương.</p>
+<h2>Không phải giá đại lý địa phương</h2>
+<p>Trang này không trộn bảng giá phân bón địa phương vào biểu đồ. Mục tiêu là theo dõi giá hàng hóa thế giới và xu hướng tăng giảm để tham chiếu cho quyết định mua vật tư.</p>
 </main>"""
     input_dataset_schema = {
         "@context": "https://schema.org",
         "@type": "Dataset",
-        "name": "Giá phân bón đầu vào Việt Nam",
+        "name": "Dự báo giá phân bón thế giới",
         "description": input_desc,
         "url": input_canonical,
-        "keywords": ["giá phân bón", "vật tư nông nghiệp", "ure", "dap", "npk", "kali"],
+        "keywords": ["giá phân bón thế giới", "dự báo phân bón", "ure", "dap", "kali", "mop"],
         "creator": {"@type": "Organization", "name": SITE_NAME, "url": SITE_BASE},
         "license": "https://creativecommons.org/licenses/by/4.0/",
         "isAccessibleForFree": True,
-        "spatialCoverage": {"@type": "Place", "name": "Việt Nam"},
+        "spatialCoverage": {"@type": "Place", "name": "Thị trường thế giới"},
         "temporalCoverage": "2025-06-01/" + today,
         "variableMeasured": [
-            {"@type": "PropertyValue", "name": "Giá phân bón nội địa", "unitText": "VND/kg"},
-            {"@type": "PropertyValue", "name": "Giá commodity phân bón thế giới", "unitText": "USD/tấn"},
+            {"@type": "PropertyValue", "name": "Giá phân bón thế giới", "unitText": "USD/tấn"},
+            {"@type": "PropertyValue", "name": "Mức tăng giảm dự báo", "unitText": "%/ngày"},
         ],
         "distribution": [
-            {
-                "@type": "DataDownload",
-                "encodingFormat": "application/json",
-                "contentUrl": f"{API_BASE}/api/v1/input-prices/latest?category=fertilizer",
-            },
             {
                 "@type": "DataDownload",
                 "encodingFormat": "application/json",
@@ -1168,7 +1184,7 @@ def render_static_pages() -> list[tuple[str, str | None]]:
                 _breadcrumb(
                     [
                         ("Trang chủ", f"{SITE_BASE}/"),
-                        ("Giá phân bón đầu vào", input_canonical),
+                        ("Giá phân bón thế giới", input_canonical),
                     ]
                 ),
             ],
@@ -1266,6 +1282,9 @@ def write_sitemap(urls: list[tuple[str, str | None]]) -> None:
         (f"{SITE_BASE}/tin-tuc", today),
         (f"{SITE_BASE}/huong-dan", today),
         (f"{SITE_BASE}/khuyen-nghi-bon-phan", today),
+        (f"{SITE_BASE}/khuyen-nghi-bon-phan/thoi-diem-ban", today),
+        (f"{SITE_BASE}/khuyen-nghi-bon-phan/chenh-lech-vung", today),
+        (f"{SITE_BASE}/khuyen-nghi-bon-phan/so-sanh-cay-trong", today),
         (f"{SITE_BASE}/khuyen-nghi-bon-phan/logic", today),
         (f"{SITE_BASE}/bao-cao-nang-suat", today),
     ]

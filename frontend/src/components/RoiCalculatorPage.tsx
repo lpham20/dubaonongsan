@@ -194,7 +194,7 @@ export function RoiCalculatorPage({
               <select value={regionId} onChange={(event) => setRegionId(Number(event.target.value) || "")}>
                 {regions.map((region) => (
                   <option key={region.region_id} value={region.region_id}>
-                    {region.region_name}{region.province ? ` - ${region.province}` : ""}
+                    {region.province ?? region.region_name}
                   </option>
                 ))}
               </select>

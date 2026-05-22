@@ -25,6 +25,7 @@ export function MobileNavDrawer({
   const headerRef = useRef<HTMLElement | null>(null);
   const drawerRef = useRef<HTMLDivElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
+  const fertilizerActive = fertilizerMenuItems.some((item) => item.value === section);
 
   const closeMenus = () => {
     onNewsMenuOpenChange(false);
@@ -83,7 +84,7 @@ export function MobileNavDrawer({
     if (!drawerOpen) return;
     if (section === "news") {
       setMobileGroup("news");
-    } else if (section === "fertilizer" || section === "fertilizerMethodology" || section === "yieldFeedback") {
+    } else if (fertilizerActive) {
       setMobileGroup("fertilizer");
     } else if (section === "analytics" || section === "inputPrices" || section === "methodology") {
       setMobileGroup("price");
@@ -165,9 +166,9 @@ export function MobileNavDrawer({
             Hướng dẫn
           </button>
           <MobileAccordion
-            title="Khuyến nghị bón phân"
+            title="Khuyến nghị"
             open={mobileGroup === "fertilizer"}
-            active={section === "fertilizer" || section === "fertilizerMethodology" || section === "yieldFeedback"}
+            active={fertilizerActive}
             onToggle={() => setMobileGroup(mobileGroup === "fertilizer" ? null : "fertilizer")}
           >
             {fertilizerMenuItems.map((item) => (
@@ -202,7 +203,7 @@ export function MobileNavDrawer({
               className={section === "inputPrices" ? "active" : ""}
               onClick={() => navigateMobile(() => onSectionChange("inputPrices"))}
             >
-              Giá phân bón đầu vào
+              Giá phân bón thế giới
             </button>
             <button
               type="button"

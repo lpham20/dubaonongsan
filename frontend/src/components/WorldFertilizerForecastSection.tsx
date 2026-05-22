@@ -153,7 +153,7 @@ export function WorldFertilizerForecastSection() {
       })
       .catch((err) => {
         if (err instanceof DOMException && err.name === "AbortError") return;
-        setError(err instanceof Error ? err.message : "Không tải được xu hướng phân bón thế giới.");
+        setError("Không tải được dữ liệu dự báo phân bón thế giới. Vui lòng thử lại sau ít phút.");
       })
       .finally(() => setLoading(false));
     return () => controller.abort();
@@ -181,10 +181,10 @@ export function WorldFertilizerForecastSection() {
         <div>
           <span className="world-kicker">
             <LineChart size={17} />
-            Commodity thế giới
+            Phân bón thế giới
           </span>
           <h2>Xu hướng giá phân bón thế giới</h2>
-          <p>Forecast Urê, DAP, Kali theo USD/tấn để người dùng tự áp tỷ lệ vào giá đại lý địa phương.</p>
+          <p>Dự báo Urê, DAP, Kali theo USD/tấn để người dùng tự áp tỷ lệ vào giá đại lý địa phương.</p>
         </div>
         <button type="button" className="world-refresh-button" onClick={() => setRefreshNonce((value) => value + 1)} disabled={loading}>
           <RefreshCw size={16} />
@@ -192,7 +192,7 @@ export function WorldFertilizerForecastSection() {
         </button>
       </div>
 
-      <div className="world-commodity-tabs" role="tablist" aria-label="Chọn commodity phân bón thế giới">
+      <div className="world-commodity-tabs" role="tablist" aria-label="Chọn nhóm phân bón thế giới">
         {commodities.map((item) => (
           <button
             key={item.commodity_slug}
@@ -210,7 +210,7 @@ export function WorldFertilizerForecastSection() {
 
       <div className="world-summary-grid">
         <div className="world-summary-main">
-          <span>{selectedCommodity.name_en}</span>
+          <span>{selectedCommodity.name_vi}</span>
           <strong>{formatUsd(forecast?.base_price_usd_per_tonne)}</strong>
           <small>
             Cập nhật {formatDate(forecast?.base_observed_at)} - {forecast?.quote_type ?? selectedCommodity.quote_type}
@@ -231,7 +231,7 @@ export function WorldFertilizerForecastSection() {
       </div>
 
       <div className="world-note">
-        <strong>Giá thế giới, không phải giá bán lẻ nội địa.</strong>
+        <strong>Giá thế giới, không phải giá đại lý địa phương.</strong>
         <p>{forecast?.note_vi ?? selectedCommodity.driver_note_vi}</p>
         {forecast?.data_quality?.reason_vi ? <p>{forecast.data_quality.reason_vi}</p> : null}
       </div>
@@ -244,6 +244,8 @@ export function WorldFertilizerForecastSection() {
 
       {forecast?.forecast_weekly.length ? (
         <>
+          <WorldForecastChart points={currentWeek?.daily_breakdown ?? forecast.forecast_daily.slice(0, 7)} />
+
           <div className="world-weekly-table">
             <div className="world-table-head">
               <span>Tuần</span>
@@ -265,8 +267,6 @@ export function WorldFertilizerForecastSection() {
               </button>
             ))}
           </div>
-
-          <WorldForecastChart points={currentWeek?.daily_breakdown ?? forecast.forecast_daily.slice(0, 7)} />
 
           <div className="world-daily-table">
             <table aria-label="Chi tiết dự báo phân bón thế giới theo ngày">
