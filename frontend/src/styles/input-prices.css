@@ -751,7 +751,7 @@
 }
 
 .world-chart-tooltip strong {
-  color: var(--color-text);
+  color: #10231b;
   font-family: var(--font-mono);
   font-weight: var(--fw-black);
 }
@@ -761,11 +761,11 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 14px;
-  color: var(--color-text-soft);
+  color: #53645c;
 }
 
 .world-chart-tooltip b {
-  color: var(--color-text);
+  color: #10231b;
   font-family: var(--font-mono);
   font-weight: var(--fw-bold);
   white-space: nowrap;
