@@ -237,6 +237,9 @@ function getInitialRoute(pathnameInput = window.location.pathname, search = wind
     return { ...fallback, section: "analytics", crop: routeCrop };
   }
   if (parts[0] === "roi-uoc-tinh") return { ...fallback, section: "roi" };
+  if (parts[0] === "thoi-diem-ban") return { ...fallback, section: "sellingTime" };
+  if (parts[0] === "chenh-lech-vung") return { ...fallback, section: "arbitrage" };
+  if (parts[0] === "so-sanh-cay-trong") return { ...fallback, section: "crossCrop" };
   if (parts[0] === "khuyen-nghi-bon-phan" && parts[1] === "roi") return { ...fallback, section: "roi" };
   if (parts[0] === "khuyen-nghi-bon-phan" && parts[1] === "thoi-diem-ban") return { ...fallback, section: "sellingTime" };
   if (parts[0] === "khuyen-nghi-bon-phan" && parts[1] === "chenh-lech-vung") return { ...fallback, section: "arbitrage" };
@@ -277,11 +280,11 @@ function routeToUrl(route: InitialRoute) {
   } else if (route.section === "fertilizer") {
     path = "/khuyen-nghi-bon-phan";
   } else if (route.section === "sellingTime") {
-    path = "/khuyen-nghi-bon-phan/thoi-diem-ban";
+    path = "/thoi-diem-ban";
   } else if (route.section === "arbitrage") {
-    path = "/khuyen-nghi-bon-phan/chenh-lech-vung";
+    path = "/chenh-lech-vung";
   } else if (route.section === "crossCrop") {
-    path = "/khuyen-nghi-bon-phan/so-sanh-cay-trong";
+    path = "/so-sanh-cay-trong";
   } else if (route.section === "fertilizerMethodology") {
     path = "/khuyen-nghi-bon-phan/logic";
   } else if (route.section === "yieldFeedback") {

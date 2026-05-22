@@ -721,6 +721,68 @@
   line-height: var(--lh-normal);
 }
 
+.world-chart-toolbar {
+  padding-inline: var(--space-4);
+}
+
+.world-chart-section {
+  margin: 0;
+  border-right: 0;
+  border-left: 0;
+  border-radius: 0;
+}
+
+.world-chart-section .chart-wrap {
+  min-height: 454px;
+}
+
+.world-chart-tooltip {
+  display: grid;
+  gap: 6px;
+  min-width: 210px;
+  padding: 9px 12px;
+  border: 1px solid #d3d8d0;
+  border-radius: var(--radius-xs);
+  color: #1f2a23;
+  background: #fffdf8;
+  box-shadow: var(--shadow-popover);
+  font-family: var(--font-sans);
+  font-size: 12px;
+}
+
+.world-chart-tooltip strong {
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-weight: var(--fw-black);
+}
+
+.world-chart-tooltip span {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  color: var(--color-text-soft);
+}
+
+.world-chart-tooltip b {
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-weight: var(--fw-bold);
+  white-space: nowrap;
+}
+
+.world-chart-tooltip b.up {
+  color: #b42318;
+}
+
+.world-chart-tooltip b.down {
+  color: var(--up-bright);
+}
+
+.world-chart-tooltip b.flat {
+  color: var(--color-text-muted);
+}
+
 .world-weekly-table {
   display: grid;
   gap: 1px;

@@ -28,21 +28,21 @@ const toolMeta: Record<AdvisoryTool, { kicker: string; title: string; descriptio
     kicker: "Thời điểm bán",
     title: "Chọn ngày bán theo dự báo giá",
     description: "Xếp hạng các ngày bán tốt nhất trong 30 ngày tới theo dự báo giá nông sản và chi phí lưu kho.",
-    canonical: "/khuyen-nghi-bon-phan/thoi-diem-ban",
+    canonical: "/thoi-diem-ban",
     Icon: BarChart3
   },
   arbitrage: {
     kicker: "Chênh lệch vùng",
     title: "Quét chênh lệch giá theo tỉnh",
     description: "So nhanh các cặp tỉnh có giá mua và giá bán chênh lệch sau khi trừ chi phí vận chuyển ước tính.",
-    canonical: "/khuyen-nghi-bon-phan/chenh-lech-vung",
+    canonical: "/chenh-lech-vung",
     Icon: GitCompareArrows
   },
   crossCrop: {
     kicker: "So sánh cây trồng",
     title: "So sánh lợi nhuận theo cây và tỉnh",
     description: "Ước tính lợi nhuận tham khảo giữa sầu riêng, cà phê, hồ tiêu và lúa theo giá, năng suất và độ phù hợp của tỉnh.",
-    canonical: "/khuyen-nghi-bon-phan/so-sanh-cay-trong",
+    canonical: "/so-sanh-cay-trong",
     Icon: Sprout
   }
 };

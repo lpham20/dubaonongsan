@@ -1,0 +1,114 @@
+/* Final header hierarchy overrides loaded after page styles. */
+.menu-bar,
+.app-shell > .menu-bar {
+  align-items: center;
+}
+
+.menu-bar .main-nav,
+.app-shell > .menu-bar .main-nav {
+  overflow: visible;
+}
+
+.menu-bar .nav-dropdown,
+.app-shell > .menu-bar .nav-dropdown {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+}
+
+.menu-bar .account-menu,
+.app-shell > .menu-bar .account-menu {
+  position: relative;
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+.menu-bar .dropdown-menu,
+.app-shell > .menu-bar .dropdown-menu {
+  min-width: 270px;
+  max-width: min(340px, calc(100vw - 32px));
+}
+
+.dropdown-menu-row {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.dropdown-section-label {
+  display: block;
+  margin: 6px 8px 2px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  font-weight: var(--fw-black);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.menu-bar .dropdown-menu button.dropdown-child-item,
+.app-shell > .menu-bar .dropdown-menu button.dropdown-child-item {
+  position: relative;
+  min-height: 34px;
+  padding-left: 30px;
+  color: var(--color-text-soft);
+  font-size: 12.5px;
+}
+
+.menu-bar .dropdown-menu button.dropdown-child-item svg,
+.app-shell > .menu-bar .dropdown-menu button.dropdown-child-item svg {
+  width: 14px;
+  height: 14px;
+  color: var(--color-text-muted);
+}
+
+.menu-bar .dropdown-menu button.dropdown-child-item::before,
+.app-shell > .menu-bar .dropdown-menu button.dropdown-child-item::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  width: 8px;
+  height: 1px;
+  background: var(--color-border-strong);
+}
+
+.mobile-accordion-row {
+  display: grid;
+  gap: 7px;
+}
+
+.mobile-section-label {
+  display: block;
+  padding: 6px 6px 0;
+  color: #64726b;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mobile-accordion-panel button.mobile-child-item {
+  width: calc(100% - 12px);
+  min-height: 44px;
+  margin-left: 12px;
+  padding-left: 18px;
+  color: #33453d;
+  background: #fbfcf8;
+  font-size: 14px;
+}
+
+.mobile-accordion-panel button.mobile-child-item.active {
+  color: #fffef9;
+  background: #167052;
+}
+
+@media (min-width: 861px) and (max-width: 1279px) {
+  .menu-bar .dropdown-menu,
+  .app-shell > .menu-bar .dropdown-menu {
+    min-width: 250px;
+  }
+}

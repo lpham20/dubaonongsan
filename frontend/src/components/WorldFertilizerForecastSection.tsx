@@ -1,12 +1,25 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import {
+  Area,
+  Brush,
+  CartesianGrid,
+  ComposedChart,
+  Line,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from "recharts";
 import { Activity, BarChart3, LineChart, RefreshCw, TrendingDown, TrendingUp } from "./icons";
 import {
   fetchWorldFertilizerCommodities,
   fetchWorldFertilizerForecast,
+  fetchWorldFertilizerHistory,
   type WorldFertilizerCommodity,
   type WorldFertilizerCommodityInfo,
   type WorldFertilizerForecast,
   type WorldFertilizerForecastPoint,
+  type WorldFertilizerHistoryPoint,
   type WorldFertilizerWeeklyPoint
 } from "../lib/api";
 
@@ -56,68 +69,288 @@ function trendClass(value: number) {
   return "flat";
 }
 
-function WorldForecastChart({ points }: { points: WorldFertilizerForecastPoint[] }) {
-  const width = 920;
-  const height = 260;
-  const padding = { top: 24, right: 24, bottom: 36, left: 70 };
-  const plotWidth = width - padding.left - padding.right;
-  const plotHeight = height - padding.top - padding.bottom;
-  const values = points
-    .flatMap((point) => [point.price_usd_per_tonne, point.price_low_usd_per_tonne, point.price_high_usd_per_tonne])
-    .filter((value) => Number.isFinite(value));
-  const minValue = values.length ? Math.min(...values) * 0.97 : 0;
-  const maxValue = values.length ? Math.max(...values) * 1.03 : 1;
-  const span = Math.max(1, maxValue - minValue);
+type WorldChartRow = {
+  dateKey: string;
+  price?: number;
+  forecast?: number;
+  forecastBand?: [number, number];
+  dailyPct?: number;
+  cumulativePct?: number;
+};
 
-  function x(index: number) {
-    if (points.length <= 1) return padding.left;
-    return padding.left + (index / (points.length - 1)) * plotWidth;
+const chartColors = {
+  grid: "#e8ece6",
+  axisLine: "#aab2a3",
+  tickFill: "#6b746a",
+  priceLine: "#0d4b38",
+  priceArea: "#0d4b38",
+  forecastLine: "#c4690b",
+  bandFill: "#c4690b",
+  tooltipBg: "#fffdf8",
+  tooltipText: "#1f2a23",
+  tooltipBorder: "#d3d8d0"
+};
+
+const toDateKey = (value: string) => {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value.slice(0, 10) : date.toISOString().slice(0, 10);
+};
+
+const formatShortDate = (value: string) =>
+  new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit" }).format(new Date(`${value}T00:00:00`));
+
+const formatFullDate = (value: string) =>
+  new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(`${value}T00:00:00`));
+
+function aggregateHistory(history: WorldFertilizerHistoryPoint[]) {
+  const groups = history.reduce((map, point) => {
+    const dateKey = toDateKey(point.observed_at);
+    map.set(dateKey, [...(map.get(dateKey) ?? []), point]);
+    return map;
+  }, new Map<string, WorldFertilizerHistoryPoint[]>());
+
+  return Array.from(groups.entries())
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([dateKey, points]) => ({
+      dateKey,
+      price: points.reduce((total, point) => total + point.price_usd_per_tonne, 0) / points.length
+    }));
+}
+
+function buildWorldChartRows(history: WorldFertilizerHistoryPoint[], forecast: WorldFertilizerForecastPoint[]) {
+  return [
+    ...aggregateHistory(history),
+    ...forecast.map((point) => ({
+      dateKey: toDateKey(point.date),
+      forecast: point.price_usd_per_tonne,
+      forecastBand: [point.price_low_usd_per_tonne, point.price_high_usd_per_tonne] as [number, number],
+      dailyPct: point.daily_pct_change,
+      cumulativePct: point.cumulative_pct_from_today
+    }))
+  ];
+}
+
+function clampZoomRange(range: { startIndex: number; endIndex: number }, fullEndIndex: number) {
+  const endLimit = Math.max(0, fullEndIndex);
+  const startIndex = Math.min(Math.max(0, range.startIndex), endLimit);
+  const endIndex = Math.min(Math.max(startIndex, range.endIndex), endLimit);
+  return { startIndex, endIndex };
+}
+
+function WorldForecastTooltip({
+  active,
+  payload
+}: {
+  active?: boolean;
+  payload?: Array<{ payload?: WorldChartRow; dataKey?: string; value?: unknown; name?: string }>;
+}) {
+  if (!active || !payload?.length) return null;
+  const row = payload.find((item) => item.payload)?.payload;
+  if (!row) return null;
+  return (
+    <div className="world-chart-tooltip">
+      <strong>{formatFullDate(row.dateKey)}</strong>
+      {typeof row.price === "number" ? (
+        <span>
+          Giá lịch sử <b>{formatUsd(row.price)}</b>
+        </span>
+      ) : null}
+      {typeof row.forecast === "number" ? (
+        <span>
+          Dự báo <b>{formatUsd(row.forecast)}</b>
+        </span>
+      ) : null}
+      {row.forecastBand ? (
+        <span>
+          Dải thấp/cao <b>{formatUsd(row.forecastBand[0])} - {formatUsd(row.forecastBand[1])}</b>
+        </span>
+      ) : null}
+      {typeof row.dailyPct === "number" ? (
+        <span>
+          Đổi mỗi ngày <b className={trendClass(row.dailyPct)}>{formatPct(row.dailyPct)}</b>
+        </span>
+      ) : null}
+      {typeof row.cumulativePct === "number" ? (
+        <span>
+          Đổi cộng dồn <b className={trendClass(row.cumulativePct)}>{formatPct(row.cumulativePct)}</b>
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+function WorldForecastChart({
+  rows,
+  showPrice,
+  showForecast,
+  showBand
+}: {
+  rows: WorldChartRow[];
+  showPrice: boolean;
+  showForecast: boolean;
+  showBand: boolean;
+}) {
+  const [zoomRange, setZoomRange] = useState<{ startIndex: number; endIndex: number } | null>(null);
+  const fullEndIndex = Math.max(rows.length - 1, 0);
+  const defaultVisiblePoints = 120;
+  const defaultZoomRange = { startIndex: Math.max(0, fullEndIndex - defaultVisiblePoints + 1), endIndex: fullEndIndex };
+  const activeZoomRange = clampZoomRange(zoomRange ?? defaultZoomRange, fullEndIndex);
+  const canZoom = rows.length > 14;
+
+  useEffect(() => {
+    setZoomRange(null);
+  }, [rows.length]);
+
+  function updateZoom(nextRange: { startIndex: number; endIndex: number }) {
+    setZoomRange(clampZoomRange(nextRange, fullEndIndex));
   }
 
-  function y(value: number) {
-    return padding.top + (1 - (value - minValue) / span) * plotHeight;
+  function zoomBy(factor: number) {
+    if (!canZoom) return;
+    const currentLength = activeZoomRange.endIndex - activeZoomRange.startIndex + 1;
+    const nextLength = Math.min(rows.length, Math.max(14, Math.round(currentLength * factor)));
+    if (nextLength >= rows.length) {
+      updateZoom({ startIndex: 0, endIndex: fullEndIndex });
+      return;
+    }
+    const center = (activeZoomRange.startIndex + activeZoomRange.endIndex) / 2;
+    const startIndex = Math.round(center - nextLength / 2);
+    updateZoom({ startIndex, endIndex: startIndex + nextLength - 1 });
   }
 
-  if (!points.length) {
+  if (!rows.length) {
     return <div className="world-forecast-empty">Chưa có dữ liệu dự báo cho lựa chọn này.</div>;
   }
 
-  const line = points.map((point, index) => `${x(index).toFixed(2)},${y(point.price_usd_per_tonne).toFixed(2)}`).join(" ");
-  const band = [
-    ...points.map((point, index) => `${index === 0 ? "M" : "L"} ${x(index).toFixed(2)} ${y(point.price_high_usd_per_tonne).toFixed(2)}`),
-    ...points
-      .slice()
-      .reverse()
-      .map((point, reverseIndex) => {
-        const index = points.length - reverseIndex - 1;
-        return `L ${x(index).toFixed(2)} ${y(point.price_low_usd_per_tonne).toFixed(2)}`;
-      }),
-    "Z"
-  ].join(" ");
-  const gridValues = [0, 0.25, 0.5, 0.75, 1].map((ratio) => minValue + span * ratio);
-
   return (
-    <svg className="world-forecast-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Biểu đồ xu hướng giá phân bón thế giới">
-      {gridValues.map((value) => (
-        <g key={value}>
-          <line x1={padding.left} x2={width - padding.right} y1={y(value)} y2={y(value)} />
-          <text x={padding.left - 12} y={y(value) + 4} textAnchor="end">
-            {Math.round(value).toLocaleString("vi-VN")}
-          </text>
-        </g>
-      ))}
-      <path className="world-forecast-band" d={band} />
-      <polyline className="world-forecast-line" points={line} />
-      {points.map((point, index) => (
-        <circle key={point.date} className="world-forecast-dot" cx={x(index)} cy={y(point.price_usd_per_tonne)} r="3.5" />
-      ))}
-      <text x={padding.left} y={height - 12}>
-        {formatDate(points[0]?.date)}
-      </text>
-      <text x={width - padding.right} y={height - 12} textAnchor="end">
-        {formatDate(points.at(-1)?.date)}
-      </text>
-    </svg>
+    <section className="chart-section world-chart-section">
+      <div className="section-heading">
+        <div>
+          <h2>Diễn biến giá và dự báo</h2>
+          <p>Giá lịch sử, đường dự báo 30 ngày và biên thấp/cao theo USD/tấn.</p>
+        </div>
+        <div className="chart-heading-tools">
+          <div className="legend">
+            <span className="legend-price" style={{ "--legend-color": chartColors.priceLine } as CSSProperties}>
+              Giá lịch sử
+            </span>
+            <span className="legend-forecast" style={{ "--legend-color": chartColors.forecastLine } as CSSProperties}>
+              Dự báo
+            </span>
+            <span className="legend-band" style={{ "--legend-color": chartColors.bandFill } as CSSProperties}>
+              Dải thấp/cao
+            </span>
+          </div>
+          {canZoom ? (
+            <div className="chart-zoom-controls" aria-label="Điều khiển thu phóng biểu đồ">
+              <button type="button" onClick={() => zoomBy(0.58)} aria-label="Phóng to biểu đồ">
+                +
+              </button>
+              <button type="button" onClick={() => zoomBy(1.72)} aria-label="Thu nhỏ biểu đồ">
+                -
+              </button>
+              <button type="button" onClick={() => updateZoom({ startIndex: 0, endIndex: fullEndIndex })}>
+                Tất cả
+              </button>
+            </div>
+          ) : null}
+        </div>
+      </div>
+      <div className="chart-wrap">
+        <ResponsiveContainer width="100%" height={430}>
+          <ComposedChart data={rows} margin={{ top: 18, right: 16, left: 4, bottom: canZoom ? 4 : 0 }}>
+            <defs>
+              <linearGradient id="worldPriceArea" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor={chartColors.priceArea} stopOpacity={0.18} />
+                <stop offset="100%" stopColor={chartColors.priceArea} stopOpacity={0.02} />
+              </linearGradient>
+              <linearGradient id="worldForecastBand" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor={chartColors.bandFill} stopOpacity={0.14} />
+                <stop offset="100%" stopColor={chartColors.bandFill} stopOpacity={0.04} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid stroke={chartColors.grid} strokeDasharray="0" vertical={false} />
+            <XAxis
+              dataKey="dateKey"
+              tickFormatter={formatShortDate}
+              minTickGap={30}
+              axisLine={{ stroke: chartColors.axisLine }}
+              tickLine={false}
+              tick={{ fill: chartColors.tickFill, fontSize: 11, fontFamily: "JetBrains Mono, monospace" }}
+            />
+            <YAxis
+              tickFormatter={(value) => `${Math.round(Number(value))}`}
+              orientation="right"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: chartColors.tickFill, fontSize: 11, fontFamily: "JetBrains Mono, monospace" }}
+              width={58}
+            />
+            <Tooltip
+              cursor={{ stroke: chartColors.axisLine, strokeDasharray: "3 4" }}
+              content={<WorldForecastTooltip />}
+            />
+            {showBand ? (
+              <Area
+                type="monotone"
+                dataKey="forecastBand"
+                stroke="none"
+                fill="url(#worldForecastBand)"
+                connectNulls
+                isAnimationActive={false}
+                name="Dải thấp/cao"
+              />
+            ) : null}
+            {showPrice ? (
+              <Area
+                type="monotone"
+                dataKey="price"
+                stroke={chartColors.priceLine}
+                strokeWidth={2}
+                fill="url(#worldPriceArea)"
+                dot={false}
+                activeDot={{ r: 4, fill: chartColors.priceLine, stroke: chartColors.tooltipBg, strokeWidth: 2 }}
+                connectNulls
+                isAnimationActive={false}
+                name="Giá lịch sử"
+              />
+            ) : null}
+            {showForecast ? (
+              <Line
+                type="monotone"
+                dataKey="forecast"
+                stroke={chartColors.forecastLine}
+                strokeDasharray="4 4"
+                strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 4, fill: chartColors.forecastLine, stroke: chartColors.tooltipBg, strokeWidth: 2 }}
+                connectNulls
+                isAnimationActive={false}
+                name="Dự báo"
+              />
+            ) : null}
+            {canZoom ? (
+              <Brush
+                dataKey="dateKey"
+                height={28}
+                travellerWidth={8}
+                startIndex={activeZoomRange.startIndex}
+                endIndex={activeZoomRange.endIndex}
+                tickFormatter={formatShortDate}
+                stroke={chartColors.priceLine}
+                fill="#f4f6f3"
+                gap={8}
+                onChange={(nextRange) => {
+                  if (typeof nextRange?.startIndex === "number" && typeof nextRange.endIndex === "number") {
+                    updateZoom({ startIndex: nextRange.startIndex, endIndex: nextRange.endIndex });
+                  }
+                }}
+              />
+            ) : null}
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+    </section>
   );
 }
 
@@ -125,6 +358,9 @@ export function WorldFertilizerForecastSection() {
   const [commodities, setCommodities] = useState<WorldFertilizerCommodityInfo[]>(FALLBACK_COMMODITIES);
   const [selected, setSelected] = useState<WorldFertilizerCommodity>("urea");
   const [forecast, setForecast] = useState<WorldFertilizerForecast | null>(null);
+  const [history, setHistory] = useState<WorldFertilizerHistoryPoint[]>([]);
+  const [historyDays, setHistoryDays] = useState(365);
+  const [layers, setLayers] = useState({ price: true, forecast: true, band: true });
   const [expandedWeek, setExpandedWeek] = useState(1);
   const [refreshNonce, setRefreshNonce] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -146,10 +382,14 @@ export function WorldFertilizerForecastSection() {
     const controller = new AbortController();
     setLoading(true);
     setError(null);
-    fetchWorldFertilizerForecast(selected, { horizonDays: 30, signal: controller.signal })
-      .then((payload) => {
-        setForecast(payload);
-        setExpandedWeek(payload.forecast_weekly[0]?.week_index ?? 1);
+    Promise.all([
+      fetchWorldFertilizerForecast(selected, { horizonDays: 30, signal: controller.signal }),
+      fetchWorldFertilizerHistory(selected, { days: historyDays, signal: controller.signal })
+    ])
+      .then(([forecastPayload, historyPayload]) => {
+        setForecast(forecastPayload);
+        setHistory(historyPayload);
+        setExpandedWeek(forecastPayload.forecast_weekly[0]?.week_index ?? 1);
       })
       .catch((err) => {
         if (err instanceof DOMException && err.name === "AbortError") return;
@@ -157,7 +397,7 @@ export function WorldFertilizerForecastSection() {
       })
       .finally(() => setLoading(false));
     return () => controller.abort();
-  }, [selected, refreshNonce]);
+  }, [selected, historyDays, refreshNonce]);
 
   const selectedCommodity = commodities.find((item) => item.commodity_slug === selected) ?? FALLBACK_COMMODITIES[0];
   const currentWeek = useMemo<WorldFertilizerWeeklyPoint | undefined>(
@@ -174,6 +414,10 @@ export function WorldFertilizerForecastSection() {
       : forecast?.source_mode === "daily_signal"
         ? "Có tín hiệu daily"
         : "Đang đánh giá nguồn";
+  const chartRows = useMemo(
+    () => buildWorldChartRows(history, forecast?.forecast_daily ?? []),
+    [forecast?.forecast_daily, history]
+  );
 
   return (
     <section id="world" className="input-price-panel world-fertilizer-section">
@@ -236,6 +480,38 @@ export function WorldFertilizerForecastSection() {
         {forecast?.data_quality?.reason_vi ? <p>{forecast.data_quality.reason_vi}</p> : null}
       </div>
 
+      <section className="chart-toolbar world-chart-toolbar" aria-label="Điều khiển biểu đồ phân bón thế giới">
+        <div className="chart-control-group">
+          <span className="control-label">Khoảng lịch sử</span>
+          <div className="segmented">
+            {[90, 180, 365].map((value) => (
+              <button
+                key={value}
+                type="button"
+                className={historyDays === value ? "active" : ""}
+                onClick={() => setHistoryDays(value)}
+              >
+                {value} ngày
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="chart-control-group chart-control-group--layers">
+          <span className="control-label">Lớp dữ liệu</span>
+          <div className="layer-toggles">
+            <button type="button" className={layers.price ? "active" : ""} onClick={() => setLayers((value) => ({ ...value, price: !value.price }))}>
+              Giá
+            </button>
+            <button type="button" className={layers.forecast ? "active" : ""} onClick={() => setLayers((value) => ({ ...value, forecast: !value.forecast }))}>
+              Dự báo
+            </button>
+            <button type="button" className={layers.band ? "active" : ""} onClick={() => setLayers((value) => ({ ...value, band: !value.band }))}>
+              Dải
+            </button>
+          </div>
+        </div>
+      </section>
+
       {!loading && forecast?.forecast_weekly.length === 0 ? (
         <div className="world-forecast-empty">
           Chưa đủ dữ liệu lịch sử để dự báo {selectedCommodity.name_vi}. Crawler đang thu thập thêm dữ liệu từ nguồn công khai.
@@ -244,7 +520,12 @@ export function WorldFertilizerForecastSection() {
 
       {forecast?.forecast_weekly.length ? (
         <>
-          <WorldForecastChart points={currentWeek?.daily_breakdown ?? forecast.forecast_daily.slice(0, 7)} />
+          <WorldForecastChart
+            rows={chartRows}
+            showPrice={layers.price}
+            showForecast={layers.forecast}
+            showBand={layers.band}
+          />
 
           <div className="world-weekly-table">
             <div className="world-table-head">

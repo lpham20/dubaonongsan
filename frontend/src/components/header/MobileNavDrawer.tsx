@@ -172,14 +172,19 @@ export function MobileNavDrawer({
             onToggle={() => setMobileGroup(mobileGroup === "fertilizer" ? null : "fertilizer")}
           >
             {fertilizerMenuItems.map((item) => (
-              <button
-                key={item.value}
-                type="button"
-                className={section === item.value ? "active" : ""}
-                onClick={() => navigateMobile(() => onSectionChange(item.value))}
-              >
-                {item.label}
-              </button>
+              <div key={item.value} className="mobile-accordion-row">
+                {item.groupLabel ? <span className="mobile-section-label">{item.groupLabel}</span> : null}
+                <button
+                  type="button"
+                  className={[
+                    section === item.value ? "active" : "",
+                    item.hierarchy === "child" ? "mobile-child-item" : ""
+                  ].filter(Boolean).join(" ")}
+                  onClick={() => navigateMobile(() => onSectionChange(item.value))}
+                >
+                  {item.label}
+                </button>
+              </div>
             ))}
           </MobileAccordion>
           <MobileAccordion

@@ -118,18 +118,23 @@ export function AppHeaderDesktop({
                   {fertilizerMenuItems.map((fertilizerItem) => {
                     const FertilizerIcon = fertilizerItem.Icon;
                     return (
-                      <button
-                        key={fertilizerItem.value}
-                        type="button"
-                        className={section === fertilizerItem.value ? "active" : ""}
-                        onClick={() => {
-                          onSectionChange(fertilizerItem.value);
-                          closeMenus();
-                        }}
-                      >
-                        <FertilizerIcon size={16} />
-                        {fertilizerItem.label}
-                      </button>
+                      <div key={fertilizerItem.value} className="dropdown-menu-row">
+                        {fertilizerItem.groupLabel ? <span className="dropdown-section-label">{fertilizerItem.groupLabel}</span> : null}
+                        <button
+                          type="button"
+                          className={[
+                            section === fertilizerItem.value ? "active" : "",
+                            fertilizerItem.hierarchy === "child" ? "dropdown-child-item" : ""
+                          ].filter(Boolean).join(" ")}
+                          onClick={() => {
+                            onSectionChange(fertilizerItem.value);
+                            closeMenus();
+                          }}
+                        >
+                          <FertilizerIcon size={16} />
+                          {fertilizerItem.label}
+                        </button>
+                      </div>
                     );
                   })}
                 </div>
