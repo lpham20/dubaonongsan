@@ -1095,7 +1095,7 @@ def render_static_pages() -> list[tuple[str, str | None]]:
 
     input_canonical = f"{SITE_BASE}/du-bao-gia/phan-bon"
     input_title = "Giá phân bón hôm nay & dự báo vật tư đầu vào"
-    input_desc = "Theo dõi giá phân bón theo tỉnh, thương hiệu, quy cách bao và giá quy đổi VND/kg cho vật tư đầu vào nông nghiệp."
+    input_desc = "Theo dõi giá phân bón theo vùng giá, thương hiệu, quy cách bao và giá quy đổi VND/kg cho vật tư đầu vào nông nghiệp."
     input_body = f"""<main>
 <h1>{html.escape(input_title)}</h1>
 <p>{html.escape(input_desc)}</p>
@@ -1106,7 +1106,7 @@ def render_static_pages() -> list[tuple[str, str | None]]:
 <li>Phân hữu cơ: phân hữu cơ vi sinh và các dòng bao chuẩn hóa theo kg.</li>
 </ul>
 <h2>Chuẩn dữ liệu</h2>
-<p>Mỗi dòng giá được chuẩn hóa theo sản phẩm, tỉnh, thương hiệu, quy cách bao, giá bao và giá quy đổi VND/kg để phục vụ so sánh chi phí đầu vào.</p>
+<p>Mỗi dòng giá được chuẩn hóa theo sản phẩm, vùng giá, thương hiệu, quy cách bao, giá bao và giá quy đổi VND/kg. Dữ liệu crawler từ nguồn công khai được ưu tiên, dữ liệu tham chiếu nền chỉ dùng khi nguồn thật chưa đủ lịch sử.</p>
 <h2>Dự báo</h2>
 <p>Dự báo phân bón dùng baseline ngắn hạn theo xu hướng chậm của giá vật tư đầu vào, tách khỏi model LSTM của giá nông sản đầu ra.</p>
 </main>"""

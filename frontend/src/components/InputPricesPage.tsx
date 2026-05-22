@@ -222,13 +222,13 @@ export function InputPricesPage() {
     <section className="input-prices-page">
       <SeoHead
         title="Giá phân bón hôm nay & dự báo vật tư đầu vào"
-        description="Theo dõi giá phân bón theo tỉnh, thương hiệu và quy cách bao 50 kg. Xem bảng giá, so sánh thương hiệu, lịch sử 12 tháng và dự báo ngắn hạn."
+        description="Theo dõi giá phân bón theo vùng giá, thương hiệu và quy cách bao 50 kg. Xem bảng giá, so sánh thương hiệu, lịch sử 12 tháng và dự báo ngắn hạn."
         canonical="/du-bao-gia/phan-bon"
         schemaJsonLd={{
           "@context": "https://schema.org",
           "@type": "Dataset",
           name: "Giá phân bón đầu vào Việt Nam",
-          description: "Bảng giá phân bón theo sản phẩm, tỉnh, thương hiệu, quy cách bao và giá quy đổi VND/kg.",
+          description: "Bảng giá phân bón theo sản phẩm, vùng giá, thương hiệu, quy cách bao và giá quy đổi VND/kg.",
           url: "https://dubaonongsan.com/du-bao-gia/phan-bon",
           creator: { "@type": "Organization", name: "dubaonongsan.com" }
         }}
@@ -243,7 +243,7 @@ export function InputPricesPage() {
           <h1>Giá phân bón hôm nay</h1>
           <p>
             <span>Theo dõi giá bao, giá quy đổi VND/kg.</span>
-            <span>Theo tỉnh và thương hiệu.</span>
+            <span>Theo vùng giá và thương hiệu.</span>
           </p>
         </div>
         <div className="input-price-head-metrics" aria-label="Tổng quan dữ liệu">
@@ -252,7 +252,7 @@ export function InputPricesPage() {
             <strong>{productCount}</strong>
           </div>
           <div>
-            <span>Tỉnh</span>
+            <span>Vùng giá</span>
             <strong>{provinceCount}</strong>
           </div>
           <div>
@@ -276,7 +276,7 @@ export function InputPricesPage() {
             </select>
           </label>
           <label>
-            Tỉnh
+            Vùng giá
             <select value={province} onChange={(event) => setProvince(event.target.value)} disabled={!provinceOptions.length}>
               {provinceOptions.map((item) => (
                 <option key={item} value={item}>
@@ -328,7 +328,7 @@ export function InputPricesPage() {
         <div className="input-section-heading">
           <div>
             <h2>Lịch sử 12 tháng và dự báo ngắn hạn</h2>
-            <p>{selectedProduct ? `${selectedProduct.name} tại ${province || "các tỉnh theo dõi"}` : "Đang tải sản phẩm"}</p>
+            <p>{selectedProduct ? `${selectedProduct.name} tại ${province || "các vùng giá theo dõi"}` : "Đang tải sản phẩm"}</p>
           </div>
           <div className="input-chart-legend">
             <span className="history">Lịch sử</span>
@@ -403,7 +403,7 @@ export function InputPricesPage() {
           <table>
             <thead>
               <tr>
-                <th>Tỉnh</th>
+                <th>Vùng giá</th>
                 <th>Sản phẩm</th>
                 <th>Thương hiệu</th>
                 <th>Quy cách</th>
@@ -437,8 +437,8 @@ export function InputPricesPage() {
       <section className="input-price-note">
         <strong>Ghi chú dữ liệu</strong>
         <p>
-          Giá phân bón đang được tách thành lớp dữ liệu riêng để chuẩn hóa sản phẩm, tỉnh, thương hiệu và quy cách. Các dòng có nguồn
-          “Dữ liệu tham chiếu nền” là baseline ban đầu trước khi import/cross-check báo giá đại lý.
+          Giá phân bón được tách thành lớp dữ liệu riêng để chuẩn hóa sản phẩm, vùng giá, thương hiệu và quy cách bao. Các dòng có nguồn
+          công khai như vietnga.vn là dữ liệu đã crawl; các dòng “Dữ liệu tham chiếu nền” chỉ dùng làm nền khi nguồn thật chưa có đủ lịch sử.
         </p>
       </section>
     </section>

@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.core.config import get_settings
 from app.core.rate_limit import limiter
 from app.db import get_db
+from app.ingestion.input_price_service import InputPriceIngestionService
 from app.ingestion.service import PriceIngestionService
 from app.models import AppUser, IotSensorTelemetry
 from app.schemas import ModelTrainingRunOut, PlatformJobRunOut, ScrapeRunOut, SensorTelemetryIn, SensorTelemetryOut
@@ -61,6 +62,14 @@ def run_news_scrape_job(
     db: Session = Depends(get_db),
 ) -> dict:
     return PlatformJobService(db).run_news_scrape()
+
+
+@router.post("/platform/jobs/input-prices")
+def run_input_price_scrape_job(
+    _: AppUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> dict:
+    return PlatformJobService(db).run_input_price_scrape()
 
 
 @router.post("/platform/jobs/weather")
@@ -134,6 +143,15 @@ def scrape_prices(
     db: Session = Depends(get_db),
 ) -> list[dict]:
     return PriceIngestionService(db).scrape_and_store(source=source)
+
+
+@router.post("/ingestion/scrape-input-prices")
+def scrape_input_prices(
+    _: AppUser = Depends(require_admin),
+    source: str | None = Query(default=None, description="Optional input-price scraper source key"),
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    return InputPriceIngestionService(db).scrape_and_store(source=source)
 
 
 @router.post("/ingestion/backfill-model-ready")

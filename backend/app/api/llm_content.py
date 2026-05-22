@@ -198,7 +198,7 @@ def _llm_input_prices_fertilizer(db: Session) -> Response:
     lines.extend(
         [
             "",
-            "## Bảng giá tham chiếu mới nhất",
+            "## Bảng giá mới nhất",
             "",
             "| Tỉnh | Sản phẩm | Thương hiệu | Giá bao | Giá quy đổi (VND/kg) | Nguồn | Ngày |",
             "|---|---|---|---|---|---|---|",
@@ -246,7 +246,7 @@ def _llm_input_prices_fertilizer(db: Session) -> Response:
             "",
             "## Ghi chú dữ liệu",
             "",
-            "Dữ liệu phân bón được tách khỏi dữ liệu giá nông sản đầu ra. Bảng này dùng chuẩn sản phẩm, tỉnh, thương hiệu, quy cách bao và giá quy đổi để chuẩn bị cho bước import/cross-check báo giá đại lý.",
+            "Dữ liệu phân bón được tách khỏi dữ liệu giá nông sản đầu ra. Các dòng có nguồn công khai như vietnga.vn là dữ liệu crawler thu được; dữ liệu tham chiếu nền chỉ dùng khi nguồn thật chưa đủ lịch sử cho sản phẩm hoặc vùng giá.",
             "",
             "Dự báo dùng baseline theo xu hướng chậm của giá vật tư đầu vào, không dùng model LSTM giá nông sản.",
             "",

@@ -7,6 +7,11 @@
   font-family: var(--font-vi);
 }
 
+.input-prices-shell {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
 .input-price-hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
@@ -26,10 +31,10 @@
   gap: 8px;
   min-height: 32px;
   padding: 0 10px;
-  border: 1px solid rgba(22, 112, 82, 0.24);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-xs);
-  color: var(--accent-deep);
-  background: var(--accent-soft);
+  color: var(--up-bright);
+  background: var(--color-surface-muted);
   font-size: 12px;
   font-weight: var(--fw-black);
   letter-spacing: 0.04em;
@@ -144,9 +149,13 @@
   border-radius: var(--radius-xs);
   color: var(--color-text);
   background: var(--color-surface);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='%238a958f' d='M6 9L2 5h8z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
   font-family: var(--font-sans);
   font-size: 13px;
   font-weight: var(--fw-medium);
+  appearance: none;
 }
 
 .input-price-controls button {
@@ -399,7 +408,11 @@
 }
 
 .input-table-wrap tbody tr:nth-child(even) {
-  background: rgba(22, 112, 82, 0.04);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.input-table-wrap tbody tr:hover {
+  background: rgba(74, 222, 128, 0.1);
 }
 
 .input-product-list {
@@ -421,7 +434,7 @@
 
 .input-product-list button:hover,
 .input-product-list button.active {
-  background: var(--accent-soft);
+  background: rgba(22, 112, 82, 0.22);
 }
 
 .input-product-list strong {
@@ -456,6 +469,35 @@
   margin-top: var(--space-2);
   color: var(--color-text-soft);
   line-height: var(--lh-normal);
+}
+
+.input-prices-shell .input-price-hero {
+  margin: var(--space-5) 0 var(--space-4);
+  padding: var(--space-4) 0 var(--space-5);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 2px solid var(--color-text);
+}
+
+.input-prices-shell .input-price-hero h1 {
+  letter-spacing: -0.02em;
+}
+
+.input-prices-shell .input-price-head-metrics,
+.input-prices-shell .input-price-controls,
+.input-prices-shell .input-stat,
+.input-prices-shell .input-chart-section,
+.input-prices-shell .input-price-panel,
+.input-prices-shell .input-price-note {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+.input-prices-shell .input-price-controls {
+  background: var(--color-surface-muted);
+}
+
+.input-prices-shell .input-price-chart line {
+  stroke: var(--color-border);
 }
 
 @media (max-width: 980px) {

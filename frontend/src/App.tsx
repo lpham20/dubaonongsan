@@ -788,7 +788,7 @@ function RoutedApp() {
     section === "analytics"
       ? `app-shell forecast-shell crop-${crop} analytics-tab-${analyticsTab}`
       : section === "inputPrices"
-        ? "app-shell input-prices-shell"
+        ? "app-shell forecast-shell input-prices-shell"
       : "app-shell";
 
   return (

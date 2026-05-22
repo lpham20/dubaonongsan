@@ -14,6 +14,7 @@ from app.models import ScrapeRun
 from app.seed import normalize_vietnamese_labels, seed_database
 from app.services.content_portal import ContentPortalService
 from app.services.crop_catalog import ensure_crop_catalog
+from app.services.input_prices import seed_input_prices
 from app.services.platform_jobs import JobScheduler
 
 
@@ -36,6 +37,7 @@ def bootstrap() -> None:
         seed_database(db)
         normalize_vietnamese_labels(db)
         ensure_crop_catalog(db)
+        seed_input_prices(db)
         content = ContentPortalService(db)
         content.seed_guides()
         content.seed_fallback_news()
@@ -68,7 +70,7 @@ def main() -> None:
 
     JobScheduler.start_once()
     logger.info(
-        "MarketAI worker started. Scheduled scrape/news/data-quality/retrain jobs are active. "
+        "MarketAI worker started. Scheduled price/input-price/news/data-quality/retrain jobs are active. "
         "scrape_interval=%d min, news_interval=%d min",
         settings.scrape_interval_minutes,
         settings.news_scrape_interval_minutes,

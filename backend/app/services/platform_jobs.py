@@ -19,6 +19,7 @@ from app.core.cache import invalidate_cache
 from app.core.admin_units import is_crop_province
 from app.core.config import get_settings
 from app.db import SessionLocal
+from app.ingestion.input_price_service import InputPriceIngestionService
 from app.ingestion.service import PriceIngestionService
 from app.ml_engine.evaluator import ForecastEvaluator
 from app.models import DailyMarketPrice, DurianVariety, ModelTrainingRun, PlatformJobRun, ProductionRegion, RecommendationSession, YieldFeedback
@@ -74,6 +75,20 @@ class PlatformJobService:
             try:
                 summary = ContentPortalService(self.db).scrape_news()
                 invalidate_cache("news")
+                self._finish_job(job, "thành công", summary)
+                return summary
+            except Exception as exc:
+                self.db.rollback()
+                job = self.db.get(PlatformJobRun, job.job_id) or job
+                self._finish_job(job, "lỗi", None, str(exc))
+                raise
+
+    def run_input_price_scrape(self) -> dict:
+        with job_lock("scrape_input_prices"):
+            job = self._start_job("scrape_input_prices")
+            try:
+                summary = {"scrape": InputPriceIngestionService(self.db).scrape_and_store(source=None)}
+                invalidate_cache("input-price")
                 self._finish_job(job, "thành công", summary)
                 return summary
             except Exception as exc:
@@ -314,6 +329,23 @@ class JobScheduler:
         )
         cls._scheduler.add_job(
             cls._run_with_session,
+            "cron",
+            hour=7,
+            minute=15,
+            args=["input_prices"],
+            id="scrape_input_prices_daily_0715",
+            replace_existing=True,
+        )
+        cls._scheduler.add_job(
+            cls._run_with_session,
+            "date",
+            run_date=datetime.now(SCHEDULER_TZ) + timedelta(seconds=15),
+            args=["input_prices"],
+            id="scrape_input_prices_boot_catchup",
+            replace_existing=True,
+        )
+        cls._scheduler.add_job(
+            cls._run_with_session,
             "interval",
             minutes=settings.news_scrape_interval_minutes,
             args=["news"],
@@ -391,6 +423,8 @@ class JobScheduler:
             try:
                 if job == "scrape":
                     service.run_scrape()
+                elif job == "input_prices":
+                    service.run_input_price_scrape()
                 elif job == "news":
                     service.run_news_scrape()
                 elif job == "data_quality":

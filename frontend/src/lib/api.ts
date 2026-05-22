@@ -719,7 +719,7 @@ export function fetchModelRuns(token: string) {
   return authJson<ModelTrainingRun[]>("/api/v1/platform/model-runs", token);
 }
 
-export function runPlatformJob(token: string, job: "scrape" | "news" | "data-quality" | "retrain" | "weather") {
+export function runPlatformJob(token: string, job: "scrape" | "news" | "input-prices" | "data-quality" | "retrain" | "weather") {
   return authJson<Record<string, unknown>>(`/api/v1/platform/jobs/${job}`, token, { method: "POST" });
 }
 

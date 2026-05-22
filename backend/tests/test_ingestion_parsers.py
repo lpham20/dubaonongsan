@@ -1,6 +1,9 @@
+from datetime import UTC, datetime
+
 from app.ingestion.sources.banggianongsan import BangGiaNongSanScraper
 from app.ingestion.sources.baohatinh import BaoHaTinhScraper
 from app.ingestion.sources.baonghean import BaoNgheAnScraper
+from app.ingestion.sources.fertilizer_vietnga import VietNgaFertilizerPriceScraper, classify_fertilizer_product
 from app.ingestion.sources.socongthuong_daklak import SoCongThuongDakLakScraper
 
 
@@ -96,3 +99,42 @@ def test_baohatinh_parser_expands_region_prices_to_provinces():
         for item in result.observations
     )
     assert any(item.province == "Gia Lai" and item.variety_name == "Sầu Thái Dona" for item in result.observations)
+
+
+def test_vietnga_fertilizer_parser_extracts_current_price_rows():
+    html = """
+    <div class="table-row heading-row">
+      <div class="table-cell">STT</div><div class="table-cell">Hình ảnh</div>
+      <div class="table-cell">Tên sản phẩm</div><div class="table-cell">Miền Tây</div>
+    </div>
+    <div class="table-row">
+      <div class="table-cell">1</div><div class="table-cell"></div>
+      <div class="table-cell">Ure Cà Mau</div>
+      <div class="table-cell"><div class="sub-cells"><div class="table-cell sub-cell"><span class="show-tablet">Miền Tây</span>935.000 - 985.000</div></div></div>
+    </div>
+    <div class="table-row">
+      <div class="table-cell">2</div><div class="table-cell"></div>
+      <div class="table-cell">DAP Đình Vũ (hạt xanh)</div>
+      <div class="table-cell"><div class="sub-cells"><div class="table-cell sub-cell"><span class="show-tablet">Miền Tây</span>1.075.000 - 1.125.000</div></div></div>
+    </div>
+    <div class="table-row">
+      <div class="table-cell">3</div><div class="table-cell"></div>
+      <div class="table-cell">NPK Bình Điền 20-20-15</div>
+      <div class="table-cell"><div class="sub-cells"><div class="table-cell sub-cell"><span class="show-tablet">Miền Tây</span>1.030.000 - 1.080.000</div></div></div>
+    </div>
+    """
+    result = VietNgaFertilizerPriceScraper().parse_table(html, observed_at=datetime(2026, 5, 20, tzinfo=UTC))
+
+    assert len(result) == 3
+    assert result[0].product_slug == "ure"
+    assert result[0].brand == "Cà Mau"
+    assert result[0].package_price_vnd == 960000
+    assert result[1].product_slug == "dap"
+    assert result[1].brand == "Đình Vũ"
+    assert result[2].product_slug == "npk-20-20-15"
+    assert result[2].brand == "Bình Điền"
+
+
+def test_vietnga_fertilizer_classifier_normalizes_common_products():
+    assert classify_fertilizer_product("Kali Canada Hạt Miểng 60%")["slug"] == "kali-mop"
+    assert classify_fertilizer_product("Lân LT (hạt)")["brand"] == "Lâm Thao"
