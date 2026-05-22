@@ -90,6 +90,7 @@ const NewsDetailPage = lazy(() =>
 const GuideDetailPage = lazy(() =>
   import("./components/GuideDetailPage").then(({ GuideDetailPage }) => ({ default: GuideDetailPage }))
 );
+const AdvisoryHub = lazy(() => import("./components/AdvisoryHub").then(({ AdvisoryHub }) => ({ default: AdvisoryHub })));
 const FertilizerAdvisor = lazy(() =>
   import("./components/FertilizerAdvisor").then(({ FertilizerAdvisor }) => ({ default: FertilizerAdvisor }))
 );
@@ -177,7 +178,7 @@ const mainSections: { value: MainSection; label: string; Icon: typeof Leaf }[] =
   { value: "home", label: "Trang chủ", Icon: Home },
   { value: "news", label: "Tin tức", Icon: Newspaper },
   { value: "guides", label: "Hướng dẫn", Icon: BookOpenCheck },
-  { value: "fertilizer", label: "Khuyến nghị bón phân", Icon: Calculator }
+  { value: "fertilizer", label: "Khuyến nghị", Icon: Calculator }
 ];
 
 function getInitialSection(search = window.location.search): MainSection {
@@ -488,7 +489,9 @@ function RoutedApp() {
     const route = getInitialRoute(location.pathname, location.search);
     const canonicalUrl = routeToUrl(route);
     const canonicalWithSearch =
-      (route.section === "news" && !route.newsSlug && location.search) || (route.section === "yieldFeedback" && location.search)
+      (route.section === "news" && !route.newsSlug && location.search) ||
+      (route.section === "yieldFeedback" && location.search) ||
+      (route.section === "fertilizer" && location.search)
         ? `${canonicalUrl}${location.search}`
         : canonicalUrl;
     const currentUrl = `${location.pathname}${location.search}`;
@@ -1097,7 +1100,7 @@ function RoutedApp() {
         <RoiCalculatorPage authToken={authToken} onRequireAuth={() => requestAccountAccess("Vui lòng đăng nhập hoặc đăng ký tài khoản để tính ROI.")} />
       ) : null}
       {!notFound && section === "fertilizer" ? (
-        <FertilizerAdvisor
+        <AdvisoryHub
           authToken={authToken}
           onRequireAuth={() => requestAccountAccess(FERTILIZER_AUTH_MESSAGE)}
         />

@@ -289,7 +289,9 @@ def test_world_fertilizer_forecast_returns_daily_percent_changes(client):
     assert forecast.status_code == 200
     payload = forecast.json()
     assert payload["commodity_slug"] == "urea"
-    assert payload["model_kind"] == "world-fertilizer-ewma-ar1-v1"
+    assert payload["model_kind"] == "world-fertilizer-anchor-ewma-ar1-v2"
+    assert payload["source_mode"] == "daily_signal"
+    assert payload["data_quality"]["history_points"] >= 14
     assert len(payload["forecast_daily"]) == 30
     assert len(payload["forecast_weekly"]) >= 4
     first = payload["forecast_daily"][0]
@@ -341,7 +343,53 @@ def test_roi_calculate_and_save(client):
     assert payload["scenario_id"]
     assert payload["fertilizer_cost_vnd_per_ha"] > 0
     assert payload["total_revenue_vnd"] > payload["fertilizer_cost_vnd_per_ha"]
+    assert len(payload["scenarios"]) == 3
     assert len(payload["sensitivity"]["matrix"]) == 9
+
+
+def test_advisory_roi_simple_mode(client):
+    token, _user_id = create_user_token("advisory-roi@example.com")
+    response = client.post(
+        "/api/v1/advisory/roi/calculate",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "crop": "sau_rieng",
+            "crop_area_ha": 1.2,
+            "expected_yield_t_ha": 16,
+            "expected_sell_price_vnd_per_kg": 72000,
+            "fertilizer_total_cost_vnd_per_ha": 38000000,
+            "other_input_cost_vnd_per_ha": 12000000,
+            "labor_cost_vnd_per_ha": 18000000,
+        },
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["fertilizer_input_mode"] == "simple"
+    assert payload["fertilizer_cost_vnd_per_ha"] == 38000000
+    assert len(payload["scenarios"]) == 3
+    assert payload["recommendations_vi"]
+
+
+def test_roi_rejects_duplicate_fertilizer_slug(client):
+    token, _user_id = create_user_token("roi-duplicate@example.com")
+    response = client.post(
+        "/api/v1/advisory/roi/calculate",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "crop": "ca_phe",
+            "crop_area_ha": 1,
+            "expected_yield_t_ha": 3.2,
+            "expected_sell_price_vnd_per_kg": 95000,
+            "fertilizer_lines": [
+                {"product_slug": "ure", "kg_per_ha": 120, "price_vnd_per_kg": 14500},
+                {"product_slug": "ure", "kg_per_ha": 80, "price_vnd_per_kg": 14600},
+            ],
+            "other_input_cost_vnd_per_ha": 5000000,
+            "labor_cost_vnd_per_ha": 8000000,
+        },
+    )
+    assert response.status_code == 400
+    assert response.json()["detail"]["code"] == "DUPLICATE_FERTILIZER"
 
 
 def test_lstm_artifact_meta_consistency():

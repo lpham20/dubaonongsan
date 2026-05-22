@@ -131,6 +131,8 @@ class WorldFertilizerWeeklyPoint(BaseModel):
     date_from: str
     date_to: str
     median_price_usd_per_tonne: float
+    low_price_usd_per_tonne: float | None = None
+    high_price_usd_per_tonne: float | None = None
     pct_change_vs_prev_week: float
     pct_change_vs_today: float
     daily_breakdown: list[WorldFertilizerForecastPoint]
@@ -145,6 +147,9 @@ class WorldFertilizerForecastOut(BaseModel):
     model_kind: str
     history_points: int
     volatility: float
+    volatility_daily: float | None = None
+    source_mode: str | None = None
+    data_quality: dict | None = None
     forecast_daily: list[WorldFertilizerForecastPoint]
     forecast_weekly: list[WorldFertilizerWeeklyPoint]
     note_vi: str

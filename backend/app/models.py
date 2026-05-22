@@ -169,6 +169,9 @@ class RoiScenario(Base):
     total_cost_vnd: Mapped[float | None] = mapped_column(Numeric(16, 2))
     net_profit_vnd: Mapped[float | None] = mapped_column(Numeric(16, 2))
     roi_pct: Mapped[float | None] = mapped_column(Numeric(8, 2))
+    scenarios_json: Mapped[list[dict[str, Any]] | None] = mapped_column(JSON)
+    forecast_model_kind: Mapped[str | None] = mapped_column(String(80))
+    confidence_score: Mapped[float | None] = mapped_column(Numeric(4, 3))
     notes: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
 

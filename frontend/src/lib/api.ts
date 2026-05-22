@@ -150,6 +150,8 @@ export type WorldFertilizerWeeklyPoint = {
   date_from: string;
   date_to: string;
   median_price_usd_per_tonne: number;
+  low_price_usd_per_tonne?: number | null;
+  high_price_usd_per_tonne?: number | null;
   pct_change_vs_prev_week: number;
   pct_change_vs_today: number;
   daily_breakdown: WorldFertilizerForecastPoint[];
@@ -164,6 +166,18 @@ export type WorldFertilizerForecast = {
   model_kind: string;
   history_points: number;
   volatility: number;
+  volatility_daily?: number | null;
+  source_mode?: string | null;
+  data_quality?: {
+    level?: string;
+    source_mode?: string;
+    sources?: string[];
+    history_points?: number;
+    latest_source?: string | null;
+    latest_observed_at?: string | null;
+    staleness_days?: number;
+    reason_vi?: string;
+  } | null;
   forecast_daily: WorldFertilizerForecastPoint[];
   forecast_weekly: WorldFertilizerWeeklyPoint[];
   note_vi: string;
@@ -182,30 +196,52 @@ export type RoiCalculateRequest = {
   crop_area_ha: number;
   expected_yield_t_ha: number;
   expected_sell_price_vnd_per_kg: number;
-  fertilizer_lines: { product_slug: string; kg_per_ha: number }[];
+  region_id?: number | null;
+  variety_id?: number | null;
+  fertilizer_total_cost_vnd_per_ha?: number | null;
+  fertilizer_lines: { product_slug?: string | null; name?: string | null; kg_per_ha: number; price_vnd_per_kg?: number | null }[];
   other_input_cost_vnd_per_ha: number;
   labor_cost_vnd_per_ha: number;
   save?: boolean;
 };
 
+export type RoiScenario = {
+  scenario: "pessimistic" | "expected" | "optimistic";
+  label_vi: string;
+  sell_price_vnd_per_kg: number;
+  yield_t_ha: number;
+  revenue_vnd: number;
+  total_cost_vnd: number;
+  net_profit_vnd: number;
+  roi_pct: number;
+  rationale_vi: string;
+};
+
 export type RoiCalculateResponse = {
   scenario_id: number | null;
+  fertilizer_input_mode: "simple" | "detail" | "db_reference";
   fertilizer_cost_vnd_per_ha: number;
   total_revenue_vnd: number;
   total_cost_vnd: number;
   net_profit_vnd: number;
   roi_pct: number;
+  scenarios: RoiScenario[];
+  confidence_score: number;
+  forecast_model_kind: string;
   breakdown: {
-    product_slug: string;
+    product_slug: string | null;
     product_name: string;
-    kg_per_ha: number;
-    price_vnd_per_kg: number;
+    name?: string | null;
+    kg_per_ha: number | null;
+    price_vnd_per_kg: number | null;
     cost_vnd_per_ha: number;
+    price_source?: string;
     source_name: string;
-    observed_at: string;
+    observed_at: string | null;
   }[];
   sensitivity: { matrix: { sell_price_delta_pct: number; fertilizer_price_delta_pct: number; roi_pct: number; net_profit_vnd: number }[] };
   notes_vi: string[];
+  recommendations_vi: string[];
 };
 
 export type CropType = "sau_rieng" | "ca_phe" | "ho_tieu" | "lua";
@@ -635,6 +671,10 @@ async function getJson<T>(url: string, signal?: AbortSignal): Promise<T> {
   return requestJson<T>(url, { signal });
 }
 
+async function getJsonWithBody<T>(url: string, payload: unknown, signal?: AbortSignal): Promise<T> {
+  return requestJson<T>(url, { method: "POST", signal, body: JSON.stringify(payload) });
+}
+
 async function authJson<T>(url: string, token: string, init?: RequestInit): Promise<T> {
   return requestJson<T>(url, { ...init, headers: authHeaders(token) });
 }
@@ -750,11 +790,90 @@ export function fetchWorldFertilizerForecast(
 }
 
 export function calculateRoi(token: string, payload: RoiCalculateRequest, signal?: AbortSignal) {
-  return authJson<RoiCalculateResponse>("/api/v1/roi/calculate", token, {
+  return authJson<RoiCalculateResponse>("/api/v1/advisory/roi/calculate", token, {
     method: "POST",
     signal,
     body: JSON.stringify(payload)
   });
+}
+
+export type SellingTimeRequest = {
+  crop: CropType;
+  region_id?: number | null;
+  variety_id?: number | null;
+  quantity_kg: number;
+  storage_cost_vnd_per_kg_per_day?: number;
+  earliest_sale_date?: string | null;
+};
+
+export type SellingTimeWindow = {
+  date: string;
+  forecast_price_vnd_per_kg: number;
+  net_revenue_vnd: number;
+  uplift_pct_vs_today: number;
+  storage_cost_vnd: number;
+};
+
+export type SellingTimeResponse = {
+  crop: CropType;
+  crop_label_vi: string;
+  model_kind: string;
+  best_window: SellingTimeWindow;
+  top_5_windows: SellingTimeWindow[];
+  confidence_score: number;
+  rationale_vi: string;
+};
+
+export function postSellingTime(payload: SellingTimeRequest, signal?: AbortSignal) {
+  return getJsonWithBody<SellingTimeResponse>("/api/v1/advisory/selling-time", payload, signal);
+}
+
+export type ArbitrageResponse = {
+  items: {
+    crop: CropType;
+    crop_label_vi: string;
+    from_region: string;
+    to_region: string;
+    from_province: string | null;
+    to_province: string | null;
+    source_price_vnd_per_kg: number;
+    target_price_vnd_per_kg: number;
+    estimated_distance_km: number;
+    transport_cost_vnd_per_kg: number;
+    net_spread_vnd_per_kg: number;
+    net_spread_pct: number;
+  }[];
+  assumption_vi: string;
+};
+
+export function fetchArbitrage(options: { crop?: CropType | ""; minNetSpreadPct?: number; maxDistanceKm?: number; signal?: AbortSignal } = {}) {
+  const params = new URLSearchParams({
+    min_net_spread_pct: String(options.minNetSpreadPct ?? 3),
+    max_distance_km: String(options.maxDistanceKm ?? 700)
+  });
+  if (options.crop) params.set("crop_type", options.crop);
+  return getJson<ArbitrageResponse>(`/api/v1/advisory/arbitrage?${params.toString()}`, options.signal);
+}
+
+export type CrossCommodityResponse = {
+  region_id: number;
+  region_name: string;
+  province: string | null;
+  items: {
+    crop: CropType;
+    crop_label_vi: string;
+    suitability_score: number;
+    reference_price_vnd_per_kg: number;
+    yield_t_ha: number;
+    estimated_profit_vnd: number;
+    roi_score: number;
+  }[];
+  intercropping_vi: string[];
+  disclaimer_vi: string;
+};
+
+export function postCrossCommodity(payload: { region_id: number; current_crop?: CropType | null; area_hectares: number }, signal?: AbortSignal) {
+  return getJsonWithBody<CrossCommodityResponse>("/api/v1/advisory/cross-commodity", payload, signal);
 }
 
 export function fetchDataQuality(crop: CropType, regionId: number, varietyId: number, signal?: AbortSignal) {

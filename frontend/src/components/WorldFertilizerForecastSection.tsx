@@ -168,6 +168,12 @@ export function WorldFertilizerForecastSection() {
   const dayThirty = forecast?.forecast_daily.at(-1);
   const summaryTrend = dayThirty?.cumulative_pct_from_today ?? 0;
   const SummaryIcon = summaryTrend > 0.5 ? TrendingUp : summaryTrend < -0.5 ? TrendingDown : Activity;
+  const qualityText =
+    forecast?.source_mode === "monthly_official_anchor"
+      ? "Neo chính thức theo tháng"
+      : forecast?.source_mode === "daily_signal"
+        ? "Có tín hiệu daily"
+        : "Đang đánh giá nguồn";
 
   return (
     <section id="world" className="input-price-panel world-fertilizer-section">
@@ -220,13 +226,14 @@ export function WorldFertilizerForecastSection() {
           <SummaryIcon size={18} />
           <span>30 ngày tới</span>
           <strong>{formatPct(summaryTrend)}</strong>
-          <small>{forecast?.model_kind ?? "Đang cập nhật"}</small>
+          <small>{qualityText}</small>
         </div>
       </div>
 
       <div className="world-note">
         <strong>Giá thế giới, không phải giá bán lẻ nội địa.</strong>
         <p>{forecast?.note_vi ?? selectedCommodity.driver_note_vi}</p>
+        {forecast?.data_quality?.reason_vi ? <p>{forecast.data_quality.reason_vi}</p> : null}
       </div>
 
       {!loading && forecast?.forecast_weekly.length === 0 ? (

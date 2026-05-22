@@ -20,7 +20,9 @@ from app.models import ScrapeRun, WorldCommodityPrice
 logger = logging.getLogger(__name__)
 WORLD_FERTILIZER_SCRAPE_ATTEMPTS = 2
 WORLD_FERTILIZER_RETRY_DELAY_SECONDS = 2.0
-WORLD_FERTILIZER_MODEL_KIND = "world-fertilizer-ewma-ar1-v1"
+WORLD_FERTILIZER_MODEL_KIND = "world-fertilizer-anchor-ewma-ar1-v2"
+MONTHLY_ANCHOR_TREND_CAP = 0.06
+DAILY_SIGNAL_TREND_CAP = 0.12
 
 COMMODITIES = {
     "urea": {
@@ -237,7 +239,7 @@ class WorldFertilizerForecastService:
         ).all()
         points = _aggregate_observations(rows)
         meta = COMMODITIES[commodity_slug]
-        if len(points) < 6:
+        if len(points) < 14:
             return {
                 "commodity_slug": commodity_slug,
                 "commodity_name_vi": meta["name_vi"],
@@ -247,21 +249,33 @@ class WorldFertilizerForecastService:
                 "model_kind": "insufficient-data",
                 "history_points": len(points),
                 "volatility": 0.0,
+                "volatility_daily": 0.0,
+                "source_mode": "insufficient-data",
+                "data_quality": {
+                    "level": "low",
+                    "reason_vi": "Chưa đủ tối thiểu 14 điểm lịch sử để nội suy xu hướng 30 ngày.",
+                    "latest_source": None,
+                    "latest_observed_at": None,
+                },
                 "forecast_daily": [],
                 "forecast_weekly": [],
                 "note_vi": "Chưa đủ dữ liệu lịch sử để dự báo xu hướng phân bón thế giới.",
             }
 
         base_observed_at, base_price, quote_type = points[-1]
+        source_mode = _source_mode(rows)
+        quality = _data_quality(rows, points, source_mode)
         returns = [
             math.log(points[index][1] / points[index - 1][1])
             for index in range(1, len(points))
             if points[index - 1][1] > 0 and points[index][1] > 0
         ][-36:]
-        monthly_trend = _monthly_trend(returns)
+        trend_cap = DAILY_SIGNAL_TREND_CAP if source_mode == "daily_signal" else MONTHLY_ANCHOR_TREND_CAP
+        monthly_trend = max(min(_monthly_trend(returns), trend_cap), -trend_cap)
         daily_trend = monthly_trend / 30
         monthly_volatility = pstdev(returns) if len(returns) > 1 else 0.0
-        daily_volatility = min(max(monthly_volatility / math.sqrt(30), 0.0015), 0.025)
+        volatility_cap = 0.018 if source_mode == "daily_signal" else 0.012
+        daily_volatility = min(max(monthly_volatility / math.sqrt(30), 0.0012), volatility_cap)
         today = datetime.now(UTC).date()
         base_seasonal = _seasonal_multiplier(base_observed_at)
         forecast_daily: list[dict] = []
@@ -295,12 +309,12 @@ class WorldFertilizerForecastService:
             "model_kind": WORLD_FERTILIZER_MODEL_KIND,
             "history_points": len(points),
             "volatility": round(daily_volatility, 6),
+            "volatility_daily": round(daily_volatility, 6),
+            "source_mode": source_mode,
+            "data_quality": quality,
             "forecast_daily": forecast_daily,
             "forecast_weekly": _weekly_summary(forecast_daily, base_price),
-            "note_vi": (
-                "Đây là xu hướng giá phân bón thế giới theo USD/tấn, không phải dự báo giá bán lẻ nội địa. "
-                "Người dùng có thể lấy % tăng/giảm này làm tín hiệu nền rồi tự áp vào giá đại lý tại địa phương."
-            ),
+            "note_vi": _forecast_note(source_mode, base_observed_at),
         }
 
     def health(self, stale_after_days: int = 45) -> dict:
@@ -381,6 +395,60 @@ def _aggregate_observations(rows: list[WorldCommodityPrice]) -> list[tuple[datet
     return sorted(points, key=lambda item: item[0])
 
 
+def _source_mode(rows: list[WorldCommodityPrice]) -> str:
+    recent_cutoff = datetime.now(UTC) - timedelta(days=45)
+    for row in rows:
+        observed_at = row.observed_at
+        if observed_at.tzinfo is None:
+            observed_at = observed_at.replace(tzinfo=UTC)
+        if observed_at >= recent_cutoff and row.source != "worldbank_pinksheet":
+            return "daily_signal"
+    return "monthly_official_anchor"
+
+
+def _data_quality(rows: list[WorldCommodityPrice], points: list[tuple[datetime, float, str]], source_mode: str) -> dict:
+    latest_row = max(rows, key=lambda row: row.observed_at)
+    latest_observed_at = latest_row.observed_at
+    if latest_observed_at.tzinfo is None:
+        latest_observed_at = latest_observed_at.replace(tzinfo=UTC)
+    staleness_days = max(0, (datetime.now(UTC) - latest_observed_at).days)
+    if source_mode == "daily_signal":
+        level = "high" if staleness_days <= 7 else "medium"
+        reason = "Có tín hiệu nguồn tin daily gần đây, World Bank Pink Sheet dùng làm neo kiểm chứng."
+    else:
+        level = "medium" if staleness_days <= 75 else "low"
+        reason = (
+            "Nguồn chính hiện là World Bank Pink Sheet theo tháng. Bảng ngày phía dưới là nội suy xu hướng 30 ngày "
+            "từ dữ liệu chính thức, không phải báo giá daily ngoài thị trường."
+        )
+    sources = sorted({row.source for row in rows})
+    return {
+        "level": level,
+        "source_mode": source_mode,
+        "sources": sources,
+        "history_points": len(points),
+        "latest_source": latest_row.source,
+        "latest_observed_at": latest_observed_at.isoformat(),
+        "staleness_days": staleness_days,
+        "reason_vi": reason,
+    }
+
+
+def _forecast_note(source_mode: str, base_observed_at: datetime) -> str:
+    base_date = f"{base_observed_at.day:02d}/{base_observed_at.month:02d}/{base_observed_at.year}"
+    common = (
+        "Đây là xu hướng giá phân bón thế giới theo USD/tấn, không phải giá bán lẻ nội địa. "
+        "Nên dùng tỷ lệ % tăng/giảm làm tín hiệu nền rồi tự áp vào báo giá đại lý, sau khi cộng tỷ giá, vận chuyển và tồn kho."
+    )
+    if source_mode == "monthly_official_anchor":
+        return (
+            f"Dữ liệu chính thức mới nhất đang neo ở World Bank Pink Sheet ngày {base_date}. "
+            "Daily breakdown là nội suy thận trọng từ xu hướng monthly, đã cap biên độ để tránh phóng đại. "
+            f"{common}"
+        )
+    return f"Có tín hiệu nguồn daily gần đây và World Bank dùng làm neo kiểm chứng. {common}"
+
+
 def _monthly_trend(returns: list[float]) -> float:
     if not returns:
         return 0.0
@@ -439,6 +507,8 @@ def _weekly_summary(forecast_daily: list[dict], base_price: float) -> list[dict]
                 "date_from": date_from,
                 "date_to": date_to,
                 "median_price_usd_per_tonne": round(week_median, 2),
+                "low_price_usd_per_tonne": round(min(item["price_low_usd_per_tonne"] for item in items), 2),
+                "high_price_usd_per_tonne": round(max(item["price_high_usd_per_tonne"] for item in items), 2),
                 "pct_change_vs_prev_week": round(((week_median / previous_median) - 1) * 100, 3) if previous_median else 0.0,
                 "pct_change_vs_today": round(((week_median / base_price) - 1) * 100, 3) if base_price else 0.0,
                 "daily_breakdown": items,
