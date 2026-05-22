@@ -138,3 +138,4 @@ def test_vietnga_fertilizer_parser_extracts_current_price_rows():
 def test_vietnga_fertilizer_classifier_normalizes_common_products():
     assert classify_fertilizer_product("Kali Canada Hạt Miểng 60%")["slug"] == "kali-mop"
     assert classify_fertilizer_product("Lân LT (hạt)")["brand"] == "Lâm Thao"
+    assert classify_fertilizer_product("NPK Việt Nhật 16-16-8-13S")["brand"] == "Việt Nhật"

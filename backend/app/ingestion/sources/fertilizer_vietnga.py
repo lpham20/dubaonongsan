@@ -198,7 +198,7 @@ def _extract_brand(label: str, folded: str, formula: str | None) -> str | None:
             brand = brand.replace(formula.replace("NPK ", ""), "")
             brand = brand.replace(formula, "")
         brand = re.sub(r"[-–+]?\s*\bTE\b", "", brand, flags=re.IGNORECASE)
-        return normalize_space(brand) or None
+        return _normalize_brand_alias(normalize_space(brand))
     for prefix in ("Ure", "Urê", "Urea", "DAP", "Kali", "Lân", "SA"):
         if clean.lower().startswith(prefix.lower()):
             brand = normalize_space(clean[len(prefix):])
