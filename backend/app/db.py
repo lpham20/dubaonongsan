@@ -42,4 +42,14 @@ def init_db() -> None:
     alembic_cfg_path = Path(__file__).resolve().parents[1] / "alembic.ini"
     cfg = Config(str(alembic_cfg_path))
     cfg.set_main_option("sqlalchemy.url", settings.database_url)
+    if settings.database_url.startswith("postgres"):
+        from sqlalchemy import text
+
+        with engine.begin() as connection:
+            connection.execute(text("SELECT pg_advisory_lock(2026052208)"))
+            try:
+                command.upgrade(cfg, "head")
+            finally:
+                connection.execute(text("SELECT pg_advisory_unlock(2026052208)"))
+        return
     command.upgrade(cfg, "head")
