@@ -1,0 +1,60 @@
+/*
+   iPad/tablet-only safety layer.
+   Keep this file scoped to 861-1180px so phone mobile CSS and desktop CSS stay untouched.
+*/
+
+@media (min-width: 861px) and (max-width: 1180px) {
+  .app-shell > .menu-bar.mobile-menu-bar,
+  .mobile-menu-bar {
+    grid-template-areas: "menu brand account" !important;
+    grid-template-columns: 56px minmax(0, 1fr) 56px !important;
+    grid-template-rows: 48px !important;
+    align-items: center !important;
+    min-height: 64px !important;
+    height: 64px !important;
+    overflow: visible !important;
+  }
+
+  .mobile-menu-trigger,
+  .mobile-header-account-trigger,
+  .mobile-menu-bar .mobile-brand-button {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    grid-row: 1 !important;
+    align-self: center !important;
+    transform: none !important;
+  }
+
+  .mobile-menu-trigger {
+    grid-area: menu !important;
+    justify-self: start !important;
+  }
+
+  .mobile-menu-bar .mobile-brand-button {
+    grid-area: brand !important;
+    justify-self: stretch !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .mobile-header-account-trigger {
+    grid-area: account !important;
+    justify-self: end !important;
+  }
+
+  .app-shell > .menu-bar.mobile-menu-bar .mobile-brand-button span,
+  .mobile-menu-bar .mobile-brand-button span {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .app-shell.forecast-shell .forecast-price-ticker {
+    top: 64px !important;
+    z-index: 90 !important;
+  }
+}

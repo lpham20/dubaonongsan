@@ -20,6 +20,7 @@ import "./styles/production.css";
 import "./styles/responsive.css";
 import "./styles/finance-terminal.css";
 import "./styles/mobile-bloomberg.css";
+import "./styles/tablet-ipad.css";
 
 if (typeof window !== "undefined") {
   window.addEventListener("error", (event) => {
