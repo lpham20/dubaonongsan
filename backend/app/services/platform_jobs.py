@@ -330,10 +330,10 @@ class JobScheduler:
         cls._scheduler.add_job(
             cls._run_with_session,
             "cron",
-            hour=7,
-            minute=15,
+            hour="6,10,14,18",
+            minute=30,
             args=["input_prices"],
-            id="scrape_input_prices_daily_0715",
+            id="scrape_input_prices_quarter_day",
             replace_existing=True,
         )
         cls._scheduler.add_job(

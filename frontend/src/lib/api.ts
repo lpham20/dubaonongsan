@@ -108,6 +108,57 @@ export type AgriInputForecastPoint = {
   model_kind: string;
 };
 
+export type AgriInputForecastScenario = {
+  base: AgriInputForecastPoint[];
+  bull: AgriInputForecastPoint[];
+  bear: AgriInputForecastPoint[];
+  model_kind: string;
+  history_points: number;
+  volatility: number;
+  latest_observed_at: string | null;
+};
+
+export const EMPTY_INPUT_FORECAST: AgriInputForecastScenario = {
+  base: [],
+  bull: [],
+  bear: [],
+  model_kind: "no-data",
+  history_points: 0,
+  volatility: 0,
+  latest_observed_at: null
+};
+
+export type RoiCalculateRequest = {
+  crop: CropType;
+  crop_area_ha: number;
+  expected_yield_t_ha: number;
+  expected_sell_price_vnd_per_kg: number;
+  fertilizer_lines: { product_slug: string; kg_per_ha: number }[];
+  other_input_cost_vnd_per_ha: number;
+  labor_cost_vnd_per_ha: number;
+  save?: boolean;
+};
+
+export type RoiCalculateResponse = {
+  scenario_id: number | null;
+  fertilizer_cost_vnd_per_ha: number;
+  total_revenue_vnd: number;
+  total_cost_vnd: number;
+  net_profit_vnd: number;
+  roi_pct: number;
+  breakdown: {
+    product_slug: string;
+    product_name: string;
+    kg_per_ha: number;
+    price_vnd_per_kg: number;
+    cost_vnd_per_ha: number;
+    source_name: string;
+    observed_at: string;
+  }[];
+  sensitivity: { matrix: { sell_price_delta_pct: number; fertilizer_price_delta_pct: number; roi_pct: number; net_profit_vnd: number }[] };
+  notes_vi: string[];
+};
+
 export type CropType = "sau_rieng" | "ca_phe" | "ho_tieu" | "lua";
 
 export type UsdVndRate = {
@@ -626,7 +677,15 @@ export function fetchAgriInputForecast(
   const params = new URLSearchParams({ product_slug: productSlug, days: String(options.days ?? 30) });
   if (options.province) params.set("province", options.province);
   if (options.brand) params.set("brand", options.brand);
-  return getJson<AgriInputForecastPoint[]>(`/api/v1/input-prices/forecast?${params.toString()}`, options.signal);
+  return getJson<AgriInputForecastScenario>(`/api/v1/input-prices/forecast?${params.toString()}`, options.signal);
+}
+
+export function calculateRoi(token: string, payload: RoiCalculateRequest, signal?: AbortSignal) {
+  return authJson<RoiCalculateResponse>("/api/v1/roi/calculate", token, {
+    method: "POST",
+    signal,
+    body: JSON.stringify(payload)
+  });
 }
 
 export function fetchDataQuality(crop: CropType, regionId: number, varietyId: number, signal?: AbortSignal) {

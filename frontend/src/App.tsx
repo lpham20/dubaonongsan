@@ -99,6 +99,9 @@ const FertilizerMethodology = lazy(() =>
 const InputPricesPage = lazy(() =>
   import("./components/InputPricesPage").then(({ InputPricesPage }) => ({ default: InputPricesPage }))
 );
+const RoiCalculatorPage = lazy(() =>
+  import("./components/RoiCalculatorPage").then(({ RoiCalculatorPage }) => ({ default: RoiCalculatorPage }))
+);
 const YieldFeedbackPage = lazy(() =>
   import("./components/YieldFeedbackPage").then(({ YieldFeedbackPage }) => ({ default: YieldFeedbackPage }))
 );
@@ -122,7 +125,17 @@ const cropLabels: Record<CropType, string> = {
   lua: "lúa"
 };
 
-type MainSection = "home" | "analytics" | "inputPrices" | "news" | "guides" | "fertilizer" | "fertilizerMethodology" | "yieldFeedback" | "methodology";
+type MainSection =
+  | "home"
+  | "analytics"
+  | "inputPrices"
+  | "roi"
+  | "news"
+  | "guides"
+  | "fertilizer"
+  | "fertilizerMethodology"
+  | "yieldFeedback"
+  | "methodology";
 type AnalyticsTab = "chart" | "analysis" | "technical" | "data";
 type NewsView = "latest" | "sau_rieng" | "ca_phe" | "ho_tieu";
 type PriceNewsView = Exclude<NewsView, "latest">;
@@ -134,7 +147,18 @@ type InitialRoute = {
   guideSlug: string;
   notFound: boolean;
 };
-const validSections: MainSection[] = ["home", "analytics", "inputPrices", "news", "guides", "fertilizer", "fertilizerMethodology", "yieldFeedback", "methodology"];
+const validSections: MainSection[] = [
+  "home",
+  "analytics",
+  "inputPrices",
+  "roi",
+  "news",
+  "guides",
+  "fertilizer",
+  "fertilizerMethodology",
+  "yieldFeedback",
+  "methodology"
+];
 const validCrops: CropType[] = ["sau_rieng", "ca_phe", "ho_tieu", "lua"];
 const validNewsViews: NewsView[] = ["latest", "sau_rieng", "ca_phe", "ho_tieu"];
 const gatedAnalyticsTabs: AnalyticsTab[] = ["analysis", "technical", "data"];
@@ -205,6 +229,7 @@ function getInitialRoute(pathnameInput = window.location.pathname, search = wind
     const routeCrop = validCrops.includes(parts[1] as CropType) ? (parts[1] as CropType) : "sau_rieng";
     return { ...fallback, section: "analytics", crop: routeCrop };
   }
+  if (parts[0] === "roi-uoc-tinh") return { ...fallback, section: "roi" };
   if (parts[0] === "khuyen-nghi-bon-phan" && parts[1] === "logic") return { ...fallback, section: "fertilizerMethodology" };
   if (parts[0] === "khuyen-nghi-bon-phan") return { ...fallback, section: "fertilizer" };
   if (parts[0] === "bao-cao-nang-suat") return { ...fallback, section: "yieldFeedback" };
@@ -236,6 +261,8 @@ function routeToUrl(route: InitialRoute) {
     path = forecastPath(route.crop);
   } else if (route.section === "inputPrices") {
     path = "/du-bao-gia/phan-bon";
+  } else if (route.section === "roi") {
+    path = "/roi-uoc-tinh";
   } else if (route.section === "fertilizer") {
     path = "/khuyen-nghi-bon-phan";
   } else if (route.section === "fertilizerMethodology") {
@@ -787,7 +814,7 @@ function RoutedApp() {
   const appShellClassName =
     section === "analytics"
       ? `app-shell forecast-shell crop-${crop} analytics-tab-${analyticsTab}`
-      : section === "inputPrices"
+      : section === "inputPrices" || section === "roi"
         ? "app-shell forecast-shell input-prices-shell"
       : "app-shell";
 
@@ -1066,6 +1093,9 @@ function RoutedApp() {
       {!notFound && section === "guides" && guideSlug ? <GuideDetailPage slug={guideSlug} /> : null}
       {!notFound && section === "guides" && !guideSlug ? <GuideLibrary guides={guides} /> : null}
       {!notFound && section === "inputPrices" ? <InputPricesPage /> : null}
+      {!notFound && section === "roi" ? (
+        <RoiCalculatorPage authToken={authToken} onRequireAuth={() => requestAccountAccess("Vui lòng đăng nhập hoặc đăng ký tài khoản để tính ROI.")} />
+      ) : null}
       {!notFound && section === "fertilizer" ? (
         <FertilizerAdvisor
           authToken={authToken}

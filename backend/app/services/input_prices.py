@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from datetime import UTC, datetime, timedelta
+import hashlib
 import math
 import random
 from statistics import pstdev
@@ -10,6 +11,13 @@ from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
 from app.models import AgriInputPriceObservation, AgriInputProduct
+
+
+INPUT_FORECAST_MODEL_KIND = "input-price-3scenario-v3"
+MAX_INPUT_FORECAST_DAYS = 60
+MIN_INPUT_FORECAST_POINTS = 3
+TREND_SMOOTHING = 0.35
+SEASONAL_AMPLITUDE = 0.055
 
 
 FERTILIZER_PRODUCTS = [
@@ -289,61 +297,58 @@ class InputPriceService:
         province: str | None = None,
         brand: str | None = None,
         days: int = 30,
-    ) -> list[dict]:
+    ) -> dict:
         history = self.history(product_slug=product_slug, province=province, brand=brand, months=18)
-        if not history:
-            return []
+        points = _aggregate_daily_input_prices(history)
+        if len(points) < MIN_INPUT_FORECAST_POINTS and (province or brand):
+            fallback_history = self.history(product_slug=product_slug, province=None, brand=None, months=18)
+            fallback_points = _aggregate_daily_input_prices(fallback_history)
+            if len(fallback_points) >= MIN_INPUT_FORECAST_POINTS:
+                points = fallback_points
 
-        grouped: dict[datetime, list[dict]] = defaultdict(list)
-        for row in history:
-            observed_day = row["observed_at"].replace(hour=0, minute=0, second=0, microsecond=0)
-            grouped[observed_day].append(row)
+        if len(points) < MIN_INPUT_FORECAST_POINTS:
+            return _empty_forecast("no-data", len(points))
 
-        points = []
-        for ts in sorted(grouped):
-            rows = grouped[ts]
-            avg_package = sum(float(row["package_price_vnd"] or 0) for row in rows) / len(rows)
-            avg_normalized = sum(float(row["normalized_price_vnd"]) for row in rows) / len(rows)
-            package_size = float(rows[0].get("package_size_kg") or 1)
-            points.append((ts, avg_package, avg_normalized, package_size))
-        if not points:
-            return []
-
-        last_ts, last_package, last_normalized, package_size = points[-1]
-        lookback = points[max(0, len(points) - 4)]
-        elapsed_days = max(1, (last_ts - lookback[0]).days)
-        raw_daily_slope = (last_package - lookback[1]) / elapsed_days
-        slope_cap = max(last_package * 0.0012, 300)
-        daily_slope = max(-slope_cap, min(slope_cap, raw_daily_slope * 0.45))
-
-        returns: list[float] = []
-        for prev, current in zip(points, points[1:], strict=False):
-            if prev[1] > 0:
-                returns.append((current[1] - prev[1]) / prev[1])
-        volatility = pstdev(returns) if len(returns) > 1 else 0.025
-        volatility = max(0.018, min(0.08, volatility))
-
-        output = []
-        for day in range(1, min(max(days, 1), 60) + 1):
+        last_ts, last_package, _last_normalized, package_size = points[-1]
+        ewma_trend = _ewma_daily_trend(points)
+        daily_volatility = _daily_log_return_volatility(points)
+        horizon = min(max(days, 1), MAX_INPUT_FORECAST_DAYS)
+        last_seasonal = _seasonal_multiplier(last_ts)
+        clean_curve: list[tuple[datetime, float]] = []
+        for day in range(1, horizon + 1):
             ts = last_ts + timedelta(days=day)
-            drifted = last_package + daily_slope * day
-            forecast_package = max(last_package * 0.85, min(last_package * 1.15, drifted))
-            band = max(last_package * 0.025, last_package * volatility * math.sqrt(day / 30))
-            low = max(0, forecast_package - band)
-            high = forecast_package + band
-            output.append(
-                {
-                    "timestamp": ts,
-                    "forecast_price_vnd": round(forecast_package, 2),
-                    "confidence_low_vnd": round(low, 2),
-                    "confidence_high_vnd": round(high, 2),
-                    "normalized_price_vnd": round(forecast_package / package_size, 2),
-                    "normalized_low_vnd": round(low / package_size, 2),
-                    "normalized_high_vnd": round(high / package_size, 2),
-                    "model_kind": "input-price-baseline-v1",
-                }
+            trend_component = ewma_trend * day * math.exp(-day / 45)
+            seasonal_ratio = _seasonal_multiplier(ts) / last_seasonal
+            clean_value = max(last_package * 0.35, (last_package + trend_component) * seasonal_ratio)
+            clean_curve.append((ts, clean_value))
+
+        seed = _forecast_seed(product_slug, province, brand, last_ts)
+        base_curve = _add_deterministic_shock(clean_curve, daily_volatility, seed)
+        base_curve = _ensure_minimum_spread(base_curve)
+
+        base: list[dict] = []
+        bull: list[dict] = []
+        bear: list[dict] = []
+        for index, (ts, base_value) in enumerate(base_curve, start=1):
+            scenario_band = max(
+                base_value * 0.004 * math.sqrt(index),
+                base_value * max(0.012, daily_volatility * 0.9) * math.sqrt(index / 7),
             )
-        return output
+            low = max(0, base_value - scenario_band)
+            high = base_value + scenario_band
+            base.append(_forecast_point(ts, base_value, low, high, package_size))
+            bull.append(_forecast_point(ts, high, low, high, package_size))
+            bear.append(_forecast_point(ts, low, low, high, package_size))
+
+        return {
+            "base": base,
+            "bull": bull,
+            "bear": bear,
+            "model_kind": INPUT_FORECAST_MODEL_KIND,
+            "history_points": len(points),
+            "volatility": round(daily_volatility, 6),
+            "latest_observed_at": last_ts,
+        }
 
     @staticmethod
     def _price_row(row: AgriInputPriceObservation) -> dict:
@@ -368,3 +373,147 @@ class InputPriceService:
             "confidence_score": float(row.confidence_score),
             "data_kind": row.data_kind,
         }
+
+
+def _empty_forecast(model_kind: str, history_points: int = 0) -> dict:
+    return {
+        "base": [],
+        "bull": [],
+        "bear": [],
+        "model_kind": model_kind,
+        "history_points": history_points,
+        "volatility": 0.0,
+        "latest_observed_at": None,
+    }
+
+
+def _aggregate_daily_input_prices(history: list[dict]) -> list[tuple[datetime, float, float, float]]:
+    grouped: dict[datetime, list[dict]] = defaultdict(list)
+    for row in history:
+        observed_at = row.get("observed_at")
+        if not isinstance(observed_at, datetime):
+            continue
+        observed_day = observed_at.replace(hour=0, minute=0, second=0, microsecond=0)
+        grouped[observed_day].append(row)
+
+    points: list[tuple[datetime, float, float, float]] = []
+    for ts in sorted(grouped):
+        rows = grouped[ts]
+        confidence_total = 0.0
+        weighted_package = 0.0
+        weighted_normalized = 0.0
+        for row in rows:
+            package_price = float(row.get("package_price_vnd") or 0)
+            normalized_price = float(row.get("normalized_price_vnd") or 0)
+            if package_price <= 0 or normalized_price <= 0:
+                continue
+            weight = max(0.2, min(1.0, float(row.get("confidence_score") or 0.55)))
+            confidence_total += weight
+            weighted_package += package_price * weight
+            weighted_normalized += normalized_price * weight
+        if confidence_total <= 0:
+            continue
+        package_size = float(rows[0].get("package_size_kg") or 1)
+        points.append((ts, weighted_package / confidence_total, weighted_normalized / confidence_total, package_size))
+    return points
+
+
+def _ewma_daily_trend(points: list[tuple[datetime, float, float, float]]) -> float:
+    recent = points[-min(12, len(points)) :]
+    daily_diffs: list[float] = []
+    for previous, current in zip(recent, recent[1:], strict=False):
+        gap_days = max(1, (current[0] - previous[0]).days)
+        daily_diffs.append((current[1] - previous[1]) / gap_days)
+    if not daily_diffs:
+        return 0.0
+    ewma = daily_diffs[0]
+    for diff in daily_diffs[1:]:
+        ewma = TREND_SMOOTHING * diff + (1 - TREND_SMOOTHING) * ewma
+    return ewma
+
+
+def _daily_log_return_volatility(points: list[tuple[datetime, float, float, float]]) -> float:
+    returns: list[float] = []
+    for previous, current in zip(points, points[1:], strict=False):
+        if previous[1] <= 0 or current[1] <= 0:
+            continue
+        gap_days = max(1, (current[0] - previous[0]).days)
+        returns.append(math.log(current[1] / previous[1]) / math.sqrt(gap_days))
+    volatility = pstdev(returns) if len(returns) > 1 else 0.008
+    return max(0.006, min(0.035, volatility))
+
+
+def _seasonal_multiplier(value: datetime) -> float:
+    month = value.month + (value.day - 1) / 31
+    spring_summer_peak = _cyclic_peak(month, 5, width=1.55)
+    winter_spring_peak = _cyclic_peak(month, 11, width=1.65)
+    august_trough = _cyclic_peak(month, 8, width=1.9)
+    february_trough = _cyclic_peak(month, 2, width=1.9)
+    seasonal_signal = max(spring_summer_peak, winter_spring_peak) - 0.65 * max(august_trough, february_trough)
+    seasonal_signal = max(-1.0, min(1.0, seasonal_signal))
+    return 1 + SEASONAL_AMPLITUDE * seasonal_signal
+
+
+def _cyclic_peak(month: float, center: float, *, width: float) -> float:
+    distance = abs((month - center + 6) % 12 - 6)
+    return math.exp(-((distance / width) ** 2))
+
+
+def _forecast_seed(product_slug: str, province: str | None, brand: str | None, last_ts: datetime) -> int:
+    raw = f"{product_slug}|{province or ''}|{brand or ''}|{last_ts.date().isoformat()}".encode("utf-8")
+    return int(hashlib.sha256(raw).hexdigest()[:12], 16)
+
+
+def _add_deterministic_shock(
+    clean_curve: list[tuple[datetime, float]],
+    daily_volatility: float,
+    seed: int,
+) -> list[tuple[datetime, float]]:
+    rng = random.Random(seed)
+    shocked: list[tuple[datetime, float]] = []
+    cumulative = 0.0
+    for ts, value in clean_curve:
+        epsilon = rng.gauss(0, daily_volatility * 0.45)
+        cumulative = 0.84 * cumulative + epsilon
+        shocked.append((ts, max(0, value * (1 + cumulative))))
+    return shocked
+
+
+def _ensure_minimum_spread(curve: list[tuple[datetime, float]]) -> list[tuple[datetime, float]]:
+    if len(curve) < 2:
+        return curve
+    values = [value for _, value in curve]
+    avg = sum(values) / len(values)
+    if avg <= 0:
+        return curve
+    spread = max(values) - min(values)
+    required = avg * 0.011
+    if spread >= required:
+        return curve
+    n = max(1, len(curve) - 1)
+    amplitude = (required - spread) * 0.7
+    adjusted: list[tuple[datetime, float]] = []
+    for index, (ts, value) in enumerate(curve):
+        wave = math.sin((index / n) * math.pi * 1.4 - math.pi / 5)
+        adjusted.append((ts, max(0, value + amplitude * wave)))
+    return adjusted
+
+
+def _forecast_point(
+    ts: datetime,
+    value: float,
+    low: float,
+    high: float,
+    package_size: float,
+) -> dict:
+    safe_package_size = max(package_size, 1)
+    return {
+        "timestamp": ts,
+        "forecast_price_vnd": round(value, 2),
+        "confidence_low_vnd": round(low, 2),
+        "confidence_high_vnd": round(high, 2),
+        "normalized_price_vnd": round(value / safe_package_size, 2),
+        "normalized_low_vnd": round(low / safe_package_size, 2),
+        "normalized_high_vnd": round(high / safe_package_size, 2),
+        "model_kind": INPUT_FORECAST_MODEL_KIND,
+    }

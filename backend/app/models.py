@@ -114,6 +114,28 @@ class AgriInputPriceObservation(Base):
     product: Mapped[AgriInputProduct] = relationship(back_populates="observations")
 
 
+class RoiScenario(Base):
+    __tablename__ = "roi_scenarios"
+
+    scenario_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_users.user_id", ondelete="CASCADE"), index=True)
+    session_id: Mapped[str | None] = mapped_column(ForeignKey("recommendation_sessions.session_id", ondelete="SET NULL"), index=True)
+    crop: Mapped[str] = mapped_column(String(40), index=True)
+    crop_area_ha: Mapped[float] = mapped_column(Numeric(8, 2))
+    expected_yield_t_ha: Mapped[float] = mapped_column(Numeric(8, 2))
+    expected_sell_price_vnd_per_kg: Mapped[float] = mapped_column(Numeric(12, 2))
+    fertilizer_cost_vnd_per_ha: Mapped[float] = mapped_column(Numeric(14, 2))
+    fertilizer_breakdown_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    other_input_cost_vnd_per_ha: Mapped[float] = mapped_column(Numeric(14, 2), default=0)
+    labor_cost_vnd_per_ha: Mapped[float] = mapped_column(Numeric(14, 2), default=0)
+    total_revenue_vnd: Mapped[float | None] = mapped_column(Numeric(16, 2))
+    total_cost_vnd: Mapped[float | None] = mapped_column(Numeric(16, 2))
+    net_profit_vnd: Mapped[float | None] = mapped_column(Numeric(16, 2))
+    roi_pct: Mapped[float | None] = mapped_column(Numeric(8, 2))
+    notes: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+
+
 class UserPriceReport(Base):
     __tablename__ = "user_price_reports"
 

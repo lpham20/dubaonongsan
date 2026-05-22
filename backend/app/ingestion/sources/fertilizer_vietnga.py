@@ -18,7 +18,7 @@ AJAX_URL = "https://vietnga.vn/wp-admin/admin-ajax.php?action=pricing_filter"
 REGION_NAME = "Đồng bằng sông Cửu Long"
 PROVINCE = "Miền Tây"
 PACKAGE_SIZE_KG = 50.0
-MAX_BACKFILL_DATES = 12
+MAX_BACKFILL_DATES = 24
 
 PRICE_RANGE_RE = re.compile(
     r"(?P<low>\d{1,3}(?:[.,]\d{3})+)\s*(?:-|–|—|đến|to)\s*(?P<high>\d{1,3}(?:[.,]\d{3})+)",

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections import OrderedDict
 from dataclasses import dataclass
+import json
 import logging
 from pathlib import Path
 import threading
@@ -43,6 +44,7 @@ def load_lstm_artifact(crop_type: str) -> TFLiteArtifact | None:
     artifacts_dir = Path(settings.ml_artifacts)
     model_path = artifacts_dir / f"lstm_{key}.tflite"
     scaler_path = artifacts_dir / f"lstm_{key}.scaler.json"
+    meta_path = artifacts_dir / f"lstm_{key}.meta.json"
     if not model_path.exists() or not scaler_path.exists():
         return None
 
@@ -51,6 +53,17 @@ def load_lstm_artifact(crop_type: str) -> TFLiteArtifact | None:
         interpreter = tflite.Interpreter(model_path=str(model_path))
         interpreter.allocate_tensors()
         scaler = Scaler.from_json(scaler_path.read_text(encoding="utf-8"))
+        if meta_path.exists():
+            meta = json.loads(meta_path.read_text(encoding="utf-8"))
+            meta_target_mode = meta.get("target_mode")
+            if meta_target_mode and scaler.target_mode != meta_target_mode:
+                logger.error(
+                    "TFLite target_mode mismatch crop=%s scaler=%s meta=%s; refusing to load",
+                    key,
+                    scaler.target_mode,
+                    meta_target_mode,
+                )
+                return None
         artifact = TFLiteArtifact(
             crop_type=key,
             interpreter=interpreter,

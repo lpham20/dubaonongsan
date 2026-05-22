@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import asdict
 from datetime import UTC, datetime
 import logging
+import time
 
 import requests
 from sqlalchemy import and_, desc, select
@@ -15,6 +16,8 @@ from app.models import AgriInputPriceObservation, AgriInputProduct, ScrapeRun
 
 
 logger = logging.getLogger(__name__)
+INPUT_PRICE_SCRAPE_ATTEMPTS = 2
+INPUT_PRICE_RETRY_DELAY_SECONDS = 2.0
 
 
 class InputPriceIngestionService:
@@ -36,8 +39,31 @@ class InputPriceIngestionService:
             self.db.add(run)
             self.db.commit()
             try:
-                logger.info("Starting input-price scrape: %s", scraper.source)
-                result = scraper.scrape()
+                result = None
+                last_error: Exception | None = None
+                for attempt in range(1, INPUT_PRICE_SCRAPE_ATTEMPTS + 1):
+                    logger.info("Starting input-price scrape: %s attempt=%d", scraper.source, attempt)
+                    try:
+                        candidate = scraper.scrape()
+                    except Exception as exc:
+                        last_error = exc
+                        if attempt < INPUT_PRICE_SCRAPE_ATTEMPTS:
+                            logger.warning(
+                                "Input-price scrape attempt failed, retrying: %s attempt=%d error=%s",
+                                scraper.source,
+                                attempt,
+                                exc,
+                            )
+                            time.sleep(INPUT_PRICE_RETRY_DELAY_SECONDS)
+                            continue
+                        raise
+                    if candidate.observations or attempt >= INPUT_PRICE_SCRAPE_ATTEMPTS:
+                        result = candidate
+                        break
+                    logger.warning("Input-price scrape returned 0 records, retrying: %s attempt=%d", scraper.source, attempt)
+                    time.sleep(INPUT_PRICE_RETRY_DELAY_SECONDS)
+                if result is None:
+                    raise last_error or RuntimeError(f"Input-price scrape did not return a result: {scraper.source}")
                 inserted, updated = self.store(result)
                 observations = result.observations
                 run.status = "thành công"

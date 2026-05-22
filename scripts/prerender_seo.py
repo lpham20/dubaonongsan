@@ -988,6 +988,13 @@ def render_static_pages() -> list[tuple[str, str | None]]:
             "Gửi năng suất thực tế sau khi dùng khuyến nghị bón phân để chuẩn bị dữ liệu hiệu chỉnh Tier 2.",
             "Báo cáo năng suất",
         ),
+        (
+            "roi.html",
+            f"{SITE_BASE}/roi-uoc-tinh",
+            "Ước tính ROI nông vụ",
+            "Tính nhanh doanh thu, chi phí phân bón, lợi nhuận ròng và ROI dự kiến theo giá vật tư đầu vào mới nhất.",
+            "Ước tính ROI nông vụ",
+        ),
     ]
     for filename, canonical, title, desc, heading in landing_pages:
         schema: dict | list[dict] = {
@@ -1108,7 +1115,7 @@ def render_static_pages() -> list[tuple[str, str | None]]:
 <h2>Chuẩn dữ liệu</h2>
 <p>Mỗi dòng giá được chuẩn hóa theo sản phẩm, vùng giá, thương hiệu, quy cách bao, giá bao và giá quy đổi VND/kg. Dữ liệu crawler từ nguồn công khai được ưu tiên, dữ liệu tham chiếu nền chỉ dùng khi nguồn thật chưa đủ lịch sử.</p>
 <h2>Dự báo</h2>
-<p>Dự báo phân bón dùng baseline ngắn hạn theo xu hướng chậm của giá vật tư đầu vào, tách khỏi model LSTM của giá nông sản đầu ra.</p>
+<p>Dự báo phân bón dùng engine 3 kịch bản theo trend, mùa vụ tháng 5/tháng 11 và biến động xác định, tách khỏi model LSTM của giá nông sản đầu ra.</p>
 </main>"""
     input_dataset_schema = {
         "@context": "https://schema.org",

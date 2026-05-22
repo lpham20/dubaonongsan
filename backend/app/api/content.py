@@ -203,6 +203,7 @@ def sitemap(db: Session = Depends(get_db)) -> Response:
         (f"{SITE_BASE}/du-bao-gia/ho_tieu", "0.9", "daily", None),
         (f"{SITE_BASE}/du-bao-gia/lua", "0.9", "daily", None),
         (f"{SITE_BASE}/du-bao-gia/phan-bon", "0.8", "daily", None),
+        (f"{SITE_BASE}/roi-uoc-tinh", "0.6", "weekly", None),
         (f"{SITE_BASE}/khuyen-nghi-bon-phan", "0.8", "weekly", None),
         (f"{SITE_BASE}/khuyen-nghi-bon-phan/logic", "0.7", "monthly", None),
         (f"{SITE_BASE}/bao-cao-nang-suat", "0.7", "monthly", None),

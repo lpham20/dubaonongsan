@@ -1,6 +1,9 @@
 from copy import deepcopy
 from datetime import UTC, datetime, timedelta
+import json
 import os
+from pathlib import Path
+from statistics import mean
 
 os.environ["MARKETAI_DATABASE_URL"] = "sqlite:///:memory:"
 os.environ["MARKETAI_START_SCHEDULER_IN_API"] = "false"
@@ -111,8 +114,19 @@ def test_input_price_endpoints_return_fertilizer_data(client):
     forecast = client.get("/api/v1/input-prices/forecast?product_slug=ure&province=Đắk Lắk&days=30")
     assert forecast.status_code == 200
     forecast_payload = forecast.json()
-    assert len(forecast_payload) == 30
-    assert forecast_payload[0]["model_kind"] == "input-price-baseline-v1"
+    assert forecast_payload["model_kind"] == "input-price-3scenario-v3"
+    assert len(forecast_payload["base"]) == 30
+    assert len(forecast_payload["bull"]) == 30
+    assert len(forecast_payload["bear"]) == 30
+    values = [row["forecast_price_vnd"] for row in forecast_payload["base"]]
+    assert max(values) - min(values) >= 0.01 * mean(values)
+    day_1_band = forecast_payload["base"][0]["confidence_high_vnd"] - forecast_payload["base"][0]["confidence_low_vnd"]
+    day_30_band = forecast_payload["base"][-1]["confidence_high_vnd"] - forecast_payload["base"][-1]["confidence_low_vnd"]
+    assert day_30_band > day_1_band
+
+    health = client.get("/api/v1/platform/input-prices/health")
+    assert health.status_code == 200
+    assert health.json()["category"] == "fertilizer"
 
 
 def test_sensor_webhook_persists_payload(client):
@@ -129,6 +143,41 @@ def test_sensor_webhook_persists_payload(client):
     )
     assert response.status_code == 201
     assert response.json()["id"] > 0
+
+
+def test_roi_calculate_and_save(client):
+    token, _user_id = create_user_token("roi@example.com")
+    response = client.post(
+        "/api/v1/roi/calculate",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "crop": "ca_phe",
+            "crop_area_ha": 2,
+            "expected_yield_t_ha": 3.5,
+            "expected_sell_price_vnd_per_kg": 95000,
+            "fertilizer_lines": [
+                {"product_slug": "ure", "kg_per_ha": 300},
+                {"product_slug": "kali-mop", "kg_per_ha": 200},
+            ],
+            "other_input_cost_vnd_per_ha": 5000000,
+            "labor_cost_vnd_per_ha": 8000000,
+            "save": True,
+        },
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["scenario_id"]
+    assert payload["fertilizer_cost_vnd_per_ha"] > 0
+    assert payload["total_revenue_vnd"] > payload["fertilizer_cost_vnd_per_ha"]
+    assert len(payload["sensitivity"]["matrix"]) == 9
+
+
+def test_lstm_artifact_meta_consistency():
+    artifacts = Path(__file__).resolve().parents[1] / "ml_artifacts"
+    for crop in ["sau_rieng", "ca_phe", "ho_tieu", "lua"]:
+        meta = json.loads((artifacts / f"lstm_{crop}.meta.json").read_text(encoding="utf-8"))
+        scaler = json.loads((artifacts / f"lstm_{crop}.scaler.json").read_text(encoding="utf-8"))
+        assert meta.get("target_mode") == scaler.get("target_mode"), crop
 
 
 def test_auth_and_watchlist_flow(client, test_password):
@@ -361,6 +410,7 @@ def test_admin_endpoints_reject_anonymous_and_non_admin_users(client, test_passw
         "/api/v1/platform/jobs/scrape",
         "/api/v1/platform/jobs/data-quality",
         "/api/v1/platform/jobs/news",
+        "/api/v1/platform/jobs/input-prices-backfill",
         "/api/v1/platform/jobs/retrain",
         "/api/v1/platform/jobs/yield-feedback-reminder",
         "/api/v1/platform/jobs/revoked-token-cleanup",
@@ -421,6 +471,7 @@ def test_sitemap_includes_static_seo_routes(client):
     assert "https://dubaonongsan.com/khuyen-nghi-bon-phan" in body
     assert "https://dubaonongsan.com/khuyen-nghi-bon-phan/logic" in body
     assert "https://dubaonongsan.com/bao-cao-nang-suat" in body
+    assert "https://dubaonongsan.com/roi-uoc-tinh" in body
 
 
 def test_news_filter_rejects_offtopic_finance_and_electricity():

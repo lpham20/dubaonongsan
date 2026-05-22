@@ -72,6 +72,14 @@ def run_input_price_scrape_job(
     return PlatformJobService(db).run_input_price_scrape()
 
 
+@router.post("/platform/jobs/input-prices-backfill")
+def run_input_price_backfill_job(
+    _: AppUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> dict:
+    return PlatformJobService(db).run_input_price_scrape()
+
+
 @router.post("/platform/jobs/weather")
 def run_weather_job(
     _: AppUser = Depends(require_admin),

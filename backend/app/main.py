@@ -22,6 +22,7 @@ from app.api.llm_content import router as llm_content_router
 from app.api.metadata import router as metadata_router
 from app.api.ops import router as ops_router
 from app.api.public import router as public_router
+from app.api.roi import router as roi_router
 from app.api.security import router as security_router
 from app.core.config import get_settings
 from app.core.rate_limit import limiter
@@ -133,6 +134,7 @@ app.include_router(analytics_router)
 app.include_router(public_router)
 app.include_router(ops_router)
 app.include_router(llm_content_router)
+app.include_router(roi_router)
 app.include_router(security_router)
 
 

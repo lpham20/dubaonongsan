@@ -180,7 +180,8 @@ def _llm_input_prices_fertilizer(db: Session) -> Response:
     products = service.products(category="fertilizer")
     latest_prices = service.latest_prices(category="fertilizer", limit=80)
     primary_slug = products[0].slug if products else "ure"
-    forecast = service.forecast(product_slug=primary_slug, province=None, days=30)
+    forecast_scenario = service.forecast(product_slug=primary_slug, province=None, days=30)
+    forecast = forecast_scenario.get("base", []) if isinstance(forecast_scenario, dict) else []
 
     lines = [
         f"# Giá phân bón đầu vào Việt Nam — cập nhật {datetime.now(timezone.utc).date().isoformat()}",
@@ -248,7 +249,7 @@ def _llm_input_prices_fertilizer(db: Session) -> Response:
             "",
             "Dữ liệu phân bón được tách khỏi dữ liệu giá nông sản đầu ra. Các dòng có nguồn công khai như vietnga.vn là dữ liệu crawler thu được; dữ liệu tham chiếu nền chỉ dùng khi nguồn thật chưa đủ lịch sử cho sản phẩm hoặc vùng giá.",
             "",
-            "Dự báo dùng baseline theo xu hướng chậm của giá vật tư đầu vào, không dùng model LSTM giá nông sản.",
+            "Dự báo dùng engine 3 kịch bản theo trend, mùa vụ tháng 5/tháng 11 và biến động xác định; không dùng model LSTM giá nông sản.",
             "",
             "License: CC BY 4.0. Khi cite vui lòng ghi nguồn dubaonongsan.com.",
         ]
