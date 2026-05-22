@@ -90,6 +90,31 @@ def test_forecast_returns_30_days(client):
     assert payload[0]["model_kind"] == "baseline-statistical"
 
 
+def test_input_price_endpoints_return_fertilizer_data(client):
+    products = client.get("/api/v1/input-prices/products?category=fertilizer")
+    assert products.status_code == 200
+    product_payload = products.json()
+    assert any(item["slug"] == "ure" for item in product_payload)
+
+    latest = client.get("/api/v1/input-prices/latest?category=fertilizer&product_slug=ure&province=Đắk Lắk")
+    assert latest.status_code == 200
+    latest_payload = latest.json()
+    assert latest_payload
+    assert latest_payload[0]["product_slug"] == "ure"
+    assert latest_payload[0]["package_price_vnd"] > 0
+    assert latest_payload[0]["normalized_price_vnd"] > 0
+
+    history = client.get("/api/v1/input-prices/history?product_slug=ure&province=Đắk Lắk&months=12")
+    assert history.status_code == 200
+    assert len(history.json()) >= 12
+
+    forecast = client.get("/api/v1/input-prices/forecast?product_slug=ure&province=Đắk Lắk&days=30")
+    assert forecast.status_code == 200
+    forecast_payload = forecast.json()
+    assert len(forecast_payload) == 30
+    assert forecast_payload[0]["model_kind"] == "input-price-baseline-v1"
+
+
 def test_sensor_webhook_persists_payload(client):
     response = client.post(
         "/api/v1/sensors/maturity-telemetry",

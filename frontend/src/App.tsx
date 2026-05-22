@@ -96,6 +96,9 @@ const FertilizerAdvisor = lazy(() =>
 const FertilizerMethodology = lazy(() =>
   import("./components/FertilizerMethodology").then(({ FertilizerMethodology }) => ({ default: FertilizerMethodology }))
 );
+const InputPricesPage = lazy(() =>
+  import("./components/InputPricesPage").then(({ InputPricesPage }) => ({ default: InputPricesPage }))
+);
 const YieldFeedbackPage = lazy(() =>
   import("./components/YieldFeedbackPage").then(({ YieldFeedbackPage }) => ({ default: YieldFeedbackPage }))
 );
@@ -119,7 +122,7 @@ const cropLabels: Record<CropType, string> = {
   lua: "lúa"
 };
 
-type MainSection = "home" | "analytics" | "news" | "guides" | "fertilizer" | "fertilizerMethodology" | "yieldFeedback" | "methodology";
+type MainSection = "home" | "analytics" | "inputPrices" | "news" | "guides" | "fertilizer" | "fertilizerMethodology" | "yieldFeedback" | "methodology";
 type AnalyticsTab = "chart" | "analysis" | "technical" | "data";
 type NewsView = "latest" | "sau_rieng" | "ca_phe" | "ho_tieu";
 type PriceNewsView = Exclude<NewsView, "latest">;
@@ -131,7 +134,7 @@ type InitialRoute = {
   guideSlug: string;
   notFound: boolean;
 };
-const validSections: MainSection[] = ["home", "analytics", "news", "guides", "fertilizer", "fertilizerMethodology", "yieldFeedback", "methodology"];
+const validSections: MainSection[] = ["home", "analytics", "inputPrices", "news", "guides", "fertilizer", "fertilizerMethodology", "yieldFeedback", "methodology"];
 const validCrops: CropType[] = ["sau_rieng", "ca_phe", "ho_tieu", "lua"];
 const validNewsViews: NewsView[] = ["latest", "sau_rieng", "ca_phe", "ho_tieu"];
 const gatedAnalyticsTabs: AnalyticsTab[] = ["analysis", "technical", "data"];
@@ -198,6 +201,7 @@ function getInitialRoute(pathnameInput = window.location.pathname, search = wind
     return { ...fallback, section: "guides", guideSlug: cleanGuideSlug };
   }
   if (parts[0] === "du-bao-gia") {
+    if (parts[1] === "phan-bon") return { ...fallback, section: "inputPrices" };
     const routeCrop = validCrops.includes(parts[1] as CropType) ? (parts[1] as CropType) : "sau_rieng";
     return { ...fallback, section: "analytics", crop: routeCrop };
   }
@@ -230,6 +234,8 @@ function routeToUrl(route: InitialRoute) {
     path = route.guideSlug ? `/huong-dan/${route.guideSlug}` : "/huong-dan";
   } else if (route.section === "analytics") {
     path = forecastPath(route.crop);
+  } else if (route.section === "inputPrices") {
+    path = "/du-bao-gia/phan-bon";
   } else if (route.section === "fertilizer") {
     path = "/khuyen-nghi-bon-phan";
   } else if (route.section === "fertilizerMethodology") {
@@ -781,6 +787,8 @@ function RoutedApp() {
   const appShellClassName =
     section === "analytics"
       ? `app-shell forecast-shell crop-${crop} analytics-tab-${analyticsTab}`
+      : section === "inputPrices"
+        ? "app-shell input-prices-shell"
       : "app-shell";
 
   return (
@@ -1057,6 +1065,7 @@ function RoutedApp() {
       ) : null}
       {!notFound && section === "guides" && guideSlug ? <GuideDetailPage slug={guideSlug} /> : null}
       {!notFound && section === "guides" && !guideSlug ? <GuideLibrary guides={guides} /> : null}
+      {!notFound && section === "inputPrices" ? <InputPricesPage /> : null}
       {!notFound && section === "fertilizer" ? (
         <FertilizerAdvisor
           authToken={authToken}
@@ -1074,6 +1083,7 @@ function RoutedApp() {
           openAnalytics(crop);
           setAnalyticsTab("chart");
         }}
+        onOpenInputPrices={() => changeSection("inputPrices")}
       />
     </main>
     </IconContext.Provider>

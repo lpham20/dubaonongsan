@@ -6,11 +6,12 @@ type Props = {
   onOpenNews: () => void;
   onOpenGuides: () => void;
   onOpenAnalytics: () => void;
+  onOpenInputPrices: () => void;
 };
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics }: Props) {
+export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics, onOpenInputPrices }: Props) {
   const isMobile = useMediaQuery("(max-width: 860px)");
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
@@ -82,6 +83,15 @@ export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics }: Props)
           </a>
           <a href="/du-bao-gia/ca_phe">Dự báo giá cà phê</a>
           <a href="/du-bao-gia/ho_tieu">Dự báo giá hồ tiêu</a>
+          <a
+            href="/du-bao-gia/phan-bon"
+            onClick={(event) => {
+              event.preventDefault();
+              onOpenInputPrices();
+            }}
+          >
+            Giá phân bón đầu vào
+          </a>
           <a href="/khuyen-nghi-bon-phan">Khuyến nghị bón phân</a>
           <a href="/bao-cao-nang-suat">Báo cáo năng suất</a>
         </details>

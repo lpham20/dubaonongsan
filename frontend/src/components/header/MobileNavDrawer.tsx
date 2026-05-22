@@ -85,7 +85,7 @@ export function MobileNavDrawer({
       setMobileGroup("news");
     } else if (section === "fertilizer" || section === "fertilizerMethodology" || section === "yieldFeedback") {
       setMobileGroup("fertilizer");
-    } else if (section === "analytics" || section === "methodology") {
+    } else if (section === "analytics" || section === "inputPrices" || section === "methodology") {
       setMobileGroup("price");
     } else {
       setMobileGroup(null);
@@ -184,7 +184,7 @@ export function MobileNavDrawer({
           <MobileAccordion
             title="Dự báo giá"
             open={mobileGroup === "price"}
-            active={section === "analytics" || section === "methodology"}
+            active={section === "analytics" || section === "inputPrices" || section === "methodology"}
             onToggle={() => setMobileGroup(mobileGroup === "price" ? null : "price")}
           >
             {cropTabs.map((tab) => (
@@ -197,6 +197,13 @@ export function MobileNavDrawer({
                 {tab.label}
               </button>
             ))}
+            <button
+              type="button"
+              className={section === "inputPrices" ? "active" : ""}
+              onClick={() => navigateMobile(() => onSectionChange("inputPrices"))}
+            >
+              Giá phân bón đầu vào
+            </button>
             <button
               type="button"
               className={section === "methodology" ? "active" : ""}

@@ -60,6 +60,60 @@ class DailyMarketPrice(Base):
     region: Mapped[ProductionRegion] = relationship(back_populates="prices")
 
 
+class AgriInputProduct(Base):
+    __tablename__ = "agri_input_products"
+
+    product_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    slug: Mapped[str] = mapped_column(String(80), unique=True, index=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(160), nullable=False)
+    category: Mapped[str] = mapped_column(String(50), default="fertilizer", index=True)
+    product_type: Mapped[str] = mapped_column(String(80), index=True)
+    nutrient_profile: Mapped[str | None] = mapped_column(String(120))
+    standard_unit: Mapped[str] = mapped_column(String(30), default="kg")
+    package_label: Mapped[str | None] = mapped_column(String(80))
+    package_size_kg: Mapped[float | None] = mapped_column(Numeric(8, 2))
+    notes: Mapped[str | None] = mapped_column(Text)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="1", index=True)
+
+    observations: Mapped[list["AgriInputPriceObservation"]] = relationship(
+        back_populates="product",
+        cascade="all, delete-orphan",
+    )
+
+
+class AgriInputPriceObservation(Base):
+    __tablename__ = "agri_input_price_observations"
+    __table_args__ = (
+        UniqueConstraint(
+            "product_id",
+            "observed_at",
+            "province",
+            "brand",
+            "source_name",
+            name="uq_agri_input_price_grain",
+        ),
+    )
+
+    observation_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    product_id: Mapped[int] = mapped_column(ForeignKey("agri_input_products.product_id"), index=True)
+    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    province: Mapped[str] = mapped_column(String(100), index=True)
+    region_name: Mapped[str | None] = mapped_column(String(100), index=True)
+    brand: Mapped[str | None] = mapped_column(String(120), index=True)
+    seller_name: Mapped[str | None] = mapped_column(String(160))
+    source_name: Mapped[str] = mapped_column(String(160), index=True)
+    source_url: Mapped[str | None] = mapped_column(String(800))
+    package_price_vnd: Mapped[float | None] = mapped_column(Numeric(14, 2))
+    normalized_price_vnd: Mapped[float] = mapped_column(Numeric(14, 2))
+    normalized_unit: Mapped[str] = mapped_column(String(30), default="kg")
+    package_size_kg: Mapped[float | None] = mapped_column(Numeric(8, 2))
+    confidence_score: Mapped[float] = mapped_column(Numeric(4, 2), default=0.55)
+    data_kind: Mapped[str] = mapped_column(String(40), default="reference", index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+
+    product: Mapped[AgriInputProduct] = relationship(back_populates="observations")
+
+
 class UserPriceReport(Base):
     __tablename__ = "user_price_reports"
 

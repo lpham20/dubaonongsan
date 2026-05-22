@@ -61,6 +61,53 @@ export type ModelMetrics = {
   note: string | null;
 };
 
+export type AgriInputProduct = {
+  product_id: number;
+  slug: string;
+  name: string;
+  category: "fertilizer";
+  product_type: string;
+  nutrient_profile: string | null;
+  standard_unit: string;
+  package_label: string | null;
+  package_size_kg: number | null;
+  notes: string | null;
+  is_active: boolean;
+};
+
+export type AgriInputPricePoint = {
+  observation_id: number;
+  product_id: number;
+  product_slug: string;
+  product_name: string;
+  product_type: string;
+  observed_at: string;
+  province: string;
+  region_name: string | null;
+  brand: string | null;
+  seller_name: string | null;
+  source_name: string;
+  source_url: string | null;
+  package_price_vnd: number | null;
+  normalized_price_vnd: number;
+  normalized_unit: string;
+  package_size_kg: number | null;
+  package_label: string | null;
+  confidence_score: number;
+  data_kind: string;
+};
+
+export type AgriInputForecastPoint = {
+  timestamp: string;
+  forecast_price_vnd: number;
+  confidence_low_vnd: number;
+  confidence_high_vnd: number;
+  normalized_price_vnd: number;
+  normalized_low_vnd: number;
+  normalized_high_vnd: number;
+  model_kind: string;
+};
+
 export type CropType = "sau_rieng" | "ca_phe" | "ho_tieu" | "lua";
 
 export type UsdVndRate = {
@@ -549,6 +596,37 @@ export function fetchMetrics(crop: CropType, regionId: number, varietyId: number
     `/api/v1/analytics/model-metrics?crop=${crop}&region_id=${regionId}&variety=${varietyId}`,
     signal
   );
+}
+
+export function fetchAgriInputProducts(signal?: AbortSignal) {
+  return getJson<AgriInputProduct[]>("/api/v1/input-prices/products?category=fertilizer", signal);
+}
+
+export function fetchAgriInputLatest(options: { productSlug?: string; province?: string; signal?: AbortSignal } = {}) {
+  const params = new URLSearchParams({ category: "fertilizer", limit: "300" });
+  if (options.productSlug) params.set("product_slug", options.productSlug);
+  if (options.province) params.set("province", options.province);
+  return getJson<AgriInputPricePoint[]>(`/api/v1/input-prices/latest?${params.toString()}`, options.signal);
+}
+
+export function fetchAgriInputHistory(
+  productSlug: string,
+  options: { province?: string; brand?: string; months?: number; signal?: AbortSignal } = {}
+) {
+  const params = new URLSearchParams({ product_slug: productSlug, months: String(options.months ?? 12) });
+  if (options.province) params.set("province", options.province);
+  if (options.brand) params.set("brand", options.brand);
+  return getJson<AgriInputPricePoint[]>(`/api/v1/input-prices/history?${params.toString()}`, options.signal);
+}
+
+export function fetchAgriInputForecast(
+  productSlug: string,
+  options: { province?: string; brand?: string; days?: number; signal?: AbortSignal } = {}
+) {
+  const params = new URLSearchParams({ product_slug: productSlug, days: String(options.days ?? 30) });
+  if (options.province) params.set("province", options.province);
+  if (options.brand) params.set("brand", options.brand);
+  return getJson<AgriInputForecastPoint[]>(`/api/v1/input-prices/forecast?${params.toString()}`, options.signal);
 }
 
 export function fetchDataQuality(crop: CropType, regionId: number, varietyId: number, signal?: AbortSignal) {

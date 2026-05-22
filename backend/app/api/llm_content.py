@@ -28,6 +28,7 @@ from app.core.config import get_settings
 from app.db import get_db
 from app.models import GuidePost, NewsArticle
 from app.services.data_loader import DataLoader
+from app.services.input_prices import InputPriceService
 
 settings = get_settings()
 router = APIRouter(prefix=settings.api_prefix, tags=["llm-content"])
@@ -74,6 +75,8 @@ def _format_int(value) -> str:
 @cached(prefix="llm-forecast", ttl_seconds=300)
 def llm_forecast(crop: str, db: Session = Depends(get_db)) -> Response:
     """Markdown summary: bảng giá hiện tại + forecast 30 ngày."""
+    if crop == "phan-bon":
+        return _llm_input_prices_fertilizer(db)
     if crop not in CROP_LABEL:
         raise HTTPException(status_code=404, detail="Crop không hỗ trợ")
     label = CROP_LABEL[crop]
@@ -161,6 +164,93 @@ def llm_forecast(crop: str, db: Session = Depends(get_db)) -> Response:
             "## License",
             "",
             'Dữ liệu cấp phép CC BY 4.0. Khi cite vui lòng ghi nguồn "dubaonongsan.com".',
+        ]
+    )
+    return _md_response("\n".join(lines))
+
+
+@router.get("/llm-content/input-prices/phan-bon")
+@cached(prefix="llm-input-prices-fertilizer", ttl_seconds=300)
+def llm_input_prices_fertilizer(db: Session = Depends(get_db)) -> Response:
+    return _llm_input_prices_fertilizer(db)
+
+
+def _llm_input_prices_fertilizer(db: Session) -> Response:
+    service = InputPriceService(db)
+    products = service.products(category="fertilizer")
+    latest_prices = service.latest_prices(category="fertilizer", limit=80)
+    primary_slug = products[0].slug if products else "ure"
+    forecast = service.forecast(product_slug=primary_slug, province=None, days=30)
+
+    lines = [
+        f"# Giá phân bón đầu vào Việt Nam — cập nhật {datetime.now(timezone.utc).date().isoformat()}",
+        "",
+        "Nguồn: dubaonongsan.com — module giá vật tư đầu vào nông nghiệp.",
+        "URL gốc: https://dubaonongsan.com/du-bao-gia/phan-bon",
+        "",
+        "## Sản phẩm đang theo dõi",
+        "",
+    ]
+    for product in products:
+        nutrient = f" ({_clean_md(product.nutrient_profile)})" if product.nutrient_profile else ""
+        lines.append(f"- {_clean_md(product.name)}{nutrient}: {_clean_md(product.package_label or product.standard_unit)}")
+
+    lines.extend(
+        [
+            "",
+            "## Bảng giá tham chiếu mới nhất",
+            "",
+            "| Tỉnh | Sản phẩm | Thương hiệu | Giá bao | Giá quy đổi (VND/kg) | Nguồn | Ngày |",
+            "|---|---|---|---|---|---|---|",
+        ]
+    )
+    for row in latest_prices[:40]:
+        observed_at = row["observed_at"]
+        timestamp = observed_at.date().isoformat() if hasattr(observed_at, "date") else str(observed_at)[:10]
+        lines.append(
+            f"| {_clean_md(row.get('province'))} "
+            f"| {_clean_md(row.get('product_name'))} "
+            f"| {_clean_md(row.get('brand'))} "
+            f"| {_format_int(row.get('package_price_vnd'))} "
+            f"| {_format_int(row.get('normalized_price_vnd'))} "
+            f"| {_clean_md(row.get('source_name'))} "
+            f"| {timestamp} |"
+        )
+
+    if forecast:
+        forecast_product = products[0].name if products else "phân bón"
+        lines.extend(
+            [
+                "",
+                f"## Dự báo ngắn hạn cho {forecast_product}",
+                "",
+                "| Ngày | Giá dự báo/bao | Khoảng thấp | Khoảng cao | Giá quy đổi (VND/kg) |",
+                "|---|---|---|---|---|",
+            ]
+        )
+        for i, row in enumerate(forecast):
+            if i not in (0, 1, 2, 6, 13, 20, 29):
+                continue
+            ts = row["timestamp"]
+            timestamp = ts.date().isoformat() if hasattr(ts, "date") else str(ts)[:10]
+            lines.append(
+                f"| {timestamp} "
+                f"| {_format_int(row.get('forecast_price_vnd'))} "
+                f"| {_format_int(row.get('confidence_low_vnd'))} "
+                f"| {_format_int(row.get('confidence_high_vnd'))} "
+                f"| {_format_int(row.get('normalized_price_vnd'))} |"
+            )
+
+    lines.extend(
+        [
+            "",
+            "## Ghi chú dữ liệu",
+            "",
+            "Dữ liệu phân bón được tách khỏi dữ liệu giá nông sản đầu ra. Bảng này dùng chuẩn sản phẩm, tỉnh, thương hiệu, quy cách bao và giá quy đổi để chuẩn bị cho bước import/cross-check báo giá đại lý.",
+            "",
+            "Dự báo dùng baseline theo xu hướng chậm của giá vật tư đầu vào, không dùng model LSTM giá nông sản.",
+            "",
+            "License: CC BY 4.0. Khi cite vui lòng ghi nguồn dubaonongsan.com.",
         ]
     )
     return _md_response("\n".join(lines))

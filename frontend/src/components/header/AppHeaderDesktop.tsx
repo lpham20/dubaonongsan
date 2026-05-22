@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { BookOpenCheck, ChevronDown, Leaf, UserRound } from "../icons";
+import { BookOpenCheck, ChevronDown, Leaf, PackageCheck, UserRound } from "../icons";
 import { fertilizerMenuItems, newsMenuItems } from "./navItems";
 import type { HeaderSurfaceProps } from "./types";
 
@@ -152,7 +152,7 @@ export function AppHeaderDesktop({
           );
         })}
 
-        <div className={["nav-dropdown", section === "analytics" || section === "methodology" ? "active" : "", priceMenuOpen ? "open" : ""].filter(Boolean).join(" ")}>
+        <div className={["nav-dropdown", section === "analytics" || section === "inputPrices" || section === "methodology" ? "active" : "", priceMenuOpen ? "open" : ""].filter(Boolean).join(" ")}>
           <button type="button" className="tab-button" aria-expanded={priceMenuOpen} onClick={() => toggleDesktopMenu("price")}>
             <Leaf size={16} />
             Dự báo giá nông sản
@@ -176,6 +176,17 @@ export function AppHeaderDesktop({
                 </button>
               );
             })}
+            <button
+              type="button"
+              className={section === "inputPrices" ? "active" : ""}
+              onClick={() => {
+                onSectionChange("inputPrices");
+                closeMenus();
+              }}
+            >
+              <PackageCheck size={16} />
+              Giá phân bón đầu vào
+            </button>
             <button
               type="button"
               className={section === "methodology" ? "active" : ""}

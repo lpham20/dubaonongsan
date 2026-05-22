@@ -21,6 +21,7 @@ import "./styles/responsive.css";
 import "./styles/finance-terminal.css";
 import "./styles/mobile-bloomberg.css";
 import "./styles/tablet-ipad.css";
+import "./styles/input-prices.css";
 
 if (typeof window !== "undefined") {
   window.addEventListener("error", (event) => {

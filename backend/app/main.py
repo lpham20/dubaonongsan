@@ -17,6 +17,7 @@ from app.api.analytics import router as analytics_router
 from app.api.auth import router as auth_router
 from app.api.content import router as content_router
 from app.api.fertilizer import router as fertilizer_router
+from app.api.input_prices import router as input_prices_router
 from app.api.llm_content import router as llm_content_router
 from app.api.metadata import router as metadata_router
 from app.api.ops import router as ops_router
@@ -30,6 +31,7 @@ from app.seed import normalize_vietnamese_labels, seed_database
 from app.services.auth import hash_password
 from app.services.content_portal import ContentPortalService
 from app.services.crop_catalog import ensure_crop_catalog
+from app.services.input_prices import seed_input_prices
 from app.services.platform_jobs import JobScheduler
 
 
@@ -99,6 +101,7 @@ async def lifespan(_: FastAPI):
             seed_database(db)
             normalize_vietnamese_labels(db)
             ensure_crop_catalog(db)
+            seed_input_prices(db)
             _ensure_demo_user(db)
             ContentPortalService(db).seed_guides()
             ContentPortalService(db).seed_fallback_news()
@@ -124,6 +127,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(content_router)
 app.include_router(fertilizer_router)
+app.include_router(input_prices_router)
 app.include_router(metadata_router)
 app.include_router(analytics_router)
 app.include_router(public_router)

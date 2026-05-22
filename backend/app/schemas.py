@@ -34,6 +34,63 @@ class ForecastPoint(BaseModel):
     model_kind: str = "baseline-statistical"
 
 
+class AgriInputProductOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    product_id: int
+    slug: str
+    name: str
+    category: str
+    product_type: str
+    nutrient_profile: str | None = None
+    standard_unit: str
+    package_label: str | None = None
+    package_size_kg: float | None = None
+    notes: str | None = None
+    is_active: bool = True
+
+
+class AgriInputPricePoint(BaseModel):
+    observation_id: int
+    product_id: int
+    product_slug: str
+    product_name: str
+    product_type: str
+    observed_at: datetime
+    province: str
+    region_name: str | None = None
+    brand: str | None = None
+    seller_name: str | None = None
+    source_name: str
+    source_url: str | None = None
+    package_price_vnd: float | None = None
+    normalized_price_vnd: float
+    normalized_unit: str = "kg"
+    package_size_kg: float | None = None
+    package_label: str | None = None
+    confidence_score: float
+    data_kind: str
+
+
+class AgriInputForecastPoint(BaseModel):
+    timestamp: datetime
+    forecast_price_vnd: float
+    confidence_low_vnd: float
+    confidence_high_vnd: float
+    normalized_price_vnd: float
+    normalized_low_vnd: float
+    normalized_high_vnd: float
+    model_kind: str = "input-price-baseline-v1"
+
+
+class AgriInputPriceSummary(BaseModel):
+    category: str
+    latest_count: int
+    provinces: list[str]
+    products: list[str]
+    latest_observed_at: datetime | None = None
+
+
 class TradingSignal(BaseModel):
     timestamp: datetime
     price_vnd: float

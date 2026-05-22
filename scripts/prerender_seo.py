@@ -1093,6 +1093,74 @@ def render_static_pages() -> list[tuple[str, str | None]]:
         )
         urls.append((canonical, today))
 
+    input_canonical = f"{SITE_BASE}/du-bao-gia/phan-bon"
+    input_title = "Giá phân bón hôm nay & dự báo vật tư đầu vào"
+    input_desc = "Theo dõi giá phân bón theo tỉnh, thương hiệu, quy cách bao và giá quy đổi VND/kg cho vật tư đầu vào nông nghiệp."
+    input_body = f"""<main>
+<h1>{html.escape(input_title)}</h1>
+<p>{html.escape(input_desc)}</p>
+<h2>Nhóm sản phẩm theo dõi</h2>
+<ul>
+<li>Phân đơn: Urê, DAP, Kali MOP/SOP, SA, lân nung chảy.</li>
+<li>Phân hỗn hợp: NPK 16-16-8, NPK 20-20-15, NPK 15-15-15.</li>
+<li>Phân hữu cơ: phân hữu cơ vi sinh và các dòng bao chuẩn hóa theo kg.</li>
+</ul>
+<h2>Chuẩn dữ liệu</h2>
+<p>Mỗi dòng giá được chuẩn hóa theo sản phẩm, tỉnh, thương hiệu, quy cách bao, giá bao và giá quy đổi VND/kg để phục vụ so sánh chi phí đầu vào.</p>
+<h2>Dự báo</h2>
+<p>Dự báo phân bón dùng baseline ngắn hạn theo xu hướng chậm của giá vật tư đầu vào, tách khỏi model LSTM của giá nông sản đầu ra.</p>
+</main>"""
+    input_dataset_schema = {
+        "@context": "https://schema.org",
+        "@type": "Dataset",
+        "name": "Giá phân bón đầu vào Việt Nam",
+        "description": input_desc,
+        "url": input_canonical,
+        "keywords": ["giá phân bón", "vật tư nông nghiệp", "ure", "dap", "npk", "kali"],
+        "creator": {"@type": "Organization", "name": SITE_NAME, "url": SITE_BASE},
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "isAccessibleForFree": True,
+        "spatialCoverage": {"@type": "Place", "name": "Việt Nam"},
+        "temporalCoverage": "2025-06-01/" + today,
+        "variableMeasured": [{"@type": "PropertyValue", "name": "Giá phân bón", "unitText": "VND/kg"}],
+        "distribution": [
+            {
+                "@type": "DataDownload",
+                "encodingFormat": "application/json",
+                "contentUrl": f"{API_BASE}/api/v1/input-prices/latest?category=fertilizer",
+            }
+        ],
+    }
+    input_page_schema = {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": input_title,
+        "description": input_desc,
+        "url": input_canonical,
+        "mainEntity": {"@id": input_canonical + "#dataset"},
+    }
+    input_dataset_schema["@id"] = input_canonical + "#dataset"
+    _write(
+        OUTPUT / "forecast" / "phan-bon.html",
+        _page(
+            input_title,
+            input_desc,
+            input_canonical,
+            input_body,
+            [
+                input_dataset_schema,
+                input_page_schema,
+                _breadcrumb(
+                    [
+                        ("Trang chủ", f"{SITE_BASE}/"),
+                        ("Giá phân bón đầu vào", input_canonical),
+                    ]
+                ),
+            ],
+        ),
+    )
+    urls.append((input_canonical, today))
+
     static_pages = [
         (
             "methodology.html",
