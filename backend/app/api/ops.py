@@ -80,6 +80,15 @@ def run_input_price_backfill_job(
     return PlatformJobService(db).run_input_price_scrape()
 
 
+@router.post("/platform/jobs/world-fertilizer")
+def run_world_fertilizer_scrape_job(
+    _: AppUser = Depends(require_admin),
+    source: str | None = Query(default=None, description="Optional world fertilizer scraper source key"),
+    db: Session = Depends(get_db),
+) -> dict:
+    return PlatformJobService(db).run_world_fertilizer_scrape(source=source)
+
+
 @router.post("/platform/jobs/weather")
 def run_weather_job(
     _: AppUser = Depends(require_admin),
@@ -160,6 +169,17 @@ def scrape_input_prices(
     db: Session = Depends(get_db),
 ) -> list[dict]:
     return InputPriceIngestionService(db).scrape_and_store(source=source)
+
+
+@router.post("/ingestion/scrape-world-fertilizer")
+def scrape_world_fertilizer(
+    _: AppUser = Depends(require_admin),
+    source: str | None = Query(default=None, description="Optional world fertilizer scraper source key"),
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    from app.services.world_fertilizer import WorldFertilizerIngestionService
+
+    return WorldFertilizerIngestionService(db).scrape_and_store(source=source)
 
 
 @router.post("/ingestion/backfill-model-ready")

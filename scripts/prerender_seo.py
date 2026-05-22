@@ -1101,8 +1101,8 @@ def render_static_pages() -> list[tuple[str, str | None]]:
         urls.append((canonical, today))
 
     input_canonical = f"{SITE_BASE}/du-bao-gia/phan-bon"
-    input_title = "Giá phân bón hôm nay & dự báo vật tư đầu vào"
-    input_desc = "Theo dõi giá phân bón theo vùng giá, thương hiệu, quy cách bao và giá quy đổi VND/kg cho vật tư đầu vào nông nghiệp."
+    input_title = "Giá phân bón hôm nay & xu hướng phân bón thế giới"
+    input_desc = "Theo dõi giá phân bón nội địa theo vùng giá, thương hiệu, quy cách bao và xu hướng Urê, DAP, Kali thế giới theo USD/tấn."
     input_body = f"""<main>
 <h1>{html.escape(input_title)}</h1>
 <p>{html.escape(input_desc)}</p>
@@ -1114,8 +1114,8 @@ def render_static_pages() -> list[tuple[str, str | None]]:
 </ul>
 <h2>Chuẩn dữ liệu</h2>
 <p>Mỗi dòng giá được chuẩn hóa theo sản phẩm, vùng giá, thương hiệu, quy cách bao, giá bao và giá quy đổi VND/kg. Dữ liệu crawler từ nguồn công khai được ưu tiên, dữ liệu tham chiếu nền chỉ dùng khi nguồn thật chưa đủ lịch sử.</p>
-<h2>Dự báo</h2>
-<p>Dự báo phân bón dùng engine cơ sở theo trend, mùa vụ tháng 5/tháng 11 và biến động xác định, tách khỏi model LSTM của giá nông sản đầu ra.</p>
+<h2>Xu hướng commodity thế giới</h2>
+<p>Trang phân bón chỉ forecast Urê, DAP và Kali thế giới theo USD/tấn. Giá nội địa được giữ làm bảng giá và lịch sử tham khảo; người dùng tự áp % tăng giảm thế giới vào giá đại lý địa phương.</p>
 </main>"""
     input_dataset_schema = {
         "@context": "https://schema.org",
@@ -1129,12 +1129,20 @@ def render_static_pages() -> list[tuple[str, str | None]]:
         "isAccessibleForFree": True,
         "spatialCoverage": {"@type": "Place", "name": "Việt Nam"},
         "temporalCoverage": "2025-06-01/" + today,
-        "variableMeasured": [{"@type": "PropertyValue", "name": "Giá phân bón", "unitText": "VND/kg"}],
+        "variableMeasured": [
+            {"@type": "PropertyValue", "name": "Giá phân bón nội địa", "unitText": "VND/kg"},
+            {"@type": "PropertyValue", "name": "Giá commodity phân bón thế giới", "unitText": "USD/tấn"},
+        ],
         "distribution": [
             {
                 "@type": "DataDownload",
                 "encodingFormat": "application/json",
                 "contentUrl": f"{API_BASE}/api/v1/input-prices/latest?category=fertilizer",
+            },
+            {
+                "@type": "DataDownload",
+                "encodingFormat": "application/json",
+                "contentUrl": f"{API_BASE}/api/v1/advisory/world-fertilizer/forecast?commodity=urea",
             }
         ],
     }

@@ -29,6 +29,7 @@ from app.db import get_db
 from app.models import GuidePost, NewsArticle
 from app.services.data_loader import DataLoader
 from app.services.input_prices import InputPriceService
+from app.services.world_fertilizer import WorldFertilizerForecastService
 
 settings = get_settings()
 router = APIRouter(prefix=settings.api_prefix, tags=["llm-content"])
@@ -69,6 +70,15 @@ def _format_int(value) -> str:
         return f"{int(float(value)):,}"
     except (TypeError, ValueError):
         return "—"
+
+
+def _format_pct(value) -> str:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return "N/A"
+    sign = "+" if number > 0 else ""
+    return f"{sign}{number:.2f}%"
 
 
 @router.get("/llm-content/forecast/{crop}")
@@ -179,9 +189,8 @@ def _llm_input_prices_fertilizer(db: Session) -> Response:
     service = InputPriceService(db)
     products = service.products(category="fertilizer")
     latest_prices = service.latest_prices(category="fertilizer", limit=80)
-    primary_slug = products[0].slug if products else "ure"
-    forecast_payload = service.forecast(product_slug=primary_slug, province=None, days=30)
-    forecast = forecast_payload.get("points", []) if isinstance(forecast_payload, dict) else []
+    world_service = WorldFertilizerForecastService(db)
+    world_forecasts = [world_service.forecast(item["commodity_slug"], horizon_days=30) for item in world_service.commodities()]
 
     lines = [
         f"# Giá phân bón đầu vào Việt Nam — cập nhật {datetime.now(timezone.utc).date().isoformat()}",
@@ -218,29 +227,30 @@ def _llm_input_prices_fertilizer(db: Session) -> Response:
             f"| {timestamp} |"
         )
 
-    if forecast:
-        forecast_product = products[0].name if products else "phân bón"
-        lines.extend(
-            [
-                "",
-                f"## Dự báo ngắn hạn cho {forecast_product}",
-                "",
-                "| Ngày | Giá dự báo/bao | Khoảng thấp | Khoảng cao | Giá quy đổi (VND/kg) |",
-                "|---|---|---|---|---|",
-            ]
+    lines.extend(
+        [
+            "",
+            "## Xu hướng giá phân bón thế giới",
+            "",
+            "Các dòng dưới đây là forecast commodity thế giới theo USD/tấn. Đây không phải dự báo giá bán lẻ nội địa; người dùng tự áp tỷ lệ phần trăm vào giá đại lý tại địa phương.",
+            "",
+            "| Commodity | Quote | Giá tham chiếu | Ngày tham chiếu | Đổi 7 ngày | Đổi 30 ngày |",
+            "|---|---|---|---|---|---|",
+        ]
+    )
+    for forecast in world_forecasts:
+        day_7 = forecast.get("forecast_daily", [None] * 7)[6] if len(forecast.get("forecast_daily", [])) >= 7 else None
+        day_30 = forecast.get("forecast_daily", [])[-1] if forecast.get("forecast_daily") else None
+        observed = forecast.get("base_observed_at")
+        observed_text = observed.date().isoformat() if hasattr(observed, "date") else str(observed or "")[:10]
+        lines.append(
+            f"| {_clean_md(forecast.get('commodity_name_vi'))} "
+            f"| {_clean_md(forecast.get('quote_type'))} "
+            f"| {_format_int(forecast.get('base_price_usd_per_tonne'))} USD/tấn "
+            f"| {observed_text or 'N/A'} "
+            f"| {_format_pct(day_7.get('cumulative_pct_from_today') if day_7 else None)} "
+            f"| {_format_pct(day_30.get('cumulative_pct_from_today') if day_30 else None)} |"
         )
-        for i, row in enumerate(forecast):
-            if i not in (0, 1, 2, 6, 13, 20, 29):
-                continue
-            ts = row["timestamp"]
-            timestamp = ts.date().isoformat() if hasattr(ts, "date") else str(ts)[:10]
-            lines.append(
-                f"| {timestamp} "
-                f"| {_format_int(row.get('forecast_price_vnd'))} "
-                f"| {_format_int(row.get('confidence_low_vnd'))} "
-                f"| {_format_int(row.get('confidence_high_vnd'))} "
-                f"| {_format_int(row.get('normalized_price_vnd'))} |"
-            )
 
     lines.extend(
         [
@@ -249,7 +259,7 @@ def _llm_input_prices_fertilizer(db: Session) -> Response:
             "",
             "Dữ liệu phân bón được tách khỏi dữ liệu giá nông sản đầu ra. Các dòng có nguồn công khai như vietnga.vn, vinacam.com.vn, thefinances.org, sfarm.vn và giathitruongcaphe.com là dữ liệu crawler thu được; dữ liệu tham chiếu nền chỉ dùng khi nguồn thật chưa đủ lịch sử cho sản phẩm hoặc vùng giá.",
             "",
-            "Dự báo dùng engine cơ sở theo trend, mùa vụ tháng 5/tháng 11 và biến động xác định; không dùng model LSTM giá nông sản.",
+            "Forecast trên trang phân bón hiện chỉ áp dụng cho commodity thế giới (Urê/DAP/Kali, USD/tấn). Dữ liệu nội địa được giữ làm bảng giá và lịch sử tham khảo, không forecast giá VND/bao.",
             "",
             "License: CC BY 4.0. Khi cite vui lòng ghi nguồn dubaonongsan.com.",
         ]

@@ -134,6 +134,7 @@ class InputPriceIngestionService:
                 observation.province,
                 observation.brand,
                 observation.source,
+                observation.package_size_kg,
             )
             normalized_price = round(observation.package_price_vnd / observation.package_size_kg, 2)
             if key in pending:
@@ -150,6 +151,7 @@ class InputPriceIngestionService:
                         AgriInputPriceObservation.province == observation.province,
                         AgriInputPriceObservation.brand == observation.brand,
                         AgriInputPriceObservation.source_name == observation.source,
+                        AgriInputPriceObservation.package_size_kg == observation.package_size_kg,
                     )
                 )
             )

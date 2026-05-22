@@ -256,9 +256,10 @@ class InputPriceService:
         if province:
             query = query.where(AgriInputPriceObservation.province == province)
 
-        latest_by_key: dict[tuple[int, str, str | None], AgriInputPriceObservation] = {}
+        latest_by_key: dict[tuple[int, str, str | None, float | None], AgriInputPriceObservation] = {}
         for row in self.db.scalars(query.limit(5000)).all():
-            key = (row.product_id, row.province, row.brand)
+            package_size = float(row.package_size_kg) if row.package_size_kg is not None else None
+            key = (row.product_id, row.province, row.brand, package_size)
             if key not in latest_by_key:
                 latest_by_key[key] = row
             if len(latest_by_key) >= limit:

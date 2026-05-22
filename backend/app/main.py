@@ -24,6 +24,7 @@ from app.api.ops import router as ops_router
 from app.api.public import router as public_router
 from app.api.roi import router as roi_router
 from app.api.security import router as security_router
+from app.api.world_fertilizer import router as world_fertilizer_router
 from app.core.config import get_settings
 from app.core.rate_limit import limiter
 from app.db import init_db
@@ -136,6 +137,7 @@ app.include_router(ops_router)
 app.include_router(llm_content_router)
 app.include_router(roi_router)
 app.include_router(security_router)
+app.include_router(world_fertilizer_router)
 
 
 @app.middleware("http")

@@ -11,7 +11,8 @@ Trang web phục vụ nông dân, thương lái, doanh nghiệp xuất khẩu n�
 - [Bảng giá hàng ngày (cà phê)](https://dubaonongsan.com/du-bao-gia/ca_phe)
 - [Bảng giá hàng ngày (hồ tiêu)](https://dubaonongsan.com/du-bao-gia/ho_tieu)
 - [Bảng giá hàng ngày (lúa)](https://dubaonongsan.com/du-bao-gia/lua)
-- [Bảng giá phân bón đầu vào](https://dubaonongsan.com/du-bao-gia/phan-bon): HTML có bảng giá, lịch sử và dự báo cơ sở
+- [Bảng giá phân bón đầu vào](https://dubaonongsan.com/du-bao-gia/phan-bon): HTML có bảng giá nội địa, lịch sử và forecast Urê/DAP/Kali thế giới theo USD/tấn
+- [API forecast phân bón thế giới](https://api.dubaonongsan.com/api/v1/advisory/world-fertilizer/forecast?commodity=urea): JSON có % tăng/giảm mỗi ngày và cộng dồn
 - [Endpoint LLM markdown — giá sầu riêng](https://api.dubaonongsan.com/api/v1/llm-content/forecast/sau_rieng): text/markdown gọn cho AI
 - [Endpoint LLM markdown — giá cà phê](https://api.dubaonongsan.com/api/v1/llm-content/forecast/ca_phe)
 - [Endpoint LLM markdown — giá hồ tiêu](https://api.dubaonongsan.com/api/v1/llm-content/forecast/ho_tieu)

@@ -193,6 +193,114 @@ def test_input_price_public_scrapers_parse_verified_shapes():
     assert {row.province for row in coffee_market.observations} == {"Đắk Lắk"}
 
 
+def test_input_price_store_keeps_package_size_variants(client):
+    from sqlalchemy import select
+
+    from app.ingestion.input_price_records import InputPriceObservation, InputPriceScrapeResult
+    from app.ingestion.input_price_service import InputPriceIngestionService
+    from app.models import AgriInputPriceObservation, AgriInputProduct
+    from app.services.input_prices import InputPriceService
+
+    observed_at = datetime(2026, 1, 21, tzinfo=UTC)
+    result = InputPriceScrapeResult(
+        source="test-sfarm",
+        source_url="https://example.test/sfarm",
+        observations=[
+            InputPriceObservation(
+                observed_at=observed_at,
+                product_slug="test-sfarm-organic",
+                product_name="Test SFARM organic",
+                product_type="Phân hữu cơ",
+                nutrient_profile="Hữu cơ",
+                province="TP.HCM",
+                region_name="Đông Nam Bộ",
+                brand="SFARM",
+                seller_name="SFARM",
+                source="test-sfarm",
+                source_url="https://example.test/sfarm",
+                package_price_vnd=26_000,
+                package_size_kg=2,
+            ),
+            InputPriceObservation(
+                observed_at=observed_at,
+                product_slug="test-sfarm-organic",
+                product_name="Test SFARM organic",
+                product_type="Phân hữu cơ",
+                nutrient_profile="Hữu cơ",
+                province="TP.HCM",
+                region_name="Đông Nam Bộ",
+                brand="SFARM",
+                seller_name="SFARM",
+                source="test-sfarm",
+                source_url="https://example.test/sfarm",
+                package_price_vnd=215_000,
+                package_size_kg=25,
+            ),
+        ],
+    )
+    with SessionLocal() as db:
+        service = InputPriceIngestionService(db)
+        inserted, updated = service.store(result)
+        assert inserted == 2
+        assert updated == 0
+        rows = db.scalars(
+            select(AgriInputPriceObservation)
+            .join(AgriInputProduct)
+            .where(AgriInputProduct.slug == "test-sfarm-organic")
+            .order_by(AgriInputPriceObservation.package_size_kg)
+        ).all()
+        assert [float(row.package_size_kg) for row in rows] == [2, 25]
+
+        latest = InputPriceService(db).latest_prices(
+            product_slug="test-sfarm-organic",
+            province="TP.HCM",
+        )
+        assert sorted(row["package_size_kg"] for row in latest) == [2, 25]
+
+
+def test_world_fertilizer_forecast_returns_daily_percent_changes(client):
+    from app.models import WorldCommodityPrice
+
+    with SessionLocal() as db:
+        for index in range(18):
+            month = (index % 12) + 1
+            year = 2025 + index // 12
+            db.add(
+                WorldCommodityPrice(
+                    commodity_slug="urea",
+                    quote_type="FOB Middle East",
+                    source="pytest",
+                    source_url="https://example.test/worldbank.xlsx",
+                    observed_at=datetime(year, month, 1, tzinfo=UTC),
+                    price_usd_per_tonne=320 + index * 7,
+                    currency="USD",
+                    confidence_score=0.95,
+                    raw_json={"series_code": "UREA_TEST"},
+                    created_at=datetime.now(UTC),
+                )
+            )
+        db.commit()
+
+    commodities = client.get("/api/v1/advisory/world-fertilizer/commodities")
+    assert commodities.status_code == 200
+    assert {item["commodity_slug"] for item in commodities.json()} >= {"urea", "dap", "kali_mop"}
+
+    forecast = client.get("/api/v1/advisory/world-fertilizer/forecast?commodity=urea&horizon_days=30")
+    assert forecast.status_code == 200
+    payload = forecast.json()
+    assert payload["commodity_slug"] == "urea"
+    assert payload["model_kind"] == "world-fertilizer-ewma-ar1-v1"
+    assert len(payload["forecast_daily"]) == 30
+    assert len(payload["forecast_weekly"]) >= 4
+    first = payload["forecast_daily"][0]
+    assert first["price_usd_per_tonne"] > 0
+    assert "daily_pct_change" in first
+    assert "cumulative_pct_from_today" in first
+
+    invalid = client.get("/api/v1/advisory/world-fertilizer/forecast?commodity=invalid")
+    assert invalid.status_code == 400
+
+
 def test_sensor_webhook_persists_payload(client):
     response = client.post(
         "/api/v1/sensors/maturity-telemetry",
@@ -475,10 +583,12 @@ def test_admin_endpoints_reject_anonymous_and_non_admin_users(client, test_passw
         "/api/v1/platform/jobs/data-quality",
         "/api/v1/platform/jobs/news",
         "/api/v1/platform/jobs/input-prices-backfill",
+        "/api/v1/platform/jobs/world-fertilizer",
         "/api/v1/platform/jobs/retrain",
         "/api/v1/platform/jobs/yield-feedback-reminder",
         "/api/v1/platform/jobs/revoked-token-cleanup",
         "/api/v1/ingestion/backfill-model-ready",
+        "/api/v1/ingestion/scrape-world-fertilizer",
     ]
     for route in protected_routes:
         response = client.post(route, headers={"Authorization": f"Bearer {token}"})

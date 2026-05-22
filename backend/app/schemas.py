@@ -99,6 +99,57 @@ class AgriInputPriceSummary(BaseModel):
     latest_observed_at: datetime | None = None
 
 
+class WorldFertilizerCommodityOut(BaseModel):
+    commodity_slug: str
+    name_vi: str
+    name_en: str
+    quote_type: str
+    driver_note_vi: str
+
+
+class WorldFertilizerHistoryPoint(BaseModel):
+    observed_at: datetime
+    price_usd_per_tonne: float
+    quote_type: str
+    source: str
+    source_url: str | None = None
+    confidence_score: float
+
+
+class WorldFertilizerForecastPoint(BaseModel):
+    date: str
+    price_usd_per_tonne: float
+    price_low_usd_per_tonne: float
+    price_high_usd_per_tonne: float
+    daily_pct_change: float
+    cumulative_pct_from_today: float
+
+
+class WorldFertilizerWeeklyPoint(BaseModel):
+    week_index: int
+    week_label_vi: str
+    date_from: str
+    date_to: str
+    median_price_usd_per_tonne: float
+    pct_change_vs_prev_week: float
+    pct_change_vs_today: float
+    daily_breakdown: list[WorldFertilizerForecastPoint]
+
+
+class WorldFertilizerForecastOut(BaseModel):
+    commodity_slug: str
+    commodity_name_vi: str
+    quote_type: str | None = None
+    base_price_usd_per_tonne: float | None = None
+    base_observed_at: datetime | None = None
+    model_kind: str
+    history_points: int
+    volatility: float
+    forecast_daily: list[WorldFertilizerForecastPoint]
+    forecast_weekly: list[WorldFertilizerWeeklyPoint]
+    note_vi: str
+
+
 class TradingSignal(BaseModel):
     timestamp: datetime
     price_vnd: float

@@ -97,6 +97,23 @@ class PlatformJobService:
                 self._finish_job(job, "lỗi", None, str(exc))
                 raise
 
+    def run_world_fertilizer_scrape(self, source: str | None = None) -> dict:
+        with job_lock("scrape_world_fertilizer"):
+            job = self._start_job("scrape_world_fertilizer")
+            try:
+                from app.services.world_fertilizer import WorldFertilizerIngestionService
+
+                summary = {"scrape": WorldFertilizerIngestionService(self.db).scrape_and_store(source=source)}
+                invalidate_cache("world-fertilizer")
+                invalidate_cache("llm-input-prices")
+                self._finish_job(job, "thành công", summary)
+                return summary
+            except Exception as exc:
+                self.db.rollback()
+                job = self.db.get(PlatformJobRun, job.job_id) or job
+                self._finish_job(job, "lỗi", None, str(exc))
+                raise
+
     def run_weather(self) -> dict:
         with job_lock("weather"):
             job = self._start_job("weather")
@@ -346,6 +363,33 @@ class JobScheduler:
         )
         cls._scheduler.add_job(
             cls._run_with_session,
+            "cron",
+            hour="9,17",
+            minute=30,
+            args=["world_fertilizer"],
+            id="scrape_world_fertilizer_twice_daily",
+            replace_existing=True,
+        )
+        cls._scheduler.add_job(
+            cls._run_with_session,
+            "date",
+            run_date=datetime.now(SCHEDULER_TZ) + timedelta(seconds=25),
+            args=["world_fertilizer"],
+            id="scrape_world_fertilizer_boot_catchup",
+            replace_existing=True,
+        )
+        cls._scheduler.add_job(
+            cls._run_with_session,
+            "cron",
+            day=10,
+            hour=8,
+            minute=0,
+            args=["world_fertilizer_monthly"],
+            id="scrape_worldbank_monthly",
+            replace_existing=True,
+        )
+        cls._scheduler.add_job(
+            cls._run_with_session,
             "interval",
             minutes=settings.news_scrape_interval_minutes,
             args=["news"],
@@ -425,6 +469,10 @@ class JobScheduler:
                     service.run_scrape()
                 elif job == "input_prices":
                     service.run_input_price_scrape()
+                elif job == "world_fertilizer":
+                    service.run_world_fertilizer_scrape()
+                elif job == "world_fertilizer_monthly":
+                    service.run_world_fertilizer_scrape(source="worldbank_pinksheet")
                 elif job == "news":
                     service.run_news_scrape()
                 elif job == "data_quality":

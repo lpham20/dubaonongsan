@@ -116,6 +116,59 @@ export type AgriInputForecast = {
   latest_observed_at: string | null;
 };
 
+export type WorldFertilizerCommodity = "urea" | "dap" | "kali_mop";
+
+export type WorldFertilizerCommodityInfo = {
+  commodity_slug: WorldFertilizerCommodity;
+  name_vi: string;
+  name_en: string;
+  quote_type: string;
+  driver_note_vi: string;
+};
+
+export type WorldFertilizerHistoryPoint = {
+  observed_at: string;
+  price_usd_per_tonne: number;
+  quote_type: string;
+  source: string;
+  source_url: string | null;
+  confidence_score: number;
+};
+
+export type WorldFertilizerForecastPoint = {
+  date: string;
+  price_usd_per_tonne: number;
+  price_low_usd_per_tonne: number;
+  price_high_usd_per_tonne: number;
+  daily_pct_change: number;
+  cumulative_pct_from_today: number;
+};
+
+export type WorldFertilizerWeeklyPoint = {
+  week_index: number;
+  week_label_vi: string;
+  date_from: string;
+  date_to: string;
+  median_price_usd_per_tonne: number;
+  pct_change_vs_prev_week: number;
+  pct_change_vs_today: number;
+  daily_breakdown: WorldFertilizerForecastPoint[];
+};
+
+export type WorldFertilizerForecast = {
+  commodity_slug: WorldFertilizerCommodity;
+  commodity_name_vi: string;
+  quote_type: string | null;
+  base_price_usd_per_tonne: number | null;
+  base_observed_at: string | null;
+  model_kind: string;
+  history_points: number;
+  volatility: number;
+  forecast_daily: WorldFertilizerForecastPoint[];
+  forecast_weekly: WorldFertilizerWeeklyPoint[];
+  note_vi: string;
+};
+
 export const EMPTY_INPUT_FORECAST: AgriInputForecast = {
   points: [],
   model_kind: "no-data",
@@ -676,6 +729,26 @@ export function fetchAgriInputForecast(
   return getJson<AgriInputForecast>(`/api/v1/input-prices/forecast?${params.toString()}`, options.signal);
 }
 
+export function fetchWorldFertilizerCommodities(signal?: AbortSignal) {
+  return getJson<WorldFertilizerCommodityInfo[]>("/api/v1/advisory/world-fertilizer/commodities", signal);
+}
+
+export function fetchWorldFertilizerHistory(
+  commodity: WorldFertilizerCommodity,
+  options: { days?: number; signal?: AbortSignal } = {}
+) {
+  const params = new URLSearchParams({ commodity, days: String(options.days ?? 365) });
+  return getJson<WorldFertilizerHistoryPoint[]>(`/api/v1/advisory/world-fertilizer/history?${params.toString()}`, options.signal);
+}
+
+export function fetchWorldFertilizerForecast(
+  commodity: WorldFertilizerCommodity,
+  options: { horizonDays?: number; signal?: AbortSignal } = {}
+) {
+  const params = new URLSearchParams({ commodity, horizon_days: String(options.horizonDays ?? 30) });
+  return getJson<WorldFertilizerForecast>(`/api/v1/advisory/world-fertilizer/forecast?${params.toString()}`, options.signal);
+}
+
 export function calculateRoi(token: string, payload: RoiCalculateRequest, signal?: AbortSignal) {
   return authJson<RoiCalculateResponse>("/api/v1/roi/calculate", token, {
     method: "POST",
@@ -774,7 +847,7 @@ export function fetchModelRuns(token: string) {
   return authJson<ModelTrainingRun[]>("/api/v1/platform/model-runs", token);
 }
 
-export function runPlatformJob(token: string, job: "scrape" | "news" | "input-prices" | "data-quality" | "retrain" | "weather") {
+export function runPlatformJob(token: string, job: "scrape" | "news" | "input-prices" | "world-fertilizer" | "data-quality" | "retrain" | "weather") {
   return authJson<Record<string, unknown>>(`/api/v1/platform/jobs/${job}`, token, { method: "POST" });
 }
 

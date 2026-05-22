@@ -90,6 +90,7 @@ class AgriInputPriceObservation(Base):
             "province",
             "brand",
             "source_name",
+            "package_size_kg",
             name="uq_agri_input_price_grain",
         ),
     )
@@ -112,6 +113,42 @@ class AgriInputPriceObservation(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
 
     product: Mapped[AgriInputProduct] = relationship(back_populates="observations")
+
+
+class WorldCommodityPrice(Base):
+    """World fertilizer commodity prices in nominal USD per metric tonne."""
+
+    __tablename__ = "world_commodity_prices"
+    __table_args__ = (
+        UniqueConstraint("commodity_slug", "source", "quote_type", "observed_at", name="uq_world_price"),
+    )
+
+    price_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    commodity_slug: Mapped[str] = mapped_column(String(40), index=True)
+    quote_type: Mapped[str] = mapped_column(String(80), index=True)
+    source: Mapped[str] = mapped_column(String(60), index=True)
+    source_url: Mapped[str | None] = mapped_column(String(800))
+    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    price_usd_per_tonne: Mapped[float] = mapped_column(Numeric(12, 2))
+    currency: Mapped[str] = mapped_column(String(10), default="USD")
+    confidence_score: Mapped[float] = mapped_column(Numeric(4, 3), default=0.75)
+    raw_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+
+
+class WorldCommodityForecast(Base):
+    """Forecast snapshot for later accuracy tracking."""
+
+    __tablename__ = "world_commodity_forecasts"
+
+    forecast_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    commodity_slug: Mapped[str] = mapped_column(String(40), index=True)
+    generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    horizon_days: Mapped[int] = mapped_column(Integer)
+    forecast_points_json: Mapped[list[dict[str, Any]]] = mapped_column(JSON)
+    model_kind: Mapped[str] = mapped_column(String(80))
+    base_price_usd_per_tonne: Mapped[float | None] = mapped_column(Numeric(12, 2))
+    realized_outcome_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
 
 
 class RoiScenario(Base):

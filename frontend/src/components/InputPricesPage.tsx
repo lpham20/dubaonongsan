@@ -1,14 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Activity, BarChart3, Database, Filter, PackageCheck, RefreshCw, TrendingUp } from "./icons";
 import { SeoHead } from "./SeoHead";
+import { WorldFertilizerForecastSection } from "./WorldFertilizerForecastSection";
 import {
-  EMPTY_INPUT_FORECAST,
-  fetchAgriInputForecast,
   fetchAgriInputHistory,
   fetchAgriInputLatest,
   fetchAgriInputProducts,
-  type AgriInputForecastPoint,
-  type AgriInputForecast,
   type AgriInputPricePoint,
   type AgriInputProduct
 } from "../lib/api";
@@ -58,26 +55,14 @@ function priceChangePct(points: SeriesPoint[]) {
   return ((latest - previous) / previous) * 100;
 }
 
-function forecastToSeries(points: AgriInputForecastPoint[]): SeriesPoint[] {
-  return points.map((point) => ({
-    timestamp: point.timestamp,
-    value: point.forecast_price_vnd,
-    low: point.confidence_low_vnd,
-    high: point.confidence_high_vnd
-  }));
-}
-
-function InputPriceChart({ history, forecast }: { history: SeriesPoint[]; forecast: AgriInputForecast }) {
-  const forecastSeries = forecastToSeries(forecast.points);
-  const all = [...history, ...forecastSeries];
+function InputPriceChart({ history }: { history: SeriesPoint[] }) {
+  const all = history;
   const width = 920;
   const height = 320;
   const padding = { top: 28, right: 28, bottom: 42, left: 74 };
   const plotWidth = width - padding.left - padding.right;
   const plotHeight = height - padding.top - padding.bottom;
-  const values = [...history, ...forecastSeries]
-    .flatMap((point) => [point.value, point.low, point.high])
-    .filter((value): value is number => typeof value === "number");
+  const values = history.map((point) => point.value).filter((value): value is number => typeof value === "number");
   const minValue = values.length ? Math.min(...values) * 0.97 : 0;
   const maxValue = values.length ? Math.max(...values) * 1.03 : 1;
   const span = Math.max(1, maxValue - minValue);
@@ -98,37 +83,6 @@ function InputPriceChart({ history, forecast }: { history: SeriesPoint[]; foreca
   }
 
   const timelineLength = Math.max(all.length, 2);
-  const forecastOffset = history.length ? history.length - 1 : 0;
-
-  function forecastX(index: number) {
-    return x(history.length ? forecastOffset + index + 1 : index, timelineLength);
-  }
-
-  function forecastPath(points: SeriesPoint[], bridgeFromHistory = false) {
-    const pathPoints = bridgeFromHistory && history.length ? [history[history.length - 1], ...points] : points;
-    return pathPoints
-      .map((point, index) => {
-        const globalIndex = bridgeFromHistory && history.length ? forecastOffset + index : history.length ? forecastOffset + index + 1 : index;
-        return `${x(globalIndex, timelineLength).toFixed(2)},${y(point.value).toFixed(2)}`;
-      })
-      .join(" ");
-  }
-
-  const bandPath =
-    forecastSeries.length
-      ? [
-          ...forecastSeries.map((point, index) => `${index === 0 ? "M" : "L"} ${forecastX(index).toFixed(2)} ${y(point.high ?? point.value).toFixed(2)}`),
-          ...forecastSeries
-            .slice()
-            .reverse()
-            .map((point, reverseIndex) => {
-              const index = forecastSeries.length - reverseIndex - 1;
-              return `L ${forecastX(index).toFixed(2)} ${y(point.low ?? point.value).toFixed(2)}`;
-            }),
-          "Z"
-        ].join(" ")
-      : "";
-  const forecastPathValue = forecastPath(forecastSeries, true);
   const gridValues = [0, 0.25, 0.5, 0.75, 1].map((ratio) => minValue + span * ratio);
 
   if (!all.length) {
@@ -145,20 +99,15 @@ function InputPriceChart({ history, forecast }: { history: SeriesPoint[]; foreca
           </text>
         </g>
       ))}
-      {bandPath ? <path className="input-forecast-band" d={bandPath} /> : null}
       {history.length ? <polyline className="input-history-line" points={pointsPath(history)} /> : null}
-      {forecastSeries.length ? <polyline className="input-forecast-base-line" points={forecastPathValue} /> : null}
       {history.map((point, index) => (
         <circle key={`${point.timestamp}-${index}`} className="input-history-dot" cx={x(index, timelineLength)} cy={y(point.value)} r="4" />
-      ))}
-      {forecastSeries.map((point, index) => (
-        <circle key={`${point.timestamp}-${index}`} className="input-forecast-dot" cx={forecastX(index)} cy={y(point.value)} r="3.5" />
       ))}
       <text x={padding.left} y={height - 12}>
         {history[0] ? formatDate(history[0].timestamp) : ""}
       </text>
       <text x={width - padding.right} y={height - 12} textAnchor="end">
-        {forecastSeries.at(-1) ? formatDate(forecastSeries.at(-1)?.timestamp) : history.at(-1) ? formatDate(history.at(-1)?.timestamp) : ""}
+        {history.at(-1) ? formatDate(history.at(-1)?.timestamp) : ""}
       </text>
     </svg>
   );
@@ -168,7 +117,6 @@ export function InputPricesPage() {
   const [products, setProducts] = useState<AgriInputProduct[]>([]);
   const [latest, setLatest] = useState<AgriInputPricePoint[]>([]);
   const [history, setHistory] = useState<AgriInputPricePoint[]>([]);
-  const [forecast, setForecast] = useState<AgriInputForecast>(EMPTY_INPUT_FORECAST);
   const [productSlug, setProductSlug] = useState("");
   const [province, setProvince] = useState("");
   const [loading, setLoading] = useState(true);
@@ -207,12 +155,10 @@ export function InputPricesPage() {
     setError(null);
     Promise.all([
       fetchAgriInputHistory(productSlug, { province: province || undefined, months: 12, signal: controller.signal }),
-      fetchAgriInputForecast(productSlug, { province: province || undefined, days: 30, signal: controller.signal }),
       fetchAgriInputLatest({ productSlug, province: province || undefined, signal: controller.signal })
     ])
-      .then(([historyPayload, forecastPayload, latestPayload]) => {
+      .then(([historyPayload, latestPayload]) => {
         setHistory(historyPayload);
-        setForecast(forecastPayload);
         setLatest((current) => {
           const remaining = current.filter((row) =>
             province ? row.product_slug !== productSlug || row.province !== province : row.product_slug !== productSlug
@@ -243,15 +189,15 @@ export function InputPricesPage() {
   const changePct = priceChangePct(historySeries);
   const avgLatestPackage = average(comparisonRows.map((row) => row.package_price_vnd ?? 0).filter(Boolean));
   const avgLatestKg = average(comparisonRows.map((row) => row.normalized_price_vnd).filter(Boolean));
-  const forecastLast = forecast.points.at(-1);
+  const selectedSourceCount = new Set(comparisonRows.map((row) => row.source_name).filter(Boolean)).size;
   const productCount = products.length;
   const provinceCount = provinceOptions.length;
 
   return (
     <section className="input-prices-page">
       <SeoHead
-        title="Giá phân bón hôm nay & dự báo vật tư đầu vào"
-        description="Theo dõi giá phân bón theo vùng giá, thương hiệu và quy cách bao 50 kg. Xem bảng giá, so sánh thương hiệu, lịch sử 12 tháng và dự báo ngắn hạn."
+        title="Giá phân bón hôm nay & xu hướng phân bón thế giới"
+        description="Theo dõi giá phân bón nội địa theo vùng giá, thương hiệu, quy cách bao và xu hướng Urê, DAP, Kali thế giới theo USD/tấn."
         canonical="/du-bao-gia/phan-bon"
         schemaJsonLd={{
           "@context": "https://schema.org",
@@ -272,7 +218,7 @@ export function InputPricesPage() {
           <h1>Giá phân bón hôm nay</h1>
           <p>
             <span>Theo dõi giá bao, giá quy đổi VND/kg.</span>
-            <span>Theo vùng giá và thương hiệu.</span>
+            <span>Kết hợp xu hướng commodity thế giới để đọc tín hiệu tăng giảm.</span>
           </p>
         </div>
         <div className="input-price-head-metrics" aria-label="Tổng quan dữ liệu">
@@ -347,28 +293,26 @@ export function InputPricesPage() {
         </div>
         <div className="input-stat">
           <Activity size={18} />
-          <span>Dự báo 30 ngày</span>
-          <strong>{formatVnd(forecastLast?.forecast_price_vnd)}</strong>
-          <small>{forecast.model_kind}</small>
+          <span>Nguồn giá nội địa</span>
+          <strong>{selectedSourceCount || provinceCount}</strong>
+          <small>nguồn/vùng đang có giá</small>
         </div>
       </section>
 
       <section className="input-chart-section">
         <div className="input-section-heading">
           <div>
-            <h2>Lịch sử 12 tháng và dự báo ngắn hạn</h2>
+            <h2>Lịch sử giá nội địa 12 tháng</h2>
             <p>{selectedProduct ? `${selectedProduct.name} tại ${province || "các vùng giá theo dõi"}` : "Đang tải sản phẩm"}</p>
           </div>
           <div className="input-chart-legend">
             <span className="history">Lịch sử</span>
-            <span className="forecast-base">Dự báo cơ sở</span>
           </div>
         </div>
-        {!forecast.points.length && forecast.model_kind === "no-data" ? (
-          <div className="input-forecast-warning">Chưa đủ tối thiểu 3 điểm lịch sử để dựng dự báo cho lựa chọn này.</div>
-        ) : null}
-        <InputPriceChart history={historySeries} forecast={forecast} />
+        <InputPriceChart history={historySeries} />
       </section>
+
+      <WorldFertilizerForecastSection />
 
       <section className="input-price-grid">
         <div className="input-price-panel">
@@ -480,7 +424,8 @@ export function InputPricesPage() {
         <strong>Ghi chú dữ liệu</strong>
         <p>
           Giá phân bón được tách thành lớp dữ liệu riêng để chuẩn hóa sản phẩm, vùng giá, thương hiệu và quy cách bao. Các dòng có nguồn
-          công khai như VietNga, Vinacam, SFARM và Coffee Market là dữ liệu đã crawl; các dòng “Dữ liệu tham chiếu nền” chỉ dùng làm nền khi nguồn thật chưa có đủ lịch sử.
+          công khai như VietNga, Vinacam, SFARM và Coffee Market là dữ liệu đã crawl. Forecast trên trang này dùng commodity thế giới theo USD/tấn;
+          dữ liệu nội địa chỉ dùng để tham khảo giá thực tế và lịch sử.
         </p>
       </section>
     </section>
