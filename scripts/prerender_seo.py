@@ -1115,7 +1115,7 @@ def render_static_pages() -> list[tuple[str, str | None]]:
 <h2>Chuẩn dữ liệu</h2>
 <p>Mỗi dòng giá được chuẩn hóa theo sản phẩm, vùng giá, thương hiệu, quy cách bao, giá bao và giá quy đổi VND/kg. Dữ liệu crawler từ nguồn công khai được ưu tiên, dữ liệu tham chiếu nền chỉ dùng khi nguồn thật chưa đủ lịch sử.</p>
 <h2>Dự báo</h2>
-<p>Dự báo phân bón dùng engine 3 kịch bản theo trend, mùa vụ tháng 5/tháng 11 và biến động xác định, tách khỏi model LSTM của giá nông sản đầu ra.</p>
+<p>Dự báo phân bón dùng engine cơ sở theo trend, mùa vụ tháng 5/tháng 11 và biến động xác định, tách khỏi model LSTM của giá nông sản đầu ra.</p>
 </main>"""
     input_dataset_schema = {
         "@context": "https://schema.org",

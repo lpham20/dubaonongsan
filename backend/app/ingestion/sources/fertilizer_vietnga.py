@@ -136,7 +136,15 @@ def classify_fertilizer_product(label: str) -> dict[str, str | None]:
             "nutrient_profile": "18-46-0",
             "brand": brand,
         }
-    if "kali" in folded:
+    if "k2so4" in folded or "sulphate" in folded or "sulfate" in folded or "sop" in folded:
+        return {
+            "slug": "kali-sop",
+            "name": "Kali SOP",
+            "product_type": "Phân đơn",
+            "nutrient_profile": "50% K2O + 18% S",
+            "brand": brand,
+        }
+    if "kali" in folded or "kaly" in folded or "kcl" in folded:
         return {
             "slug": "kali-mop",
             "name": "Kali MOP",
@@ -144,7 +152,7 @@ def classify_fertilizer_product(label: str) -> dict[str, str | None]:
             "nutrient_profile": "K2O",
             "brand": brand,
         }
-    if "ure" in folded or "uree" in folded or "urea" in folded:
+    if "ure" in folded or "uree" in folded or "urea" in folded or re.search(r"\bdam\b", folded):
         return {
             "slug": "ure",
             "name": "Urê",
@@ -154,10 +162,18 @@ def classify_fertilizer_product(label: str) -> dict[str, str | None]:
         }
     if "lan" in folded:
         return {
-            "slug": "lan",
-            "name": "Lân",
+            "slug": "lan-nung-chay",
+            "name": "Lân nung chảy",
             "product_type": "Phân lân",
             "nutrient_profile": "P2O5",
+            "brand": brand,
+        }
+    if "phan bo" in folded or "huu co" in folded or "vi sinh" in folded:
+        return {
+            "slug": _slugify(label),
+            "name": label,
+            "product_type": "Phân hữu cơ",
+            "nutrient_profile": "Hữu cơ",
             "brand": brand,
         }
     if re.search(r"\bsa\b", folded):
@@ -199,7 +215,7 @@ def _extract_brand(label: str, folded: str, formula: str | None) -> str | None:
             brand = brand.replace(formula, "")
         brand = re.sub(r"[-–+]?\s*\bTE\b", "", brand, flags=re.IGNORECASE)
         return _normalize_brand_alias(normalize_space(brand))
-    for prefix in ("Ure", "Urê", "Urea", "DAP", "Kali", "Lân", "SA"):
+    for prefix in ("Urea", "Urê", "Ure", "Đạm", "DAP", "Kali", "Kaly", "Lân", "SA"):
         if clean.lower().startswith(prefix.lower()):
             brand = normalize_space(clean[len(prefix):])
             return _normalize_brand_alias(brand)

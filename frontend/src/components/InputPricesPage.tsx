@@ -8,7 +8,7 @@ import {
   fetchAgriInputLatest,
   fetchAgriInputProducts,
   type AgriInputForecastPoint,
-  type AgriInputForecastScenario,
+  type AgriInputForecast,
   type AgriInputPricePoint,
   type AgriInputProduct
 } from "../lib/api";
@@ -67,17 +67,15 @@ function forecastToSeries(points: AgriInputForecastPoint[]): SeriesPoint[] {
   }));
 }
 
-function InputPriceChart({ history, forecast }: { history: SeriesPoint[]; forecast: AgriInputForecastScenario }) {
-  const baseSeries = forecastToSeries(forecast.base);
-  const bullSeries = forecastToSeries(forecast.bull);
-  const bearSeries = forecastToSeries(forecast.bear);
-  const all = [...history, ...baseSeries];
+function InputPriceChart({ history, forecast }: { history: SeriesPoint[]; forecast: AgriInputForecast }) {
+  const forecastSeries = forecastToSeries(forecast.points);
+  const all = [...history, ...forecastSeries];
   const width = 920;
   const height = 320;
   const padding = { top: 28, right: 28, bottom: 42, left: 74 };
   const plotWidth = width - padding.left - padding.right;
   const plotHeight = height - padding.top - padding.bottom;
-  const values = [...history, ...baseSeries, ...bullSeries, ...bearSeries]
+  const values = [...history, ...forecastSeries]
     .flatMap((point) => [point.value, point.low, point.high])
     .filter((value): value is number => typeof value === "number");
   const minValue = values.length ? Math.min(...values) * 0.97 : 0;
@@ -117,22 +115,20 @@ function InputPriceChart({ history, forecast }: { history: SeriesPoint[]; foreca
   }
 
   const bandPath =
-    bullSeries.length && bullSeries.length === bearSeries.length
+    forecastSeries.length
       ? [
-          ...bullSeries.map((point, index) => `${index === 0 ? "M" : "L"} ${forecastX(index).toFixed(2)} ${y(point.value).toFixed(2)}`),
-          ...bearSeries
+          ...forecastSeries.map((point, index) => `${index === 0 ? "M" : "L"} ${forecastX(index).toFixed(2)} ${y(point.high ?? point.value).toFixed(2)}`),
+          ...forecastSeries
             .slice()
             .reverse()
             .map((point, reverseIndex) => {
-              const index = bearSeries.length - reverseIndex - 1;
-              return `L ${forecastX(index).toFixed(2)} ${y(point.value).toFixed(2)}`;
+              const index = forecastSeries.length - reverseIndex - 1;
+              return `L ${forecastX(index).toFixed(2)} ${y(point.low ?? point.value).toFixed(2)}`;
             }),
           "Z"
         ].join(" ")
       : "";
-  const basePath = forecastPath(baseSeries, true);
-  const bullPath = forecastPath(bullSeries);
-  const bearPath = forecastPath(bearSeries);
+  const forecastPathValue = forecastPath(forecastSeries, true);
   const gridValues = [0, 0.25, 0.5, 0.75, 1].map((ratio) => minValue + span * ratio);
 
   if (!all.length) {
@@ -151,20 +147,18 @@ function InputPriceChart({ history, forecast }: { history: SeriesPoint[]; foreca
       ))}
       {bandPath ? <path className="input-forecast-band" d={bandPath} /> : null}
       {history.length ? <polyline className="input-history-line" points={pointsPath(history)} /> : null}
-      {bullSeries.length ? <polyline className="input-forecast-bull-line" points={bullPath} /> : null}
-      {bearSeries.length ? <polyline className="input-forecast-bear-line" points={bearPath} /> : null}
-      {baseSeries.length ? <polyline className="input-forecast-base-line" points={basePath} /> : null}
+      {forecastSeries.length ? <polyline className="input-forecast-base-line" points={forecastPathValue} /> : null}
       {history.map((point, index) => (
         <circle key={`${point.timestamp}-${index}`} className="input-history-dot" cx={x(index, timelineLength)} cy={y(point.value)} r="4" />
       ))}
-      {baseSeries.map((point, index) => (
+      {forecastSeries.map((point, index) => (
         <circle key={`${point.timestamp}-${index}`} className="input-forecast-dot" cx={forecastX(index)} cy={y(point.value)} r="3.5" />
       ))}
       <text x={padding.left} y={height - 12}>
         {history[0] ? formatDate(history[0].timestamp) : ""}
       </text>
       <text x={width - padding.right} y={height - 12} textAnchor="end">
-        {baseSeries.at(-1) ? formatDate(baseSeries.at(-1)?.timestamp) : history.at(-1) ? formatDate(history.at(-1)?.timestamp) : ""}
+        {forecastSeries.at(-1) ? formatDate(forecastSeries.at(-1)?.timestamp) : history.at(-1) ? formatDate(history.at(-1)?.timestamp) : ""}
       </text>
     </svg>
   );
@@ -174,7 +168,7 @@ export function InputPricesPage() {
   const [products, setProducts] = useState<AgriInputProduct[]>([]);
   const [latest, setLatest] = useState<AgriInputPricePoint[]>([]);
   const [history, setHistory] = useState<AgriInputPricePoint[]>([]);
-  const [forecast, setForecast] = useState<AgriInputForecastScenario>(EMPTY_INPUT_FORECAST);
+  const [forecast, setForecast] = useState<AgriInputForecast>(EMPTY_INPUT_FORECAST);
   const [productSlug, setProductSlug] = useState("");
   const [province, setProvince] = useState("");
   const [loading, setLoading] = useState(true);
@@ -249,7 +243,7 @@ export function InputPricesPage() {
   const changePct = priceChangePct(historySeries);
   const avgLatestPackage = average(comparisonRows.map((row) => row.package_price_vnd ?? 0).filter(Boolean));
   const avgLatestKg = average(comparisonRows.map((row) => row.normalized_price_vnd).filter(Boolean));
-  const forecastLast = forecast.base.at(-1);
+  const forecastLast = forecast.points.at(-1);
   const productCount = products.length;
   const provinceCount = provinceOptions.length;
 
@@ -367,12 +361,10 @@ export function InputPricesPage() {
           </div>
           <div className="input-chart-legend">
             <span className="history">Lịch sử</span>
-            <span className="forecast-base">Cơ sở</span>
-            <span className="forecast-bull">Lạc quan</span>
-            <span className="forecast-bear">Bi quan</span>
+            <span className="forecast-base">Dự báo cơ sở</span>
           </div>
         </div>
-        {!forecast.base.length && forecast.model_kind === "no-data" ? (
+        {!forecast.points.length && forecast.model_kind === "no-data" ? (
           <div className="input-forecast-warning">Chưa đủ tối thiểu 3 điểm lịch sử để dựng dự báo cho lựa chọn này.</div>
         ) : null}
         <InputPriceChart history={historySeries} forecast={forecast} />
@@ -488,7 +480,7 @@ export function InputPricesPage() {
         <strong>Ghi chú dữ liệu</strong>
         <p>
           Giá phân bón được tách thành lớp dữ liệu riêng để chuẩn hóa sản phẩm, vùng giá, thương hiệu và quy cách bao. Các dòng có nguồn
-          công khai như vietnga.vn là dữ liệu đã crawl; các dòng “Dữ liệu tham chiếu nền” chỉ dùng làm nền khi nguồn thật chưa có đủ lịch sử.
+          công khai như VietNga, Vinacam, SFARM và Coffee Market là dữ liệu đã crawl; các dòng “Dữ liệu tham chiếu nền” chỉ dùng làm nền khi nguồn thật chưa có đủ lịch sử.
         </p>
       </section>
     </section>

@@ -80,13 +80,11 @@ class AgriInputForecastPoint(BaseModel):
     normalized_price_vnd: float
     normalized_low_vnd: float
     normalized_high_vnd: float
-    model_kind: str = "input-price-3scenario-v3"
+    model_kind: str = "input-price-seasonal-v3"
 
 
-class AgriInputForecastScenario(BaseModel):
-    base: list[AgriInputForecastPoint]
-    bull: list[AgriInputForecastPoint]
-    bear: list[AgriInputForecastPoint]
+class AgriInputForecast(BaseModel):
+    points: list[AgriInputForecastPoint]
     model_kind: str
     history_points: int = 0
     volatility: float = 0.0

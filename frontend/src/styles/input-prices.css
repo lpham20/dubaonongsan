@@ -307,14 +307,6 @@
   background: #d97706;
 }
 
-.input-chart-legend .forecast-bull::before {
-  background: #2563eb;
-}
-
-.input-chart-legend .forecast-bear::before {
-  background: #dc2626;
-}
-
 .input-forecast-warning {
   margin: var(--space-3) var(--space-4) 0;
   padding: 10px 12px;
@@ -348,9 +340,7 @@
 }
 
 .input-history-line,
-.input-forecast-base-line,
-.input-forecast-bull-line,
-.input-forecast-bear-line {
+.input-forecast-base-line {
   fill: none;
   stroke-width: 4;
   stroke-linecap: round;
@@ -363,16 +353,6 @@
 
 .input-forecast-base-line {
   stroke: #d97706;
-}
-
-.input-forecast-bull-line {
-  stroke: #2563eb;
-  stroke-dasharray: 9 8;
-}
-
-.input-forecast-bear-line {
-  stroke: #dc2626;
-  stroke-dasharray: 9 8;
 }
 
 .input-forecast-band {

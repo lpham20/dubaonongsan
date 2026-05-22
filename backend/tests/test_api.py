@@ -114,19 +114,83 @@ def test_input_price_endpoints_return_fertilizer_data(client):
     forecast = client.get("/api/v1/input-prices/forecast?product_slug=ure&province=Đắk Lắk&days=30")
     assert forecast.status_code == 200
     forecast_payload = forecast.json()
-    assert forecast_payload["model_kind"] == "input-price-3scenario-v3"
-    assert len(forecast_payload["base"]) == 30
-    assert len(forecast_payload["bull"]) == 30
-    assert len(forecast_payload["bear"]) == 30
-    values = [row["forecast_price_vnd"] for row in forecast_payload["base"]]
+    assert forecast_payload["model_kind"] == "input-price-seasonal-v3"
+    assert len(forecast_payload["points"]) == 30
+    values = [row["forecast_price_vnd"] for row in forecast_payload["points"]]
     assert max(values) - min(values) >= 0.01 * mean(values)
-    day_1_band = forecast_payload["base"][0]["confidence_high_vnd"] - forecast_payload["base"][0]["confidence_low_vnd"]
-    day_30_band = forecast_payload["base"][-1]["confidence_high_vnd"] - forecast_payload["base"][-1]["confidence_low_vnd"]
+    day_1_band = forecast_payload["points"][0]["confidence_high_vnd"] - forecast_payload["points"][0]["confidence_low_vnd"]
+    day_30_band = forecast_payload["points"][-1]["confidence_high_vnd"] - forecast_payload["points"][-1]["confidence_low_vnd"]
     assert day_30_band > day_1_band
 
     health = client.get("/api/v1/platform/input-prices/health")
     assert health.status_code == 200
     assert health.json()["category"] == "fertilizer"
+
+
+def test_input_price_public_scrapers_parse_verified_shapes():
+    from app.ingestion.input_price_registry import INPUT_PRICE_SCRAPERS
+    from app.ingestion.sources.fertilizer_public_sources import (
+        CoffeeMarketFertilizerPriceScraper,
+        SFarmOrganicFertilizerPriceScraper,
+        TheFinancesFertilizerPriceScraper,
+        VinacamFertilizerPriceScraper,
+    )
+
+    assert {"vinacam_fertilizer", "thefinances_fertilizer", "sfarm_organic_fertilizer", "coffee_market_fertilizer"} <= set(
+        INPUT_PRICE_SCRAPERS
+    )
+
+    vinacam = VinacamFertilizerPriceScraper().parse_html(
+        """
+        <p>Giá phân bón cập nhật ngày: 06/05/2026</p>
+        <table>
+          <tr><th>#</th><th>Tên Phân Bón</th><th>Thị Trường</th><th>Ghi chú</th></tr>
+          <tr><th>HCM</th><th>HN</th><th>Quy Nhơn</th></tr>
+          <tr><td></td><td>Phân Urea Hà Bắc</td><td>18.000</td><td>-</td><td>-</td><td></td></tr>
+        </table>
+        """
+    )
+    assert len(vinacam.observations) == 1
+    assert vinacam.observations[0].product_slug == "ure"
+    assert vinacam.observations[0].package_price_vnd == 900_000
+
+    finances = TheFinancesFertilizerPriceScraper().parse_html(
+        """
+        <h1>Giá phân bón hôm nay cập nhật 22/05/2026</h1>
+        <table>
+          <tr><td>An Giang</td><td>DAP Trung Quốc</td><td>22,000</td><td>đ/kg</td><td>Đại lý cấp I</td></tr>
+          <tr><td>Cà Mau</td><td>Phân lân</td><td>2,450</td><td>đ/kg</td><td>Bán lẻ</td></tr>
+        </table>
+        """
+    )
+    assert {row.province for row in finances.observations} == {"An Giang", "Cà Mau"}
+    assert any(row.product_slug == "dap" and row.package_price_vnd == 1_100_000 for row in finances.observations)
+
+    sfarm = SFarmOrganicFertilizerPriceScraper().parse_html(
+        """
+        <p>Bảng giá được cập nhật vào 21/01/2026.</p>
+        <table>
+          <tr><th>Sản phẩm</th><th>Quy cách</th><th>Giá tham khảo</th></tr>
+          <tr><td>Phân bò SFARM</td><td>25 kg</td><td>~215.000đ / túi</td></tr>
+        </table>
+        """
+    )
+    assert sfarm.observations[0].product_slug == "phan-bo-u-hoai-sfarm"
+    assert sfarm.observations[0].package_size_kg == 25
+    assert sfarm.observations[0].package_price_vnd == 215_000
+
+    coffee_market = CoffeeMarketFertilizerPriceScraper().parse_html(
+        """
+        <main>
+          <p>Cập nhật lần cuối: 25/1/2026</p>
+          <p>Phân URÊ</p><p>Cà Mau</p><p>610.000</p><p>-</p><p>650.000</p><p>đ/bao</p>
+          <p>Phân NPK 16-16-8</p><p>Đầu Trâu</p><p>670.000</p><p>-</p><p>750.000</p><p>đ/bao</p>
+        </main>
+        """,
+        province="Đắk Lắk",
+    )
+    assert len(coffee_market.observations) == 2
+    assert {row.province for row in coffee_market.observations} == {"Đắk Lắk"}
 
 
 def test_sensor_webhook_persists_payload(client):

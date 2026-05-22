@@ -11,7 +11,7 @@ from app.core.config import get_settings
 from app.db import get_db
 from app.models import AgriInputPriceObservation, AgriInputProduct, ScrapeRun
 from app.schemas import (
-    AgriInputForecastScenario,
+    AgriInputForecast,
     AgriInputPricePoint,
     AgriInputPriceSummary,
     AgriInputProductOut,
@@ -75,7 +75,7 @@ def input_price_history(
     )
 
 
-@router.get("/input-prices/forecast", response_model=AgriInputForecastScenario)
+@router.get("/input-prices/forecast", response_model=AgriInputForecast)
 @cached(prefix="input-price-forecast", ttl_seconds=900)
 def input_price_forecast(
     product_slug: str = Query(..., min_length=1, max_length=80),
@@ -83,7 +83,7 @@ def input_price_forecast(
     brand: str | None = Query(default=None, max_length=120),
     days: int = Query(default=30, ge=1, le=60),
     db: Session = Depends(get_db),
-) -> list[dict]:
+) -> dict:
     return InputPriceService(db).forecast(
         product_slug=product_slug,
         province=province,

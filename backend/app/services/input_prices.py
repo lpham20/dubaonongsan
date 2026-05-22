@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from app.models import AgriInputPriceObservation, AgriInputProduct
 
 
-INPUT_FORECAST_MODEL_KIND = "input-price-3scenario-v3"
+INPUT_FORECAST_MODEL_KIND = "input-price-seasonal-v3"
 MAX_INPUT_FORECAST_DAYS = 60
 MIN_INPUT_FORECAST_POINTS = 3
 TREND_SMOOTHING = 0.35
@@ -326,24 +326,18 @@ class InputPriceService:
         base_curve = _add_deterministic_shock(clean_curve, daily_volatility, seed)
         base_curve = _ensure_minimum_spread(base_curve)
 
-        base: list[dict] = []
-        bull: list[dict] = []
-        bear: list[dict] = []
+        points_output: list[dict] = []
         for index, (ts, base_value) in enumerate(base_curve, start=1):
-            scenario_band = max(
+            confidence_band = max(
                 base_value * 0.004 * math.sqrt(index),
                 base_value * max(0.012, daily_volatility * 0.9) * math.sqrt(index / 7),
             )
-            low = max(0, base_value - scenario_band)
-            high = base_value + scenario_band
-            base.append(_forecast_point(ts, base_value, low, high, package_size))
-            bull.append(_forecast_point(ts, high, low, high, package_size))
-            bear.append(_forecast_point(ts, low, low, high, package_size))
+            low = max(0, base_value - confidence_band)
+            high = base_value + confidence_band
+            points_output.append(_forecast_point(ts, base_value, low, high, package_size))
 
         return {
-            "base": base,
-            "bull": bull,
-            "bear": bear,
+            "points": points_output,
             "model_kind": INPUT_FORECAST_MODEL_KIND,
             "history_points": len(points),
             "volatility": round(daily_volatility, 6),
@@ -369,7 +363,7 @@ class InputPriceService:
             "normalized_price_vnd": float(row.normalized_price_vnd),
             "normalized_unit": row.normalized_unit,
             "package_size_kg": float(row.package_size_kg) if row.package_size_kg is not None else None,
-            "package_label": row.product.package_label,
+            "package_label": f"Bao {float(row.package_size_kg):g} kg" if row.package_size_kg is not None else row.product.package_label,
             "confidence_score": float(row.confidence_score),
             "data_kind": row.data_kind,
         }
@@ -377,9 +371,7 @@ class InputPriceService:
 
 def _empty_forecast(model_kind: str, history_points: int = 0) -> dict:
     return {
-        "base": [],
-        "bull": [],
-        "bear": [],
+        "points": [],
         "model_kind": model_kind,
         "history_points": history_points,
         "volatility": 0.0,

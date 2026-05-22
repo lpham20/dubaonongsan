@@ -108,20 +108,16 @@ export type AgriInputForecastPoint = {
   model_kind: string;
 };
 
-export type AgriInputForecastScenario = {
-  base: AgriInputForecastPoint[];
-  bull: AgriInputForecastPoint[];
-  bear: AgriInputForecastPoint[];
+export type AgriInputForecast = {
+  points: AgriInputForecastPoint[];
   model_kind: string;
   history_points: number;
   volatility: number;
   latest_observed_at: string | null;
 };
 
-export const EMPTY_INPUT_FORECAST: AgriInputForecastScenario = {
-  base: [],
-  bull: [],
-  bear: [],
+export const EMPTY_INPUT_FORECAST: AgriInputForecast = {
+  points: [],
   model_kind: "no-data",
   history_points: 0,
   volatility: 0,
@@ -677,7 +673,7 @@ export function fetchAgriInputForecast(
   const params = new URLSearchParams({ product_slug: productSlug, days: String(options.days ?? 30) });
   if (options.province) params.set("province", options.province);
   if (options.brand) params.set("brand", options.brand);
-  return getJson<AgriInputForecastScenario>(`/api/v1/input-prices/forecast?${params.toString()}`, options.signal);
+  return getJson<AgriInputForecast>(`/api/v1/input-prices/forecast?${params.toString()}`, options.signal);
 }
 
 export function calculateRoi(token: string, payload: RoiCalculateRequest, signal?: AbortSignal) {
