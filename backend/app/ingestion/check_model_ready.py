@@ -30,7 +30,6 @@ def main() -> None:
         varieties = db.scalars(select(DurianVariety).order_by(DurianVariety.variety_id)).all()
         varieties = [variety for variety in varieties if variety.crop_type == crop_type]
         loader = DataLoader(db)
-        forecaster = LSTMForecaster(ForecastConfig())
         for region in regions:
             for variety in varieties:
                 history = loader.historical_prices(
@@ -40,7 +39,12 @@ def main() -> None:
                     quality_grade="Loại A",
                     limit=180,
                 )
-                forecast = forecaster.predict_30_days(
+                forecast = LSTMForecaster(
+                    ForecastConfig(),
+                    crop_type=crop_type,
+                    region_id=region.region_id,
+                    variety_id=variety.variety_id,
+                ).predict_30_days(
                     loader.latest_feature_window(
                         region_id=region.region_id,
                         variety_id=variety.variety_id,

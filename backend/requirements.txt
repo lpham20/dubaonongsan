@@ -3,6 +3,7 @@ uvicorn[standard]==0.38.0
 SQLAlchemy==2.0.45
 pydantic-settings==2.12.0
 numpy==2.3.5
+tflite-runtime==2.14.0; platform_system == "Linux" and platform_machine == "x86_64"
 pytest==9.0.3
 httpx==0.28.1
 beautifulsoup4==4.14.3

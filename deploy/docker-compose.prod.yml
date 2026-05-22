@@ -40,9 +40,13 @@ services:
       MARKETAI_ENVIRONMENT: production
       MARKETAI_START_SCHEDULER_IN_API: "false"
       MARKETAI_JOB_LOCK_DIR: /app/.job_locks
+      MARKETAI_ML_ARTIFACTS: /app/ml_artifacts
+      MARKETAI_ML_MAX_MODELS: "1"
     depends_on:
       postgres:
         condition: service_healthy
+    volumes:
+      - ml_artifacts:/app/ml_artifacts:ro
     expose:
       - "8010"
     healthcheck:
@@ -76,8 +80,11 @@ services:
       MARKETAI_ENVIRONMENT: production
       MARKETAI_START_SCHEDULER_IN_API: "false"
       MARKETAI_JOB_LOCK_DIR: /app/.job_locks
+      MARKETAI_ML_ARTIFACTS: /app/ml_artifacts
+      MARKETAI_ML_MAX_MODELS: "1"
     volumes:
       - job_locks:/app/.job_locks
+      - ml_artifacts:/app/ml_artifacts
     depends_on:
       postgres:
         condition: service_healthy
@@ -145,3 +152,4 @@ volumes:
   caddy_config:
   caddy_logs:
   job_locks:
+  ml_artifacts:

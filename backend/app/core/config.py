@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     news_scrape_daily_minute: int = 0
     data_quality_interval_minutes: int = 60 * 24
     retrain_interval_minutes: int = 60 * 24
+    ml_artifacts: str = "/app/ml_artifacts"
+    ml_enable_tflite: bool = True
+    ml_max_models: int = 1
 
     model_config = SettingsConfigDict(env_file=".env", env_prefix="MARKETAI_")
 

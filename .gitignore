@@ -4,7 +4,11 @@ marketai.db
 __pycache__/
 .pytest_cache/
 .venv/
+.venv-train/
 .job_locks/
+ml_artifacts/
+backend/ml_artifacts/
+training_snapshots/
 frontend/dist/
 frontend/node_modules/
 backend/.env

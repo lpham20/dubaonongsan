@@ -151,7 +151,8 @@ def forecast_30_days(
     config = ForecastConfig()
     loader = DataLoader(db)
     window = loader.latest_feature_window(crop_type=crop, region_id=region_id, variety_id=variety_id or variety)
-    forecasts = LSTMForecaster(config).predict_30_days(window)
+    forecaster = LSTMForecaster(config, crop_type=crop, region_id=region_id, variety_id=variety_id or variety)
+    forecasts = forecaster.predict_30_days(window)
     if not window:
         return []
     timestamps = loader.extend_timestamps(window[-1]["timestamp"], config.horizon_days)
@@ -164,6 +165,7 @@ def forecast_30_days(
             "forecast_price_vnd": price,
             "confidence_low_vnd": round(price - band, 2),
             "confidence_high_vnd": round(price + band, 2),
+            "model_kind": forecaster.last_model_kind,
         }
         for ts, price in zip(timestamps, forecasts, strict=False)
     ]

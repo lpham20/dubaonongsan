@@ -299,7 +299,12 @@ class MarketIntelligenceService:
         loader = DataLoader(self.db)
         history = loader.historical_prices(crop_type=crop, region_id=region_id, variety_id=variety_id, quality_grade="Loại A", limit=90)
         window = loader.latest_feature_window(crop_type=crop, region_id=region_id, variety_id=variety_id)
-        forecast = LSTMForecaster(ForecastConfig()).predict_30_days(window)
+        forecast = LSTMForecaster(
+            ForecastConfig(),
+            crop_type=crop,
+            region_id=region_id,
+            variety_id=variety_id,
+        ).predict_30_days(window)
         alerts: list[dict] = []
         if history and forecast:
             latest = float(history[-1]["max_price_vnd"] or 0)

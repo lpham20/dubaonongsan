@@ -2,7 +2,8 @@ FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
+    PIP_NO_CACHE_DIR=1 \
+    MARKETAI_ML_ARTIFACTS=/app/ml_artifacts
 
 RUN groupadd --system marketai \
     && useradd --system --gid marketai --home /app marketai
@@ -21,7 +22,7 @@ COPY alembic.ini .
 COPY alembic ./alembic
 COPY app ./app
 
-RUN mkdir -p /app/.job_locks \
+RUN mkdir -p /app/.job_locks /app/ml_artifacts \
     && chown -R marketai:marketai /app
 
 USER marketai

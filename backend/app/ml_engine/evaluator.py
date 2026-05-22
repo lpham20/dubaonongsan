@@ -22,7 +22,6 @@ class ForecastEvaluator:
     ) -> None:
         self.db = db
         self.config = config or ForecastConfig()
-        self.forecaster = LSTMForecaster(self.config)
         self.crop_type = crop_type
         self.region_id = region_id
         self.variety_id = variety_id
@@ -56,7 +55,12 @@ class ForecastEvaluator:
                 ]
                 if not actual:
                     continue
-                forecast = self.forecaster.predict_30_days(window)[: len(actual)]
+                forecast = LSTMForecaster(
+                    self.config,
+                    crop_type=self.crop_type,
+                    region_id=region_id,
+                    variety_id=variety_id,
+                ).predict_30_days(window)[: len(actual)]
                 for predicted, actual_point in zip(forecast, actual, strict=False):
                     actual_price = float(actual_point["max_price_vnd"])
                     error = predicted - actual_price

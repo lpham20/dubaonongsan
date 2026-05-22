@@ -87,6 +87,7 @@ def test_forecast_returns_30_days(client):
     payload = response.json()
     assert len(payload) == 30
     assert payload[0]["forecast_price_vnd"] > 0
+    assert payload[0]["model_kind"] == "baseline-statistical"
 
 
 def test_sensor_webhook_persists_payload(client):

@@ -31,6 +31,7 @@ class ForecastPoint(BaseModel):
     forecast_price_vnd: float
     confidence_low_vnd: float
     confidence_high_vnd: float
+    model_kind: str = "baseline-statistical"
 
 
 class TradingSignal(BaseModel):
