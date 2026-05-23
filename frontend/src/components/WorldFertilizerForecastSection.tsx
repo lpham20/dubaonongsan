@@ -74,8 +74,8 @@ function formatPct(value: number | null | undefined) {
 }
 
 function trendClass(value: number) {
-  if (value > 0.5) return "up";
-  if (value < -0.5) return "down";
+  if (value > 0) return "up";
+  if (value < 0) return "down";
   return "flat";
 }
 

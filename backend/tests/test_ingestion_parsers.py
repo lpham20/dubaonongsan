@@ -5,7 +5,13 @@ from app.ingestion.sources.baohatinh import BaoHaTinhScraper
 from app.ingestion.sources.baonghean import BaoNgheAnScraper
 from app.ingestion.sources.coffee_market import CoffeeMarketScraper
 from app.ingestion.sources.fertilizer_vietnga import VietNgaFertilizerPriceScraper, classify_fertilizer_product
-from app.ingestion.sources.socongthuong_daklak import SoCongThuongDakLakHistoryScraper, SoCongThuongDakLakScraper
+import app.ingestion.sources.socongthuong_daklak as socongthuong_daklak
+from app.ingestion.sources.socongthuong_daklak import (
+    ARCHIVE_INDEX_URL,
+    URLS,
+    SoCongThuongDakLakHistoryScraper,
+    SoCongThuongDakLakScraper,
+)
 
 
 def test_banggianongsan_parser_extracts_varieties_provinces_and_markets():
@@ -74,6 +80,7 @@ def test_socongthuong_daklak_parser_extracts_more_varieties():
     assert len(result.observations) == 4
     assert any(item.variety_name == "Sầu Musang King" for item in result.observations)
     assert any(item.variety_name == "Sầu Chuồng Bò" for item in result.observations)
+    assert all(item.province is None for item in result.observations)
 
 
 def test_socongthuong_history_parser_supports_parenthesized_labels():
@@ -93,6 +100,66 @@ def test_socongthuong_history_parser_supports_parenthesized_labels():
     assert len(result.observations) == 3
     assert any(row.variety_name == "Sầu Sáp Hữu" for row in result.observations)
     assert len(scraper.source_url) <= 500
+
+
+def test_socongthuong_history_parser_supports_lowercase_loai_labels():
+    html = """
+    <html><body>
+    <h1>Bảng giá nông sản ngày 05/9/2025</h1>
+    GIÁ SẦU RIÊNG TRONG NƯỚC
+    Sầu riêng Ri6 loại A 40.000 - 43.000
+    Sầu riêng Thái loại B 60.000 - 65.000
+    GIÁ BƠ TRONG NƯỚC
+    </body></html>
+    """
+    result = SoCongThuongDakLakHistoryScraper().parse(html)
+
+    assert len(result.observations) == 2
+    assert any(row.variety_name == "Ri6" and row.quality_grade == "Loại A" for row in result.observations)
+    assert any(row.variety_name == "Sầu Thái Dona" and row.quality_grade == "Loại B" for row in result.observations)
+
+
+def test_socongthuong_history_maps_regional_columns_to_their_provinces():
+    html = """
+    <html><body>
+    <h1>Bảng giá nông sản ngày 05/9/2025</h1>
+    GIÁ SẦU RIÊNG TRONG NƯỚC
+    Giá sầu riêng tại khu vực miền Đông Phân loại Đồng Nai Bình Phước Tây Ninh
+    Sầu riêng Ri6 loại A 40.000 - 42.000 41.000 - 43.000 42.000 - 44.000
+    Sầu riêng Thái loại B 60.000 - 63.000 61.000 - 64.000 62.000 - 65.000
+    Giá sầu riêng tại Tây Nguyên Phân loại Tây Nguyên Gia Lai Đắk Lắk
+    Sầu riêng Ri6 loại A 40.000 - 43.000 39.000 - 42.000 41.000 - 44.000
+    Sầu riêng Thái loại B 60.000 - 65.000 62.000 - 65.000 64.000 - 67.000
+    GIÁ BƠ TRONG NƯỚC
+    </body></html>
+    """
+    result = SoCongThuongDakLakHistoryScraper().parse(html)
+
+    assert len(result.observations) == 10
+    assert any(row.province == "Đồng Nai" and row.min_price_vnd == 40000 for row in result.observations)
+    assert any(row.province == "Tây Ninh" and row.max_price_vnd == 44000 for row in result.observations)
+    assert any(row.province == "Gia Lai" and row.min_price_vnd == 39000 for row in result.observations)
+    assert any(row.province == "Đắk Lắk" and row.max_price_vnd == 67000 for row in result.observations)
+
+
+def test_socongthuong_history_discovers_official_articles_only(monkeypatch):
+    discovered = f"{ARCHIVE_INDEX_URL}bang-gia-nong-san-ngay-05-9-2025-5882.html"
+    listing_html = f"""
+    <a href="{discovered}">valid</a>
+    <a href="{URLS[0]}">already scheduled</a>
+    <a href="/vi/news/savefile/thong-tin-gia-ca-thi-truong/bang-gia-nong-san-ngay-24-9-2025-5920.html">savefile</a>
+    <a href="https://example.com/bang-gia-nong-san-ngay-fake.html">external</a>
+    """
+    monkeypatch.setattr(socongthuong_daklak, "fetch_html", lambda _: listing_html)
+    scraper = SoCongThuongDakLakHistoryScraper()
+    scraper.archive_index_pages = 1
+
+    urls = scraper.discover_article_urls()
+
+    assert discovered in urls
+    assert URLS[0] not in urls
+    assert all("/savefile/" not in url for url in urls)
+    assert all(url.startswith(ARCHIVE_INDEX_URL) for url in urls)
 
 
 def test_coffee_parser_only_stores_province_prices_found_in_source():

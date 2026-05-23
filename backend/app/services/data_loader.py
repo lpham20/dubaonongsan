@@ -12,6 +12,7 @@ from app.models import (
 
 
 SYNTHETIC_SOURCE = "Nội suy từ giá vùng"
+DERIVED_SOURCE_PREFIX = "Hiệu chỉnh từ "
 
 
 class DataLoader:
@@ -130,8 +131,11 @@ class DataLoader:
         ):
             if point.get(key) is not None:
                 point[key] = float(point[key])
-        point["is_synthetic"] = point.get("exchange_source") == SYNTHETIC_SOURCE
-        point["data_kind"] = "Nội suy" if point["is_synthetic"] else "Quan sát"
+        source = point.get("exchange_source") or ""
+        is_interpolated = source == SYNTHETIC_SOURCE
+        is_calibrated = source.startswith(DERIVED_SOURCE_PREFIX)
+        point["is_synthetic"] = is_interpolated or is_calibrated
+        point["data_kind"] = "Nội suy" if is_interpolated else ("Hiệu chỉnh" if is_calibrated else "Quan sát")
         return point
 
     @staticmethod
