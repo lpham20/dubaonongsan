@@ -145,7 +145,7 @@ class SoCongThuongDakLakHistoryScraper(SoCongThuongDakLakScraper):
     """One-off observed-price backfill; intentionally excluded from hourly jobs."""
 
     source = f"{SOURCE} (backfill lịch sử)"
-    source_url = ", ".join(HISTORICAL_URLS)
+    source_url = HISTORICAL_URLS[0]
 
     def scrape(self) -> ScrapeResult:
         observations: list[PriceObservation] = []

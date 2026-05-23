@@ -87,10 +87,12 @@ def test_socongthuong_history_parser_supports_parenthesized_labels():
     GIÁ BƠ TRONG NƯỚC
     </body></html>
     """
-    result = SoCongThuongDakLakHistoryScraper().parse(html)
+    scraper = SoCongThuongDakLakHistoryScraper()
+    result = scraper.parse(html)
 
     assert len(result.observations) == 3
     assert any(row.variety_name == "Sầu Sáp Hữu" for row in result.observations)
+    assert len(scraper.source_url) <= 500
 
 
 def test_coffee_parser_only_stores_province_prices_found_in_source():
