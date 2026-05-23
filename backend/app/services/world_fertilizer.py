@@ -265,6 +265,18 @@ class WorldFertilizerForecastService:
         base_observed_at, base_price, quote_type = points[-1]
         source_mode = _source_mode(rows)
         quality = _data_quality(rows, points, source_mode)
+        latest_official_check = self.db.scalar(
+            select(ScrapeRun)
+            .where(ScrapeRun.source == "world-fertilizer:worldbank_pinksheet")
+            .where(ScrapeRun.status.in_(["thành công", "trùng lặp"]))
+            .order_by(desc(ScrapeRun.finished_at))
+            .limit(1)
+        )
+        quality["last_source_check_at"] = (
+            latest_official_check.finished_at.isoformat()
+            if latest_official_check and latest_official_check.finished_at
+            else None
+        )
         returns = [
             math.log(points[index][1] / points[index - 1][1])
             for index in range(1, len(points))

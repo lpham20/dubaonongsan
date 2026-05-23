@@ -175,6 +175,7 @@ export type WorldFertilizerForecast = {
     history_points?: number;
     latest_source?: string | null;
     latest_observed_at?: string | null;
+    last_source_check_at?: string | null;
     staleness_days?: number;
     reason_vi?: string;
   } | null;

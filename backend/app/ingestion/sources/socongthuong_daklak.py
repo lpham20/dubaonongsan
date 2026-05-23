@@ -13,6 +13,21 @@ URLS = [
     "https://socongthuong.daklak.gov.vn/vi/news/thong-tin-gia-ca-thi-truong/bang-gia-nong-san-ngay-26-3-2026-6202.html",
 ]
 
+HISTORICAL_URLS = [
+    "https://socongthuong.daklak.gov.vn/vi/news/thong-tin-gia-ca-thi-truong/bang-gia-nong-san-ngay-12-02-2026-6151.html",
+    "https://socongthuong.daklak.gov.vn/vi/news/thong-tin-gia-ca-thi-truong/bang-gia-nong-san-ngay-25-02-2026-6160.html",
+    "https://socongthuong.daklak.gov.vn/vi/news/thong-tin-gia-ca-thi-truong/bang-gia-nong-san-ngay-23-3-2026-6195.html",
+    "https://socongthuong.daklak.gov.vn/vi/news/thong-tin-gia-ca-thi-truong/bang-gia-nong-san-ngay-25-3-2026-6199.html",
+    "https://socongthuong.daklak.gov.vn/vi/news/thong-tin-gia-ca-thi-truong/bang-gia-nong-san-ngay-31-3-2026-6207.html",
+    "https://socongthuong.daklak.gov.vn/vi/news/thong-tin-gia-ca-thi-truong/bang-gia-nong-san-ngay-6-4-2026-6217.html",
+    "https://socongthuong.daklak.gov.vn/vi/news/thong-tin-gia-ca-thi-truong/bang-gia-nong-san-ngay-7-4-2026-6219.html",
+    "https://socongthuong.daklak.gov.vn/vi/news/thong-tin-gia-ca-thi-truong/bang-gia-nong-san-ngay-9-4-2026-6224.html",
+    "https://socongthuong.daklak.gov.vn/vi/news/thong-tin-gia-ca-thi-truong/bang-gia-nong-san-ngay-16-4-2026-6237.html",
+    "https://socongthuong.daklak.gov.vn/vi/news/thong-tin-gia-ca-thi-truong/bang-gia-nong-san-ngay-05-5-2026-6255.html",
+    "https://socongthuong.daklak.gov.vn/vi/news/thong-tin-gia-ca-thi-truong/bang-gia-nong-san-ngay-12-5-2026-6261.html",
+    "https://socongthuong.daklak.gov.vn/vi/news/thong-tin-gia-ca-thi-truong/bang-gia-nong-san-ngay-15-5-2026-6270.html",
+]
+
 
 class SoCongThuongDakLakScraper:
     source = SOURCE
@@ -41,10 +56,16 @@ class SoCongThuongDakLakScraper:
             "Sầu riêng Ri6 A",
             "Sầu riêng Ri6 B",
             "Sầu riêng Ri6 C",
+            "Sầu riêng Ri6 (Loại A)",
+            "Sầu riêng Ri6 (Loại B)",
+            "Sầu riêng Ri6 (Loại C)",
             "Sầu riêng Thái VIP A",
             "Sầu riêng Thái VIP B",
             "Sầu riêng Thái A",
             "Sầu riêng Thái B",
+            "Sầu riêng Thái (Loại A)",
+            "Sầu riêng Thái (Loại B)",
+            "Sầu riêng Thái (Loại C)",
             "Sầu riêng Thái (VIP A)",
             "Sầu riêng Thái (VIP B)",
             "Sầu riêng Thái (Mẫu đẹp A)",
@@ -61,6 +82,8 @@ class SoCongThuongDakLakScraper:
             "Sầu riêng Black Thorn A",
             "Sáp Hữu (Loại A)",
             "Sáp Hữu (Loại B)",
+            "Sáu Hữu (Loại A)",
+            "Sáu Hữu (Loại B)",
         ]
 
         for label in known_labels:
@@ -96,7 +119,7 @@ class SoCongThuongDakLakScraper:
             variety = "Sầu Chuồng Bò"
         elif "black thorn" in folded:
             variety = "Sầu Black Thorn"
-        elif "sap huu" in folded:
+        elif "sap huu" in folded or "sau huu" in folded:
             variety = "Sầu Sáp Hữu"
         elif "thai" in folded:
             variety = "Sầu Thái Dona"
@@ -116,3 +139,16 @@ class SoCongThuongDakLakScraper:
         else:
             grade = "Tổng hợp"
         return variety, grade
+
+
+class SoCongThuongDakLakHistoryScraper(SoCongThuongDakLakScraper):
+    """One-off observed-price backfill; intentionally excluded from hourly jobs."""
+
+    source = f"{SOURCE} (backfill lịch sử)"
+    source_url = ", ".join(HISTORICAL_URLS)
+
+    def scrape(self) -> ScrapeResult:
+        observations: list[PriceObservation] = []
+        for url in HISTORICAL_URLS:
+            observations.extend(self.parse(fetch_html(url), url).observations)
+        return ScrapeResult(self.source, self.source_url, observations)

@@ -105,7 +105,7 @@ def _calculate_roi_v2(
     fertilizer_cost_per_ha, breakdown, input_mode = _fertilizer_cost(payload, db)
     total_cost_per_ha = fertilizer_cost_per_ha + payload.other_input_cost_vnd_per_ha + payload.labor_cost_vnd_per_ha
     if total_cost_per_ha <= 0:
-        raise HTTPException(status_code=400, detail="Tổng chi phí/ha phải lớn hơn 0 để tính ROI.")
+        raise HTTPException(status_code=400, detail="Tổng chi phí/ha phải lớn hơn 0 để tính lợi nhuận.")
 
     forecast = _forecast_context(payload, db)
     scenarios = _build_scenarios(payload, total_cost_per_ha, forecast)
@@ -310,9 +310,7 @@ def _forecast_context(payload: RoiCalculateRequest, db: Session) -> dict:
 
 def _build_scenarios(payload: RoiCalculateRequest, cost_per_ha: float, forecast: dict) -> list[dict]:
     specs = [
-        ("pessimistic", "Bi quan", forecast["low_price"], 0.9, "Giá bán và năng suất cùng lệch xấu so với kỳ vọng."),
-        ("expected", "Kỳ vọng", forecast["expected_price"], 1.0, "Kết hợp giá bạn nhập với trung vị forecast nông sản."),
-        ("optimistic", "Lạc quan", forecast["high_price"], 1.08, "Giá bán hoặc chất lượng đầu ra tốt hơn vùng trung vị."),
+        ("expected", "Cơ sở", forecast["expected_price"], 1.0, "Kết hợp giá bạn nhập với trung vị dự báo nông sản."),
     ]
     scenarios = []
     for key, label, price, yield_multiplier, rationale in specs:
@@ -375,13 +373,13 @@ def _confidence_score(forecast: dict, input_mode: str, payload: RoiCalculateRequ
 def _roi_notes(roi_pct: float, fertilizer_cost_per_ha: float, total_cost_per_ha: float) -> list[str]:
     notes: list[str] = []
     if roi_pct < 0:
-        notes.append("ROI dự kiến âm - cần giảm chi phí, tăng chất lượng bán ra hoặc hoãn quyết định đầu tư lớn.")
+        notes.append("Lợi nhuận dự kiến âm - cần giảm chi phí, tăng chất lượng bán ra hoặc hoãn quyết định đầu tư lớn.")
     elif roi_pct < 15:
-        notes.append("ROI dưới 15% - nên rà lại chi phí phân bón, nhân công hoặc chờ giá bán tốt hơn.")
+        notes.append("Tỷ suất lợi nhuận dưới 15% - nên rà lại chi phí phân bón, nhân công hoặc chờ giá bán tốt hơn.")
     if total_cost_per_ha > 0 and fertilizer_cost_per_ha / total_cost_per_ha > 0.5:
         notes.append("Phân bón chiếm trên 50% tổng chi phí - nên so lại liều lượng và thời điểm mua.")
     if not notes:
-        notes.append("Kịch bản kỳ vọng có ROI dương; vẫn nên kiểm tra thêm rủi ro giá bán, thời tiết và dòng tiền.")
+        notes.append("Kịch bản kỳ vọng có lợi nhuận dương; vẫn nên kiểm tra thêm rủi ro giá bán, thời tiết và dòng tiền.")
     return notes
 
 
@@ -396,9 +394,9 @@ def _roi_recommendations(
     recommendations: list[str] = []
     fertilizer_share = fertilizer_cost_per_ha / total_cost_per_ha if total_cost_per_ha > 0 else 0
     if roi_pct < 0:
-        recommendations.append("Không nên chốt phương án này ngay: ROI âm trong kịch bản kỳ vọng.")
+        recommendations.append("Không nên chốt phương án này ngay: lợi nhuận âm trong kịch bản kỳ vọng.")
     elif roi_pct < 15:
-        recommendations.append("Chỉ nên triển khai nếu có hợp đồng/đầu ra chắc hơn, vì biên an toàn ROI còn mỏng.")
+        recommendations.append("Chỉ nên triển khai nếu có hợp đồng/đầu ra chắc hơn, vì biên an toàn lợi nhuận còn mỏng.")
     else:
         recommendations.append("Có thể xem đây là phương án khả thi, nhưng nên theo dõi lại giá bán trước khi xuống tiền lớn.")
     if fertilizer_share > 0.5:

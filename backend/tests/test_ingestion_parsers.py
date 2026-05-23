@@ -3,8 +3,9 @@ from datetime import UTC, datetime
 from app.ingestion.sources.banggianongsan import BangGiaNongSanScraper
 from app.ingestion.sources.baohatinh import BaoHaTinhScraper
 from app.ingestion.sources.baonghean import BaoNgheAnScraper
+from app.ingestion.sources.coffee_market import CoffeeMarketScraper
 from app.ingestion.sources.fertilizer_vietnga import VietNgaFertilizerPriceScraper, classify_fertilizer_product
-from app.ingestion.sources.socongthuong_daklak import SoCongThuongDakLakScraper
+from app.ingestion.sources.socongthuong_daklak import SoCongThuongDakLakHistoryScraper, SoCongThuongDakLakScraper
 
 
 def test_banggianongsan_parser_extracts_varieties_provinces_and_markets():
@@ -73,6 +74,43 @@ def test_socongthuong_daklak_parser_extracts_more_varieties():
     assert len(result.observations) == 4
     assert any(item.variety_name == "Sầu Musang King" for item in result.observations)
     assert any(item.variety_name == "Sầu Chuồng Bò" for item in result.observations)
+
+
+def test_socongthuong_history_parser_supports_parenthesized_labels():
+    html = """
+    <html><body>
+    <h1>Bảng giá nông sản ngày 25/02/2026</h1>
+    GIÁ SẦU RIÊNG TRONG NƯỚC
+    Sầu riêng Ri6 (Loại A) 84.000 – 95.000
+    Sầu riêng Thái (Loại B) 140.000 – 145.000
+    Sáu Hữu (Loại A) 160.000 – 166.000
+    GIÁ BƠ TRONG NƯỚC
+    </body></html>
+    """
+    result = SoCongThuongDakLakHistoryScraper().parse(html)
+
+    assert len(result.observations) == 3
+    assert any(row.variety_name == "Sầu Sáp Hữu" for row in result.observations)
+
+
+def test_coffee_parser_only_stores_province_prices_found_in_source():
+    html = """
+    <html><body>
+    <h1>Giá cà phê hôm nay 20/04/2026</h1>
+    Đắk Lắk 95.000 đồng/kg
+    Lâm Đồng 94.500 đồng/kg
+    </body></html>
+    """
+    result = CoffeeMarketScraper().parse(html)
+
+    assert {row.province for row in result.observations} == {"Đắk Lắk", "Lâm Đồng"}
+    assert all(row.variety_name == "Cà phê tổng hợp" for row in result.observations)
+
+
+def test_coffee_parser_does_not_invent_prices_when_source_has_no_values():
+    result = CoffeeMarketScraper().parse("<html><body>Không có bảng giá theo tỉnh.</body></html>")
+
+    assert result.observations == []
 
 
 def test_baohatinh_parser_expands_region_prices_to_provinces():

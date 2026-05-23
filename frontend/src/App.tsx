@@ -1116,7 +1116,7 @@ function RoutedApp() {
       {!notFound && section === "guides" && !guideSlug ? <GuideLibrary guides={guides} /> : null}
       {!notFound && section === "inputPrices" ? <InputPricesPage /> : null}
       {!notFound && section === "roi" ? (
-        <RoiCalculatorPage authToken={authToken} onRequireAuth={() => requestAccountAccess("Vui lòng đăng nhập hoặc đăng ký tài khoản để tính ROI.")} />
+        <RoiCalculatorPage authToken={authToken} onRequireAuth={() => requestAccountAccess("Vui lòng đăng nhập hoặc đăng ký tài khoản để tính lợi nhuận.")} />
       ) : null}
       {!notFound && section === "fertilizer" ? (
         <AdvisoryHub

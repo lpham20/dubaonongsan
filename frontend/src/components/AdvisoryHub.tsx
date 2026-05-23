@@ -322,7 +322,7 @@ function CrossCropPanel() {
                   <strong>{formatVnd(item.estimated_profit_vnd)}</strong>
                 </div>
                 <i style={{ width: `${Math.max(8, (Math.abs(item.estimated_profit_vnd) / maxProfit) * 100)}%` }} />
-                <small>Độ phù hợp {Math.round(item.suitability_score * 100)}% · Điểm ROI {item.roi_score.toFixed(1)}%</small>
+                <small>Độ phù hợp {Math.round(item.suitability_score * 100)}% · Tỷ suất lợi nhuận {item.roi_score.toFixed(1)}%</small>
               </article>
             ))}
           </div>

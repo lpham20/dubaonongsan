@@ -1012,9 +1012,9 @@ def render_static_pages() -> list[tuple[str, str | None]]:
         (
             "roi.html",
             f"{SITE_BASE}/roi-uoc-tinh",
-            "Ước tính ROI nông vụ",
-            "Tính nhanh doanh thu, chi phí phân bón, lợi nhuận ròng và ROI dự kiến theo giá vật tư đầu vào mới nhất.",
-            "Ước tính ROI nông vụ",
+            "Ước tính lợi nhuận nông vụ",
+            "Tính nhanh doanh thu, chi phí phân bón và lợi nhuận dự kiến theo giá vật tư đầu vào mới nhất.",
+            "Ước tính lợi nhuận nông vụ",
         ),
     ]
     for filename, canonical, title, desc, heading in landing_pages:

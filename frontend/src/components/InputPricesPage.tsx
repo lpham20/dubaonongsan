@@ -34,7 +34,7 @@ export function InputPricesPage() {
             <span>Dự báo 30 ngày</span>
           </div>
           <p>
-            Trang này chỉ hiển thị giá phân bón thế giới và dự báo xu hướng tăng giảm. Giá đại lý địa phương không còn được trộn vào chart để tránh nhiễu logic.
+            Theo dõi biến động và dự báo giá hàng hóa phân bón thế giới.
           </p>
         </div>
 

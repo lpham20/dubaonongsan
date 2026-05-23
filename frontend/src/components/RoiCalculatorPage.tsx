@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, Calculator, Database, RefreshCw, X } from "./icons";
 import { SeoHead } from "./SeoHead";
 import {
@@ -19,9 +19,10 @@ const cropOptions: { value: CropType; label: string; defaultYield: number; defau
 type InputMode = "simple" | "detail";
 
 type FertilizerLineState = {
+  id: string;
   name: string;
-  kg_per_ha: number;
-  price_vnd_per_kg: number;
+  kg_per_ha: string;
+  price_vnd_per_kg: string;
 };
 
 function formatVnd(value: number | null | undefined) {
@@ -31,6 +32,11 @@ function formatVnd(value: number | null | undefined) {
 
 function formatNumber(value: number) {
   return value.toLocaleString("vi-VN", { maximumFractionDigits: 2 });
+}
+
+function positiveNumber(value: string) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : 0;
 }
 
 export function RoiCalculatorPage({
@@ -54,9 +60,10 @@ export function RoiCalculatorPage({
   const [otherCost, setOtherCost] = useState(5_000_000);
   const [laborCost, setLaborCost] = useState(8_000_000);
   const [fertilizerLines, setFertilizerLines] = useState<FertilizerLineState[]>([
-    { name: "Urê", kg_per_ha: 250, price_vnd_per_kg: 11_800 },
-    { name: "Kali", kg_per_ha: 180, price_vnd_per_kg: 15_200 }
+    { id: "line-1", name: "Urê", kg_per_ha: "250", price_vnd_per_kg: "11800" },
+    { id: "line-2", name: "Kali", kg_per_ha: "180", price_vnd_per_kg: "15200" }
   ]);
+  const nextLineId = useRef(2);
   const [save, setSave] = useState(false);
   const [result, setResult] = useState<RoiCalculateResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -80,7 +87,7 @@ export function RoiCalculatorPage({
   }, [crop]);
 
   const detailTotal = useMemo(
-    () => fertilizerLines.reduce((sum, line) => sum + Math.max(0, line.kg_per_ha) * Math.max(0, line.price_vnd_per_kg), 0),
+    () => fertilizerLines.reduce((sum, line) => sum + positiveNumber(line.kg_per_ha) * positiveNumber(line.price_vnd_per_kg), 0),
     [fertilizerLines]
   );
   const activeFertilizerCost = mode === "simple" ? fertilizerTotal : detailTotal;
@@ -91,7 +98,10 @@ export function RoiCalculatorPage({
   }
 
   function addLine() {
-    setFertilizerLines((current) => [...current, { name: "NPK", kg_per_ha: 100, price_vnd_per_kg: 13_500 }].slice(0, 20));
+    setFertilizerLines((current) => {
+      nextLineId.current += 1;
+      return [...current, { id: `line-${nextLineId.current}`, name: "NPK", kg_per_ha: "100", price_vnd_per_kg: "13500" }].slice(0, 20);
+    });
   }
 
   function removeLine(index: number) {
@@ -118,8 +128,12 @@ export function RoiCalculatorPage({
         fertilizer_lines:
           mode === "detail"
             ? fertilizerLines
-                .filter((line) => line.name.trim() && line.kg_per_ha > 0 && line.price_vnd_per_kg > 0)
-                .map((line) => ({ name: line.name.trim(), kg_per_ha: line.kg_per_ha, price_vnd_per_kg: line.price_vnd_per_kg }))
+                .filter((line) => line.name.trim() && positiveNumber(line.kg_per_ha) > 0 && positiveNumber(line.price_vnd_per_kg) > 0)
+                .map((line) => ({
+                  name: line.name.trim(),
+                  kg_per_ha: positiveNumber(line.kg_per_ha),
+                  price_vnd_per_kg: positiveNumber(line.price_vnd_per_kg)
+                }))
             : [],
         other_input_cost_vnd_per_ha: otherCost,
         labor_cost_vnd_per_ha: laborCost,
@@ -128,7 +142,7 @@ export function RoiCalculatorPage({
       controller.signal
     )
       .then(setResult)
-      .catch((err) => setError(err instanceof Error ? err.message : "Không tính được ROI."))
+      .catch((err) => setError(err instanceof Error ? err.message : "Không tính được lợi nhuận."))
       .finally(() => setLoading(false));
   }
 
@@ -136,8 +150,8 @@ export function RoiCalculatorPage({
     <section className={embedded ? "roi-page advisory-embedded-roi" : "roi-page input-prices-page"}>
       {!embedded ? (
         <SeoHead
-          title="Ước tính ROI nông vụ"
-          description="Tính ROI 3 kịch bản, dùng chi phí phân bón do nông dân tự nhập và forecast giá nông sản."
+          title="Ước tính lợi nhuận nông vụ"
+          description="Ước tính lợi nhuận theo chi phí phân bón do nông dân tự nhập và dự báo giá nông sản."
           canonical="/roi-uoc-tinh"
         />
       ) : null}
@@ -146,15 +160,15 @@ export function RoiCalculatorPage({
         <div>
           <span className="input-price-kicker">
             <Calculator size={18} />
-            ROI 3 kịch bản
+            Lợi nhuận nông vụ
           </span>
-          <h1>Ước tính ROI nông vụ</h1>
+          <h1>Ước tính lợi nhuận nông vụ</h1>
           <p>
             <span>Nhập chi phí phân bón thực tế của anh.</span>
-            <span>Hệ thống kết hợp forecast giá nông sản để dựng Bi quan / Kỳ vọng / Lạc quan.</span>
+            <span>Hệ thống kết hợp dự báo giá nông sản để ước tính lợi nhuận cơ sở.</span>
           </p>
         </div>
-        <div className="input-price-head-metrics" aria-label="Tổng quan ROI">
+        <div className="input-price-head-metrics" aria-label="Tổng quan lợi nhuận">
           <div>
             <span>Phân bón/ha</span>
             <strong>{formatVnd(activeFertilizerCost)}</strong>
@@ -252,7 +266,7 @@ export function RoiCalculatorPage({
           ) : (
             <div className="roi-lines detail">
               {fertilizerLines.map((line, index) => (
-                <div className="roi-line detail" key={`${line.name}-${index}`}>
+                <div className="roi-line detail" key={line.id}>
                   <input aria-label="Tên phân bón" value={line.name} onChange={(event) => updateLine(index, { name: event.target.value })} />
                   <input
                     aria-label="kg mỗi ha"
@@ -260,7 +274,7 @@ export function RoiCalculatorPage({
                     min="0"
                     step="10"
                     value={line.kg_per_ha}
-                    onChange={(event) => updateLine(index, { kg_per_ha: Number(event.target.value) })}
+                    onChange={(event) => updateLine(index, { kg_per_ha: event.target.value })}
                   />
                   <input
                     aria-label="giá mỗi kg"
@@ -268,9 +282,9 @@ export function RoiCalculatorPage({
                     min="0"
                     step="100"
                     value={line.price_vnd_per_kg}
-                    onChange={(event) => updateLine(index, { price_vnd_per_kg: Number(event.target.value) })}
+                    onChange={(event) => updateLine(index, { price_vnd_per_kg: event.target.value })}
                   />
-                  <strong>{formatVnd(line.kg_per_ha * line.price_vnd_per_kg)}</strong>
+                  <strong>{formatVnd(positiveNumber(line.kg_per_ha) * positiveNumber(line.price_vnd_per_kg))}</strong>
                   <button type="button" onClick={() => removeLine(index)} aria-label="Xóa dòng phân bón" title="Xóa dòng phân bón">
                     <X size={16} />
                   </button>
@@ -292,7 +306,7 @@ export function RoiCalculatorPage({
           </label>
           <button type="button" className="roi-primary-button" onClick={submit} disabled={loading}>
             <RefreshCw size={16} />
-            {loading ? "Đang tính" : "Tính ROI"}
+            {loading ? "Đang tính" : "Tính lợi nhuận"}
           </button>
         </div>
       </section>
@@ -314,13 +328,13 @@ export function RoiCalculatorPage({
             </div>
             <div className="input-stat">
               <Calculator size={18} />
-              <span>ROI kỳ vọng</span>
+              <span>Tỷ suất lợi nhuận</span>
               <strong className={result.roi_pct >= 0 ? "positive" : "negative"}>{result.roi_pct.toFixed(1)}%</strong>
               <small>Độ tin cậy {Math.round(result.confidence_score * 100)}%</small>
             </div>
           </section>
 
-          <section className="roi-scenario-grid" aria-label="3 kịch bản ROI">
+          <section className="roi-scenario-grid" aria-label="Kịch bản lợi nhuận cơ sở">
             {result.scenarios.map((scenario) => (
               <article key={scenario.scenario} className={`roi-scenario-card ${scenario.scenario}`}>
                 <span>{scenario.label_vi}</span>
@@ -334,7 +348,7 @@ export function RoiCalculatorPage({
           <section className="input-price-panel input-price-data">
             <div className="input-section-heading compact">
               <h2>Khuyến nghị</h2>
-              <p>Rút ra từ chi phí phân bón, forecast giá nông sản và biên an toàn ROI</p>
+              <p>Rút ra từ chi phí phân bón, dự báo giá nông sản và biên an toàn lợi nhuận</p>
             </div>
             <div className="roi-recommendations">
               {result.recommendations_vi.map((note) => (
@@ -345,16 +359,16 @@ export function RoiCalculatorPage({
 
           <section className="input-price-panel input-price-data">
             <div className="input-section-heading compact">
-              <h2>Độ nhạy ROI</h2>
+              <h2>Độ nhạy lợi nhuận</h2>
               <p>Giá bán ±10%, giá phân bón ±15%</p>
             </div>
             <div className="input-table-wrap">
-              <table aria-label="Bảng độ nhạy ROI">
+              <table aria-label="Bảng độ nhạy lợi nhuận">
                 <thead>
                   <tr>
                     <th>Giá bán</th>
                     <th>Giá phân</th>
-                    <th>ROI</th>
+                    <th>Tỷ suất</th>
                     <th>Lợi nhuận ròng</th>
                   </tr>
                 </thead>

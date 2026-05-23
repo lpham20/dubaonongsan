@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import desc, select
 from sqlalchemy.orm import Session
 
+from app.core.admin_units import is_crop_province, is_production_region, normalize_province_name
 from app.core.config import get_settings
 from app.db import get_db
 from app.ml_engine.lstm_forecaster import ForecastConfig, LSTMForecaster
@@ -248,16 +249,23 @@ def _latest_prices_by_region(db: Session, crop: str) -> list[dict]:
             latest[row.region_id] = row
         if len(latest) >= 30:
             break
-    return [
-        {
-            "region_id": row.region_id,
-            "region": row.region.region_name if row.region else f"Vùng {row.region_id}",
-            "province": row.region.province if row.region else "",
-            "display_name": (row.region.province or row.region.region_name) if row.region else f"Vùng {row.region_id}",
-            "price": float(row.max_price_vnd),
-        }
-        for row in latest.values()
-    ]
+    production_prices = []
+    for row in latest.values():
+        if row.region is None or not is_production_region(row.region.region_name, row.region.province):
+            continue
+        province = normalize_province_name(row.region.province)
+        if not province or not is_crop_province(crop, province):
+            continue
+        production_prices.append(
+            {
+                "region_id": row.region_id,
+                "region": row.region.region_name,
+                "province": province,
+                "display_name": province,
+                "price": float(row.max_price_vnd),
+            }
+        )
+    return production_prices
 
 
 def _estimated_distance_km(source: str | None, target: str | None) -> float:

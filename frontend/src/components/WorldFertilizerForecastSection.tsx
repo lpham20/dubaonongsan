@@ -57,6 +57,16 @@ function formatDate(value: string | null | undefined) {
   return new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(value));
 }
 
+function formatCheckedAt(value: string | null | undefined) {
+  if (!value) return "đang chờ";
+  return new Intl.DateTimeFormat("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    day: "2-digit",
+    month: "2-digit"
+  }).format(new Date(value));
+}
+
 function formatPct(value: number | null | undefined) {
   if (typeof value !== "number" || !Number.isFinite(value)) return "0,00%";
   const sign = value > 0 ? "+" : "";
@@ -73,22 +83,20 @@ type WorldChartRow = {
   dateKey: string;
   price?: number;
   forecast?: number;
-  forecastBand?: [number, number];
   dailyPct?: number;
   cumulativePct?: number;
 };
 
 const chartColors = {
-  grid: "#e8ece6",
-  axisLine: "#aab2a3",
-  tickFill: "#6b746a",
-  priceLine: "#0d4b38",
-  priceArea: "#0d4b38",
-  forecastLine: "#c4690b",
-  bandFill: "#c4690b",
-  tooltipBg: "#fffdf8",
-  tooltipText: "#1f2a23",
-  tooltipBorder: "#d3d8d0"
+  grid: "rgba(255,255,255,0.06)",
+  axisLine: "rgba(255,255,255,0.18)",
+  tickFill: "#b6c0bb",
+  priceLine: "#4ade80",
+  priceArea: "#4ade80",
+  forecastLine: "#fbbf24",
+  tooltipBg: "#181f1d",
+  tooltipText: "#ecf2ee",
+  tooltipBorder: "rgba(255,255,255,0.18)"
 };
 
 const toDateKey = (value: string) => {
@@ -123,7 +131,6 @@ function buildWorldChartRows(history: WorldFertilizerHistoryPoint[], forecast: W
     ...forecast.map((point) => ({
       dateKey: toDateKey(point.date),
       forecast: point.price_usd_per_tonne,
-      forecastBand: [point.price_low_usd_per_tonne, point.price_high_usd_per_tonne] as [number, number],
       dailyPct: point.daily_pct_change,
       cumulativePct: point.cumulative_pct_from_today
     }))
@@ -160,11 +167,6 @@ function WorldForecastTooltip({
           Dự báo <b>{formatUsd(row.forecast)}</b>
         </span>
       ) : null}
-      {row.forecastBand ? (
-        <span>
-          Dải thấp/cao <b>{formatUsd(row.forecastBand[0])} - {formatUsd(row.forecastBand[1])}</b>
-        </span>
-      ) : null}
       {typeof row.dailyPct === "number" ? (
         <span>
           Đổi mỗi ngày <b className={trendClass(row.dailyPct)}>{formatPct(row.dailyPct)}</b>
@@ -182,13 +184,11 @@ function WorldForecastTooltip({
 function WorldForecastChart({
   rows,
   showPrice,
-  showForecast,
-  showBand
+  showForecast
 }: {
   rows: WorldChartRow[];
   showPrice: boolean;
   showForecast: boolean;
-  showBand: boolean;
 }) {
   const [zoomRange, setZoomRange] = useState<{ startIndex: number; endIndex: number } | null>(null);
   const fullEndIndex = Math.max(rows.length - 1, 0);
@@ -214,7 +214,8 @@ function WorldForecastChart({
       return;
     }
     const center = (activeZoomRange.startIndex + activeZoomRange.endIndex) / 2;
-    const startIndex = Math.round(center - nextLength / 2);
+    const maxStart = Math.max(0, rows.length - nextLength);
+    const startIndex = Math.min(maxStart, Math.max(0, Math.round(center - (nextLength - 1) / 2)));
     updateZoom({ startIndex, endIndex: startIndex + nextLength - 1 });
   }
 
@@ -227,18 +228,15 @@ function WorldForecastChart({
       <div className="section-heading">
         <div>
           <h2>Diễn biến giá và dự báo</h2>
-          <p>Giá lịch sử, đường dự báo 30 ngày và biên thấp/cao theo USD/tấn.</p>
+          <p>Giá lịch sử và đường dự báo 30 ngày theo USD/tấn.</p>
         </div>
         <div className="chart-heading-tools">
           <div className="legend">
             <span className="legend-price" style={{ "--legend-color": chartColors.priceLine } as CSSProperties}>
-              Giá lịch sử
+              Giá
             </span>
             <span className="legend-forecast" style={{ "--legend-color": chartColors.forecastLine } as CSSProperties}>
               Dự báo
-            </span>
-            <span className="legend-band" style={{ "--legend-color": chartColors.bandFill } as CSSProperties}>
-              Dải thấp/cao
             </span>
           </div>
           {canZoom ? (
@@ -261,12 +259,8 @@ function WorldForecastChart({
           <ComposedChart data={rows} margin={{ top: 18, right: 16, left: 4, bottom: canZoom ? 4 : 0 }}>
             <defs>
               <linearGradient id="worldPriceArea" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor={chartColors.priceArea} stopOpacity={0.18} />
+                <stop offset="0%" stopColor={chartColors.priceArea} stopOpacity={0.3} />
                 <stop offset="100%" stopColor={chartColors.priceArea} stopOpacity={0.02} />
-              </linearGradient>
-              <linearGradient id="worldForecastBand" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor={chartColors.bandFill} stopOpacity={0.14} />
-                <stop offset="100%" stopColor={chartColors.bandFill} stopOpacity={0.04} />
               </linearGradient>
             </defs>
             <CartesianGrid stroke={chartColors.grid} strokeDasharray="0" vertical={false} />
@@ -290,17 +284,6 @@ function WorldForecastChart({
               cursor={{ stroke: chartColors.axisLine, strokeDasharray: "3 4" }}
               content={<WorldForecastTooltip />}
             />
-            {showBand ? (
-              <Area
-                type="monotone"
-                dataKey="forecastBand"
-                stroke="none"
-                fill="url(#worldForecastBand)"
-                connectNulls
-                isAnimationActive={false}
-                name="Dải thấp/cao"
-              />
-            ) : null}
             {showPrice ? (
               <Area
                 type="monotone"
@@ -338,7 +321,7 @@ function WorldForecastChart({
                 endIndex={activeZoomRange.endIndex}
                 tickFormatter={formatShortDate}
                 stroke={chartColors.priceLine}
-                fill="#f4f6f3"
+                fill="#111918"
                 gap={8}
                 onChange={(nextRange) => {
                   if (typeof nextRange?.startIndex === "number" && typeof nextRange.endIndex === "number") {
@@ -360,7 +343,7 @@ export function WorldFertilizerForecastSection() {
   const [forecast, setForecast] = useState<WorldFertilizerForecast | null>(null);
   const [history, setHistory] = useState<WorldFertilizerHistoryPoint[]>([]);
   const [historyDays, setHistoryDays] = useState(365);
-  const [layers, setLayers] = useState({ price: true, forecast: true, band: true });
+  const [layers, setLayers] = useState({ price: true, forecast: true });
   const [expandedWeek, setExpandedWeek] = useState(1);
   const [refreshNonce, setRefreshNonce] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -408,12 +391,6 @@ export function WorldFertilizerForecastSection() {
   const dayThirty = forecast?.forecast_daily.at(-1);
   const summaryTrend = dayThirty?.cumulative_pct_from_today ?? 0;
   const SummaryIcon = summaryTrend > 0.5 ? TrendingUp : summaryTrend < -0.5 ? TrendingDown : Activity;
-  const qualityText =
-    forecast?.source_mode === "monthly_official_anchor"
-      ? "Neo chính thức theo tháng"
-      : forecast?.source_mode === "daily_signal"
-        ? "Có tín hiệu daily"
-        : "Đang đánh giá nguồn";
   const chartRows = useMemo(
     () => buildWorldChartRows(history, forecast?.forecast_daily ?? []),
     [forecast?.forecast_daily, history]
@@ -428,7 +405,7 @@ export function WorldFertilizerForecastSection() {
             Phân bón thế giới
           </span>
           <h2>Xu hướng giá phân bón thế giới</h2>
-          <p>Dự báo Urê, DAP, Kali theo USD/tấn để người dùng tự áp tỷ lệ vào giá đại lý địa phương.</p>
+          <p>Giá tham chiếu và dự báo 30 ngày theo USD/tấn.</p>
         </div>
         <button type="button" className="world-refresh-button" onClick={() => setRefreshNonce((value) => value + 1)} disabled={loading}>
           <RefreshCw size={16} />
@@ -457,7 +434,7 @@ export function WorldFertilizerForecastSection() {
           <span>{selectedCommodity.name_vi}</span>
           <strong>{formatUsd(forecast?.base_price_usd_per_tonne)}</strong>
           <small>
-            Cập nhật {formatDate(forecast?.base_observed_at)} - {forecast?.quote_type ?? selectedCommodity.quote_type}
+            Giá nguồn {formatDate(forecast?.base_observed_at)} · quét lúc {formatCheckedAt(forecast?.data_quality?.last_source_check_at)}
           </small>
         </div>
         <div className={`world-trend-card ${trendClass(daySeven?.cumulative_pct_from_today ?? 0)}`}>
@@ -470,28 +447,26 @@ export function WorldFertilizerForecastSection() {
           <SummaryIcon size={18} />
           <span>30 ngày tới</span>
           <strong>{formatPct(summaryTrend)}</strong>
-          <small>{qualityText}</small>
+          <small>So với giá tham chiếu hôm nay</small>
         </div>
-      </div>
-
-      <div className="world-note">
-        <strong>Giá thế giới, không phải giá đại lý địa phương.</strong>
-        <p>{forecast?.note_vi ?? selectedCommodity.driver_note_vi}</p>
-        {forecast?.data_quality?.reason_vi ? <p>{forecast.data_quality.reason_vi}</p> : null}
       </div>
 
       <section className="chart-toolbar world-chart-toolbar" aria-label="Điều khiển biểu đồ phân bón thế giới">
         <div className="chart-control-group">
-          <span className="control-label">Khoảng lịch sử</span>
+          <span className="control-label">Khoảng thời gian</span>
           <div className="segmented">
-            {[90, 180, 365].map((value) => (
+            {[
+              { days: 90, label: "90 ngày" },
+              { days: 365, label: "1 năm" },
+              { days: 1095, label: "3 năm" }
+            ].map((period) => (
               <button
-                key={value}
+                key={period.days}
                 type="button"
-                className={historyDays === value ? "active" : ""}
-                onClick={() => setHistoryDays(value)}
+                className={historyDays === period.days ? "active" : ""}
+                onClick={() => setHistoryDays(period.days)}
               >
-                {value} ngày
+                {period.label}
               </button>
             ))}
           </div>
@@ -504,9 +479,6 @@ export function WorldFertilizerForecastSection() {
             </button>
             <button type="button" className={layers.forecast ? "active" : ""} onClick={() => setLayers((value) => ({ ...value, forecast: !value.forecast }))}>
               Dự báo
-            </button>
-            <button type="button" className={layers.band ? "active" : ""} onClick={() => setLayers((value) => ({ ...value, band: !value.band }))}>
-              Dải
             </button>
           </div>
         </div>
@@ -524,7 +496,6 @@ export function WorldFertilizerForecastSection() {
             rows={chartRows}
             showPrice={layers.price}
             showForecast={layers.forecast}
-            showBand={layers.band}
           />
 
           <div className="world-weekly-table">

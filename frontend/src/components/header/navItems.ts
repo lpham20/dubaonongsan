@@ -19,7 +19,7 @@ export const fertilizerMenuItems: {
   { value: "fertilizer", label: "Khuyến nghị bón phân", Icon: Calculator },
   { value: "fertilizerMethodology", label: "Giải thích logic cách tính", Icon: BookOpenCheck, hierarchy: "child" },
   { value: "yieldFeedback", label: "Báo cáo năng suất", Icon: ClipboardCheck, hierarchy: "child" },
-  { value: "roi", label: "ROI nông vụ", Icon: Calculator, groupLabel: "Công cụ quyết định" },
+  { value: "roi", label: "Lợi nhuận nông vụ", Icon: Calculator, groupLabel: "Công cụ quyết định" },
   { value: "sellingTime", label: "Thời điểm bán", Icon: BarChart3 },
   { value: "arbitrage", label: "Chênh lệch vùng", Icon: GitCompareArrows },
   { value: "crossCrop", label: "So sánh cây trồng", Icon: Sprout }

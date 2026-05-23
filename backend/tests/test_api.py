@@ -303,6 +303,48 @@ def test_world_fertilizer_forecast_returns_daily_percent_changes(client):
     assert invalid.status_code == 400
 
 
+def test_arbitrage_excludes_aggregate_and_wholesale_regions(client):
+    from sqlalchemy import select
+
+    from app.models import DailyMarketPrice, DurianVariety, ProductionRegion
+
+    with SessionLocal() as db:
+        variety = db.scalar(select(DurianVariety).where(DurianVariety.crop_type == "sau_rieng"))
+        aggregate = db.scalar(select(ProductionRegion).where(ProductionRegion.region_name == "Thị trường Việt Nam"))
+        if aggregate is None:
+            aggregate = ProductionRegion(region_name="Thị trường Việt Nam", province=None, export_code=None, risk_level_index=0)
+            db.add(aggregate)
+            db.flush()
+        allowed = {
+            row.province: row
+            for row in db.scalars(select(ProductionRegion).where(ProductionRegion.province.in_(["Cần Thơ", "Đồng Nai"]))).all()
+        }
+        assert variety is not None and {"Cần Thơ", "Đồng Nai"} <= set(allowed)
+        prices = [(aggregate, 30_000), (allowed["Cần Thơ"], 55_000), (allowed["Đồng Nai"], 95_000)]
+        observed_at = datetime.now(UTC) + timedelta(minutes=2)
+        for region, price in prices:
+            db.add(
+                DailyMarketPrice(
+                    record_timestamp=observed_at,
+                    variety_id=variety.variety_id,
+                    crop_type="sau_rieng",
+                    quality_grade="pytest",
+                    region_id=region.region_id,
+                    exchange_source="pytest-arbitrage",
+                    min_price_vnd=price,
+                    max_price_vnd=price,
+                )
+            )
+        db.commit()
+
+    response = client.get("/api/v1/advisory/arbitrage?crop_type=sau_rieng&min_net_spread_pct=0&max_distance_km=3000")
+    assert response.status_code == 200
+    labels = {item["from_region"] for item in response.json()["items"]} | {item["to_region"] for item in response.json()["items"]}
+    assert "Thị trường Việt Nam" not in labels
+    assert "Chợ đầu mối TP.HCM" not in labels
+    assert labels <= {"Cần Thơ", "Vĩnh Long", "Đồng Tháp", "Đắk Lắk", "Lâm Đồng", "Đồng Nai", "Tây Ninh"}
+
+
 def test_sensor_webhook_persists_payload(client):
     response = client.post(
         "/api/v1/sensors/maturity-telemetry",
@@ -343,7 +385,7 @@ def test_roi_calculate_and_save(client):
     assert payload["scenario_id"]
     assert payload["fertilizer_cost_vnd_per_ha"] > 0
     assert payload["total_revenue_vnd"] > payload["fertilizer_cost_vnd_per_ha"]
-    assert len(payload["scenarios"]) == 3
+    assert len(payload["scenarios"]) == 1
     assert len(payload["sensitivity"]["matrix"]) == 9
 
 
@@ -366,7 +408,7 @@ def test_advisory_roi_simple_mode(client):
     payload = response.json()
     assert payload["fertilizer_input_mode"] == "simple"
     assert payload["fertilizer_cost_vnd_per_ha"] == 38000000
-    assert len(payload["scenarios"]) == 3
+    assert len(payload["scenarios"]) == 1
     assert payload["recommendations_vi"]
 
 

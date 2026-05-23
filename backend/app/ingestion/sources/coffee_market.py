@@ -28,29 +28,6 @@ PROVINCE_REGION = {
     "Điện Biên": "Tây Bắc",
 }
 
-BASE_PRICES = {
-    "Đắk Lắk": 136000.0,
-    "Đắk Nông": 136000.0,
-    "Lâm Đồng": 134500.0,
-    "Gia Lai": 135000.0,
-    "Kon Tum": 134800.0,
-    "Bình Phước": 135000.0,
-    "Đồng Nai": 134800.0,
-    "Bà Rịa - Vũng Tàu": 135500.0,
-    "Sơn La": 132000.0,
-    "Điện Biên": 131500.0,
-}
-
-VARIETY_MULTIPLIERS = {
-    "Robusta nhân xô": 1.0,
-    "Robusta loại 1": 1.04,
-    "Arabica Catimor": 1.18,
-    "Culi Robusta": 1.1,
-    "Moka Cầu Đất": 1.75,
-    "Cà phê tổng hợp": 1.02,
-}
-
-
 class CoffeeMarketScraper:
     source = SOURCE
     source_url = ", ".join(URLS)
@@ -71,31 +48,26 @@ class CoffeeMarketScraper:
         folded = strip_accents(text).lower()
         observed_at = parse_article_date(text, default=datetime(2026, 3, 24, tzinfo=UTC))
         province_prices = self._extract_province_prices(folded)
-        if len(province_prices) < 4:
-            province_prices = BASE_PRICES
 
         observations: list[PriceObservation] = []
         for province, base_price in province_prices.items():
             region = PROVINCE_REGION.get(province)
             if not region:
                 continue
-            for variety, multiplier in VARIETY_MULTIPLIERS.items():
-                max_price = round(base_price * multiplier, 2)
-                min_price = round(max_price * 0.965, 2)
-                observations.append(
-                    PriceObservation(
-                        observed_at=observed_at,
-                        variety_name=variety,
-                        quality_grade="Loại A",
-                        region_name=region,
-                        province=province,
-                        source=self.source,
-                        source_url=url,
-                        min_price_vnd=min_price,
-                        max_price_vnd=max_price,
-                        crop_type="ca_phe",
-                    )
+            observations.append(
+                PriceObservation(
+                    observed_at=observed_at,
+                    variety_name="Cà phê tổng hợp",
+                    quality_grade="Tổng hợp",
+                    region_name=region,
+                    province=province,
+                    source=self.source,
+                    source_url=url,
+                    min_price_vnd=base_price,
+                    max_price_vnd=base_price,
+                    crop_type="ca_phe",
                 )
+            )
         return ScrapeResult(self.source, url, observations)
 
     @staticmethod
@@ -104,7 +76,7 @@ class CoffeeMarketScraper:
 
     @staticmethod
     def _extract_province_prices(folded_text: str) -> dict[str, float]:
-        prices = dict(BASE_PRICES)
+        prices: dict[str, float] = {}
         aliases = {
             "Đắk Lắk": ["dak lak", "daklak"],
             "Đắk Nông": ["dak nong", "daknong"],

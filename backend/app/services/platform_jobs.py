@@ -364,28 +364,18 @@ class JobScheduler:
         cls._scheduler.add_job(
             cls._run_with_session,
             "cron",
-            hour="9,17",
+            hour=8,
             minute=30,
-            args=["world_fertilizer"],
-            id="scrape_world_fertilizer_twice_daily",
+            args=["world_fertilizer_official"],
+            id="scrape_worldbank_daily",
             replace_existing=True,
         )
         cls._scheduler.add_job(
             cls._run_with_session,
             "date",
             run_date=datetime.now(SCHEDULER_TZ) + timedelta(seconds=25),
-            args=["world_fertilizer"],
-            id="scrape_world_fertilizer_boot_catchup",
-            replace_existing=True,
-        )
-        cls._scheduler.add_job(
-            cls._run_with_session,
-            "cron",
-            day=10,
-            hour=8,
-            minute=0,
-            args=["world_fertilizer_monthly"],
-            id="scrape_worldbank_monthly",
+            args=["world_fertilizer_official"],
+            id="scrape_worldbank_boot_catchup",
             replace_existing=True,
         )
         cls._scheduler.add_job(
@@ -471,7 +461,7 @@ class JobScheduler:
                     service.run_input_price_scrape()
                 elif job == "world_fertilizer":
                     service.run_world_fertilizer_scrape()
-                elif job == "world_fertilizer_monthly":
+                elif job == "world_fertilizer_official":
                     service.run_world_fertilizer_scrape(source="worldbank_pinksheet")
                 elif job == "news":
                     service.run_news_scrape()
