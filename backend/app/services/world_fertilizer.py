@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from app.core.cache import invalidate_cache
 from app.ingestion.world_fertilizer_records import WorldFertilizerObservation, WorldFertilizerScrapeResult
 from app.ingestion.world_fertilizer_registry import build_world_fertilizer_scrapers
+from app.ml_engine.world_fertilizer_lstm import predict_world_fertilizer_lstm
 from app.models import ScrapeRun, WorldCommodityPrice
 
 
@@ -23,7 +24,7 @@ WORLD_FERTILIZER_RETRY_DELAY_SECONDS = 2.0
 WORLD_FERTILIZER_MODEL_KIND = "world-fertilizer-anchor-ewma-ar1-v2"
 MONTHLY_ANCHOR_TREND_CAP = 0.06
 DAILY_SIGNAL_DAILY_TREND_CAP = 0.01
-DAILY_SIGNAL_SOURCES = {"tradingeconomics_urea_daily"}
+DAILY_SIGNAL_SOURCES = {"tradingeconomics_urea_daily", "yahoo_urea_futures_daily", "investing_urea_current"}
 DAILY_SIGNAL_MIN_POINTS = 14
 
 COMMODITIES = {
@@ -273,18 +274,12 @@ class WorldFertilizerForecastService:
 
         base_observed_at, base_price, quote_type = points[-1]
         quality = _data_quality(selected_rows, points, source_mode)
-        checked_source = (
-            "world-fertilizer:tradingeconomics_urea_daily"
+        checked_sources = (
+            [f"world-fertilizer:{source}" for source in DAILY_SIGNAL_SOURCES]
             if source_mode == "daily_signal"
-            else "world-fertilizer:worldbank_pinksheet"
+            else ["world-fertilizer:worldbank_pinksheet"]
         )
-        latest_official_check = self.db.scalar(
-            select(ScrapeRun)
-            .where(ScrapeRun.source == checked_source)
-            .where(ScrapeRun.status.in_(["thành công", "trùng lặp"]))
-            .order_by(desc(ScrapeRun.finished_at))
-            .limit(1)
-        )
+        latest_official_check = _latest_successful_scrape_run(self.db, checked_sources)
         quality["last_source_check_at"] = (
             latest_official_check.finished_at.isoformat()
             if latest_official_check and latest_official_check.finished_at
@@ -305,28 +300,37 @@ class WorldFertilizerForecastService:
             daily_trend = monthly_trend / 30
             daily_volatility = min(max(raw_volatility / math.sqrt(30), 0.0012), 0.012)
         today = datetime.now(UTC).date()
-        base_seasonal = _seasonal_multiplier(base_observed_at)
-        forecast_daily: list[dict] = []
-        previous_price = base_price
-        for day in range(1, horizon + 1):
-            forecast_date = today + timedelta(days=day)
-            seasonal_ratio = _seasonal_multiplier(datetime(forecast_date.year, forecast_date.month, 1, tzinfo=UTC)) / base_seasonal
-            trend_ratio = math.exp(daily_trend * day)
-            price = max(base_price * 0.2, base_price * trend_ratio * seasonal_ratio)
-            spread = max(0.01, daily_volatility * math.sqrt(day)) * 1.45
-            low = max(0, price * (1 - spread))
-            high = price * (1 + spread)
-            forecast_daily.append(
-                {
-                    "date": forecast_date.isoformat(),
-                    "price_usd_per_tonne": round(price, 2),
-                    "price_low_usd_per_tonne": round(low, 2),
-                    "price_high_usd_per_tonne": round(high, 2),
-                    "daily_pct_change": round(((price / previous_price) - 1) * 100, 3) if previous_price else 0.0,
-                    "cumulative_pct_from_today": round(((price / base_price) - 1) * 100, 3),
-                }
+        lstm_prediction = predict_world_fertilizer_lstm(commodity_slug, points, horizon_days=horizon) if source_mode == "daily_signal" else None
+        if lstm_prediction is not None:
+            forecast_daily = _forecast_daily_from_prices(
+                predicted_prices=lstm_prediction.prices,
+                base_price=base_price,
+                today=today,
+                daily_volatility=daily_volatility,
             )
-            previous_price = price
+            model_kind = lstm_prediction.model_kind
+            quality["model_artifact"] = {
+                "model_kind": lstm_prediction.model_kind,
+                "source": lstm_prediction.meta.get("source"),
+                "last_observed_at": lstm_prediction.meta.get("last_observed_at"),
+                "validation_mae_usd_per_tonne": lstm_prediction.meta.get("validation_mae_usd_per_tonne"),
+                "validation_rmse_improvement_pct": lstm_prediction.meta.get("validation_rmse_improvement_pct"),
+            }
+        else:
+            base_seasonal = _seasonal_multiplier(base_observed_at)
+            predicted_prices = []
+            for day in range(1, horizon + 1):
+                forecast_date = today + timedelta(days=day)
+                seasonal_ratio = _seasonal_multiplier(datetime(forecast_date.year, forecast_date.month, 1, tzinfo=UTC)) / base_seasonal
+                trend_ratio = math.exp(daily_trend * day)
+                predicted_prices.append(max(base_price * 0.2, base_price * trend_ratio * seasonal_ratio))
+            forecast_daily = _forecast_daily_from_prices(
+                predicted_prices=predicted_prices,
+                base_price=base_price,
+                today=today,
+                daily_volatility=daily_volatility,
+            )
+            model_kind = WORLD_FERTILIZER_MODEL_KIND
 
         return {
             "commodity_slug": commodity_slug,
@@ -334,7 +338,7 @@ class WorldFertilizerForecastService:
             "quote_type": quote_type,
             "base_price_usd_per_tonne": round(base_price, 2),
             "base_observed_at": base_observed_at,
-            "model_kind": WORLD_FERTILIZER_MODEL_KIND,
+            "model_kind": model_kind,
             "history_points": len(points),
             "volatility": round(daily_volatility, 6),
             "volatility_daily": round(daily_volatility, 6),
@@ -342,7 +346,7 @@ class WorldFertilizerForecastService:
             "data_quality": quality,
             "forecast_daily": forecast_daily,
             "forecast_weekly": _weekly_summary(forecast_daily, base_price),
-            "note_vi": _forecast_note(source_mode, base_observed_at),
+            "note_vi": _forecast_note(source_mode, base_observed_at, model_kind),
         }
 
     def health(self, stale_after_days: int = 45) -> dict:
@@ -471,12 +475,61 @@ def _data_quality(rows: list[WorldCommodityPrice], points: list[tuple[datetime, 
     }
 
 
-def _forecast_note(source_mode: str, base_observed_at: datetime) -> str:
+def _latest_successful_scrape_run(db: Session, sources: list[str]) -> ScrapeRun | None:
+    if not sources:
+        return None
+    success_statuses = ("thành công", "trùng lặp", "thanh cong")
+    return db.scalar(
+        select(ScrapeRun)
+        .where(ScrapeRun.source.in_(sources), ScrapeRun.status.in_(success_statuses))
+        .order_by(desc(ScrapeRun.finished_at), desc(ScrapeRun.started_at))
+        .limit(1)
+    )
+
+
+def _forecast_daily_from_prices(
+    *,
+    predicted_prices: list[float],
+    base_price: float,
+    today,
+    daily_volatility: float,
+) -> list[dict]:
+    forecast_daily: list[dict] = []
+    previous_price = base_price
+    band_width = min(max(daily_volatility * 1.35, 0.004), 0.035)
+    for index, raw_price in enumerate(predicted_prices, start=1):
+        price = max(base_price * 0.2, float(raw_price))
+        forecast_date = today + timedelta(days=index)
+        pct_change_vs_today = ((price / base_price) - 1) * 100 if base_price else 0.0
+        pct_change_vs_prev_day = ((price / previous_price) - 1) * 100 if previous_price else 0.0
+        forecast_daily.append(
+            {
+                "day_index": index,
+                "date": forecast_date.isoformat(),
+                "price_usd_per_tonne": round(price, 2),
+                "price_low_usd_per_tonne": round(price * (1 - band_width), 2),
+                "price_high_usd_per_tonne": round(price * (1 + band_width), 2),
+                "daily_pct_change": round(pct_change_vs_prev_day, 3),
+                "cumulative_pct_from_today": round(pct_change_vs_today, 3),
+                "pct_change_vs_today": round(pct_change_vs_today, 3),
+                "pct_change_vs_prev_day": round(pct_change_vs_prev_day, 3),
+            }
+        )
+        previous_price = price
+    return forecast_daily
+
+
+def _forecast_note(source_mode: str, base_observed_at: datetime, model_kind: str) -> str:
     base_date = f"{base_observed_at.day:02d}/{base_observed_at.month:02d}/{base_observed_at.year}"
     common = (
         "Đây là xu hướng giá phân bón thế giới theo USD/tấn, không phải giá bán lẻ nội địa. "
         "Nên dùng tỷ lệ % tăng/giảm làm tín hiệu nền rồi tự áp vào báo giá đại lý, sau khi cộng tỷ giá, vận chuyển và tồn kho."
     )
+    if model_kind.startswith("world-fertilizer-lstm"):
+        return (
+            f"Mô hình LSTM đang dùng chuỗi daily Yahoo/Investing mới nhất đến ngày {base_date} để dự báo 30 ngày. "
+            f"{common}"
+        )
     if source_mode == "monthly_official_anchor":
         return (
             f"Dữ liệu chính thức mới nhất đang neo ở World Bank Pink Sheet ngày {base_date}. "

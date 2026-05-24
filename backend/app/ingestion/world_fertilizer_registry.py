@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from app.ingestion.sources.world_fertilizer_investing import InvestingUreaCurrentScraper
 from app.ingestion.sources.world_fertilizer_tradingeconomics import TradingEconomicsUreaDailyScraper
 from app.ingestion.sources.world_fertilizer_vietnambiz import VietnamBizWorldFertilizerScraper
 from app.ingestion.sources.world_fertilizer_worldbank import WorldBankPinkSheetScraper
@@ -11,6 +12,7 @@ WORLD_FERTILIZER_SCRAPERS = {
     "vietnambiz_world_fertilizer": VietnamBizWorldFertilizerScraper,
     "tradingeconomics_urea_daily": TradingEconomicsUreaDailyScraper,
     "yahoo_urea_futures_daily": YahooUreaFuturesDailyScraper,
+    "investing_urea_current": InvestingUreaCurrentScraper,
 }
 
 DEFAULT_WORLD_FERTILIZER_SOURCES = ("worldbank_pinksheet", "vietnambiz_world_fertilizer")

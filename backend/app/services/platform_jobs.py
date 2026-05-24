@@ -22,7 +22,7 @@ from app.db import SessionLocal
 from app.ingestion.input_price_service import InputPriceIngestionService
 from app.ingestion.service import PriceIngestionService
 from app.ml_engine.evaluator import ForecastEvaluator
-from app.models import DailyMarketPrice, DurianVariety, ModelTrainingRun, PlatformJobRun, ProductionRegion, RecommendationSession, YieldFeedback
+from app.models import DailyMarketPrice, DurianVariety, ModelTrainingRun, PlatformJobRun, ProductionRegion, RecommendationSession, ScrapeRun, YieldFeedback
 from app.services.content_portal import ContentPortalService
 from app.services.crop_catalog import CROP_TYPES, ensure_crop_catalog
 from app.services.auth import cleanup_expired_revoked_tokens
@@ -112,6 +112,45 @@ class PlatformJobService:
                 self.db.rollback()
                 job = self.db.get(PlatformJobRun, job.job_id) or job
                 self._finish_job(job, "lỗi", None, str(exc))
+                raise
+
+    def run_world_fertilizer_current_scrape(self, *, skip_if_success_today: bool = True) -> dict:
+        with job_lock("scrape_world_fertilizer_current"):
+            job = self._start_job("scrape_world_fertilizer_current")
+            settings = get_settings()
+            source = "investing_urea_current"
+            try:
+                if skip_if_success_today and self._has_successful_scrape_today(f"world-fertilizer:{source}"):
+                    summary = {"source": source, "reason": "already_succeeded_today"}
+                    self._finish_job(job, "bỏ qua", summary)
+                    return summary
+
+                from app.services.world_fertilizer import WorldFertilizerIngestionService
+
+                attempts = max(1, settings.world_fertilizer_current_retry_attempts)
+                delay_seconds = max(1, settings.world_fertilizer_current_retry_delay_seconds)
+                scrape_summaries: list[dict] = []
+                for attempt in range(1, attempts + 1):
+                    result = WorldFertilizerIngestionService(self.db).scrape_and_store(source=source)
+                    scrape_summaries.extend(result)
+                    if _world_fertilizer_scrape_succeeded(result):
+                        summary = {"source": source, "attempts": attempt, "scrape": scrape_summaries}
+                        invalidate_cache("world-fertilizer")
+                        invalidate_cache("llm-input-prices")
+                        self._finish_job(job, "thành công", summary)
+                        return summary
+                    if attempt < attempts:
+                        time.sleep(delay_seconds)
+
+                summary = {"source": source, "attempts": attempts, "scrape": scrape_summaries}
+                message = "Investing Urea current scrape failed after configured retries."
+                self._finish_job(job, "lỗi", summary, message)
+                raise RuntimeError(message)
+            except Exception as exc:
+                self.db.rollback()
+                job = self.db.get(PlatformJobRun, job.job_id) or job
+                if job.status not in {"lỗi", "thành công", "bỏ qua"}:
+                    self._finish_job(job, "lỗi", None, str(exc))
                 raise
 
     def run_weather(self) -> dict:
@@ -226,6 +265,25 @@ class PlatformJobService:
     def latest_training_runs(self, limit: int = 10) -> list[ModelTrainingRun]:
         return self.db.scalars(select(ModelTrainingRun).order_by(desc(ModelTrainingRun.started_at)).limit(limit)).all()
 
+    def _has_successful_scrape_today(self, source: str) -> bool:
+        local_midnight = datetime.now(SCHEDULER_TZ).replace(hour=0, minute=0, second=0, microsecond=0)
+        utc_midnight = local_midnight.astimezone(UTC)
+        success_statuses = ("thành công", "trùng lặp", "thanh cong")
+        return (
+            self.db.scalar(
+                select(ScrapeRun)
+                .where(
+                    ScrapeRun.source == source,
+                    ScrapeRun.started_at >= utc_midnight,
+                    ScrapeRun.status.in_(success_statuses),
+                    ScrapeRun.records_found > 0,
+                )
+                .order_by(desc(ScrapeRun.started_at))
+                .limit(1)
+            )
+            is not None
+        )
+
     def _quality_summary(self, crop: str) -> dict:
         service = MarketIntelligenceService(self.db)
         varieties = self.db.scalars(
@@ -310,6 +368,15 @@ class PlatformJobService:
         self.db.commit()
 
 
+def _world_fertilizer_scrape_succeeded(results: list[dict]) -> bool:
+    success_statuses = {"thành công", "trùng lặp", "thanh cong"}
+    for item in results:
+        status = str(item.get("status") or "").strip().lower()
+        if status in success_statuses and int(item.get("records_found") or 0) > 0:
+            return True
+    return False
+
+
 class JobScheduler:
     _scheduler: APBackgroundScheduler | None = None
 
@@ -376,6 +443,24 @@ class JobScheduler:
             run_date=datetime.now(SCHEDULER_TZ) + timedelta(seconds=25),
             args=["world_fertilizer_official"],
             id="scrape_worldbank_boot_catchup",
+            replace_existing=True,
+        )
+        cls._scheduler.add_job(
+            cls._run_with_session,
+            "cron",
+            hour=9,
+            minute=0,
+            args=["world_fertilizer_current"],
+            id="scrape_investing_urea_daily_0900",
+            replace_existing=True,
+        )
+        cls._scheduler.add_job(
+            cls._run_with_session,
+            "cron",
+            hour="9-23",
+            minute="15,30,45",
+            args=["world_fertilizer_current_retry"],
+            id="scrape_investing_urea_retry_until_success",
             replace_existing=True,
         )
         cls._scheduler.add_job(
@@ -463,6 +548,8 @@ class JobScheduler:
                     service.run_world_fertilizer_scrape()
                 elif job == "world_fertilizer_official":
                     service.run_world_fertilizer_scrape(source="worldbank_pinksheet")
+                elif job in {"world_fertilizer_current", "world_fertilizer_current_retry"}:
+                    service.run_world_fertilizer_current_scrape(skip_if_success_today=True)
                 elif job == "news":
                     service.run_news_scrape()
                 elif job == "data_quality":
