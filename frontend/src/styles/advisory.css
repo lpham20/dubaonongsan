@@ -210,10 +210,6 @@
   background: #0c7054;
 }
 
-.roi-hero {
-  margin-bottom: 18px;
-}
-
 .roi-light-page {
   --color-bg: #f7faf8;
   --color-surface: #ffffff;
@@ -230,8 +226,14 @@
 }
 
 .roi-light-page .input-price-hero {
-  padding: 22px 0 24px;
+  grid-template-columns: 1fr;
+  margin-bottom: 18px;
+  padding: 22px var(--space-4) 24px;
   border-bottom: 1px solid var(--color-border);
+}
+
+.roi-light-page .roi-hero-copy {
+  width: min(760px, 100%);
 }
 
 .roi-light-page .input-price-kicker,
@@ -263,7 +265,7 @@
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
-  text-align: right;
+  text-align: left;
 }
 
 .roi-light-page .roi-mode-toggle button {
@@ -288,6 +290,10 @@
 
 .roi-grid > .input-price-panel:last-child > .roi-mode-toggle {
   margin: var(--space-3) var(--space-4) var(--space-3);
+}
+
+.roi-fertilizer-heading h2 {
+  white-space: nowrap;
 }
 
 .roi-form.single {

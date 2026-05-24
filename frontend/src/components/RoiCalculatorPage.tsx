@@ -30,10 +30,6 @@ function formatVnd(value: number | null | undefined) {
   return `${Math.round(value).toLocaleString("vi-VN")} đ`;
 }
 
-function formatNumber(value: number) {
-  return value.toLocaleString("vi-VN", { maximumFractionDigits: 2 });
-}
-
 function formatMoneyInput(value: number | string) {
   const raw = typeof value === "number" ? String(value) : value;
   const digits = raw.replace(/[^\d]/g, "");
@@ -143,11 +139,6 @@ export function RoiCalculatorPage({
     setSellPrice(nextCrop.defaultPrice);
   }, [crop]);
 
-  const detailTotal = useMemo(
-    () => fertilizerLines.reduce((sum, line) => sum + positiveNumber(line.kg_per_ha) * positiveMoneyNumber(line.price_vnd_per_kg), 0),
-    [fertilizerLines]
-  );
-  const activeFertilizerCost = mode === "simple" ? fertilizerTotal : detailTotal;
   const sensitivityRows = useMemo(() => result?.sensitivity.matrix ?? [], [result]);
 
   function updateLine(index: number, patch: Partial<FertilizerLineState>) {
@@ -214,30 +205,12 @@ export function RoiCalculatorPage({
       ) : null}
 
       <header className="input-price-hero roi-hero">
-        <div>
+        <div className="roi-hero-copy">
           <span className="input-price-kicker">
             <Calculator size={18} />
             Lợi nhuận nông vụ
           </span>
           <h1>Ước tính lợi nhuận nông vụ</h1>
-          <p>
-            <span>Nhập chi phí phân bón thực tế của anh.</span>
-            <span>Hệ thống kết hợp dự báo giá nông sản để ước tính lợi nhuận cơ sở.</span>
-          </p>
-        </div>
-        <div className="input-price-head-metrics" aria-label="Tổng quan lợi nhuận">
-          <div>
-            <span>Phân bón/ha</span>
-            <strong>{formatVnd(activeFertilizerCost)}</strong>
-          </div>
-          <div>
-            <span>Năng suất</span>
-            <strong>{formatNumber(yieldTarget)} t/ha</strong>
-          </div>
-          <div>
-            <span>Giá bán</span>
-            <strong>{formatVnd(sellPrice)}</strong>
-          </div>
         </div>
       </header>
 
@@ -294,9 +267,8 @@ export function RoiCalculatorPage({
         </div>
 
         <div className="input-price-panel">
-          <div className="input-section-heading compact">
+          <div className="input-section-heading compact roi-fertilizer-heading">
             <h2>Chi phí phân bón</h2>
-            <p>Ưu tiên số liệu anh tự nhập, không tự lấy giá đại lý nếu anh đã có báo giá thực tế</p>
           </div>
           <div className="roi-mode-toggle" role="tablist" aria-label="Chọn cách nhập chi phí phân bón">
             <button type="button" className={mode === "simple" ? "active" : ""} onClick={() => setMode("simple")}>
