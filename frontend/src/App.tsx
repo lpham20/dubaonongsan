@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { BrowserRouter, useLocation, useNavigate } from "react-router-dom";
 import {
   BookOpenCheck,
@@ -169,8 +169,10 @@ const validSections: MainSection[] = [
 const validCrops: CropType[] = ["sau_rieng", "ca_phe", "ho_tieu", "lua"];
 const validNewsViews: NewsView[] = ["latest", "sau_rieng", "ca_phe", "ho_tieu"];
 const gatedAnalyticsTabs: AnalyticsTab[] = ["analysis", "technical", "data"];
+const gatedAdvisorySections: MainSection[] = ["sellingTime", "arbitrage", "crossCrop"];
 const ANALYTICS_AUTH_MESSAGE = "Vui lòng đăng nhập hoặc đăng ký tài khoản để xem mục này.";
 const FERTILIZER_AUTH_MESSAGE = "Vui lòng đăng nhập hoặc đăng ký tài khoản trước khi tính khuyến nghị.";
+const ADVISORY_AUTH_MESSAGE = "Vui lòng đăng nhập hoặc đăng ký tài khoản để sử dụng công cụ này.";
 const newsViewPaths: Record<PriceNewsView, string> = {
   sau_rieng: "gia-sau-rieng",
   ca_phe: "gia-ca-phe",
@@ -347,6 +349,7 @@ function RoutedApp() {
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authOpen, setAuthOpen] = useState(false);
+  const advisoryGatePromptedRef = useRef<MainSection | null>(null);
   const [jobs, setJobs] = useState<PlatformJobRun[]>([]);
   const [modelRuns, setModelRuns] = useState<ModelTrainingRun[]>([]);
   const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
@@ -579,6 +582,20 @@ function RoutedApp() {
     setPendingAnalyticsTab(null);
   }, [authToken, pendingAnalyticsTab]);
 
+  useEffect(() => {
+    if (authToken) {
+      advisoryGatePromptedRef.current = null;
+      return;
+    }
+    if (!gatedAdvisorySections.includes(section)) {
+      advisoryGatePromptedRef.current = null;
+      return;
+    }
+    if (advisoryGatePromptedRef.current === section) return;
+    advisoryGatePromptedRef.current = section;
+    requestAccountAccess(ADVISORY_AUTH_MESSAGE);
+  }, [authToken, section]);
+
   const latestPrice = useMemo(() => historical.at(-1)?.max_price_vnd ?? 0, [historical]);
   const visibleHistorical = useMemo(() => {
     const validDates = historical
@@ -693,7 +710,7 @@ function RoutedApp() {
     if (!open) {
       setPendingAnalyticsTab(null);
       setError((current) =>
-        current === ANALYTICS_AUTH_MESSAGE || current === FERTILIZER_AUTH_MESSAGE ? null : current
+        current === ANALYTICS_AUTH_MESSAGE || current === FERTILIZER_AUTH_MESSAGE || current === ADVISORY_AUTH_MESSAGE ? null : current
       );
     }
   }
@@ -1128,21 +1145,21 @@ function RoutedApp() {
         <AdvisoryHub
           tool="sellingTime"
           authToken={authToken}
-          onRequireAuth={() => requestAccountAccess(FERTILIZER_AUTH_MESSAGE)}
+          onRequireAuth={() => requestAccountAccess(ADVISORY_AUTH_MESSAGE)}
         />
       ) : null}
       {!notFound && section === "arbitrage" ? (
         <AdvisoryHub
           tool="arbitrage"
           authToken={authToken}
-          onRequireAuth={() => requestAccountAccess(FERTILIZER_AUTH_MESSAGE)}
+          onRequireAuth={() => requestAccountAccess(ADVISORY_AUTH_MESSAGE)}
         />
       ) : null}
       {!notFound && section === "crossCrop" ? (
         <AdvisoryHub
           tool="crossCrop"
           authToken={authToken}
-          onRequireAuth={() => requestAccountAccess(FERTILIZER_AUTH_MESSAGE)}
+          onRequireAuth={() => requestAccountAccess(ADVISORY_AUTH_MESSAGE)}
         />
       ) : null}
       {!notFound && section === "fertilizerMethodology" ? <FertilizerMethodology /> : null}

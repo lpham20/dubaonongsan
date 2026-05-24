@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { BarChart3, Calculator, GitCompareArrows, Leaf, RefreshCw, Sprout } from "./icons";
+import { BarChart3, Calculator, GitCompareArrows, Leaf, RefreshCw, ShieldCheck, Sprout } from "./icons";
 import { FertilizerAdvisor } from "./FertilizerAdvisor";
 import { SeoHead } from "./SeoHead";
 import {
@@ -74,9 +74,14 @@ export function AdvisoryHub({
 }) {
   const meta = toolMeta[tool];
   const ToolIcon = meta.Icon;
+  const locked = tool !== "fertilizer" && !authToken;
+  const activeAuthToken = authToken ?? "";
+  const pageClassName = tool === "fertilizer"
+    ? "advisory-page"
+    : "advisory-page fertilizer-page roi-standard-page advisory-standard-page";
 
   return (
-    <section className="advisory-page">
+    <section className={pageClassName}>
       {tool !== "fertilizer" ? (
         <>
           <SeoHead
@@ -84,25 +89,45 @@ export function AdvisoryHub({
             description={meta.description}
             canonical={meta.canonical}
           />
-          <header className="advisory-hero">
-            <span><ToolIcon size={17} /> {meta.kicker}</span>
-            <h1>{meta.title}</h1>
-            <p>{meta.description}</p>
+          <header className="fertilizer-hero roi-hero advisory-standard-hero">
+            <div className="roi-hero-copy">
+              <span className="input-price-kicker"><ToolIcon size={17} /> {meta.kicker}</span>
+              <h1>{meta.title}</h1>
+              <p>{meta.description}</p>
+            </div>
           </header>
         </>
       ) : null}
 
-      <div className={tool === "fertilizer" ? "advisory-content advisory-content--flush" : "advisory-content"}>
+      <div className={tool === "fertilizer" ? "advisory-content advisory-content--flush" : "advisory-content advisory-standard-content"}>
         {tool === "fertilizer" ? <FertilizerAdvisor authToken={authToken} onRequireAuth={onRequireAuth} /> : null}
-        {tool === "sellingTime" ? <SellingTimePanel /> : null}
-        {tool === "arbitrage" ? <ArbitragePanel /> : null}
-        {tool === "crossCrop" ? <CrossCropPanel /> : null}
+        {locked ? <AdvisoryAccountGate onRequireAuth={onRequireAuth} /> : null}
+        {!locked && tool === "sellingTime" ? <SellingTimePanel authToken={activeAuthToken} /> : null}
+        {!locked && tool === "arbitrage" ? <ArbitragePanel authToken={activeAuthToken} /> : null}
+        {!locked && tool === "crossCrop" ? <CrossCropPanel authToken={activeAuthToken} /> : null}
       </div>
     </section>
   );
 }
 
-function SellingTimePanel() {
+function AdvisoryAccountGate({ onRequireAuth }: { onRequireAuth: () => void }) {
+  return (
+    <section className="input-price-panel roi-panel advisory-auth-gate">
+      <div className="input-section-heading compact roi-section-heading">
+        <h2><ShieldCheck size={18} /> Cần tài khoản để sử dụng</h2>
+        <p>Đăng nhập hoặc đăng ký để mở công cụ tính toán và lưu phiên làm việc.</p>
+      </div>
+      <div className="advisory-auth-gate-body">
+        <p>Các công cụ quyết định dùng dữ liệu dự báo và dữ liệu vùng, nên hệ thống yêu cầu tài khoản để kiểm soát phiên tính và lịch sử sử dụng.</p>
+        <button type="button" className="roi-primary-button" onClick={onRequireAuth}>
+          Đăng nhập / đăng ký
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function SellingTimePanel({ authToken }: { authToken: string }) {
   const [crop, setCrop] = useState<CropType>("sau_rieng");
   const [regions, setRegions] = useState<Region[]>([]);
   const [regionId, setRegionId] = useState<number | "">("");
@@ -126,7 +151,7 @@ function SellingTimePanel() {
   function submit() {
     setLoading(true);
     setError(null);
-    postSellingTime({ crop, region_id: typeof regionId === "number" ? regionId : null, quantity_kg: quantity, storage_cost_vnd_per_kg_per_day: storageCost })
+    postSellingTime(authToken, { crop, region_id: typeof regionId === "number" ? regionId : null, quantity_kg: quantity, storage_cost_vnd_per_kg_per_day: storageCost })
       .then(setResult)
       .catch((err) => setError(err instanceof Error ? err.message : "Không tính được thời điểm bán."))
       .finally(() => setLoading(false));
@@ -189,14 +214,14 @@ function SellingTimePanel() {
   );
 }
 
-function ArbitragePanel() {
+function ArbitragePanel({ authToken }: { authToken: string }) {
   const [crop, setCrop] = useState<CropType | "">("");
   const [result, setResult] = useState<ArbitrageResponse | null>(null);
   const [loading, setLoading] = useState(false);
 
   function load() {
     setLoading(true);
-    fetchArbitrage({ crop })
+    fetchArbitrage(authToken, { crop })
       .then(setResult)
       .finally(() => setLoading(false));
   }
@@ -251,7 +276,7 @@ function ArbitragePanel() {
   );
 }
 
-function CrossCropPanel() {
+function CrossCropPanel({ authToken }: { authToken: string }) {
   const [regions, setRegions] = useState<Region[]>([]);
   const [regionId, setRegionId] = useState<number | "">("");
   const [area, setArea] = useState(1);
@@ -281,7 +306,7 @@ function CrossCropPanel() {
     if (!regionId) return;
     setLoading(true);
     setError(null);
-    postCrossCommodity({ region_id: Number(regionId), area_hectares: area })
+    postCrossCommodity(authToken, { region_id: Number(regionId), area_hectares: area })
       .then(setResult)
       .catch((err) => setError(err instanceof Error ? err.message : "Không so sánh được cây trồng."))
       .finally(() => setLoading(false));

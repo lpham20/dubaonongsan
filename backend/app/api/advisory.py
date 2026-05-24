@@ -13,7 +13,8 @@ from app.core.admin_units import is_crop_province, is_production_region, normali
 from app.core.config import get_settings
 from app.db import get_db
 from app.ml_engine.lstm_forecaster import ForecastConfig, LSTMForecaster
-from app.models import DailyMarketPrice, ProductionRegion
+from app.models import AppUser, DailyMarketPrice, ProductionRegion
+from app.services.auth import current_user
 from app.services.data_loader import DataLoader
 
 
@@ -68,7 +69,11 @@ class CrossCommodityRequest(BaseModel):
 
 
 @router.post("/selling-time")
-def selling_time(payload: SellingTimeRequest, db: Session = Depends(get_db)) -> dict:
+def selling_time(
+    payload: SellingTimeRequest,
+    _: AppUser = Depends(current_user),
+    db: Session = Depends(get_db),
+) -> dict:
     region_id, variety_id = _resolve_series(db, payload.crop, payload.region_id, payload.variety_id)
     forecast = _crop_forecast(db, payload.crop, region_id, variety_id)
     if not forecast["points"]:
@@ -115,6 +120,7 @@ def arbitrage(
     crop_type: Crop | None = Query(default=None),
     min_net_spread_pct: float = Query(default=3, ge=0, le=100),
     max_distance_km: float = Query(default=700, ge=10, le=3000),
+    _: AppUser = Depends(current_user),
     db: Session = Depends(get_db),
 ) -> dict:
     crops = [crop_type] if crop_type else list(CROP_LABELS)
@@ -161,7 +167,11 @@ def arbitrage(
 
 
 @router.post("/cross-commodity")
-def cross_commodity(payload: CrossCommodityRequest, db: Session = Depends(get_db)) -> dict:
+def cross_commodity(
+    payload: CrossCommodityRequest,
+    _: AppUser = Depends(current_user),
+    db: Session = Depends(get_db),
+) -> dict:
     region = db.get(ProductionRegion, payload.region_id)
     if not region:
         raise HTTPException(status_code=404, detail="Không tìm thấy vùng sản xuất.")

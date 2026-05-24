@@ -825,8 +825,12 @@ export type SellingTimeResponse = {
   rationale_vi: string;
 };
 
-export function postSellingTime(payload: SellingTimeRequest, signal?: AbortSignal) {
-  return getJsonWithBody<SellingTimeResponse>("/api/v1/advisory/selling-time", payload, signal);
+export function postSellingTime(token: string, payload: SellingTimeRequest, signal?: AbortSignal) {
+  return authJson<SellingTimeResponse>("/api/v1/advisory/selling-time", token, {
+    method: "POST",
+    signal,
+    body: JSON.stringify(payload)
+  });
 }
 
 export type ArbitrageResponse = {
@@ -847,13 +851,13 @@ export type ArbitrageResponse = {
   assumption_vi: string;
 };
 
-export function fetchArbitrage(options: { crop?: CropType | ""; minNetSpreadPct?: number; maxDistanceKm?: number; signal?: AbortSignal } = {}) {
+export function fetchArbitrage(token: string, options: { crop?: CropType | ""; minNetSpreadPct?: number; maxDistanceKm?: number; signal?: AbortSignal } = {}) {
   const params = new URLSearchParams({
     min_net_spread_pct: String(options.minNetSpreadPct ?? 3),
     max_distance_km: String(options.maxDistanceKm ?? 700)
   });
   if (options.crop) params.set("crop_type", options.crop);
-  return getJson<ArbitrageResponse>(`/api/v1/advisory/arbitrage?${params.toString()}`, options.signal);
+  return authJson<ArbitrageResponse>(`/api/v1/advisory/arbitrage?${params.toString()}`, token, { signal: options.signal });
 }
 
 export type CrossCommodityResponse = {
@@ -873,8 +877,12 @@ export type CrossCommodityResponse = {
   disclaimer_vi: string;
 };
 
-export function postCrossCommodity(payload: { region_id: number; current_crop?: CropType | null; area_hectares: number }, signal?: AbortSignal) {
-  return getJsonWithBody<CrossCommodityResponse>("/api/v1/advisory/cross-commodity", payload, signal);
+export function postCrossCommodity(token: string, payload: { region_id: number; current_crop?: CropType | null; area_hectares: number }, signal?: AbortSignal) {
+  return authJson<CrossCommodityResponse>("/api/v1/advisory/cross-commodity", token, {
+    method: "POST",
+    signal,
+    body: JSON.stringify(payload)
+  });
 }
 
 export function fetchDataQuality(crop: CropType, regionId: number, varietyId: number, signal?: AbortSignal) {

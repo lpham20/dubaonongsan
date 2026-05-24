@@ -351,12 +351,28 @@ def test_arbitrage_excludes_aggregate_and_wholesale_regions(client):
             )
         db.commit()
 
-    response = client.get("/api/v1/advisory/arbitrage?crop_type=sau_rieng&min_net_spread_pct=0&max_distance_km=3000")
+    token, _user_id = create_user_token("arbitrage@example.com")
+    response = client.get(
+        "/api/v1/advisory/arbitrage?crop_type=sau_rieng&min_net_spread_pct=0&max_distance_km=3000",
+        headers={"Authorization": f"Bearer {token}"},
+    )
     assert response.status_code == 200
     labels = {item["from_region"] for item in response.json()["items"]} | {item["to_region"] for item in response.json()["items"]}
     assert "Thị trường Việt Nam" not in labels
     assert "Chợ đầu mối TP.HCM" not in labels
     assert labels <= {"Cần Thơ", "Vĩnh Long", "Đồng Tháp", "Đắk Lắk", "Lâm Đồng", "Đồng Nai", "Tây Ninh"}
+
+
+def test_advisory_decision_tools_require_login(client):
+    assert client.get("/api/v1/advisory/arbitrage").status_code == 401
+    assert client.post(
+        "/api/v1/advisory/selling-time",
+        json={"crop": "sau_rieng", "quantity_kg": 1000},
+    ).status_code == 401
+    assert client.post(
+        "/api/v1/advisory/cross-commodity",
+        json={"region_id": 1, "area_hectares": 1},
+    ).status_code == 401
 
 
 def test_sensor_webhook_persists_payload(client):
