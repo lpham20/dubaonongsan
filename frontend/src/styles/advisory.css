@@ -309,7 +309,8 @@
   color: var(--color-text);
   background: #fff;
   font-family: var(--font-sans);
-  font-size: 14px;
+  font-size: revert;
+  font-weight: var(--fw-regular);
 }
 
 .roi-standard-page .roi-form input:focus,
@@ -322,10 +323,20 @@
 
 .roi-standard-page .roi-money-input {
   font-family: var(--font-sans);
-  font-weight: var(--fw-bold);
-  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-regular);
+  font-variant-numeric: normal;
   letter-spacing: 0;
   text-align: left;
+}
+
+@media (max-width: 860px) {
+  .roi-standard-page .roi-form input,
+  .roi-standard-page .roi-form select,
+  .roi-standard-page .roi-line input {
+    min-height: 48px;
+    height: 48px;
+    font-size: 15px;
+  }
 }
 
 .roi-standard-page .roi-mode-toggle button {
