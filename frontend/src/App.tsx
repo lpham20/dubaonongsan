@@ -836,7 +836,7 @@ function RoutedApp() {
   const appShellClassName =
     section === "analytics"
       ? `app-shell forecast-shell crop-${crop} analytics-tab-${analyticsTab}`
-      : section === "inputPrices" || section === "roi"
+      : section === "inputPrices"
         ? "app-shell forecast-shell input-prices-shell"
       : "app-shell";
 

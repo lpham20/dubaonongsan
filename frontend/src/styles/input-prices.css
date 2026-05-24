@@ -553,6 +553,10 @@
   gap: var(--space-4);
 }
 
+.world-fertilizer-page .world-fertilizer-hero {
+  grid-template-columns: 1fr;
+}
+
 .world-fertilizer-page .world-fertilizer-hero .quote-side {
   grid-template-columns: repeat(3, minmax(118px, 1fr));
 }
@@ -703,6 +707,23 @@
 
 .world-chart-toolbar {
   padding-inline: var(--space-4);
+  justify-content: flex-end;
+}
+
+.world-chart-toolbar .chart-control-group:first-child {
+  margin-left: auto;
+}
+
+.app-shell.forecast-shell .world-chart-toolbar {
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: flex-end !important;
+  gap: var(--space-3) !important;
+  padding: var(--space-3) var(--space-4) !important;
+}
+
+.app-shell.forecast-shell .world-chart-toolbar .chart-control-group:first-child {
+  margin-left: auto;
 }
 
 .world-chart-section {
@@ -1135,6 +1156,15 @@
   .world-refresh-button {
     width: 100%;
     justify-content: center;
+  }
+
+  .app-shell.forecast-shell .world-chart-toolbar {
+    align-items: stretch !important;
+    flex-direction: column;
+  }
+
+  .app-shell.forecast-shell .world-chart-toolbar .chart-control-group:first-child {
+    margin-left: 0;
   }
 
   .world-insight-tabs {

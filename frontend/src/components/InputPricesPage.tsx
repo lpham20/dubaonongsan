@@ -25,32 +25,11 @@ export function InputPricesPage() {
             <PackageCheck size={20} />
             <h1>
               <span className="quote-h1-line1">Giá phân bón thế giới</span>
-              <span className="quote-h1-line2">Dự báo 30 ngày Urê, DAP, Kali</span>
             </h1>
-          </div>
-          <div className="quote-meta">
-            <span>USD/tấn</span>
-            <span>Hàng hóa thế giới</span>
-            <span>Dự báo 30 ngày</span>
           </div>
           <p>
             Theo dõi biến động và dự báo giá hàng hóa phân bón thế giới.
           </p>
-        </div>
-
-        <div className="quote-side">
-          <div className="quote-range">
-            <span>Phạm vi</span>
-            <strong>Thế giới</strong>
-          </div>
-          <div className="quote-range">
-            <span>Đơn vị</span>
-            <strong>USD/tấn</strong>
-          </div>
-          <div className="quote-range">
-            <span>Tín hiệu</span>
-            <strong>%/ngày</strong>
-          </div>
         </div>
       </header>
 

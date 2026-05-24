@@ -195,7 +195,7 @@ export function RoiCalculatorPage({
   }
 
   return (
-    <section className={embedded ? "roi-page advisory-embedded-roi" : "roi-page input-prices-page roi-light-page"}>
+    <section className={embedded ? "roi-page roi-standard-page advisory-embedded-roi" : "roi-page fertilizer-page roi-standard-page"}>
       {!embedded ? (
         <SeoHead
           title="Ước tính lợi nhuận nông vụ"
@@ -204,7 +204,7 @@ export function RoiCalculatorPage({
         />
       ) : null}
 
-      <header className="input-price-hero roi-hero">
+      <header className="fertilizer-hero roi-hero">
         <div className="roi-hero-copy">
           <span className="input-price-kicker">
             <Calculator size={18} />
@@ -216,9 +216,9 @@ export function RoiCalculatorPage({
 
       {error ? <div className="input-price-error">{error}</div> : null}
 
-      <section className="input-price-grid roi-grid">
-        <div className="input-price-panel">
-          <div className="input-section-heading compact">
+      <section className="fertilizer-layout roi-grid">
+        <div className="input-price-panel roi-panel">
+          <div className="input-section-heading compact roi-section-heading">
             <h2>Thông số nông vụ</h2>
             <p>Chi phí theo mỗi hecta</p>
           </div>
@@ -266,8 +266,8 @@ export function RoiCalculatorPage({
           </div>
         </div>
 
-        <div className="input-price-panel">
-          <div className="input-section-heading compact roi-fertilizer-heading">
+        <div className="input-price-panel roi-panel">
+          <div className="input-section-heading compact roi-section-heading roi-fertilizer-heading">
             <h2>Chi phí phân bón</h2>
           </div>
           <div className="roi-mode-toggle" role="tablist" aria-label="Chọn cách nhập chi phí phân bón">
