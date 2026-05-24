@@ -34,9 +34,66 @@ function formatNumber(value: number) {
   return value.toLocaleString("vi-VN", { maximumFractionDigits: 2 });
 }
 
+function formatMoneyInput(value: number | string) {
+  const raw = typeof value === "number" ? String(value) : value;
+  const digits = raw.replace(/[^\d]/g, "");
+  if (!digits) return "";
+  return Number(digits).toLocaleString("en-US");
+}
+
+function parseMoneyInput(value: string) {
+  const digits = value.replace(/[^\d]/g, "");
+  return digits ? Number(digits) : 0;
+}
+
 function positiveNumber(value: string) {
-  const number = Number(value);
+  const number = Number(value.replace(/[^\d.]/g, ""));
   return Number.isFinite(number) && number > 0 ? number : 0;
+}
+
+function positiveMoneyNumber(value: string) {
+  const number = parseMoneyInput(value);
+  return Number.isFinite(number) && number > 0 ? number : 0;
+}
+
+function MoneyInput({
+  value,
+  onValueChange,
+  ariaLabel
+}: {
+  value: number;
+  onValueChange: (value: number) => void;
+  ariaLabel?: string;
+}) {
+  return (
+    <input
+      aria-label={ariaLabel}
+      className="roi-money-input"
+      inputMode="numeric"
+      value={formatMoneyInput(value)}
+      onChange={(event) => onValueChange(parseMoneyInput(event.target.value))}
+    />
+  );
+}
+
+function MoneyTextInput({
+  value,
+  onValueChange,
+  ariaLabel
+}: {
+  value: string;
+  onValueChange: (value: string) => void;
+  ariaLabel?: string;
+}) {
+  return (
+    <input
+      aria-label={ariaLabel}
+      className="roi-money-input"
+      inputMode="numeric"
+      value={formatMoneyInput(value)}
+      onChange={(event) => onValueChange(formatMoneyInput(event.target.value))}
+    />
+  );
 }
 
 export function RoiCalculatorPage({
@@ -87,7 +144,7 @@ export function RoiCalculatorPage({
   }, [crop]);
 
   const detailTotal = useMemo(
-    () => fertilizerLines.reduce((sum, line) => sum + positiveNumber(line.kg_per_ha) * positiveNumber(line.price_vnd_per_kg), 0),
+    () => fertilizerLines.reduce((sum, line) => sum + positiveNumber(line.kg_per_ha) * positiveMoneyNumber(line.price_vnd_per_kg), 0),
     [fertilizerLines]
   );
   const activeFertilizerCost = mode === "simple" ? fertilizerTotal : detailTotal;
@@ -128,11 +185,11 @@ export function RoiCalculatorPage({
         fertilizer_lines:
           mode === "detail"
             ? fertilizerLines
-                .filter((line) => line.name.trim() && positiveNumber(line.kg_per_ha) > 0 && positiveNumber(line.price_vnd_per_kg) > 0)
+                .filter((line) => line.name.trim() && positiveNumber(line.kg_per_ha) > 0 && positiveMoneyNumber(line.price_vnd_per_kg) > 0)
                 .map((line) => ({
                   name: line.name.trim(),
                   kg_per_ha: positiveNumber(line.kg_per_ha),
-                  price_vnd_per_kg: positiveNumber(line.price_vnd_per_kg)
+                  price_vnd_per_kg: positiveMoneyNumber(line.price_vnd_per_kg)
                 }))
             : [],
         other_input_cost_vnd_per_ha: otherCost,
@@ -147,7 +204,7 @@ export function RoiCalculatorPage({
   }
 
   return (
-    <section className={embedded ? "roi-page advisory-embedded-roi" : "roi-page input-prices-page"}>
+    <section className={embedded ? "roi-page advisory-embedded-roi" : "roi-page input-prices-page roi-light-page"}>
       {!embedded ? (
         <SeoHead
           title="Ước tính lợi nhuận nông vụ"
@@ -223,15 +280,15 @@ export function RoiCalculatorPage({
             </label>
             <label>
               Giá bán kỳ vọng (VND/kg)
-              <input type="number" min="100" step="500" value={sellPrice} onChange={(event) => setSellPrice(Number(event.target.value))} />
+              <MoneyInput value={sellPrice} onValueChange={setSellPrice} />
             </label>
             <label>
               Chi phí vật tư khác/ha
-              <input type="number" min="0" step="100000" value={otherCost} onChange={(event) => setOtherCost(Number(event.target.value))} />
+              <MoneyInput value={otherCost} onValueChange={setOtherCost} />
             </label>
             <label>
               Chi phí nhân công/ha
-              <input type="number" min="0" step="100000" value={laborCost} onChange={(event) => setLaborCost(Number(event.target.value))} />
+              <MoneyInput value={laborCost} onValueChange={setLaborCost} />
             </label>
           </div>
         </div>
@@ -254,13 +311,7 @@ export function RoiCalculatorPage({
             <div className="roi-form single">
               <label>
                 Tổng tiền phân bón đã/sẽ chi mỗi ha
-                <input
-                  type="number"
-                  min="0"
-                  step="100000"
-                  value={fertilizerTotal}
-                  onChange={(event) => setFertilizerTotal(Number(event.target.value))}
-                />
+                <MoneyInput value={fertilizerTotal} onValueChange={setFertilizerTotal} />
               </label>
             </div>
           ) : (
@@ -276,15 +327,12 @@ export function RoiCalculatorPage({
                     value={line.kg_per_ha}
                     onChange={(event) => updateLine(index, { kg_per_ha: event.target.value })}
                   />
-                  <input
-                    aria-label="giá mỗi kg"
-                    type="number"
-                    min="0"
-                    step="100"
+                  <MoneyTextInput
+                    ariaLabel="giá mỗi kg"
                     value={line.price_vnd_per_kg}
-                    onChange={(event) => updateLine(index, { price_vnd_per_kg: event.target.value })}
+                    onValueChange={(value) => updateLine(index, { price_vnd_per_kg: value })}
                   />
-                  <strong>{formatVnd(positiveNumber(line.kg_per_ha) * positiveNumber(line.price_vnd_per_kg))}</strong>
+                  <strong>{formatVnd(positiveNumber(line.kg_per_ha) * positiveMoneyNumber(line.price_vnd_per_kg))}</strong>
                   <button type="button" onClick={() => removeLine(index)} aria-label="Xóa dòng phân bón" title="Xóa dòng phân bón">
                     <X size={16} />
                   </button>

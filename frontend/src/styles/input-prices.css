@@ -758,6 +758,172 @@
   color: var(--color-text-muted);
 }
 
+.world-insight-tabs {
+  display: flex;
+  gap: 1px;
+  background: var(--color-border);
+  border-top: 1px solid var(--color-border);
+}
+
+.world-insight-tabs button {
+  flex: 1 1 0;
+  min-height: 46px;
+  border: 0;
+  color: var(--color-text-muted);
+  background: var(--color-surface-muted);
+  font-size: 12px;
+  font-weight: var(--fw-black);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.world-insight-tabs button.active,
+.world-insight-tabs button:hover {
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+.world-insight-panel {
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.world-analysis-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr);
+  gap: var(--space-4);
+}
+
+.world-insight-kicker {
+  display: inline-flex;
+  margin-bottom: var(--space-2);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: var(--fw-black);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.world-insight-panel h3 {
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 22px;
+  font-weight: var(--fw-black);
+  line-height: var(--lh-tight);
+}
+
+.world-insight-panel p {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-soft);
+  line-height: var(--lh-normal);
+}
+
+.world-insight-panel strong.up,
+.world-metric-row strong.up {
+  color: var(--up-bright);
+}
+
+.world-insight-panel strong.down,
+.world-metric-row strong.down {
+  color: var(--down-bright);
+}
+
+.world-driver-list {
+  display: grid;
+  gap: 1px;
+  background: var(--color-border);
+}
+
+.world-driver-list div,
+.world-metric-row {
+  display: grid;
+  gap: 6px;
+  padding: var(--space-3);
+  background: var(--color-surface-muted);
+}
+
+.world-driver-list strong,
+.world-metric-row span {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.world-driver-list span,
+.world-metric-row strong {
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: var(--fw-black);
+  font-variant-numeric: tabular-nums;
+}
+
+.world-technical-panel {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--color-border);
+}
+
+.world-technical-panel p {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: var(--space-3);
+  background: var(--color-surface);
+}
+
+.world-data-table {
+  overflow-x: auto;
+  border-top: 1px solid var(--color-border);
+  -webkit-overflow-scrolling: touch;
+}
+
+.world-data-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+  font-size: 13px;
+}
+
+.world-data-table th,
+.world-data-table td {
+  padding: 10px var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  text-align: left;
+}
+
+.world-data-table th {
+  color: var(--color-text-muted);
+  background: var(--color-surface-muted);
+  font-size: 11px;
+  font-weight: var(--fw-black);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.world-data-table td:nth-child(3),
+.world-data-table td:nth-child(4) {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.world-data-table .up {
+  color: var(--up-bright);
+}
+
+.world-data-table .down {
+  color: var(--down-bright);
+}
+
+.world-data-table .flat {
+  color: var(--color-text-muted);
+}
+
 .world-weekly-table {
   display: grid;
   gap: 1px;
@@ -885,8 +1051,13 @@
   }
 
   .input-stat-grid,
-  .world-summary-grid {
+  .world-summary-grid,
+  .world-technical-panel {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .world-analysis-panel {
+    grid-template-columns: 1fr;
   }
 
   .world-table-head,
@@ -964,6 +1135,14 @@
   .world-refresh-button {
     width: 100%;
     justify-content: center;
+  }
+
+  .world-insight-tabs {
+    flex-direction: column;
+  }
+
+  .world-technical-panel {
+    grid-template-columns: 1fr;
   }
 
   .world-weekly-table {

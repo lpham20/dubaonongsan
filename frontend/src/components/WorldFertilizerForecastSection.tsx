@@ -19,8 +19,7 @@ import {
   type WorldFertilizerCommodityInfo,
   type WorldFertilizerForecast,
   type WorldFertilizerForecastPoint,
-  type WorldFertilizerHistoryPoint,
-  type WorldFertilizerWeeklyPoint
+  type WorldFertilizerHistoryPoint
 } from "../lib/api";
 
 const FALLBACK_COMMODITIES: WorldFertilizerCommodityInfo[] = [
@@ -79,6 +78,24 @@ function trendClass(value: number) {
   return "flat";
 }
 
+function qualityLabel(level: string | null | undefined) {
+  if (level === "high") return "Tốt";
+  if (level === "medium") return "Trung bình";
+  if (level === "low") return "Cần bổ sung";
+  return "Đang cập nhật";
+}
+
+function sourceModeLabel(mode: string | null | undefined) {
+  if (mode === "daily_signal") return "Nguồn daily";
+  if (mode === "monthly_official_anchor") return "Neo monthly";
+  return "Chưa đủ dữ liệu";
+}
+
+function historyWindowLabel(points: WorldFertilizerHistoryPoint[]) {
+  if (!points.length) return "Đang cập nhật";
+  return `${formatDate(points[0].observed_at)} - ${formatDate(points.at(-1)?.observed_at)}`;
+}
+
 type WorldChartRow = {
   dateKey: string;
   price?: number;
@@ -86,6 +103,8 @@ type WorldChartRow = {
   dailyPct?: number;
   cumulativePct?: number;
 };
+
+type WorldInsightTab = "analysis" | "technical" | "data";
 
 const chartColors = {
   grid: "rgba(255,255,255,0.06)",
@@ -344,7 +363,7 @@ export function WorldFertilizerForecastSection() {
   const [history, setHistory] = useState<WorldFertilizerHistoryPoint[]>([]);
   const [historyDays, setHistoryDays] = useState(365);
   const [layers, setLayers] = useState({ price: true, forecast: true });
-  const [expandedWeek, setExpandedWeek] = useState(1);
+  const [insightTab, setInsightTab] = useState<WorldInsightTab>("analysis");
   const [refreshNonce, setRefreshNonce] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -372,7 +391,6 @@ export function WorldFertilizerForecastSection() {
       .then(([forecastPayload, historyPayload]) => {
         setForecast(forecastPayload);
         setHistory(historyPayload);
-        setExpandedWeek(forecastPayload.forecast_weekly[0]?.week_index ?? 1);
       })
       .catch((err) => {
         if (err instanceof DOMException && err.name === "AbortError") return;
@@ -383,10 +401,6 @@ export function WorldFertilizerForecastSection() {
   }, [selected, historyDays, refreshNonce]);
 
   const selectedCommodity = commodities.find((item) => item.commodity_slug === selected) ?? FALLBACK_COMMODITIES[0];
-  const currentWeek = useMemo<WorldFertilizerWeeklyPoint | undefined>(
-    () => forecast?.forecast_weekly.find((week) => week.week_index === expandedWeek) ?? forecast?.forecast_weekly[0],
-    [expandedWeek, forecast]
-  );
   const daySeven = forecast?.forecast_daily[6];
   const dayThirty = forecast?.forecast_daily.at(-1);
   const summaryTrend = dayThirty?.cumulative_pct_from_today ?? 0;
@@ -394,6 +408,34 @@ export function WorldFertilizerForecastSection() {
   const chartRows = useMemo(
     () => buildWorldChartRows(history, forecast?.forecast_daily ?? []),
     [forecast?.forecast_daily, history]
+  );
+  const latestHistory = history.at(-1);
+  const firstHistory = history[0];
+  const historyChangePct =
+    firstHistory && latestHistory && firstHistory.price_usd_per_tonne
+      ? ((latestHistory.price_usd_per_tonne / firstHistory.price_usd_per_tonne) - 1) * 100
+      : 0;
+  const recentForecastRows = forecast?.forecast_daily ?? [];
+  const dataRows = useMemo(
+    () => [
+      ...history.slice(-10).map((point) => ({
+        key: `history-${point.observed_at}`,
+        date: point.observed_at,
+        price: point.price_usd_per_tonne,
+        change: null as number | null,
+        type: "Lịch sử",
+        source: point.source
+      })),
+      ...recentForecastRows.map((point) => ({
+        key: `forecast-${point.date}`,
+        date: point.date,
+        price: point.price_usd_per_tonne,
+        change: point.daily_pct_change,
+        type: "Dự báo",
+        source: forecast?.model_kind ?? "forecast"
+      }))
+    ],
+    [forecast?.model_kind, history, recentForecastRows]
   );
 
   return (
@@ -484,13 +526,13 @@ export function WorldFertilizerForecastSection() {
         </div>
       </section>
 
-      {!loading && forecast?.forecast_weekly.length === 0 ? (
+      {!loading && forecast?.forecast_daily.length === 0 ? (
         <div className="world-forecast-empty">
           Chưa đủ dữ liệu lịch sử để dự báo {selectedCommodity.name_vi}. Crawler đang thu thập thêm dữ liệu từ nguồn công khai.
         </div>
       ) : null}
 
-      {forecast?.forecast_weekly.length ? (
+      {forecast?.forecast_daily.length ? (
         <>
           <WorldForecastChart
             rows={chartRows}
@@ -498,50 +540,105 @@ export function WorldFertilizerForecastSection() {
             showForecast={layers.forecast}
           />
 
-          <div className="world-weekly-table">
-            <div className="world-table-head">
-              <span>Tuần</span>
-              <span>Giá TB</span>
-              <span>Đổi so tuần trước</span>
-              <span>Đổi so hôm nay</span>
-            </div>
-            {forecast.forecast_weekly.map((week) => (
+          <nav className="world-insight-tabs" aria-label="Chi tiết dự báo phân bón thế giới">
+            {[
+              { value: "analysis", label: "Phân tích" },
+              { value: "technical", label: "Kỹ thuật" },
+              { value: "data", label: "Dữ liệu" }
+            ].map((tab) => (
               <button
-                key={week.week_index}
+                key={tab.value}
                 type="button"
-                className={week.week_index === currentWeek?.week_index ? "active" : ""}
-                onClick={() => setExpandedWeek(week.week_index)}
+                className={insightTab === tab.value ? "active" : ""}
+                onClick={() => setInsightTab(tab.value as WorldInsightTab)}
               >
-                <span>{week.week_label_vi}</span>
-                <strong>{formatUsd(week.median_price_usd_per_tonne)}</strong>
-                <em className={trendClass(week.pct_change_vs_prev_week)}>{formatPct(week.pct_change_vs_prev_week)}</em>
-                <em className={trendClass(week.pct_change_vs_today)}>{formatPct(week.pct_change_vs_today)}</em>
+                {tab.label}
               </button>
             ))}
-          </div>
+          </nav>
 
-          <div className="world-daily-table">
-            <table aria-label="Chi tiết dự báo phân bón thế giới theo ngày">
+          {insightTab === "analysis" ? (
+            <section className="world-insight-panel world-analysis-panel">
+              <div>
+                <span className="world-insight-kicker">Nhận định</span>
+                <h3>
+                  {selectedCommodity.name_vi} {summaryTrend >= 0 ? "đang có tín hiệu tăng" : "đang có tín hiệu giảm"} trong khung 30 ngày
+                </h3>
+                <p>
+                  Giá tham chiếu mới nhất là {formatUsd(forecast.base_price_usd_per_tonne)}. Dự báo 7 ngày đang ở mức{" "}
+                  <strong className={trendClass(daySeven?.cumulative_pct_from_today ?? 0)}>
+                    {formatPct(daySeven?.cumulative_pct_from_today)}
+                  </strong>
+                  , còn kịch bản 30 ngày là{" "}
+                  <strong className={trendClass(summaryTrend)}>{formatPct(summaryTrend)}</strong> so với hiện tại.
+                </p>
+                <p>{forecast.note_vi}</p>
+              </div>
+              <div className="world-driver-list">
+                <div>
+                  <strong>Nền dữ liệu</strong>
+                  <span>{sourceModeLabel(forecast.source_mode)}</span>
+                </div>
+                <div>
+                  <strong>Độ tin cậy</strong>
+                  <span>{qualityLabel(forecast.data_quality?.level)}</span>
+                </div>
+                <div>
+                  <strong>Khung lịch sử</strong>
+                  <span>{historyWindowLabel(history)}</span>
+                </div>
+              </div>
+            </section>
+          ) : null}
+
+          {insightTab === "technical" ? (
+            <section className="world-insight-panel world-technical-panel">
+              <div className="world-metric-row">
+                <span>Số điểm lịch sử</span>
+                <strong>{forecast.history_points.toLocaleString("vi-VN")}</strong>
+              </div>
+              <div className="world-metric-row">
+                <span>Biến động/ngày</span>
+                <strong>{formatPct((forecast.volatility_daily ?? forecast.volatility) * 100)}</strong>
+              </div>
+              <div className="world-metric-row">
+                <span>Biến động trong khung đang xem</span>
+                <strong className={trendClass(historyChangePct)}>{formatPct(historyChangePct)}</strong>
+              </div>
+              <div className="world-metric-row">
+                <span>Nguồn gần nhất</span>
+                <strong>{forecast.data_quality?.latest_source ?? "Đang cập nhật"}</strong>
+              </div>
+              <p>{forecast.data_quality?.reason_vi}</p>
+            </section>
+          ) : null}
+
+          {insightTab === "data" ? (
+          <div className="world-data-table">
+            <table aria-label="Bảng dữ liệu phân bón thế giới">
               <thead>
                 <tr>
                   <th>Ngày</th>
-                  <th>Giá dự báo</th>
-                  <th>Đổi mỗi ngày</th>
-                  <th>Đổi cộng dồn</th>
+                  <th>Loại</th>
+                  <th>Giá</th>
+                  <th>Đổi/ngày</th>
+                  <th>Nguồn</th>
                 </tr>
               </thead>
               <tbody>
-                {(currentWeek?.daily_breakdown ?? []).map((point) => (
-                  <tr key={point.date}>
+                {dataRows.map((point) => (
+                  <tr key={point.key}>
                     <td>{formatDate(point.date)}</td>
-                    <td>{formatUsd(point.price_usd_per_tonne)}</td>
-                    <td className={trendClass(point.daily_pct_change)}>{formatPct(point.daily_pct_change)}</td>
-                    <td className={trendClass(point.cumulative_pct_from_today)}>{formatPct(point.cumulative_pct_from_today)}</td>
+                    <td>{point.type}</td>
+                    <td>{formatUsd(point.price)}</td>
+                    <td className={point.change === null ? "flat" : trendClass(point.change)}>{point.change === null ? "-" : formatPct(point.change)}</td>
+                    <td>{point.source}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          ) : null}
         </>
       ) : null}
     </section>

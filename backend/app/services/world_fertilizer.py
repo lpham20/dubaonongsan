@@ -22,7 +22,9 @@ WORLD_FERTILIZER_SCRAPE_ATTEMPTS = 2
 WORLD_FERTILIZER_RETRY_DELAY_SECONDS = 2.0
 WORLD_FERTILIZER_MODEL_KIND = "world-fertilizer-anchor-ewma-ar1-v2"
 MONTHLY_ANCHOR_TREND_CAP = 0.06
-DAILY_SIGNAL_TREND_CAP = 0.12
+DAILY_SIGNAL_DAILY_TREND_CAP = 0.01
+DAILY_SIGNAL_SOURCES = {"tradingeconomics_urea_daily"}
+DAILY_SIGNAL_MIN_POINTS = 14
 
 COMMODITIES = {
     "urea": {
@@ -226,18 +228,25 @@ class WorldFertilizerForecastService:
             .order_by(WorldCommodityPrice.observed_at)
             .limit(2000)
         ).all()
-        return [self._history_row(row) for row in rows]
+        source_mode = _source_mode(rows)
+        return [self._history_row(row) for row in _model_rows(rows, source_mode)]
 
     def forecast(self, commodity_slug: str, horizon_days: int = 30) -> dict:
         self._validate_commodity(commodity_slug)
         horizon = min(max(horizon_days, 1), 60)
-        rows = self.db.scalars(
-            select(WorldCommodityPrice)
-            .where(WorldCommodityPrice.commodity_slug == commodity_slug)
-            .order_by(WorldCommodityPrice.observed_at)
-            .limit(3000)
-        ).all()
-        points = _aggregate_observations(rows)
+        rows = list(
+            reversed(
+                self.db.scalars(
+                    select(WorldCommodityPrice)
+                    .where(WorldCommodityPrice.commodity_slug == commodity_slug)
+                    .order_by(desc(WorldCommodityPrice.observed_at))
+                    .limit(3000)
+                ).all()
+            )
+        )
+        source_mode = _source_mode(rows)
+        selected_rows = _model_rows(rows, source_mode)
+        points = _aggregate_observations(selected_rows)
         meta = COMMODITIES[commodity_slug]
         if len(points) < 14:
             return {
@@ -263,11 +272,15 @@ class WorldFertilizerForecastService:
             }
 
         base_observed_at, base_price, quote_type = points[-1]
-        source_mode = _source_mode(rows)
-        quality = _data_quality(rows, points, source_mode)
+        quality = _data_quality(selected_rows, points, source_mode)
+        checked_source = (
+            "world-fertilizer:tradingeconomics_urea_daily"
+            if source_mode == "daily_signal"
+            else "world-fertilizer:worldbank_pinksheet"
+        )
         latest_official_check = self.db.scalar(
             select(ScrapeRun)
-            .where(ScrapeRun.source == "world-fertilizer:worldbank_pinksheet")
+            .where(ScrapeRun.source == checked_source)
             .where(ScrapeRun.status.in_(["thành công", "trùng lặp"]))
             .order_by(desc(ScrapeRun.finished_at))
             .limit(1)
@@ -282,12 +295,15 @@ class WorldFertilizerForecastService:
             for index in range(1, len(points))
             if points[index - 1][1] > 0 and points[index][1] > 0
         ][-36:]
-        trend_cap = DAILY_SIGNAL_TREND_CAP if source_mode == "daily_signal" else MONTHLY_ANCHOR_TREND_CAP
-        monthly_trend = max(min(_monthly_trend(returns), trend_cap), -trend_cap)
-        daily_trend = monthly_trend / 30
-        monthly_volatility = pstdev(returns) if len(returns) > 1 else 0.0
-        volatility_cap = 0.018 if source_mode == "daily_signal" else 0.012
-        daily_volatility = min(max(monthly_volatility / math.sqrt(30), 0.0012), volatility_cap)
+        raw_trend = _monthly_trend(returns)
+        raw_volatility = pstdev(returns) if len(returns) > 1 else 0.0
+        if source_mode == "daily_signal":
+            daily_trend = max(min(raw_trend, DAILY_SIGNAL_DAILY_TREND_CAP), -DAILY_SIGNAL_DAILY_TREND_CAP)
+            daily_volatility = min(max(raw_volatility, 0.0012), 0.018)
+        else:
+            monthly_trend = max(min(raw_trend, MONTHLY_ANCHOR_TREND_CAP), -MONTHLY_ANCHOR_TREND_CAP)
+            daily_trend = monthly_trend / 30
+            daily_volatility = min(max(raw_volatility / math.sqrt(30), 0.0012), 0.012)
         today = datetime.now(UTC).date()
         base_seasonal = _seasonal_multiplier(base_observed_at)
         forecast_daily: list[dict] = []
@@ -409,13 +425,22 @@ def _aggregate_observations(rows: list[WorldCommodityPrice]) -> list[tuple[datet
 
 def _source_mode(rows: list[WorldCommodityPrice]) -> str:
     recent_cutoff = datetime.now(UTC) - timedelta(days=45)
-    for row in rows:
+    daily_rows = [row for row in rows if row.source in DAILY_SIGNAL_SOURCES]
+    distinct_days = {row.observed_at.date() for row in daily_rows}
+    for row in daily_rows:
         observed_at = row.observed_at
         if observed_at.tzinfo is None:
             observed_at = observed_at.replace(tzinfo=UTC)
-        if observed_at >= recent_cutoff and row.source != "worldbank_pinksheet":
+        if observed_at >= recent_cutoff and len(distinct_days) >= DAILY_SIGNAL_MIN_POINTS:
             return "daily_signal"
     return "monthly_official_anchor"
+
+
+def _model_rows(rows: list[WorldCommodityPrice], source_mode: str) -> list[WorldCommodityPrice]:
+    if source_mode == "daily_signal":
+        return [row for row in rows if row.source in DAILY_SIGNAL_SOURCES]
+    official_rows = [row for row in rows if row.source == "worldbank_pinksheet"]
+    return official_rows or rows
 
 
 def _data_quality(rows: list[WorldCommodityPrice], points: list[tuple[datetime, float, str]], source_mode: str) -> dict:

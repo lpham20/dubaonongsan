@@ -214,6 +214,71 @@
   margin-bottom: 18px;
 }
 
+.roi-light-page {
+  --color-bg: #f7faf8;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f3f7f4;
+  --color-border: #d8e2da;
+  --color-text: #10231b;
+  --color-text-soft: #40534a;
+  --color-text-muted: #66756e;
+  --accent: #0c7054;
+  --up-bright: #0c7054;
+  --down-bright: #b42318;
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+.roi-light-page .input-price-hero {
+  padding: 22px 0 24px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.roi-light-page .input-price-kicker,
+.roi-light-page .input-price-head-metrics,
+.roi-light-page .input-price-panel,
+.roi-light-page .input-stat-grid,
+.roi-light-page .input-stat,
+.roi-light-page .roi-scenario-card {
+  background: var(--color-surface);
+}
+
+.roi-light-page .input-price-kicker {
+  color: var(--accent);
+  background: var(--color-surface-muted);
+}
+
+.roi-light-page .input-section-heading {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.roi-light-page .roi-form input,
+.roi-light-page .roi-form select,
+.roi-light-page .roi-line input {
+  color: var(--color-text);
+  background: #fff;
+}
+
+.roi-light-page .roi-money-input {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  text-align: right;
+}
+
+.roi-light-page .roi-mode-toggle button {
+  background: #fff;
+}
+
+.roi-light-page .roi-mode-toggle button.active {
+  color: #fff;
+  background: var(--accent);
+}
+
+.roi-light-page .input-price-data {
+  background: var(--color-surface);
+}
+
 .roi-mode-toggle {
   display: flex;
   flex-wrap: wrap;

@@ -262,23 +262,36 @@ def test_world_fertilizer_forecast_returns_daily_percent_changes(client):
     from app.models import WorldCommodityPrice
 
     with SessionLocal() as db:
-        for index in range(18):
-            month = (index % 12) + 1
-            year = 2025 + index // 12
+        start = datetime.now(UTC) - timedelta(days=44)
+        for index in range(45):
             db.add(
                 WorldCommodityPrice(
                     commodity_slug="urea",
-                    quote_type="FOB Middle East",
-                    source="pytest",
-                    source_url="https://example.test/worldbank.xlsx",
-                    observed_at=datetime(year, month, 1, tzinfo=UTC),
+                    quote_type="Trading Economics Urea benchmark",
+                    source="tradingeconomics_urea_daily",
+                    source_url="https://example.test/urea-daily",
+                    observed_at=start + timedelta(days=index),
                     price_usd_per_tonne=320 + index * 7,
                     currency="USD",
                     confidence_score=0.95,
-                    raw_json={"series_code": "UREA_TEST"},
+                    raw_json={"symbol": "UREA:COM"},
                     created_at=datetime.now(UTC),
                 )
             )
+        db.add(
+            WorldCommodityPrice(
+                commodity_slug="urea",
+                quote_type="FOB Middle East",
+                source="worldbank_pinksheet",
+                source_url="https://example.test/worldbank.xlsx",
+                observed_at=start + timedelta(days=44),
+                price_usd_per_tonne=999,
+                currency="USD",
+                confidence_score=0.95,
+                raw_json={"series_code": "UREA_TEST"},
+                created_at=datetime.now(UTC),
+            )
+        )
         db.commit()
 
     commodities = client.get("/api/v1/advisory/world-fertilizer/commodities")
@@ -292,6 +305,7 @@ def test_world_fertilizer_forecast_returns_daily_percent_changes(client):
     assert payload["model_kind"] == "world-fertilizer-anchor-ewma-ar1-v2"
     assert payload["source_mode"] == "daily_signal"
     assert payload["data_quality"]["history_points"] >= 14
+    assert payload["base_price_usd_per_tonne"] == 628
     assert len(payload["forecast_daily"]) == 30
     assert len(payload["forecast_weekly"]) >= 4
     first = payload["forecast_daily"][0]
