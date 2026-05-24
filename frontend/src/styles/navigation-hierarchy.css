@@ -21,7 +21,56 @@
 .app-shell > .menu-bar .account-menu {
   position: relative;
   flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
   margin-left: auto;
+}
+
+.menu-bar .language-toggle,
+.app-shell > .menu-bar .language-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 42px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: var(--fw-black);
+  letter-spacing: 0.04em;
+}
+
+.menu-bar .language-toggle:hover,
+.app-shell > .menu-bar .language-toggle:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.language-flag {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.mobile-language-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 48px;
+  min-height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: var(--fw-black);
 }
 
 .menu-bar .dropdown-menu,
@@ -110,5 +159,47 @@
   .menu-bar .dropdown-menu,
   .app-shell > .menu-bar .dropdown-menu {
     min-width: 250px;
+  }
+}
+
+@media (max-width: 860px) {
+  .app-shell > .menu-bar.mobile-menu-bar .mobile-brand-button,
+  .mobile-menu-bar .mobile-brand-button {
+    flex: 1 1 0;
+    max-width: calc(100vw - 164px);
+  }
+
+  .mobile-language-toggle {
+    flex: 0 0 auto;
+    min-width: 44px;
+    min-height: 40px;
+    padding: 0 6px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .menu-bar,
+  .app-shell > .menu-bar {
+    display: grid;
+    grid-template-columns: minmax(210px, 280px) minmax(0, auto) minmax(210px, 280px);
+    justify-content: stretch;
+  }
+
+  .menu-bar .brand-title,
+  .app-shell > .menu-bar .brand-title {
+    justify-self: start;
+  }
+
+  .menu-bar .main-nav,
+  .app-shell > .menu-bar .main-nav {
+    justify-self: center;
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .menu-bar .account-menu,
+  .app-shell > .menu-bar .account-menu {
+    justify-self: end;
+    margin-left: 0;
   }
 }

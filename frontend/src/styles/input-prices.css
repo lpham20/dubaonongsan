@@ -707,23 +707,34 @@
 
 .world-chart-toolbar {
   padding-inline: var(--space-4);
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 .world-chart-toolbar .chart-control-group:first-child {
-  margin-left: auto;
+  margin-left: 0;
 }
 
 .app-shell.forecast-shell .world-chart-toolbar {
   display: flex !important;
-  align-items: flex-end !important;
-  justify-content: flex-end !important;
+  align-items: center !important;
+  justify-content: center !important;
   gap: var(--space-3) !important;
   padding: var(--space-3) var(--space-4) !important;
 }
 
 .app-shell.forecast-shell .world-chart-toolbar .chart-control-group:first-child {
-  margin-left: auto;
+  margin-left: 0;
+}
+
+.world-layer-control {
+  align-items: center;
+  justify-items: center;
+  text-align: center;
+}
+
+.app-shell.forecast-shell .world-layer-control .layer-toggles {
+  width: auto;
+  min-width: 220px;
 }
 
 .world-chart-section {
@@ -895,6 +906,55 @@
   margin: 0;
   padding: var(--space-3);
   background: var(--color-surface);
+}
+
+.world-technical-panel-v2 {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.app-shell.forecast-shell .world-technical-panel-v2 .technical-summary,
+.app-shell.forecast-shell .world-technical-panel-v2 .technical-cards article,
+.app-shell.forecast-shell .world-technical-panel-v2 .technical-levels article {
+  border-color: var(--color-border);
+  background: var(--color-surface-muted);
+}
+
+.app-shell.forecast-shell .world-technical-panel-v2 .technical-summary > span,
+.app-shell.forecast-shell .world-technical-panel-v2 .technical-cards svg {
+  color: var(--up-bright);
+}
+
+.app-shell.forecast-shell .world-technical-panel-v2 .technical-summary h2,
+.app-shell.forecast-shell .world-technical-panel-v2 .technical-cards strong,
+.app-shell.forecast-shell .world-technical-panel-v2 .technical-levels strong {
+  color: var(--color-text);
+}
+
+.app-shell.forecast-shell .world-technical-panel-v2 .technical-summary p,
+.app-shell.forecast-shell .world-technical-panel-v2 .technical-cards small,
+.app-shell.forecast-shell .world-technical-panel-v2 .technical-cards span,
+.app-shell.forecast-shell .world-technical-panel-v2 .technical-levels span {
+  color: var(--color-text-soft);
+}
+
+.world-technical-reason {
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  color: var(--color-text-soft);
+  background: var(--color-surface-muted);
+  font-size: 13px;
+  line-height: var(--lh-normal);
+}
+
+.world-technical-reason strong {
+  color: var(--color-text);
 }
 
 .world-data-table {

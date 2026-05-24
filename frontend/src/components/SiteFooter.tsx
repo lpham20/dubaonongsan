@@ -1,4 +1,5 @@
 import { FormEvent, useState } from "react";
+import { useLanguage } from "../contexts/LanguageContext";
 import { subscribeNewsletter } from "../lib/api";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 
@@ -11,7 +12,60 @@ type Props = {
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const footerCopy = {
+  vi: {
+    legalLabel: "Thông tin pháp lý",
+    brand: "Dự báo nông sản",
+    legal:
+      "Đây là trang blog cá nhân lưu trữ và phân tích thông tin nông nghiệp nhằm mục đích chia sẻ kiến thức, hỗ trợ bà con nông dân phi lợi nhuận, không phải là cơ quan báo chí.",
+    quickLinks: "Liên kết nhanh",
+    marketNews: "Tin tức thị trường",
+    guides: "Quy trình kỹ thuật",
+    agriForecast: "Dự báo giá nông sản",
+    coffeeForecast: "Dự báo giá cà phê",
+    pepperForecast: "Dự báo giá hồ tiêu",
+    fertilizerForecast: "Giá phân bón thế giới",
+    fertilizerAdvisory: "Khuyến nghị bón phân",
+    yieldFeedback: "Báo cáo năng suất",
+    subscribeLabel: "Đăng ký nhận tin",
+    subscribeTitle: "Nhận tin giá nông sản",
+    subscribeText: "Đừng bỏ lỡ biến động giá nông sản ngày mai. Đăng ký ngay!",
+    invalidEmail: "Vui lòng nhập đúng định dạng email.",
+    success: "Đã ghi nhận email đăng ký.",
+    error: "Chưa thể đăng ký lúc này. Vui lòng thử lại sau.",
+    sending: "Đang gửi",
+    submit: "Đăng ký",
+    rights: "© 2026 Dự báo nông sản. All rights reserved."
+  },
+  en: {
+    legalLabel: "Legal information",
+    brand: "Agri Price Forecast",
+    legal:
+      "This is a personal knowledge site that stores and analyzes agricultural information for educational, non-profit farmer support. It is not a press agency.",
+    quickLinks: "Quick links",
+    marketNews: "Market news",
+    guides: "Technical guides",
+    agriForecast: "Agricultural price forecast",
+    coffeeForecast: "Coffee price forecast",
+    pepperForecast: "Pepper price forecast",
+    fertilizerForecast: "World fertilizer prices",
+    fertilizerAdvisory: "Fertilizer recommendation",
+    yieldFeedback: "Yield feedback",
+    subscribeLabel: "Subscribe",
+    subscribeTitle: "Agricultural price updates",
+    subscribeText: "Get notified before important agricultural price moves. Subscribe now.",
+    invalidEmail: "Please enter a valid email address.",
+    success: "Your subscription email has been recorded.",
+    error: "Subscription is not available right now. Please try again later.",
+    sending: "Sending",
+    submit: "Subscribe",
+    rights: "© 2026 Agri Price Forecast. All rights reserved."
+  }
+} as const;
+
 export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics, onOpenInputPrices }: Props) {
+  const { language } = useLanguage();
+  const copy = footerCopy[language];
   const isMobile = useMediaQuery("(max-width: 860px)");
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
@@ -23,7 +77,7 @@ export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics, onOpenIn
 
     if (!emailPattern.test(normalizedEmail)) {
       setStatus("error");
-      setMessage("Vui lòng nhập đúng định dạng email.");
+      setMessage(copy.invalidEmail);
       return;
     }
 
@@ -34,26 +88,28 @@ export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics, onOpenIn
       await subscribeNewsletter(normalizedEmail);
       setStatus("success");
       setEmail("");
-      setMessage("Đã ghi nhận email đăng ký.");
+      setMessage(copy.success);
     } catch {
       setStatus("error");
-      setMessage("Chưa thể đăng ký lúc này. Vui lòng thử lại sau.");
+      setMessage(copy.error);
     }
   }
 
   return (
     <footer className="site-footer">
       <div className="site-footer-grid">
-        <details className="footer-brand-block site-footer-section" aria-label="Thông tin pháp lý" open={!isMobile}>
-          <summary><span className="footer-section-title">Dự báo nông sản</span></summary>
-          <p>
-            Đây là trang blog cá nhân lưu trữ và phân tích thông tin nông nghiệp nhằm mục đích chia sẻ kiến thức, hỗ trợ bà con nông dân phi lợi nhuận, không phải là cơ quan báo chí.
-          </p>
+        <details className="footer-brand-block site-footer-section" aria-label={copy.legalLabel} open={!isMobile}>
+          <summary>
+            <span className="footer-section-title">{copy.brand}</span>
+          </summary>
+          <p>{copy.legal}</p>
           <a href="mailto:dubaonongsan@gmail.com">dubaonongsan@gmail.com</a>
         </details>
 
-        <details className="footer-links site-footer-section" aria-label="Liên kết nhanh" open={!isMobile}>
-          <summary><span className="footer-section-title">Liên kết nhanh</span></summary>
+        <details className="footer-links site-footer-section" aria-label={copy.quickLinks} open={!isMobile}>
+          <summary>
+            <span className="footer-section-title">{copy.quickLinks}</span>
+          </summary>
           <a
             href="/tin-tuc"
             onClick={(event) => {
@@ -61,7 +117,7 @@ export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics, onOpenIn
               onOpenNews();
             }}
           >
-            Tin tức thị trường
+            {copy.marketNews}
           </a>
           <a
             href="/huong-dan"
@@ -70,7 +126,7 @@ export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics, onOpenIn
               onOpenGuides();
             }}
           >
-            Quy trình kỹ thuật
+            {copy.guides}
           </a>
           <a
             href="/du-bao-gia/sau_rieng"
@@ -79,10 +135,10 @@ export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics, onOpenIn
               onOpenAnalytics();
             }}
           >
-            Dự báo giá nông sản
+            {copy.agriForecast}
           </a>
-          <a href="/du-bao-gia/ca_phe">Dự báo giá cà phê</a>
-          <a href="/du-bao-gia/ho_tieu">Dự báo giá hồ tiêu</a>
+          <a href="/du-bao-gia/ca_phe">{copy.coffeeForecast}</a>
+          <a href="/du-bao-gia/ho_tieu">{copy.pepperForecast}</a>
           <a
             href="/du-bao-gia/phan-bon"
             onClick={(event) => {
@@ -90,15 +146,17 @@ export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics, onOpenIn
               onOpenInputPrices();
             }}
           >
-            Giá phân bón thế giới
+            {copy.fertilizerForecast}
           </a>
-          <a href="/khuyen-nghi-bon-phan">Khuyến nghị bón phân</a>
-          <a href="/bao-cao-nang-suat">Báo cáo năng suất</a>
+          <a href="/khuyen-nghi-bon-phan">{copy.fertilizerAdvisory}</a>
+          <a href="/bao-cao-nang-suat">{copy.yieldFeedback}</a>
         </details>
 
-        <details className="footer-subscribe site-footer-section" aria-label="Đăng ký nhận tin" open={!isMobile}>
-          <summary><span className="footer-section-title">Nhận tin giá nông sản</span></summary>
-          <p>Đừng bỏ lỡ biến động giá nông sản ngày mai. Đăng ký ngay!</p>
+        <details className="footer-subscribe site-footer-section" aria-label={copy.subscribeLabel} open={!isMobile}>
+          <summary>
+            <span className="footer-section-title">{copy.subscribeTitle}</span>
+          </summary>
+          <p>{copy.subscribeText}</p>
           <form onSubmit={handleSubmit} noValidate>
             <label htmlFor="footer-email">Email</label>
             <div>
@@ -122,15 +180,19 @@ export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics, onOpenIn
                 aria-describedby={message ? "footer-email-feedback" : undefined}
               />
               <button type="submit" disabled={status === "submitting"}>
-                {status === "submitting" ? "Đang gửi" : "Đăng ký"}
+                {status === "submitting" ? copy.sending : copy.submit}
               </button>
             </div>
           </form>
-          {message ? <p id="footer-email-feedback" className={`footer-form-message ${status}`}>{message}</p> : null}
+          {message ? (
+            <p id="footer-email-feedback" className={`footer-form-message ${status}`}>
+              {message}
+            </p>
+          ) : null}
         </details>
       </div>
 
-      <div className="footer-bottom">© 2026 Dự báo nông sản. All rights reserved.</div>
+      <div className="footer-bottom">{copy.rights}</div>
     </footer>
   );
 }

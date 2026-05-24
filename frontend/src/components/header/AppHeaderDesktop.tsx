@@ -1,5 +1,13 @@
 import { useEffect, useRef } from "react";
 import { BookOpenCheck, ChevronDown, Leaf, PackageCheck, UserRound } from "../icons";
+import {
+  cropItemLabel,
+  fertilizerGroupLabel,
+  fertilizerItemLabel,
+  headerText,
+  mainSectionLabel,
+  newsItemLabel
+} from "./i18n";
 import { fertilizerMenuItems, newsMenuItems } from "./navItems";
 import type { HeaderSurfaceProps } from "./types";
 
@@ -15,6 +23,8 @@ export function AppHeaderDesktop({
   authOpen,
   authContent,
   userLabel,
+  language,
+  onLanguageToggle,
   onSectionChange,
   onAnalyticsOpen,
   onNewsOpen,
@@ -25,6 +35,7 @@ export function AppHeaderDesktop({
 }: HeaderSurfaceProps) {
   const headerRef = useRef<HTMLElement | null>(null);
   const fertilizerActive = fertilizerMenuItems.some((item) => item.value === section);
+  const copy = headerText[language];
 
   const closeMenus = () => {
     onNewsMenuOpenChange(false);
@@ -60,10 +71,10 @@ export function AppHeaderDesktop({
   }, [onAuthOpenChange]);
 
   return (
-    <nav ref={headerRef} className="menu-bar" aria-label="Điều hướng chính">
+    <nav ref={headerRef} className="menu-bar" aria-label={copy.mainNavigation}>
       <div className="brand-title">
         <Leaf size={21} />
-        <span>DỰ BÁO NÔNG SẢN</span>
+        <span>{copy.brand}</span>
       </div>
       <div className="main-nav">
         {mainSections.map((item) => {
@@ -73,7 +84,7 @@ export function AppHeaderDesktop({
               <div key={item.value} className={["nav-dropdown", section === "news" ? "active" : "", newsMenuOpen ? "open" : ""].filter(Boolean).join(" ")}>
                 <button type="button" className="tab-button" aria-expanded={newsMenuOpen} onClick={() => toggleDesktopMenu("news")}>
                   <Icon size={16} />
-                  {item.label}
+                  {mainSectionLabel(language, item.value, item.label)}
                   <ChevronDown size={14} />
                 </button>
                 <div className="dropdown-menu">
@@ -90,7 +101,7 @@ export function AppHeaderDesktop({
                         }}
                       >
                         <NewsIcon size={16} />
-                        {newsItem.label}
+                        {newsItemLabel(language, newsItem.value)}
                       </button>
                     );
                   })}
@@ -111,7 +122,7 @@ export function AppHeaderDesktop({
               >
                 <button type="button" className="tab-button" aria-expanded={fertilizerMenuOpen} onClick={() => toggleDesktopMenu("fertilizer")}>
                   <Icon size={16} />
-                  {item.label}
+                  {mainSectionLabel(language, item.value, item.label)}
                   <ChevronDown size={14} />
                 </button>
                 <div className="dropdown-menu">
@@ -119,7 +130,7 @@ export function AppHeaderDesktop({
                     const FertilizerIcon = fertilizerItem.Icon;
                     return (
                       <div key={fertilizerItem.value} className="dropdown-menu-row">
-                        {fertilizerItem.groupLabel ? <span className="dropdown-section-label">{fertilizerItem.groupLabel}</span> : null}
+                        {fertilizerItem.groupLabel ? <span className="dropdown-section-label">{fertilizerGroupLabel(language, fertilizerItem.groupLabel)}</span> : null}
                         <button
                           type="button"
                           className={[
@@ -132,7 +143,7 @@ export function AppHeaderDesktop({
                           }}
                         >
                           <FertilizerIcon size={16} />
-                          {fertilizerItem.label}
+                          {fertilizerItemLabel(language, fertilizerItem.value, fertilizerItem.label)}
                         </button>
                       </div>
                     );
@@ -153,7 +164,7 @@ export function AppHeaderDesktop({
               type="button"
             >
               <Icon size={16} />
-              {item.label}
+              {mainSectionLabel(language, item.value, item.label)}
             </button>
           );
         })}
@@ -161,7 +172,7 @@ export function AppHeaderDesktop({
         <div className={["nav-dropdown", section === "analytics" || section === "inputPrices" || section === "methodology" ? "active" : "", priceMenuOpen ? "open" : ""].filter(Boolean).join(" ")}>
           <button type="button" className="tab-button" aria-expanded={priceMenuOpen} onClick={() => toggleDesktopMenu("price")}>
             <Leaf size={16} />
-            Dự báo giá nông sản
+            {copy.priceForecast}
             <ChevronDown size={14} />
           </button>
           <div className="dropdown-menu">
@@ -178,7 +189,7 @@ export function AppHeaderDesktop({
                   }}
                 >
                   <Icon size={16} />
-                  {tab.label}
+                  {cropItemLabel(language, tab.value)}
                 </button>
               );
             })}
@@ -191,7 +202,7 @@ export function AppHeaderDesktop({
               }}
             >
               <PackageCheck size={16} />
-              Giá phân bón thế giới
+              {copy.worldFertilizer}
             </button>
             <button
               type="button"
@@ -202,15 +213,19 @@ export function AppHeaderDesktop({
               }}
             >
               <BookOpenCheck size={16} />
-              Thuật toán dự báo
+              {copy.forecastAlgorithm}
             </button>
           </div>
         </div>
       </div>
       <div className="account-menu">
+        <button type="button" className="language-toggle" onClick={onLanguageToggle} aria-label={copy.switchLanguage}>
+          <span className="language-flag" aria-hidden="true">{copy.languageFlag}</span>
+          <span>{copy.languageLabel}</span>
+        </button>
         <button type="button" className="account-trigger" onClick={() => onAuthOpenChange(!authOpen)}>
           <UserRound size={16} />
-          {userLabel ?? "Tài khoản"}
+          {userLabel ?? copy.account}
         </button>
         {authOpen ? <div className="account-popover">{authContent}</div> : null}
       </div>

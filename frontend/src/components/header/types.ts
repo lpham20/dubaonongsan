@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { LucideIcon } from "../icons";
 import type { CropType } from "../../lib/api";
+import type { AppLanguage } from "../../contexts/LanguageContext";
 
 export type MainSection =
   | "home"
@@ -62,4 +63,6 @@ export type AppHeaderProps = {
 export type HeaderSurfaceProps = AppHeaderProps & {
   authContent: ReactNode;
   userLabel: string | null;
+  language: AppLanguage;
+  onLanguageToggle: () => void;
 };

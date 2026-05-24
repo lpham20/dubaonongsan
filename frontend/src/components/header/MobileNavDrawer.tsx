@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Leaf, Menu, UserRound, X } from "../icons";
+import {
+  cropItemLabel,
+  fertilizerGroupLabel,
+  fertilizerItemLabel,
+  headerText,
+  newsItemLabel
+} from "./i18n";
 import { fertilizerMenuItems, newsMenuItems } from "./navItems";
 import { MobileAccordion } from "./MobileAccordion";
 import type { HeaderSurfaceProps } from "./types";
@@ -12,6 +19,8 @@ export function MobileNavDrawer({
   authOpen,
   authContent,
   userLabel,
+  language,
+  onLanguageToggle,
   onSectionChange,
   onAnalyticsOpen,
   onNewsOpen,
@@ -26,6 +35,7 @@ export function MobileNavDrawer({
   const drawerRef = useRef<HTMLDivElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const fertilizerActive = fertilizerMenuItems.some((item) => item.value === section);
+  const copy = headerText[language];
 
   const closeMenus = () => {
     onNewsMenuOpenChange(false);
@@ -94,16 +104,20 @@ export function MobileNavDrawer({
   }, [drawerOpen, section]);
 
   return (
-    <nav ref={headerRef} className="menu-bar mobile-menu-bar" aria-label="Điều hướng chính">
+    <nav ref={headerRef} className="menu-bar mobile-menu-bar" aria-label={copy.mainNavigation}>
       <button type="button" className="brand-title mobile-brand-button" onClick={() => navigateMobile(() => onSectionChange("home"))}>
         <Leaf size={20} />
-        <span>DỰ BÁO NÔNG SẢN</span>
+        <span>{copy.brand}</span>
+      </button>
+      <button type="button" className="mobile-language-toggle" onClick={onLanguageToggle} aria-label={copy.switchLanguage}>
+        <span aria-hidden="true">{copy.languageFlag}</span>
+        <span>{copy.languageLabel}</span>
       </button>
       <button
         ref={menuButtonRef}
         type="button"
         className="mobile-menu-trigger"
-        aria-label="Mở menu"
+        aria-label={copy.openMenu}
         aria-expanded={drawerOpen}
         aria-controls="mobile-nav-drawer"
         onClick={() => setDrawerOpen(true)}
@@ -113,7 +127,7 @@ export function MobileNavDrawer({
       <button
         type="button"
         className="mobile-header-account-trigger"
-        aria-label={userLabel ? `Tài khoản ${userLabel}` : "Mở tài khoản"}
+        aria-label={userLabel ? `${copy.account} ${userLabel}` : copy.openAccount}
         onClick={() => {
           setDrawerOpen(false);
           onAuthOpenChange(true);
@@ -130,23 +144,23 @@ export function MobileNavDrawer({
         className={drawerOpen ? "mobile-nav-drawer open" : "mobile-nav-drawer"}
         role="dialog"
         aria-modal="true"
-        aria-label="Menu điều hướng"
+        aria-label={copy.mobileDrawer}
       >
         <div className="mobile-drawer-head">
           <div className="brand-title">
             <Leaf size={20} />
-            <span>DỰ BÁO NÔNG SẢN</span>
+            <span>{copy.brand}</span>
           </div>
-          <button type="button" aria-label="Đóng menu" onClick={closeDrawer}>
+          <button type="button" aria-label={copy.closeMenu} onClick={closeDrawer}>
             <X size={22} />
           </button>
         </div>
         <div className="mobile-drawer-list">
           <button type="button" className={section === "home" ? "active" : ""} onClick={() => navigateMobile(() => onSectionChange("home"))}>
-            Trang chủ
+            {language === "en" ? "Home" : "Trang chủ"}
           </button>
           <MobileAccordion
-            title="Tin tức"
+            title={language === "en" ? "News" : "Tin tức"}
             open={mobileGroup === "news"}
             active={section === "news"}
             onToggle={() => setMobileGroup(mobileGroup === "news" ? null : "news")}
@@ -158,22 +172,22 @@ export function MobileNavDrawer({
                 className={section === "news" && newsView === item.value ? "active" : ""}
                 onClick={() => navigateMobile(() => onNewsOpen(item.value))}
               >
-                {item.label}
+                {newsItemLabel(language, item.value)}
               </button>
             ))}
           </MobileAccordion>
           <button type="button" className={section === "guides" ? "active" : ""} onClick={() => navigateMobile(() => onSectionChange("guides"))}>
-            Hướng dẫn
+            {language === "en" ? "Guides" : "Hướng dẫn"}
           </button>
           <MobileAccordion
-            title="Khuyến nghị"
+            title={language === "en" ? "Advisory" : "Khuyến nghị"}
             open={mobileGroup === "fertilizer"}
             active={fertilizerActive}
             onToggle={() => setMobileGroup(mobileGroup === "fertilizer" ? null : "fertilizer")}
           >
             {fertilizerMenuItems.map((item) => (
               <div key={item.value} className="mobile-accordion-row">
-                {item.groupLabel ? <span className="mobile-section-label">{item.groupLabel}</span> : null}
+                {item.groupLabel ? <span className="mobile-section-label">{fertilizerGroupLabel(language, item.groupLabel)}</span> : null}
                 <button
                   type="button"
                   className={[
@@ -182,13 +196,13 @@ export function MobileNavDrawer({
                   ].filter(Boolean).join(" ")}
                   onClick={() => navigateMobile(() => onSectionChange(item.value))}
                 >
-                  {item.label}
+                  {fertilizerItemLabel(language, item.value, item.label)}
                 </button>
               </div>
             ))}
           </MobileAccordion>
           <MobileAccordion
-            title="Dự báo giá"
+            title={copy.forecastPrice}
             open={mobileGroup === "price"}
             active={section === "analytics" || section === "inputPrices" || section === "methodology"}
             onToggle={() => setMobileGroup(mobileGroup === "price" ? null : "price")}
@@ -200,7 +214,7 @@ export function MobileNavDrawer({
                 className={section === "analytics" && crop === tab.value ? "active" : ""}
                 onClick={() => navigateMobile(() => onAnalyticsOpen(tab.value))}
               >
-                {tab.label}
+                {cropItemLabel(language, tab.value)}
               </button>
             ))}
             <button
@@ -208,14 +222,14 @@ export function MobileNavDrawer({
               className={section === "inputPrices" ? "active" : ""}
               onClick={() => navigateMobile(() => onSectionChange("inputPrices"))}
             >
-              Giá phân bón thế giới
+              {copy.worldFertilizer}
             </button>
             <button
               type="button"
               className={section === "methodology" ? "active" : ""}
               onClick={() => navigateMobile(() => onSectionChange("methodology"))}
             >
-              Thuật toán dự báo
+              {copy.forecastAlgorithm}
             </button>
           </MobileAccordion>
           <button
@@ -225,7 +239,7 @@ export function MobileNavDrawer({
               onAuthOpenChange(true);
             }}
           >
-            {userLabel ?? "Tài khoản"}
+            {userLabel ?? copy.account}
           </button>
         </div>
       </div>
@@ -233,7 +247,7 @@ export function MobileNavDrawer({
         <>
           <div className="mobile-auth-backdrop" onClick={() => onAuthOpenChange(false)} />
           <div className="account-popover mobile-auth-sheet">
-            <button type="button" className="mobile-auth-close" aria-label="Đóng tài khoản" onClick={() => onAuthOpenChange(false)}>
+            <button type="button" className="mobile-auth-close" aria-label={copy.closeMenu} onClick={() => onAuthOpenChange(false)}>
               <X size={20} />
             </button>
             {authContent}

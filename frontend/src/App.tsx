@@ -20,6 +20,7 @@ import { TickerTape } from "./components/TickerTape";
 import { SiteFooter } from "./components/SiteFooter";
 import { SeoHead } from "./components/SeoHead";
 import { useAuth } from "./contexts/AuthContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
 import {
   fetchAvailableVarieties,
   exportCsvUrl,
@@ -256,7 +257,9 @@ function getInitialRoute(pathnameInput = window.location.pathname, search = wind
 export function App() {
   return (
     <BrowserRouter>
-      <RoutedApp />
+      <LanguageProvider>
+        <RoutedApp />
+      </LanguageProvider>
     </BrowserRouter>
   );
 }
