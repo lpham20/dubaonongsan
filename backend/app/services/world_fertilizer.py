@@ -24,14 +24,20 @@ WORLD_FERTILIZER_RETRY_DELAY_SECONDS = 2.0
 WORLD_FERTILIZER_MODEL_KIND = "world-fertilizer-anchor-ewma-ar1-v2"
 MONTHLY_ANCHOR_TREND_CAP = 0.06
 DAILY_SIGNAL_DAILY_TREND_CAP = 0.01
-DAILY_SIGNAL_SOURCES = {"tradingeconomics_urea_daily", "yahoo_urea_futures_daily", "investing_urea_current"}
+PRIMARY_DAILY_SIGNAL_SOURCES = {"commoditypriceapi_urea_public_1y"}
+DAILY_SIGNAL_SOURCES = {
+    *PRIMARY_DAILY_SIGNAL_SOURCES,
+    "tradingeconomics_urea_daily",
+    "yahoo_urea_futures_daily",
+    "investing_urea_current",
+}
 DAILY_SIGNAL_MIN_POINTS = 14
 
 COMMODITIES = {
     "urea": {
         "name_vi": "Urê",
         "name_en": "Urea",
-        "quote_type": "FOB Middle East",
+        "quote_type": "Benchmark USD/tan",
         "driver_note_vi": "Urê thường nhạy với khí gas, than và nguồn cung Trung Quốc/Trung Đông.",
     },
     "dap": {
@@ -428,23 +434,36 @@ def _aggregate_observations(rows: list[WorldCommodityPrice]) -> list[tuple[datet
 
 
 def _source_mode(rows: list[WorldCommodityPrice]) -> str:
-    recent_cutoff = datetime.now(UTC) - timedelta(days=45)
+    primary_daily_rows = [row for row in rows if row.source in PRIMARY_DAILY_SIGNAL_SOURCES]
+    if _has_recent_daily_signal(primary_daily_rows):
+        return "daily_signal"
     daily_rows = [row for row in rows if row.source in DAILY_SIGNAL_SOURCES]
-    distinct_days = {row.observed_at.date() for row in daily_rows}
-    for row in daily_rows:
-        observed_at = row.observed_at
-        if observed_at.tzinfo is None:
-            observed_at = observed_at.replace(tzinfo=UTC)
-        if observed_at >= recent_cutoff and len(distinct_days) >= DAILY_SIGNAL_MIN_POINTS:
-            return "daily_signal"
+    if _has_recent_daily_signal(daily_rows):
+        return "daily_signal"
     return "monthly_official_anchor"
 
 
 def _model_rows(rows: list[WorldCommodityPrice], source_mode: str) -> list[WorldCommodityPrice]:
     if source_mode == "daily_signal":
+        primary_rows = [row for row in rows if row.source in PRIMARY_DAILY_SIGNAL_SOURCES]
+        if _has_recent_daily_signal(primary_rows):
+            return primary_rows
         return [row for row in rows if row.source in DAILY_SIGNAL_SOURCES]
     official_rows = [row for row in rows if row.source == "worldbank_pinksheet"]
     return official_rows or rows
+
+
+def _has_recent_daily_signal(rows: list[WorldCommodityPrice]) -> bool:
+    if len({row.observed_at.date() for row in rows}) < DAILY_SIGNAL_MIN_POINTS:
+        return False
+    recent_cutoff = datetime.now(UTC) - timedelta(days=45)
+    for row in rows:
+        observed_at = row.observed_at
+        if observed_at.tzinfo is None:
+            observed_at = observed_at.replace(tzinfo=UTC)
+        if observed_at >= recent_cutoff:
+            return True
+    return False
 
 
 def _data_quality(rows: list[WorldCommodityPrice], points: list[tuple[datetime, float, str]], source_mode: str) -> dict:
@@ -527,7 +546,7 @@ def _forecast_note(source_mode: str, base_observed_at: datetime, model_kind: str
     )
     if model_kind.startswith("world-fertilizer-lstm"):
         return (
-            f"Mô hình LSTM đang dùng chuỗi daily Yahoo/Investing mới nhất đến ngày {base_date} để dự báo 30 ngày. "
+            f"Mô hình LSTM đang dùng chuỗi daily benchmark mới nhất đến ngày {base_date} để dự báo 30 ngày. "
             f"{common}"
         )
     if source_mode == "monthly_official_anchor":

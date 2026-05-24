@@ -118,7 +118,7 @@ class PlatformJobService:
         with job_lock("scrape_world_fertilizer_current"):
             job = self._start_job("scrape_world_fertilizer_current")
             settings = get_settings()
-            source = "investing_urea_current"
+            source = "commoditypriceapi_urea_public_1y"
             try:
                 if skip_if_success_today and self._has_successful_scrape_today(f"world-fertilizer:{source}"):
                     summary = {"source": source, "reason": "already_succeeded_today"}
@@ -143,7 +143,7 @@ class PlatformJobService:
                         time.sleep(delay_seconds)
 
                 summary = {"source": source, "attempts": attempts, "scrape": scrape_summaries}
-                message = "Investing Urea current scrape failed after configured retries."
+                message = "CommodityPriceAPI Urea public scrape failed after configured retries."
                 self._finish_job(job, "lỗi", summary, message)
                 raise RuntimeError(message)
             except Exception as exc:
@@ -451,7 +451,7 @@ class JobScheduler:
             hour=9,
             minute=0,
             args=["world_fertilizer_current"],
-            id="scrape_investing_urea_daily_0900",
+            id="scrape_commoditypriceapi_urea_daily_0900",
             replace_existing=True,
         )
         cls._scheduler.add_job(
@@ -460,7 +460,7 @@ class JobScheduler:
             hour="9-23",
             minute="15,30,45",
             args=["world_fertilizer_current_retry"],
-            id="scrape_investing_urea_retry_until_success",
+            id="scrape_commoditypriceapi_urea_retry_until_success",
             replace_existing=True,
         )
         cls._scheduler.add_job(

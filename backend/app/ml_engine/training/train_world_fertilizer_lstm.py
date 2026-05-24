@@ -11,7 +11,7 @@ from typing import Any
 import numpy as np
 import tensorflow as tf
 
-from app.ingestion.sources.world_fertilizer_yahoo import YahooUreaFuturesDailyScraper
+from app.ingestion.sources.world_fertilizer_commoditypriceapi import CommodityPriceApiUreaPublicScraper
 
 
 logger = logging.getLogger("marketai.train_world_fertilizer_lstm")
@@ -28,7 +28,7 @@ def train(
     batch_size: int,
 ) -> dict[str, Any]:
     _set_determinism()
-    observations = YahooUreaFuturesDailyScraper().scrape().observations
+    observations = CommodityPriceApiUreaPublicScraper().scrape().observations
     observations = [row for row in observations if row.commodity_slug == commodity_slug and row.price_usd_per_tonne > 0]
     observations.sort(key=lambda row: row.observed_at)
     if len(observations) < lookback_window + horizon_days + 10:
@@ -122,8 +122,8 @@ def train(
     meta = {
         "commodity_slug": commodity_slug,
         "model_kind": "world-fertilizer-lstm-tflite-v1",
-        "source": "yahoo_urea_futures_daily",
-        "source_symbol": "UME=F",
+        "source": "commoditypriceapi_urea_public_1y",
+        "source_symbol": "UREA",
         "observations": len(points),
         "first_observed_at": points[0][0].isoformat(),
         "last_observed_at": points[-1][0].isoformat(),
