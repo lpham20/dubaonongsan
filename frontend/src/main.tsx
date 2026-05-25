@@ -24,6 +24,7 @@ import "./styles/tablet-ipad.css";
 import "./styles/input-prices.css";
 import "./styles/advisory.css";
 import "./styles/navigation-hierarchy.css";
+import "./styles/live-ticker.css";
 
 if (typeof window !== "undefined") {
   window.addEventListener("error", (event) => {

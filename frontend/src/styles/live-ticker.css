@@ -1,0 +1,186 @@
+/* Shared live price ticker.
+   Kept on a dedicated class so old news/home ticker overrides cannot pull it
+   out of alignment on individual routes. */
+
+.app-shell.live-ticker-shell {
+  width: 100%;
+  max-width: 100%;
+}
+
+.live-price-ticker {
+  position: sticky;
+  top: var(--header-height-desktop);
+  z-index: 92;
+  display: flex;
+  align-items: stretch;
+  align-self: stretch;
+  width: 100vw;
+  max-width: none;
+  height: var(--ticker-height);
+  min-height: var(--ticker-height);
+  margin: 0 calc(50% - 50vw);
+  padding: 0;
+  overflow: hidden;
+  color: var(--ink-text-bright);
+  background: var(--ink-black);
+  border: 0;
+  border-bottom: 1px solid var(--ink-line);
+  border-radius: 0;
+  box-shadow: none;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: var(--fw-bold);
+}
+
+.live-price-ticker-label {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  height: 100%;
+  padding: 0 22px 0 max(var(--app-shell-pad, var(--shell-pad-desktop)), 24px);
+  color: var(--ink-text-bright);
+  background: var(--accent-deep);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: var(--fw-black);
+  letter-spacing: 0.1em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.live-price-ticker-track {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.live-price-ticker-track::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 60px;
+  background: linear-gradient(90deg, transparent, var(--ink-black));
+  pointer-events: none;
+}
+
+.live-price-ticker-content {
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  height: 100%;
+  gap: 32px;
+  padding: 0 16px;
+  white-space: nowrap;
+  animation: liveTickerScroll 90s linear infinite;
+}
+
+.live-price-ticker-content > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-text-bright);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-bold);
+}
+
+.live-price-ticker-content strong {
+  color: var(--ink-text-muted);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.live-price-ticker-content b {
+  color: var(--ink-text-bright);
+  font-weight: var(--fw-bold);
+}
+
+.live-price-ticker-content em {
+  font-style: normal;
+  font-weight: var(--fw-bold);
+}
+
+.live-price-ticker-content em.up {
+  color: var(--up-bright);
+}
+
+.live-price-ticker-content em.down {
+  color: var(--down-bright);
+}
+
+@keyframes liveTickerScroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-33.333%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-price-ticker-content {
+    animation: none;
+  }
+}
+
+@media (max-width: 860px) {
+  .live-price-ticker {
+    top: var(--header-height-mobile);
+    height: 52px;
+    min-height: 52px;
+    align-items: center;
+  }
+
+  .live-price-ticker-label {
+    height: 100%;
+    max-width: 118px;
+    padding: 0 10px 0 max(var(--app-shell-pad, var(--shell-pad-mobile)), 12px);
+    overflow: hidden;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-overflow: ellipsis;
+  }
+
+  .live-price-ticker-track {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+
+  .live-price-ticker-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .live-price-ticker-track::after {
+    display: none;
+    content: none;
+  }
+
+  .live-price-ticker-content {
+    gap: 8px;
+    height: 100%;
+    padding: 0 10px;
+    animation: none;
+  }
+
+  .live-price-ticker-content > span {
+    flex: 0 0 auto;
+    min-height: 34px;
+    padding: 0 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .live-price-ticker-content > span:nth-child(n + 6) {
+    display: none;
+  }
+}

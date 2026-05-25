@@ -76,16 +76,16 @@ function LivePriceTickerComponent() {
   }, []);
 
   return (
-    <div className="news-price-ticker" aria-label={language === "en" ? "Live agricultural price ticker" : "Dải băng giá nông sản"}>
-      <span>{language === "en" ? "Live prices" : "Giá trực tuyến"}</span>
-      <div>
-        <div>
+    <div className="live-price-ticker" aria-label={language === "en" ? "Live agricultural price ticker" : "Dải băng giá nông sản"}>
+      <div className="live-price-ticker-label">{language === "en" ? "Live prices" : "Giá trực tuyến"}</div>
+      <div className="live-price-ticker-track">
+        <div className="live-price-ticker-content">
           {repeated.map((item, index) => (
-            <strong key={`${item.label}-${index}`}>
-              {item.label}
+            <span key={`${item.label}-${index}`}>
+              <strong>{item.label}</strong>
               <b className="num">{item.value}</b>
               <em className={item.tone}>{item.change}</em>
-            </strong>
+            </span>
           ))}
         </div>
       </div>

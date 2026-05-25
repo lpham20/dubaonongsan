@@ -16,6 +16,7 @@ import {
 } from "./components/icons";
 import { AppHeader } from "./components/AppHeader";
 import { FreshnessBanner } from "./components/FreshnessBanner";
+import { LivePriceTicker } from "./components/LivePriceTicker";
 import { TickerTape } from "./components/TickerTape";
 import { SiteFooter } from "./components/SiteFooter";
 import { SeoHead } from "./components/SeoHead";
@@ -1028,12 +1029,13 @@ function RoutedApp() {
   }
 
   const showErrorBanner = Boolean(error && (authOpen || section === "analytics"));
-  const appShellClassName =
+  const baseAppShellClassName =
     section === "analytics"
       ? `app-shell forecast-shell crop-${crop} analytics-tab-${analyticsTab}`
       : section === "inputPrices"
         ? "app-shell forecast-shell input-prices-shell"
       : "app-shell";
+  const appShellClassName = `${baseAppShellClassName}${section === "news" || section === "inputPrices" ? " live-ticker-shell" : ""}`;
 
   return (
     <IconContext.Provider value={{ size: 18, weight: "regular", mirrored: false }}>
@@ -1068,6 +1070,7 @@ function RoutedApp() {
       />
 
       {section === "analytics" ? <TickerTape points={tickerPoints} /> : null}
+      {section === "inputPrices" ? <LivePriceTicker /> : null}
 
       {section === "analytics" ? (
         <>

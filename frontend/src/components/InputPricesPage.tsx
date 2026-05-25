@@ -1,5 +1,4 @@
 import { LineChart, PackageCheck } from "./icons";
-import { LivePriceTicker } from "./LivePriceTicker";
 import { SeoHead } from "./SeoHead";
 import { WorldFertilizerForecastSection } from "./WorldFertilizerForecastSection";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -29,8 +28,6 @@ export function InputPricesPage() {
           creator: { "@type": "Organization", name: "dubaonongsan.com" }
         }}
       />
-      <LivePriceTicker />
-
       <header className="market-quote-header world-fertilizer-hero">
         <div className="quote-main">
           <div className="quote-title-row">
