@@ -1304,7 +1304,6 @@ function RoutedApp() {
           busy={contentBusy}
           onScrape={() => void refreshNews()}
           activeView={newsView}
-          onViewChange={openNews}
           onOpenAnalytics={openAnalytics}
         />
       ) : null}

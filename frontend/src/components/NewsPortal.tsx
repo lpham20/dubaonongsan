@@ -37,7 +37,6 @@ type Props = {
   busy: boolean;
   onScrape: () => void;
   activeView: NewsView;
-  onViewChange: (view: NewsView) => void;
   onOpenAnalytics: (crop: CropType) => void;
 };
 
@@ -112,13 +111,6 @@ const SORT_OPTIONS: { value: SortMode; label: string }[] = [
   { value: "watch", label: "Cần theo dõi" }
 ];
 
-const NEWS_VIEW_TABS: { value: NewsView; label: string }[] = [
-  { value: "latest", label: "Tin tức mới nhất" },
-  { value: "sau_rieng", label: "Giá sầu riêng" },
-  { value: "ca_phe", label: "Giá cà phê" },
-  { value: "ho_tieu", label: "Giá hồ tiêu" }
-];
-
 const NEWS_PAGE_SIZE = 8;
 const VIEW_SEO: Record<NewsView, { title: string; description: string; canonical: string }> = {
   latest: {
@@ -156,13 +148,6 @@ const FALLBACK_NEWS_TICKER: TickerItem[] = [
   { label: "Lúa OM 5451", value: "7.800 đ/kg", change: "-0,2%", tone: "down" },
   { label: "Urea hạt đục", value: "12.400 đ/kg", change: "-0,4%", tone: "down" }
 ];
-
-function newsViewLabel(value: NewsView, copy: { latest: string; durian: string; coffee: string; pepper: string }) {
-  if (value === "sau_rieng") return copy.durian;
-  if (value === "ca_phe") return copy.coffee;
-  if (value === "ho_tieu") return copy.pepper;
-  return copy.latest;
-}
 
 function newsSeoEn(value: NewsView, copy: { seoLatestTitle: string; seoLatestDescription: string }) {
   const seo: Record<NewsView, { title: string; description: string; canonical: string }> = {
@@ -223,7 +208,7 @@ function relationLabel(value: string) {
   return "Market";
 }
 
-export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, onViewChange, onOpenAnalytics }: Props) {
+export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, onOpenAnalytics }: Props) {
   const { language } = useLanguage();
   const pageCopy = language === "en"
     ? {
@@ -424,20 +409,6 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
           ) : null}
         </div>
       ) : null}
-
-      <nav className="news-view-tabs" aria-label={pageCopy.navLabel}>
-        {NEWS_VIEW_TABS.map((view) => (
-          <button
-            type="button"
-            className={`news-view-tab ${activeView === view.value ? "active" : ""}`}
-            aria-current={activeView === view.value ? "page" : undefined}
-            key={view.value}
-            onClick={() => onViewChange(view.value)}
-          >
-            {newsViewLabel(view.value, pageCopy)}
-          </button>
-        ))}
-      </nav>
 
       {activePriceCrop ? (
         <PriceBoardSection
@@ -647,12 +618,11 @@ function PriceBoardSection({
     <section className="news-price-board">
       <div className="news-price-board-header">
         <div>
-          <span>{language === "en" ? "Agricultural price board" : "Bảng giá nông sản"}</span>
-          <h2>{language === "en" ? `${cropName} prices today, ${formatDate(latestDate)}` : `${meta.title} hôm nay ngày ${formatDate(latestDate)}`}</h2>
-          <p>
-            {language === "en" ? `Latest ${cropName.toLowerCase()} prices by variety and province from the system data.` : `Tổng hợp giá ${meta.cropName} theo giống và vùng/tỉnh trong dữ liệu mới nhất của hệ thống.`}
-          </p>
-          <FreshnessBanner />
+          <h1>{language === "en" ? `${cropName} prices today, ${formatDate(latestDate)}` : `${meta.title} hôm nay ngày ${formatDate(latestDate)}`}</h1>
+          <div className="news-price-board-meta">
+            <span>{language === "en" ? "Agricultural price board" : "Bảng giá nông sản"}</span>
+            <FreshnessBanner />
+          </div>
         </div>
         <div className="price-board-kpis">
           <span>
