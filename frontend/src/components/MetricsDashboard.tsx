@@ -1,42 +1,45 @@
 import { memo } from "react";
 import { Gauge, LineChart, Ruler, TimerReset } from "./icons";
 import type { ModelMetrics } from "../lib/api";
+import { useLanguage } from "../contexts/LanguageContext";
 
 type Props = {
   metrics: ModelMetrics | null;
 };
 
 function MetricsDashboardComponent({ metrics }: Props) {
+  const { language } = useLanguage();
+  const locale = language === "en" ? "en-US" : "vi-VN";
   const hasBacktest = Boolean(metrics?.backtest_samples);
   const values = [
     {
       label: "RMSE",
-      value: hasBacktest ? `${Math.round(metrics?.rmse_vnd_per_kg ?? 0).toLocaleString("vi-VN")}` : "-",
+      value: hasBacktest ? `${Math.round(metrics?.rmse_vnd_per_kg ?? 0).toLocaleString(locale)}` : "-",
       suffix: "VND/kg",
       icon: Gauge
     },
     {
       label: "MAE",
-      value: hasBacktest ? `${Math.round(metrics?.mae_vnd_per_kg ?? 0).toLocaleString("vi-VN")}` : "-",
+      value: hasBacktest ? `${Math.round(metrics?.mae_vnd_per_kg ?? 0).toLocaleString(locale)}` : "-",
       suffix: "VND/kg",
       icon: Ruler
     },
     {
-      label: "Dữ liệu lùi",
+      label: language === "en" ? "Lookback" : "Dữ liệu lùi",
       value: `${metrics?.lookback_days ?? 60}`,
-      suffix: "ngày",
+      suffix: language === "en" ? "days" : "ngày",
       icon: TimerReset
     },
     {
-      label: "Dự báo",
+      label: language === "en" ? "Forecast" : "Dự báo",
       value: `${metrics?.forecast_horizon_days ?? 30}`,
-      suffix: "ngày",
+      suffix: language === "en" ? "days" : "ngày",
       icon: LineChart
     }
   ];
 
   return (
-    <section className="metrics-grid" aria-label="Chỉ số mô hình">
+    <section className="metrics-grid" aria-label={language === "en" ? "Model metrics" : "Chỉ số mô hình"}>
       {values.map((item) => {
         const Icon = item.icon;
         return (

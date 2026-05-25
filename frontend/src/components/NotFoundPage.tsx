@@ -2,32 +2,36 @@ import { Link } from "react-router-dom";
 import { Home, Newspaper, Sprout } from "./icons";
 import { Breadcrumb } from "./Breadcrumb";
 import { SeoHead } from "./SeoHead";
+import { useLanguage } from "../contexts/LanguageContext";
+import { withLanguagePrefix } from "../lib/localizedRoutes";
 
 export function NotFoundPage() {
+  const { language } = useLanguage();
+  const isEnglish = language === "en";
   return (
     <section className="content-page detail-page not-found-page">
       <SeoHead
-        title="Không tìm thấy trang"
-        description="Trang bạn tìm không tồn tại. Quay về Dự báo nông sản để xem tin thị trường, hướng dẫn kỹ thuật và dự báo giá nông sản."
+        title={isEnglish ? "Page not found" : "Không tìm thấy trang"}
+        description={isEnglish ? "The page you are looking for does not exist. Return to Agri Price Forecast for market news, farming guides and crop price forecasts." : "Trang bạn tìm không tồn tại. Quay về Dự báo nông sản để xem tin thị trường, hướng dẫn kỹ thuật và dự báo giá nông sản."}
         canonical="/404"
       />
-      <Breadcrumb items={[{ label: "Trang chủ", href: "/" }, { label: "Không tìm thấy" }]} />
+      <Breadcrumb items={[{ label: isEnglish ? "Home" : "Trang chủ", href: "/" }, { label: isEnglish ? "Not found" : "Không tìm thấy" }]} />
       <div className="not-found-card">
         <span>404</span>
-        <h1>Không tìm thấy trang</h1>
-        <p>Đường dẫn này không tồn tại hoặc nội dung đã được chuyển sang địa chỉ khác.</p>
+        <h1>{isEnglish ? "Page not found" : "Không tìm thấy trang"}</h1>
+        <p>{isEnglish ? "This URL does not exist, or the content has moved to another address." : "Đường dẫn này không tồn tại hoặc nội dung đã được chuyển sang địa chỉ khác."}</p>
         <nav>
-          <Link to="/">
+          <Link to={withLanguagePrefix("/", language)}>
             <Home size={16} />
-            Trang chủ
+            {isEnglish ? "Home" : "Trang chủ"}
           </Link>
-          <Link to="/tin-tuc">
+          <Link to={withLanguagePrefix("/tin-tuc", language)}>
             <Newspaper size={16} />
-            Tin tức thị trường
+            {isEnglish ? "Market news" : "Tin tức thị trường"}
           </Link>
-          <Link to="/du-bao-gia/sau_rieng">
+          <Link to={withLanguagePrefix("/du-bao-gia/sau_rieng", language)}>
             <Sprout size={16} />
-            Dự báo giá nông sản
+            {isEnglish ? "Crop price forecast" : "Dự báo giá nông sản"}
           </Link>
         </nav>
       </div>

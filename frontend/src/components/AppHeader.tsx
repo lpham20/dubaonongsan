@@ -63,7 +63,7 @@ export function AppHeader(props: AppHeaderProps) {
     </>
   );
 
-  const surfaceProps = { ...props, authContent, userLabel, language, onLanguageToggle: toggleLanguage };
+  const surfaceProps = { ...props, authContent, userLabel, language, onLanguageToggle: props.onLanguageToggle ?? toggleLanguage };
 
   return isMobile ? <MobileNavDrawer {...surfaceProps} /> : <AppHeaderDesktop {...surfaceProps} />;
 }

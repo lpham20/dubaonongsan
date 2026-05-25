@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
+import { useLanguage } from "../contexts/LanguageContext";
 import { safeJsonLd } from "../lib/jsonLd";
 import { canonicalUrl } from "../lib/seo";
+import { withLanguagePrefix } from "../lib/localizedRoutes";
 
 type Item = {
   label: string;
@@ -8,6 +10,7 @@ type Item = {
 };
 
 export function Breadcrumb({ items }: { items: Item[] }) {
+  const { language } = useLanguage();
   const schema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -15,7 +18,7 @@ export function Breadcrumb({ items }: { items: Item[] }) {
       "@type": "ListItem",
       position: index + 1,
       name: item.label,
-      item: item.href ? canonicalUrl(item.href) : undefined
+      item: item.href ? canonicalUrl(withLanguagePrefix(item.href, language)) : undefined
     }))
   };
 
@@ -25,7 +28,7 @@ export function Breadcrumb({ items }: { items: Item[] }) {
         <ol>
           {items.map((item, index) => (
             <li key={`${item.label}-${index}`}>
-              {item.href ? <Link to={item.href}>{item.label}</Link> : <span>{item.label}</span>}
+              {item.href ? <Link to={withLanguagePrefix(item.href, language)}>{item.label}</Link> : <span>{item.label}</span>}
             </li>
           ))}
         </ol>

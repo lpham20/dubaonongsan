@@ -2,6 +2,7 @@ import { FormEvent, useState } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { subscribeNewsletter } from "../lib/api";
 import { useMediaQuery } from "../hooks/useMediaQuery";
+import { withLanguagePrefix } from "../lib/localizedRoutes";
 
 type Props = {
   onOpenNews: () => void;
@@ -70,6 +71,7 @@ export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics, onOpenIn
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const link = (path: string) => withLanguagePrefix(path, language);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -111,7 +113,7 @@ export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics, onOpenIn
             <span className="footer-section-title">{copy.quickLinks}</span>
           </summary>
           <a
-            href="/tin-tuc"
+            href={link("/tin-tuc")}
             onClick={(event) => {
               event.preventDefault();
               onOpenNews();
@@ -120,7 +122,7 @@ export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics, onOpenIn
             {copy.marketNews}
           </a>
           <a
-            href="/huong-dan"
+            href={link("/huong-dan")}
             onClick={(event) => {
               event.preventDefault();
               onOpenGuides();
@@ -129,7 +131,7 @@ export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics, onOpenIn
             {copy.guides}
           </a>
           <a
-            href="/du-bao-gia/sau_rieng"
+            href={link("/du-bao-gia/sau_rieng")}
             onClick={(event) => {
               event.preventDefault();
               onOpenAnalytics();
@@ -137,10 +139,10 @@ export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics, onOpenIn
           >
             {copy.agriForecast}
           </a>
-          <a href="/du-bao-gia/ca_phe">{copy.coffeeForecast}</a>
-          <a href="/du-bao-gia/ho_tieu">{copy.pepperForecast}</a>
+          <a href={link("/du-bao-gia/ca_phe")}>{copy.coffeeForecast}</a>
+          <a href={link("/du-bao-gia/ho_tieu")}>{copy.pepperForecast}</a>
           <a
-            href="/du-bao-gia/phan-bon"
+            href={link("/du-bao-gia/phan-bon")}
             onClick={(event) => {
               event.preventDefault();
               onOpenInputPrices();
@@ -148,8 +150,8 @@ export function SiteFooter({ onOpenNews, onOpenGuides, onOpenAnalytics, onOpenIn
           >
             {copy.fertilizerForecast}
           </a>
-          <a href="/khuyen-nghi-bon-phan">{copy.fertilizerAdvisory}</a>
-          <a href="/bao-cao-nang-suat">{copy.yieldFeedback}</a>
+          <a href={link("/khuyen-nghi-bon-phan")}>{copy.fertilizerAdvisory}</a>
+          <a href={link("/bao-cao-nang-suat")}>{copy.yieldFeedback}</a>
         </details>
 
         <details className="footer-subscribe site-footer-section" aria-label={copy.subscribeLabel} open={!isMobile}>

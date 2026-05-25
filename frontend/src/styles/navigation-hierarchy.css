@@ -53,7 +53,40 @@
 }
 
 .language-flag {
-  font-size: 15px;
+  position: relative;
+  display: inline-block;
+  width: 22px;
+  height: 15px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.26), 0 0 0 2px rgba(0, 0, 0, 0.12);
+  line-height: 1;
+}
+
+.language-flag-en {
+  background:
+    linear-gradient(0deg, transparent 40%, #fff 40% 60%, transparent 60%),
+    linear-gradient(90deg, transparent 43%, #fff 43% 57%, transparent 57%),
+    linear-gradient(0deg, transparent 45%, #c8102e 45% 55%, transparent 55%),
+    linear-gradient(90deg, transparent 47%, #c8102e 47% 53%, transparent 53%),
+    linear-gradient(27deg, transparent 44%, #fff 44% 50%, #c8102e 50% 54%, #fff 54% 60%, transparent 60%),
+    linear-gradient(153deg, transparent 44%, #fff 44% 50%, #c8102e 50% 54%, #fff 54% 60%, transparent 60%),
+    #012169;
+}
+
+.language-flag-vi {
+  background: #da251d;
+}
+
+.language-flag-vi::before {
+  content: "★";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #ffde00;
+  font-size: 9px;
   line-height: 1;
 }
 

@@ -14,6 +14,7 @@ import {
 import { memo, useEffect, useMemo, useState, type CSSProperties, type PointerEvent } from "react";
 import { TriangleAlert } from "./icons";
 import type { ForecastPoint, PricePoint, TradingSignal } from "../lib/api";
+import { useLanguage, type AppLanguage } from "../contexts/LanguageContext";
 
 type Props = {
   historical: PricePoint[];
@@ -53,12 +54,12 @@ const toDateKey = (value: string) => {
   return Number.isNaN(date.getTime()) ? value.slice(0, 10) : date.toISOString().slice(0, 10);
 };
 
-const formatDate = (value: string) =>
-  new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit" }).format(
+const formatDate = (value: string, language: AppLanguage = "vi") =>
+  new Intl.DateTimeFormat(language === "en" ? "en-US" : "vi-VN", { day: "2-digit", month: "2-digit" }).format(
     new Date(`${value}T00:00:00`)
   );
 
-const formatMoney = (value?: number) => (value ? `${Math.round(value).toLocaleString("vi-VN")} VND` : "-");
+const formatMoney = (value?: number, language: AppLanguage = "vi") => (value ? `${Math.round(value).toLocaleString(language === "en" ? "en-US" : "vi-VN")} VND` : "-");
 
 const average = (values: number[]) =>
   values.length ? values.reduce((total, value) => total + value, 0) / values.length : undefined;
@@ -110,6 +111,7 @@ function pickDailyPoint(points: PricePoint[]) {
 }
 
 function MasterChartComponent({ historical, forecast, signals, showPrice, showForecast, showRain, showSignals }: Props) {
+  const { language } = useLanguage();
   const isDark = useDarkChart();
   const isCoarsePointer = useCoarsePointer();
   const [zoomRange, setZoomRange] = useState<{ startIndex: number; endIndex: number } | null>(null);
@@ -235,40 +237,40 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
     <section className="chart-section">
       <div className="section-heading">
         <div>
-          <h2>Diễn biến giá và dự báo</h2>
-          <p>Giá lịch sử, đường dự báo và lượng mưa theo bộ lọc đang chọn.</p>
+          <h2>{language === "en" ? "Price movement and forecast" : "Diễn biến giá và dự báo"}</h2>
+          <p>{language === "en" ? "Historical prices, forecast line and rainfall for the selected filter." : "Giá lịch sử, đường dự báo và lượng mưa theo bộ lọc đang chọn."}</p>
         </div>
         <div className="chart-heading-tools">
           <div className="legend">
             <span className="legend-price" style={{ "--legend-color": colors.priceLine } as CSSProperties}>
-              Giá
+              {language === "en" ? "Price" : "Giá"}
             </span>
             <span className="legend-forecast" style={{ "--legend-color": colors.forecastLine } as CSSProperties}>
-              Dự báo
+              {language === "en" ? "Forecast" : "Dự báo"}
             </span>
             <span
               className={`legend-rain ${hasRainData ? "" : "legend-disabled"}`}
               style={{ "--legend-color": colors.rainBar } as CSSProperties}
-              title={hasRainData ? undefined : "Chưa có dữ liệu lượng mưa"}
+              title={hasRainData ? undefined : language === "en" ? "No rainfall data yet" : "Chưa có dữ liệu lượng mưa"}
             >
-              Mưa{hasRainData ? "" : " (chưa có dữ liệu)"}
+              {language === "en" ? "Rain" : "Mưa"}{hasRainData ? "" : language === "en" ? " (no data yet)" : " (chưa có dữ liệu)"}
             </span>
           </div>
           {canZoom ? (
-            <div className="chart-zoom-controls" aria-label="Điều khiển thu phóng biểu đồ">
-              <button type="button" onClick={() => zoomBy(0.58)} aria-label="Phóng to biểu đồ">
+            <div className="chart-zoom-controls" aria-label={language === "en" ? "Chart zoom controls" : "Điều khiển thu phóng biểu đồ"}>
+              <button type="button" onClick={() => zoomBy(0.58)} aria-label={language === "en" ? "Zoom in chart" : "Phóng to biểu đồ"}>
                 +
               </button>
-              <button type="button" onClick={() => zoomBy(1.72)} aria-label="Thu nhỏ biểu đồ">
+              <button type="button" onClick={() => zoomBy(1.72)} aria-label={language === "en" ? "Zoom out chart" : "Thu nhỏ biểu đồ"}>
                 -
               </button>
               <button type="button" onClick={resetZoom}>
-                Tất cả
+                {language === "en" ? "All" : "Tất cả"}
               </button>
             </div>
           ) : null}
           {canZoom ? (
-            <small className="chart-mobile-hint">Dùng + / - để phóng gần hoặc thu ra, Tất cả để xem toàn bộ chuỗi.</small>
+            <small className="chart-mobile-hint">{language === "en" ? "Use + / - to zoom, or All to show the full series." : "Dùng + / - để phóng gần hoặc thu ra, Tất cả để xem toàn bộ chuỗi."}</small>
           ) : null}
           {canZoom && isCoarsePointer ? (
             <div className="mobile-chart-range-controls">
@@ -276,22 +278,22 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
                 <button
                   type="button"
                   onClick={() => panBy(-Math.max(1, Math.round(activeWindowLength * 0.45)))}
-                  aria-label="Lùi về khoảng thời gian trước"
+                  aria-label={language === "en" ? "Move to previous time window" : "Lùi về khoảng thời gian trước"}
                 >
                   {"<"}
                 </button>
                 <button
                   type="button"
                   onClick={() => panBy(Math.max(1, Math.round(activeWindowLength * 0.45)))}
-                  aria-label="Tiến tới khoảng thời gian sau"
+                  aria-label={language === "en" ? "Move to next time window" : "Tiến tới khoảng thời gian sau"}
                 >
                   {">"}
                 </button>
               </div>
               <label>
                 <span>
-                  {rows[activeZoomRange.startIndex]?.dateKey ? formatDate(rows[activeZoomRange.startIndex].dateKey) : "-"} -{" "}
-                  {rows[activeZoomRange.endIndex]?.dateKey ? formatDate(rows[activeZoomRange.endIndex].dateKey) : "-"}
+                  {rows[activeZoomRange.startIndex]?.dateKey ? formatDate(rows[activeZoomRange.startIndex].dateKey, language) : "-"} -{" "}
+                  {rows[activeZoomRange.endIndex]?.dateKey ? formatDate(rows[activeZoomRange.endIndex].dateKey, language) : "-"}
                 </span>
                 <input
                   type="range"
@@ -301,7 +303,7 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
                   value={Math.min(activeZoomRange.startIndex, maxWindowStart)}
                   onInput={(event) => setWindowStart(Number(event.currentTarget.value))}
                   onChange={(event) => setWindowStart(Number(event.currentTarget.value))}
-                  aria-label="Chọn khoảng thời gian hiển thị trên biểu đồ"
+                  aria-label={language === "en" ? "Select visible time window on chart" : "Chọn khoảng thời gian hiển thị trên biểu đồ"}
                 />
               </label>
             </div>
@@ -317,6 +319,7 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
             showForecast={showForecast}
             showRain={showRain}
             showSignals={showSignals}
+            language={language}
           />
         ) : (
         <ResponsiveContainer width="100%" height={430}>
@@ -330,7 +333,7 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
             <CartesianGrid stroke={colors.grid} strokeDasharray="0" vertical={false} />
             <XAxis
               dataKey="dateKey"
-              tickFormatter={formatDate}
+              tickFormatter={(value) => formatDate(String(value), language)}
               minTickGap={30}
               axisLine={{ stroke: colors.axisLine }}
               tickLine={false}
@@ -347,7 +350,7 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
             />
             <YAxis yAxisId="rain" orientation="left" domain={rainDomain} hide />
             <Tooltip
-              labelFormatter={(label) => formatDate(String(label))}
+              labelFormatter={(label) => formatDate(String(label), language)}
               contentStyle={{
                 background: colors.tooltipBg,
                 border: `1px solid ${colors.tooltipBorder}`,
@@ -360,8 +363,8 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
               labelStyle={{ color: colors.tooltipText, fontWeight: 700, marginBottom: 4 }}
               itemStyle={{ color: colors.tooltipText }}
               formatter={(value, name) => {
-                if (name === "Mưa (mm)") return [`${value} mm`, "Mưa"];
-                return [formatMoney(Number(value)), name === "Dự báo" ? "Dự báo" : "Giá"];
+                if (name === (language === "en" ? "Rain (mm)" : "Mưa (mm)")) return [`${value} mm`, language === "en" ? "Rain" : "Mưa"];
+                return [formatMoney(Number(value), language), name === (language === "en" ? "Forecast" : "Dự báo") ? (language === "en" ? "Forecast" : "Dự báo") : (language === "en" ? "Price" : "Giá")];
               }}
             />
             {showRain ? (
@@ -372,7 +375,7 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
                 opacity={isDark ? 0.55 : 0.35}
                 radius={[2, 2, 0, 0]}
                 isAnimationActive={false}
-                name="Mưa (mm)"
+                name={language === "en" ? "Rain (mm)" : "Mưa (mm)"}
               />
             ) : null}
             {showPrice ? (
@@ -387,7 +390,7 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
                 activeDot={{ r: 4, fill: colors.priceLine, stroke: colors.tooltipBg, strokeWidth: 2 }}
                 connectNulls
                 isAnimationActive={false}
-                name="Giá"
+                name={language === "en" ? "Price" : "Giá"}
               />
             ) : null}
             {showForecast ? (
@@ -401,7 +404,7 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
                 dot={false}
                 connectNulls
                 isAnimationActive={false}
-                name="Dự báo"
+                name={language === "en" ? "Forecast" : "Dự báo"}
               />
             ) : null}
             {showSignals
@@ -421,7 +424,7 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
                         isCoarsePointer
                           ? undefined
                           : {
-                              value: "Bán",
+                              value: language === "en" ? "Sell" : "Bán",
                               position: "top",
                               fill: colors.signalText,
                               fontSize: 11,
@@ -438,7 +441,7 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
                 travellerWidth={8}
                 startIndex={activeZoomRange.startIndex}
                 endIndex={activeZoomRange.endIndex}
-                tickFormatter={formatDate}
+                tickFormatter={(value) => formatDate(String(value), language)}
                 stroke={colors.priceLine}
                 fill={isDark ? "#111918" : "#f4f6f3"}
                 gap={8}
@@ -454,7 +457,7 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
         )}
         <div className="signal-chip">
           <TriangleAlert size={16} />
-          {signals.length} CẢNH BÁO BÁN
+          {signals.length} {language === "en" ? "SELL ALERTS" : "CẢNH BÁO BÁN"}
         </div>
       </div>
     </section>
@@ -467,7 +470,8 @@ function MobileSvgChart({
   showPrice,
   showForecast,
   showRain,
-  showSignals
+  showSignals,
+  language
 }: {
   rows: ChartRow[];
   colors: ChartColors;
@@ -475,6 +479,7 @@ function MobileSvgChart({
   showForecast: boolean;
   showRain: boolean;
   showSignals: boolean;
+  language: AppLanguage;
 }) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   useEffect(() => {
@@ -492,7 +497,7 @@ function MobileSvgChart({
   ]);
 
   if (!rows.length || !priceValues.length) {
-    return <div className="mobile-chart-empty">Chưa có đủ dữ liệu để vẽ biểu đồ.</div>;
+    return <div className="mobile-chart-empty">{language === "en" ? "Not enough data to draw the chart yet." : "Chưa có đủ dữ liệu để vẽ biểu đồ."}</div>;
   }
 
   const rawMin = Math.min(...priceValues);
@@ -543,12 +548,12 @@ function MobileSvgChart({
   }
 
   return (
-    <div className="mobile-chart-frame" aria-label="Biểu đồ giá thu gọn cho điện thoại">
+    <div className="mobile-chart-frame" aria-label={language === "en" ? "Compact mobile price chart" : "Biểu đồ giá thu gọn cho điện thoại"}>
       <div className="mobile-chart-readout">
-        <strong>{formatDate(currentRow.dateKey)}</strong>
-        {typeof currentRow.price === "number" ? <span>Giá {formatMoney(currentRow.price)}</span> : null}
-        {typeof currentRow.forecast === "number" ? <span>Dự báo {formatMoney(currentRow.forecast)}</span> : null}
-        {typeof currentRow.rain === "number" ? <span>Mưa {currentRow.rain.toFixed(1)} mm</span> : null}
+        <strong>{formatDate(currentRow.dateKey, language)}</strong>
+        {typeof currentRow.price === "number" ? <span>{language === "en" ? "Price" : "Giá"} {formatMoney(currentRow.price, language)}</span> : null}
+        {typeof currentRow.forecast === "number" ? <span>{language === "en" ? "Forecast" : "Dự báo"} {formatMoney(currentRow.forecast, language)}</span> : null}
+        {typeof currentRow.rain === "number" ? <span>{language === "en" ? "Rain" : "Mưa"} {currentRow.rain.toFixed(1)} mm</span> : null}
       </div>
       <svg
         className="mobile-svg-chart"
@@ -663,7 +668,7 @@ function MobileSvgChart({
             fill={colors.tickFill}
             className="mobile-chart-label"
           >
-            {formatDate(rows[index].dateKey)}
+            {formatDate(rows[index].dateKey, language)}
           </text>
         ))}
         <rect

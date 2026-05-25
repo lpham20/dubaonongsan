@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { AlertTriangle, BadgeCheck, Clock3 } from "./icons";
+import { useLanguage } from "../contexts/LanguageContext";
 
 type ScrapeHealth = {
   status: "ok" | "stale" | "worker_dead" | "no_scrape_ever";
@@ -16,6 +17,7 @@ async function readHealthResponse(res: Response) {
 }
 
 export function FreshnessBanner() {
+  const { language } = useLanguage();
   const [health, setHealth] = useState<ScrapeHealth | null>(null);
 
   useEffect(() => {
@@ -51,13 +53,13 @@ export function FreshnessBanner() {
     const age = health.age_minutes ?? 0;
     const human =
       age < 60
-        ? `${Math.round(age)} phút trước`
+        ? language === "en" ? `${Math.round(age)} min ago` : `${Math.round(age)} phút trước`
         : age < 24 * 60
-          ? `${Math.round(age / 60)} giờ trước`
-          : `${Math.round(age / (24 * 60))} ngày trước`;
+          ? language === "en" ? `${Math.round(age / 60)} hours ago` : `${Math.round(age / 60)} giờ trước`
+          : language === "en" ? `${Math.round(age / (24 * 60))} days ago` : `${Math.round(age / (24 * 60))} ngày trước`;
     const date = health.last_success_at ? new Date(health.last_success_at) : null;
     const timeStr = date
-      ? new Intl.DateTimeFormat("vi-VN", {
+      ? new Intl.DateTimeFormat(language === "en" ? "en-US" : "vi-VN", {
           hour: "2-digit",
           minute: "2-digit",
           day: "2-digit",
@@ -68,7 +70,7 @@ export function FreshnessBanner() {
       <div className="freshness-banner ok">
         <BadgeCheck size={14} />
         <span>
-          <strong>Cập nhật lúc {timeStr}</strong> ({human})
+          <strong>{language === "en" ? "Updated at" : "Cập nhật lúc"} {timeStr}</strong> ({human})
         </span>
       </div>
     );
@@ -78,7 +80,7 @@ export function FreshnessBanner() {
     return (
       <div className="freshness-banner stale">
         <Clock3 size={14} />
-        <span>Dữ liệu cũ - quá trình cập nhật đang chậm</span>
+        <span>{language === "en" ? "Data is stale - the update process is slower than usual" : "Dữ liệu cũ - quá trình cập nhật đang chậm"}</span>
       </div>
     );
   }
@@ -86,7 +88,7 @@ export function FreshnessBanner() {
   return (
     <div className="freshness-banner dead">
       <AlertTriangle size={14} />
-      <span>Hệ thống cập nhật giá đang bảo trì. Dữ liệu hiển thị là lần cập nhật gần nhất.</span>
+      <span>{language === "en" ? "The price update system is under maintenance. The displayed data is the latest available update." : "Hệ thống cập nhật giá đang bảo trì. Dữ liệu hiển thị là lần cập nhật gần nhất."}</span>
     </div>
   );
 }

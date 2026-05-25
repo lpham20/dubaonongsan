@@ -20,6 +20,11 @@ from app.models import AppUser, DurianVariety, GuidePost, NewsArticle, Productio
 from app.schemas import GuidePostOut, NewsArticleOut, SubscriberIn, SubscriberOut, UserPriceReportIn, UserPriceReportOut
 from app.services.auth import require_admin
 from app.services.content_portal import ContentPortalService
+from app.content_i18n.translations import (
+    guide_translation_for,
+    localized_language,
+    machine_translate_many_en,
+)
 
 
 settings = get_settings()
@@ -69,11 +74,57 @@ def _news_slug(article: NewsArticle) -> str:
     return f"{article.article_id}-{_slug_from_url(article.source_url, article.title)}"
 
 
+def _news_out(article: NewsArticle, lang: str = "vi") -> dict:
+    if localized_language(lang) != "en":
+        return {
+            "article_id": article.article_id,
+            "source_name": article.source_name,
+            "source_url": article.source_url,
+            "title": article.title,
+            "summary": article.summary,
+            "excerpt": article.excerpt,
+            "category": article.category,
+            "image_url": article.image_url,
+            "published_at": article.published_at,
+            "scraped_at": article.scraped_at,
+        }
+    title, summary, excerpt, category = machine_translate_many_en(
+        [article.title, article.summary, article.excerpt or "", article.category]
+    )
+    return {
+        "article_id": article.article_id,
+        "source_name": article.source_name,
+        "source_url": article.source_url,
+        "title": title,
+        "summary": summary,
+        "excerpt": excerpt or summary,
+        "category": category,
+        "image_url": article.image_url,
+        "published_at": article.published_at,
+        "scraped_at": article.scraped_at,
+    }
+
+
 def _public_guide_slug(slug: str) -> str:
     return re.sub(r"^(hainong|hai-nong|hai_nong)-+", "", slug, flags=re.IGNORECASE)
 
 
-def _guide_out(guide: GuidePost) -> dict:
+def _guide_out(guide: GuidePost, lang: str = "vi") -> dict:
+    if localized_language(lang) == "en":
+        translated = guide_translation_for(guide.post_id)
+        if translated:
+            return {
+                "post_id": guide.post_id,
+                "slug": guide.public_slug or _public_guide_slug(guide.slug),
+                "title": translated.get("title") or guide.title,
+                "crop_type": guide.crop_type,
+                "category": translated.get("category") or guide.category,
+                "tags": guide.tags,
+                "summary": translated.get("summary") or guide.summary,
+                "content": translated.get("content") or _public_guide_content(guide.content),
+                "author": translated.get("author") or "Agri Price Forecast technical desk",
+                "published_at": guide.published_at,
+            }
     return {
         "post_id": guide.post_id,
         "slug": guide.public_slug or _public_guide_slug(guide.slug),
@@ -111,27 +162,32 @@ def _guide_image_urls(content: str) -> list[str]:
 def news(
     category: str | None = Query(default=None),
     limit: int = Query(default=120, ge=1, le=2000),
+    lang: str = Query(default="vi", pattern="^(vi|en)$"),
     db: Session = Depends(get_db),
 ) -> list:
-    return ContentPortalService(db).latest_news(limit=limit, category=category)
+    return [_news_out(article, lang) for article in ContentPortalService(db).latest_news(limit=limit, category=category)]
 
 
 @router.get("/content/news/{slug}", response_model=NewsArticleOut)
 @cached(prefix="news-detail", ttl_seconds=900)
-def news_detail(slug: str, db: Session = Depends(get_db)) -> NewsArticle:
+def news_detail(
+    slug: str,
+    lang: str = Query(default="vi", pattern="^(vi|en)$"),
+    db: Session = Depends(get_db),
+) -> dict:
     article = db.scalar(select(NewsArticle).where(NewsArticle.public_slug == slug))
     if article:
-        return article
+        return _news_out(article, lang)
     article_id_part = slug.split("-", 1)[0]
     if article_id_part.isdigit():
         article = db.scalar(select(NewsArticle).where(NewsArticle.article_id == int(article_id_part)))
         if article:
-            return article
+            return _news_out(article, lang)
 
     articles = db.scalars(select(NewsArticle).order_by(NewsArticle.scraped_at.desc()).limit(2500)).all()
     for article in articles:
         if _news_slug(article) == slug or _slug_from_url(article.source_url, article.title) == slug:
-            return article
+            return _news_out(article, lang)
     raise HTTPException(status_code=404, detail="Không tìm thấy bài tin")
 
 
@@ -152,18 +208,23 @@ def scrape_news(
 def guides(
     crop: str | None = Query(default=None),
     limit: int = Query(default=120, ge=1, le=500),
+    lang: str = Query(default="vi", pattern="^(vi|en)$"),
     db: Session = Depends(get_db),
 ) -> list:
-    return [_guide_out(guide) for guide in ContentPortalService(db).guides(crop=crop, limit=limit)]
+    return [_guide_out(guide, lang) for guide in ContentPortalService(db).guides(crop=crop, limit=limit)]
 
 
 @router.get("/content/guides/{slug}", response_model=GuidePostOut)
 @cached(prefix="guide-detail", ttl_seconds=1800)
-def guide_detail(slug: str, db: Session = Depends(get_db)) -> dict:
+def guide_detail(
+    slug: str,
+    lang: str = Query(default="vi", pattern="^(vi|en)$"),
+    db: Session = Depends(get_db),
+) -> dict:
     public_slug = _public_guide_slug(slug)
     guide = db.scalar(select(GuidePost).where(GuidePost.public_slug == public_slug))
     if guide is not None:
-        return _guide_out(guide)
+        return _guide_out(guide, lang)
     candidate_slugs = {slug, f"hainong-{slug}"}
     guide = db.scalar(select(GuidePost).where(GuidePost.slug.in_(candidate_slugs)))
     if guide is None:
@@ -187,7 +248,7 @@ def guide_detail(slug: str, db: Session = Depends(get_db)) -> dict:
             )
     if guide is None:
         raise HTTPException(status_code=404, detail="Không tìm thấy bài hướng dẫn")
-    return _guide_out(guide)
+    return _guide_out(guide, lang)
 
 
 @router.get("/sitemap.xml", include_in_schema=False)
@@ -223,6 +284,14 @@ def sitemap(db: Session = Depends(get_db)) -> Response:
         published = article.published_at or article.scraped_at
         lastmod = published.date().isoformat() if published else None
         urls.append((f"{SITE_BASE}/tin-tuc/{_news_slug(article)}", "0.6", "weekly", lastmod))
+
+    localized_urls: list[tuple[str, str, str, str | None]] = []
+    for loc, priority, changefreq, lastmod in urls:
+        path = loc.removeprefix(SITE_BASE)
+        for prefix in ("vn", "en"):
+            localized_path = f"/{prefix}" if path == "/" else f"/{prefix}{path}"
+            localized_urls.append((f"{SITE_BASE}{localized_path}", priority, changefreq, lastmod))
+    urls.extend(localized_urls)
 
     body = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for loc, priority, changefreq, lastmod in urls:

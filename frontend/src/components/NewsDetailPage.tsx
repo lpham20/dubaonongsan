@@ -6,8 +6,11 @@ import { RelatedForecastWidget } from "./RelatedForecastWidget";
 import { SeoHead } from "./SeoHead";
 import { fetchNews, fetchNewsDetail, type NewsArticle } from "../lib/api";
 import { compactText, DEFAULT_OG_IMAGE, newsPath } from "../lib/seo";
+import { useLanguage } from "../contexts/LanguageContext";
+import { withLanguagePrefix } from "../lib/localizedRoutes";
 
 export function NewsDetailPage({ slug }: { slug: string }) {
+  const { language } = useLanguage();
   const [article, setArticle] = useState<NewsArticle | null>(null);
   const [related, setRelated] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +23,7 @@ export function NewsDetailPage({ slug }: { slug: string }) {
     setLoading(true);
     setFailed(false);
     setArticle(null);
-    fetchNewsDetail(slug, controller.signal)
+    fetchNewsDetail(slug, controller.signal, language)
       .then(setArticle)
       .catch((err) => {
         if (err?.name === "AbortError") {
@@ -38,12 +41,12 @@ export function NewsDetailPage({ slug }: { slug: string }) {
       window.clearTimeout(timeoutId);
       controller.abort();
     };
-  }, [slug, retryKey]);
+  }, [language, slug, retryKey]);
 
   useEffect(() => {
     if (!article) return;
     const controller = new AbortController();
-    fetchNews(controller.signal)
+    fetchNews(controller.signal, language)
       .then((items) => {
         const articleText = normalizeTopicText(`${article.title} ${article.summary} ${article.category}`);
         setRelated(
@@ -63,10 +66,11 @@ export function NewsDetailPage({ slug }: { slug: string }) {
         if (!controller.signal.aborted) setRelated([]);
       });
     return () => controller.abort();
-  }, [article]);
+  }, [article, language]);
 
   const articleSchema = useMemo(() => {
     if (!article) return undefined;
+    const copy = newsDetailCopy[language];
     return {
       "@context": "https://schema.org",
       "@type": "NewsArticle",
@@ -82,36 +86,40 @@ export function NewsDetailPage({ slug }: { slug: string }) {
       },
       publisher: {
         "@type": "Organization",
-        name: "Dự báo nông sản",
+        name: copy.publisher,
         logo: {
           "@type": "ImageObject",
             url: "https://dubaonongsan.com/og-cover.jpg"
         }
       }
     };
-  }, [article]);
+  }, [article, language]);
 
   if (loading) {
+    const copy = newsDetailCopy[language];
     return (
       <section className="content-page detail-page">
-        <Breadcrumb items={[{ label: "Trang chủ", href: "/" }, { label: "Tin tức", href: "/tin-tuc" }]} />
-        <div className="loading">Đang tải bài tin...</div>
+        <Breadcrumb items={[{ label: copy.home, href: "/" }, { label: copy.news, href: "/tin-tuc" }]} />
+        <div className="loading">{copy.loading}</div>
       </section>
     );
   }
 
   if (failed || !article) {
+    const copy = newsDetailCopy[language];
     return (
       <section className="content-page detail-page">
-        <SeoHead title="Không tải được bài tin" description="Đường truyền yếu hoặc bài tin tạm thời không khả dụng. Vui lòng thử lại." canonical={`/tin-tuc/${slug}`} />
-        <Breadcrumb items={[{ label: "Trang chủ", href: "/" }, { label: "Tin tức", href: "/tin-tuc" }, { label: "Không tải được" }]} />
-        <h1>Không tải được bài tin</h1>
-        <p>Mạng có thể đang chậm hoặc bài tin tạm thời chưa sẵn sàng. Bạn có thể thử lại sau vài giây.</p>
+        <SeoHead title={copy.errorTitle} description={copy.errorDescription} canonical={`/tin-tuc/${slug}`} />
+        <Breadcrumb items={[{ label: copy.home, href: "/" }, { label: copy.news, href: "/tin-tuc" }, { label: copy.errorCrumb }]} />
+        <h1>{copy.errorTitle}</h1>
+        <p>{copy.errorBody}</p>
         <div className="detail-error-actions">
           <button type="button" className="detail-primary-link" onClick={() => setRetryKey((value) => value + 1)}>
-            Thử lại
+            {copy.retry}
           </button>
-          <Link className="detail-secondary-link" to="/tin-tuc">Quay lại bản tin thị trường</Link>
+          <Link className="detail-secondary-link" to={withLanguagePrefix("/tin-tuc", language)}>
+            {copy.backToNews}
+          </Link>
         </div>
       </section>
     );
@@ -130,7 +138,7 @@ export function NewsDetailPage({ slug }: { slug: string }) {
         publishedAt={article.published_at || article.scraped_at}
         schemaJsonLd={articleSchema}
       />
-      <Breadcrumb items={[{ label: "Trang chủ", href: "/" }, { label: "Tin tức", href: "/tin-tuc" }, { label: article.category }]} />
+      <Breadcrumb items={[{ label: newsDetailCopy[language].home, href: "/" }, { label: newsDetailCopy[language].news, href: "/tin-tuc" }, { label: article.category }]} />
       <article className="detail-article">
         <header>
           <span className="detail-kicker">
@@ -141,7 +149,7 @@ export function NewsDetailPage({ slug }: { slug: string }) {
           <p>{article.summary}</p>
           <div className="detail-meta">
             <CalendarDays size={16} />
-            <span>{formatDate(article.published_at || article.scraped_at)}</span>
+            <span>{formatDate(article.published_at || article.scraped_at, language)}</span>
             <span>{article.source_name}</span>
           </div>
         </header>
@@ -149,7 +157,7 @@ export function NewsDetailPage({ slug }: { slug: string }) {
           <img
             className="detail-hero-image"
             src={article.image_url}
-            alt={`Ảnh minh họa: ${article.title}`}
+            alt={language === "en" ? `Illustration: ${article.title}` : `Ảnh minh họa: ${article.title}`}
             loading="eager"
             fetchPriority="high"
             decoding="async"
@@ -163,9 +171,9 @@ export function NewsDetailPage({ slug }: { slug: string }) {
           ))}
         </div>
         <RelatedForecastWidget text={`${article.title} ${article.summary} ${article.category}`} />
-        {related.length ? <RelatedNews articles={related} /> : null}
+        {related.length ? <RelatedNews articles={related} language={language} /> : null}
         <a className="detail-primary-link" href={article.source_url} target="_blank" rel="noreferrer">
-          Đọc bài gốc tại {article.source_name}
+          {language === "en" ? `Read the original article at ${article.source_name}` : `Đọc bài gốc tại ${article.source_name}`}
           <ExternalLink size={16} />
         </a>
       </article>
@@ -173,15 +181,15 @@ export function NewsDetailPage({ slug }: { slug: string }) {
   );
 }
 
-function RelatedNews({ articles }: { articles: NewsArticle[] }) {
+function RelatedNews({ articles, language }: { articles: NewsArticle[]; language: "vi" | "en" }) {
   return (
-    <aside aria-label="Tin liên quan" className="related-news">
-      <h2>Tin liên quan</h2>
+    <aside aria-label={language === "en" ? "Related news" : "Tin liên quan"} className="related-news">
+      <h2>{language === "en" ? "Related news" : "Tin liên quan"}</h2>
       <ul>
         {articles.map((item) => (
           <li key={item.article_id}>
-            <Link to={newsPath(item)}>{item.title}</Link>
-            <small>{item.category} · {formatDate(item.published_at || item.scraped_at)}</small>
+            <Link to={withLanguagePrefix(newsPath(item), language)}>{item.title}</Link>
+            <small>{item.category} · {formatDate(item.published_at || item.scraped_at, language)}</small>
           </li>
         ))}
       </ul>
@@ -196,9 +204,36 @@ function normalizeTopicText(value: string) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
-function formatDate(value: string | null) {
-  if (!value) return "Đang cập nhật";
+function formatDate(value: string | null, language: "vi" | "en" = "vi") {
+  if (!value) return language === "en" ? "Updating" : "Đang cập nhật";
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Đang cập nhật";
-  return new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
+  if (Number.isNaN(date.getTime())) return language === "en" ? "Updating" : "Đang cập nhật";
+  return new Intl.DateTimeFormat(language === "en" ? "en-US" : "vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
 }
+
+const newsDetailCopy = {
+  vi: {
+    home: "Trang chủ",
+    news: "Tin tức",
+    publisher: "Dự báo nông sản",
+    loading: "Đang tải bài tin...",
+    errorTitle: "Không tải được bài tin",
+    errorDescription: "Đường truyền yếu hoặc bài tin tạm thời không khả dụng. Vui lòng thử lại.",
+    errorCrumb: "Không tải được",
+    errorBody: "Mạng có thể đang chậm hoặc bài tin tạm thời chưa sẵn sàng. Bạn có thể thử lại sau vài giây.",
+    retry: "Thử lại",
+    backToNews: "Quay lại bản tin thị trường"
+  },
+  en: {
+    home: "Home",
+    news: "News",
+    publisher: "Agri Price Forecast",
+    loading: "Loading this article...",
+    errorTitle: "Could not load this article",
+    errorDescription: "The connection is slow or this article is temporarily unavailable. Please try again.",
+    errorCrumb: "Could not load",
+    errorBody: "The network may be slow or the article may not be ready yet. Please try again in a few seconds.",
+    retry: "Try again",
+    backToNews: "Back to market news"
+  }
+} as const;

@@ -110,7 +110,7 @@ export function MobileNavDrawer({
         <span>{copy.brand}</span>
       </button>
       <button type="button" className="mobile-language-toggle" onClick={onLanguageToggle} aria-label={copy.switchLanguage}>
-        <span aria-hidden="true">{copy.languageFlag}</span>
+        <span className={`language-flag language-flag-${language}`} aria-hidden="true" />
         <span>{copy.languageLabel}</span>
       </button>
       <button
@@ -134,7 +134,7 @@ export function MobileNavDrawer({
         }}
       >
         <UserRound size={24} />
-        <span className="sr-only">{userLabel ?? "Tài khoản"}</span>
+        <span className="sr-only">{userLabel ?? copy.account}</span>
       </button>
 
       <div className={drawerOpen ? "mobile-drawer-backdrop open" : "mobile-drawer-backdrop"} onClick={closeDrawer} />

@@ -27,6 +27,9 @@ import {
   type Variety
 } from "../lib/api";
 import { newsPath } from "../lib/seo";
+import { useLanguage } from "../contexts/LanguageContext";
+import { withLanguagePrefix } from "../lib/localizedRoutes";
+import { cropLabel } from "../lib/displayLabels";
 
 type Props = {
   articles: NewsArticle[];
@@ -154,7 +157,103 @@ const FALLBACK_NEWS_TICKER: TickerItem[] = [
   { label: "Urea hạt đục", value: "12.400 đ/kg", change: "-0,4%", tone: "down" }
 ];
 
+function newsViewLabel(value: NewsView, copy: { latest: string; durian: string; coffee: string; pepper: string }) {
+  if (value === "sau_rieng") return copy.durian;
+  if (value === "ca_phe") return copy.coffee;
+  if (value === "ho_tieu") return copy.pepper;
+  return copy.latest;
+}
+
+function newsSeoEn(value: NewsView, copy: { seoLatestTitle: string; seoLatestDescription: string }) {
+  const seo: Record<NewsView, { title: string; description: string; canonical: string }> = {
+    latest: {
+      title: copy.seoLatestTitle,
+      description: copy.seoLatestDescription,
+      canonical: "/tin-tuc"
+    },
+    sau_rieng: {
+      title: "Durian price news and market updates",
+      description: "Latest durian price news by production area, variety, export flow and market demand.",
+      canonical: "/tin-tuc/gia-sau-rieng"
+    },
+    ca_phe: {
+      title: "Coffee price news and market updates",
+      description: "Latest Robusta and Arabica coffee price news, exports, inventory and policy updates.",
+      canonical: "/tin-tuc/gia-ca-phe"
+    },
+    ho_tieu: {
+      title: "Pepper price news and market updates",
+      description: "Latest black pepper price news, export updates, inventory signals and policy changes.",
+      canonical: "/tin-tuc/gia-ho-tieu"
+    }
+  };
+  return seo[value] ?? seo.latest;
+}
+
+function topicLabel(topic: NewsTopic, language: "vi" | "en") {
+  if (language === "vi") return topic;
+  const labels: Record<NewsTopic, string> = {
+    "Tất cả": "All",
+    "Cà phê": "Coffee",
+    "Sầu riêng": "Durian",
+    "Hồ tiêu": "Pepper",
+    "Lúa": "Rice",
+    "Giá nông sản": "Crop prices",
+    "Phân bón - vật tư": "Fertilizer & inputs",
+    "Xuất khẩu": "Exports",
+    "Chính sách": "Policy",
+    "Tin khác": "Other"
+  };
+  return labels[topic] ?? topic;
+}
+
+function sortLabel(value: SortMode, language: "vi" | "en") {
+  if (language === "vi") return SORT_OPTIONS.find((item) => item.value === value)?.label ?? value;
+  if (value === "newest") return "Newest";
+  if (value === "impact") return "Impact";
+  return "Related";
+}
+
+function relationLabel(value: string) {
+  const normalized = normalize(value);
+  if (normalized.includes("gia")) return "Price";
+  if (normalized.includes("xuat khau")) return "Exports";
+  if (normalized.includes("phan bon")) return "Inputs";
+  if (normalized.includes("chinh sach")) return "Policy";
+  return "Market";
+}
+
 export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, onViewChange, onOpenAnalytics }: Props) {
+  const { language } = useLanguage();
+  const pageCopy = language === "en"
+    ? {
+        heroKicker: "Agricultural news",
+        heroTitle: "Market news for agricultural prices, fertilizer and policy",
+        refreshing: "Fetching news",
+        refresh: "Fetch latest news",
+        navLabel: "Choose news section",
+        latest: "Latest news",
+        durian: "Durian prices",
+        coffee: "Coffee prices",
+        pepper: "Pepper prices",
+        seoLatestTitle: "Latest agricultural market, fertilizer and policy news",
+        seoLatestDescription: "Fresh agricultural news on crop prices, fertilizer, inputs, exports and policy changes that can affect the market.",
+        tickerLabel: "Agricultural price ticker"
+      }
+    : {
+        heroKicker: "Tin tức nông nghiệp",
+        heroTitle: "Bản tin thị trường nông sản, phân bón và chính sách ngành",
+        refreshing: "Đang lấy tin",
+        refresh: "Lấy tin mới",
+        navLabel: "Chọn mục tin tức",
+        latest: "Tin tức mới nhất",
+        durian: "Giá sầu riêng",
+        coffee: "Giá cà phê",
+        pepper: "Giá hồ tiêu",
+        seoLatestTitle: "Tin tức thị trường nông sản, phân bón và chính sách mới nhất",
+        seoLatestDescription: "Bản tin nông nghiệp mới nhất về giá nông sản, phân bón, vật tư, xuất khẩu và chính sách có thể ảnh hưởng tới thị trường.",
+        tickerLabel: "Dải băng giá nông sản"
+      };
   const location = useLocation();
   const [activeTopic, setActiveTopic] = useState<NewsTopic>(topicFromPath);
   const [sortMode, setSortMode] = useState<SortMode>("newest");
@@ -224,10 +323,12 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
   const pageCount = Math.max(1, Math.ceil(rest.length / NEWS_PAGE_SIZE));
   const activePage = Math.min(newsPage, pageCount);
   const pagedRest = rest.slice((activePage - 1) * NEWS_PAGE_SIZE, activePage * NEWS_PAGE_SIZE);
-  const marketWatch = buildMarketWatch(rankedArticles);
-  const digest = buildDigest(filteredArticles);
+  const marketWatch = buildMarketWatch(rankedArticles, language);
+  const digest = buildDigest(filteredArticles, language);
   const tickerItems = useMemo(() => buildNewsTicker(tickerData), [tickerData]);
-  const seo = VIEW_SEO[activeView] ?? VIEW_SEO.latest;
+  const seo = language === "en"
+    ? newsSeoEn(activeView, pageCopy)
+    : VIEW_SEO[activeView] ?? VIEW_SEO.latest;
 
   useEffect(() => {
     const nextQuery = new URLSearchParams(location.search).get("q") ?? "";
@@ -311,20 +412,20 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
           <div>
             <span>
               <Newspaper size={18} />
-              Tin tức nông nghiệp
+              {pageCopy.heroKicker}
             </span>
-            <h1>Bản tin thị trường nông sản, phân bón và chính sách ngành</h1>
+            <h1>{pageCopy.heroTitle}</h1>
           </div>
           {canScrape ? (
             <button type="button" className="news-refresh-button" onClick={onScrape} disabled={busy}>
               <RefreshCw size={16} />
-              {busy ? "Đang lấy tin" : "Lấy tin mới"}
+              {busy ? pageCopy.refreshing : pageCopy.refresh}
             </button>
           ) : null}
         </div>
       ) : null}
 
-      <nav className="news-view-tabs" aria-label="Chọn mục tin tức">
+      <nav className="news-view-tabs" aria-label={pageCopy.navLabel}>
         {NEWS_VIEW_TABS.map((view) => (
           <button
             type="button"
@@ -333,7 +434,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
             key={view.value}
             onClick={() => onViewChange(view.value)}
           >
-            {view.label}
+            {newsViewLabel(view.value, pageCopy)}
           </button>
         ))}
       </nav>
@@ -349,7 +450,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
       ) : (
       <>
       <div className="news-toolbar">
-        <div className="news-topic-tabs" aria-label="Lọc tin theo chủ đề">
+        <div className="news-topic-tabs" aria-label={language === "en" ? "Filter news by topic" : "Lọc tin theo chủ đề"}>
           {TOPICS.map((topic) => (
             <button
               type="button"
@@ -357,7 +458,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
               key={topic}
               onClick={() => setActiveTopic(topic)}
             >
-              {topic}
+              {topicLabel(topic, language)}
               <small>{topicCount(rankedArticles, topic)}</small>
             </button>
           ))}
@@ -368,10 +469,10 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Tìm theo cây trồng, giá, xuất khẩu..."
+              placeholder={language === "en" ? "Search by crop, price, exports..." : "Tìm theo cây trồng, giá, xuất khẩu..."}
             />
           </label>
-          <div className="news-sort" aria-label="Sắp xếp tin tức">
+          <div className="news-sort" aria-label={language === "en" ? "Sort news" : "Sắp xếp tin tức"}>
             {SORT_OPTIONS.map((option) => (
               <button
                 type="button"
@@ -379,7 +480,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
                 key={option.value}
                 onClick={() => setSortMode(option.value)}
               >
-                {option.label}
+                {sortLabel(option.value, language)}
               </button>
             ))}
           </div>
@@ -390,7 +491,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
         <section className="news-digest-panel">
           <div>
             <BarChart3 size={18} />
-            <h2>Tóm tắt nhanh hôm nay</h2>
+            <h2>{language === "en" ? "Today at a glance" : "Tóm tắt nhanh hôm nay"}</h2>
           </div>
           <ul>
             {digest.slice(0, 2).map((line) => (
@@ -412,11 +513,11 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
             <section className="news-brief-panel">
               <div>
                 <TrendingUp size={17} />
-                <h3>Tin ảnh hưởng giá</h3>
+                <h3>{language === "en" ? "Price-moving news" : "Tin ảnh hưởng giá"}</h3>
               </div>
               {quickReads.slice(0, 4).map(({ article, topic, impact }) => (
-                <Link to={newsPath(article)} key={article.article_id}>
-                  <span>{topic}</span>
+                <Link to={withLanguagePrefix(newsPath(article), language)} key={article.article_id}>
+                  <span>{topicLabel(topic, language)}</span>
                   <div className="news-alert-title">
                     <strong>{displayTitle(article.title, 76)}</strong>
                     <TrendSparkline topic={topic} impact={impact} />
@@ -431,7 +532,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
             <section className="market-watch-panel">
               <div>
                 <Tags size={17} />
-                <h3>Theo dõi thị trường</h3>
+                <h3>{language === "en" ? "Market watch" : "Theo dõi thị trường"}</h3>
               </div>
               {marketWatch.map((item) => (
                 <button
@@ -440,7 +541,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
                   key={item.topic}
                   onClick={() => setActiveTopic(item.topic)}
                 >
-                  <span>{item.topic}</span>
+                  <span>{topicLabel(item.topic, language)}</span>
                   <strong>{item.count}</strong>
                   <small>{item.note}</small>
                 </button>
@@ -449,7 +550,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
           </aside>
         </div>
       ) : (
-        <div className="news-empty">Không có tin phù hợp với bộ lọc hiện tại.</div>
+        <div className="news-empty">{language === "en" ? "No stories match the current filters." : "Không có tin phù hợp với bộ lọc hiện tại."}</div>
       )}
 
       {rest.length ? (
@@ -475,7 +576,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
                 <div className="news-source-row">
                   <small>{article.source_name}</small>
                   <small className="num">{formatDate(article.published_at ?? article.scraped_at)}</small>
-                  <Link to={newsPath(article)}>
+                  <Link to={withLanguagePrefix(newsPath(article), language)}>
                     Xem chi tiết
                     <ExternalLink size={14} />
                   </Link>
@@ -523,7 +624,9 @@ function PriceBoardSection({
   onOpenAnalytics: (crop: CropType) => void;
   onReported: () => Promise<void>;
 }) {
+  const { language } = useLanguage();
   const meta = PRICE_VIEW_META[crop];
+  const cropName = cropLabel(crop, language);
   const [reportOpen, setReportOpen] = useState(false);
   const displayRows = rows
     .filter((row) => priceValue(row) > 0)
@@ -544,25 +647,25 @@ function PriceBoardSection({
     <section className="news-price-board">
       <div className="news-price-board-header">
         <div>
-          <span>Bảng giá nông sản</span>
-          <h2>{meta.title} hôm nay ngày {formatDate(latestDate)}</h2>
+          <span>{language === "en" ? "Agricultural price board" : "Bảng giá nông sản"}</span>
+          <h2>{language === "en" ? `${cropName} prices today, ${formatDate(latestDate)}` : `${meta.title} hôm nay ngày ${formatDate(latestDate)}`}</h2>
           <p>
-            Tổng hợp giá {meta.cropName} theo giống và vùng/tỉnh trong dữ liệu mới nhất của hệ thống.
+            {language === "en" ? `Latest ${cropName.toLowerCase()} prices by variety and province from the system data.` : `Tổng hợp giá ${meta.cropName} theo giống và vùng/tỉnh trong dữ liệu mới nhất của hệ thống.`}
           </p>
           <FreshnessBanner />
         </div>
         <div className="price-board-kpis">
           <span>
             <strong>{displayRows.length}</strong>
-            dòng giá
+            {language === "en" ? "price rows" : "dòng giá"}
           </span>
           <span>
             <strong>{provinceCount}</strong>
-            vùng/tỉnh
+            {language === "en" ? "areas/provinces" : "vùng/tỉnh"}
           </span>
           <span>
             <strong>{varietyCount}</strong>
-            loại giống
+            {language === "en" ? "varieties" : "loại giống"}
           </span>
         </div>
       </div>
@@ -570,20 +673,20 @@ function PriceBoardSection({
       <PriceReportNotice onOpen={() => setReportOpen(true)} />
 
       {loading ? (
-        <div className="news-price-empty">Đang tải bảng giá mới nhất...</div>
+        <div className="news-price-empty">{language === "en" ? "Loading the latest price board..." : "Đang tải bảng giá mới nhất..."}</div>
       ) : displayRows.length ? (
         <>
           <div className="news-price-table-wrap">
             <table className="news-price-table">
               <thead>
                 <tr>
-                  <th>Tỉnh/vùng</th>
-                  <th>Loại giống</th>
-                  <th>Loại</th>
-                  <th>Giá thấp</th>
-                  <th>Giá cao</th>
-                  <th>Cập nhật</th>
-                  <th>Báo giá nông dân</th>
+                  <th>{language === "en" ? "Province/area" : "Tỉnh/vùng"}</th>
+                  <th>{language === "en" ? "Variety" : "Loại giống"}</th>
+                  <th>{language === "en" ? "Grade" : "Loại"}</th>
+                  <th>{language === "en" ? "Low price" : "Giá thấp"}</th>
+                  <th>{language === "en" ? "High price" : "Giá cao"}</th>
+                  <th>{language === "en" ? "Updated" : "Cập nhật"}</th>
+                  <th>{language === "en" ? "Farmer quote" : "Báo giá nông dân"}</th>
                 </tr>
               </thead>
               <tbody>
@@ -594,7 +697,7 @@ function PriceBoardSection({
                       {row.province && row.region !== row.province ? <small>{row.region}</small> : null}
                     </td>
                     <td><span lang={languageForCropName(row.variety)}>{row.variety}</span></td>
-                    <td>{row.quality_grade ?? "Chuẩn thị trường"}</td>
+                    <td>{row.quality_grade ?? (language === "en" ? "Market standard" : "Chuẩn thị trường")}</td>
                     <td className="num">{formatMoney(row.min_price_vnd ?? row.max_price_vnd)}</td>
                     <td className="num">{formatMoney(row.max_price_vnd ?? row.min_price_vnd)}</td>
                     <td className="num">{formatDate(row.timestamp)}</td>
@@ -603,11 +706,11 @@ function PriceBoardSection({
                         <>
                           <strong>{formatMoney(row.farmer_report_price_vnd)}</strong>
                           <small>
-                            {row.farmer_report_quality_grade ?? "Giá tham khảo"} · {row.farmer_reported_at ? formatDate(row.farmer_reported_at) : ""}
+                            {row.farmer_report_quality_grade ?? (language === "en" ? "Reference price" : "Giá tham khảo")} · {row.farmer_reported_at ? formatDate(row.farmer_reported_at) : ""}
                           </small>
                         </>
                       ) : (
-                        <small>Chưa có báo giá</small>
+                        <small>{language === "en" ? "No quote yet" : "Chưa có báo giá"}</small>
                       )}
                     </td>
                   </tr>
@@ -615,7 +718,7 @@ function PriceBoardSection({
               </tbody>
             </table>
           </div>
-          <div className="news-price-card-list" aria-label={`Bảng giá ${meta.cropName} dạng thẻ`}>
+          <div className="news-price-card-list" aria-label={language === "en" ? `${cropName} price cards` : `Bảng giá ${meta.cropName} dạng thẻ`}>
             {displayRows.map((row, index) => (
               <article className="news-price-card" key={`card-${row.timestamp}-${row.region}-${row.variety}-${row.quality_grade ?? "all"}-${index}`}>
                 <div className="news-price-card-head">
@@ -627,29 +730,29 @@ function PriceBoardSection({
                 </div>
                 <div className="news-price-card-meta">
                   <span lang={languageForCropName(row.variety)}>{row.variety}</span>
-                  <span>{row.quality_grade ?? "Chuẩn thị trường"}</span>
+                  <span>{row.quality_grade ?? (language === "en" ? "Market standard" : "Chuẩn thị trường")}</span>
                 </div>
                 <div className="news-price-card-range">
                   <span>
-                    <small>Giá thấp</small>
+                    <small>{language === "en" ? "Low price" : "Giá thấp"}</small>
                     <b className="num">{formatMoney(row.min_price_vnd ?? row.max_price_vnd)}</b>
                   </span>
                   <span>
-                    <small>Giá cao</small>
+                    <small>{language === "en" ? "High price" : "Giá cao"}</small>
                     <b className="num">{formatMoney(row.max_price_vnd ?? row.min_price_vnd)}</b>
                   </span>
                 </div>
                 <div className="news-price-card-footer">
                   {row.farmer_report_price_vnd ? (
                     <>
-                      <span>Báo giá nông dân</span>
+                      <span>{language === "en" ? "Farmer quote" : "Báo giá nông dân"}</span>
                       <strong className="num">{formatMoney(row.farmer_report_price_vnd)}</strong>
                       <small>
-                        {row.farmer_report_quality_grade ?? "Giá tham khảo"}{row.farmer_reported_at ? ` · ${formatDate(row.farmer_reported_at)}` : ""}
+                        {row.farmer_report_quality_grade ?? (language === "en" ? "Reference price" : "Giá tham khảo")}{row.farmer_reported_at ? ` · ${formatDate(row.farmer_reported_at)}` : ""}
                       </small>
                     </>
                   ) : (
-                    <small>Chưa có báo giá nông dân</small>
+                    <small>{language === "en" ? "No farmer quote yet" : "Chưa có báo giá nông dân"}</small>
                   )}
                 </div>
               </article>
@@ -658,12 +761,12 @@ function PriceBoardSection({
         </>
       ) : (
         <div className="news-price-empty">
-          Chưa có bảng giá đủ sạch cho mục này. Hệ thống sẽ bổ sung sau các lần quét dữ liệu tiếp theo.
+          {language === "en" ? "No clean price board is available for this section yet. The system will add it after the next data scans." : "Chưa có bảng giá đủ sạch cho mục này. Hệ thống sẽ bổ sung sau các lần quét dữ liệu tiếp theo."}
         </div>
       )}
 
       <button type="button" className="news-forecast-link" onClick={() => onOpenAnalytics(crop)}>
-        Xem {meta.forecastLabel}
+        {language === "en" ? `View ${cropName.toLowerCase()} forecast` : `Xem ${meta.forecastLabel}`}
         <ExternalLink size={15} />
       </button>
       {reportOpen ? (
@@ -681,18 +784,19 @@ function PriceBoardSection({
 }
 
 function PriceReportNotice({ onOpen }: { onOpen: () => void }) {
+  const { language } = useLanguage();
   return (
     <div className="price-report-notice">
       <div className="price-report-notice-body">
-        <strong>Lưu ý giá tham khảo</strong>
-        <p>Giá được tổng hợp từ dữ liệu thị trường và mô hình AI, dùng để tham khảo nhanh theo vùng.</p>
+        <strong>{language === "en" ? "Reference price note" : "Lưu ý giá tham khảo"}</strong>
+        <p>{language === "en" ? "Prices are aggregated from market data and AI-assisted cleaning, intended as quick regional references." : "Giá được tổng hợp từ dữ liệu thị trường và mô hình AI, dùng để tham khảo nhanh theo vùng."}</p>
         <details>
-          <summary>Xem lưu ý đầy đủ</summary>
-          <p>{PRICE_DISCLAIMER}</p>
+          <summary>{language === "en" ? "Read full note" : "Xem lưu ý đầy đủ"}</summary>
+          <p>{language === "en" ? "Actual transaction prices can differ by grade, volume, logistics, payment terms and buyer requirements. Please confirm locally before making a sale." : PRICE_DISCLAIMER}</p>
         </details>
       </div>
       <button type="button" onClick={onOpen}>
-        Báo giá
+        {language === "en" ? "Report price" : "Báo giá"}
       </button>
     </div>
   );
@@ -707,12 +811,13 @@ function PriceReportModal({
   onClose: () => void;
   onSaved: () => Promise<void>;
 }) {
+  const { language } = useLanguage();
   const [regions, setRegions] = useState<Region[]>([]);
   const [varieties, setVarieties] = useState<Variety[]>([]);
   const [regionId, setRegionId] = useState<number>(0);
   const [varietyId, setVarietyId] = useState<number>(0);
   const [price, setPrice] = useState("");
-  const [grade, setGrade] = useState("Giá người dùng báo");
+  const [grade, setGrade] = useState(language === "en" ? "User-reported price" : "Giá người dùng báo");
   const [reporterName, setReporterName] = useState("");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
@@ -725,7 +830,7 @@ function PriceReportModal({
         setRegions(payload);
         setRegionId(payload[0]?.region_id ?? 0);
       })
-      .catch(() => setMessage("Không tải được danh sách vùng."));
+      .catch(() => setMessage(language === "en" ? "Could not load the area list." : "Không tải được danh sách vùng."));
     return () => controller.abort();
   }, [crop]);
 
@@ -741,7 +846,7 @@ function PriceReportModal({
         setVarieties(payload);
         setVarietyId(payload[0]?.variety_id ?? 0);
       })
-      .catch(() => setMessage("Không tải được danh sách loại nông sản."));
+      .catch(() => setMessage(language === "en" ? "Could not load the variety list." : "Không tải được danh sách loại nông sản."));
     return () => controller.abort();
   }, [crop, regionId]);
 
@@ -749,11 +854,11 @@ function PriceReportModal({
     event.preventDefault();
     const normalizedPrice = Number(price.replace(/[^\d]/g, ""));
     if (!regionId || !varietyId) {
-      setMessage("Vui lòng chọn vùng và loại nông sản.");
+      setMessage(language === "en" ? "Please choose an area and variety." : "Vui lòng chọn vùng và loại nông sản.");
       return;
     }
     if (!Number.isFinite(normalizedPrice) || normalizedPrice <= 0) {
-      setMessage("Vui lòng nhập giá hợp lệ.");
+      setMessage(language === "en" ? "Please enter a valid price." : "Vui lòng nhập giá hợp lệ.");
       return;
     }
 
@@ -765,13 +870,13 @@ function PriceReportModal({
         region_id: regionId,
         variety_id: varietyId,
         price_vnd: normalizedPrice,
-        quality_grade: grade.trim() || "Giá người dùng báo",
+        quality_grade: grade.trim() || (language === "en" ? "User-reported price" : "Giá người dùng báo"),
         reporter_name: reporterName.trim() || null,
         note: note.trim() || null
       });
       await onSaved();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Không lưu được giá vừa báo.");
+      setMessage(error instanceof Error ? error.message : language === "en" ? "Could not save this price report." : "Không lưu được giá vừa báo.");
     } finally {
       setBusy(false);
     }
@@ -779,17 +884,17 @@ function PriceReportModal({
 
   return (
     <div className="price-report-modal-backdrop" role="presentation" onMouseDown={onClose}>
-      <div className="price-report-modal" role="dialog" aria-modal="true" aria-label="Báo giá địa phương" onMouseDown={(event) => event.stopPropagation()}>
+      <div className="price-report-modal" role="dialog" aria-modal="true" aria-label={language === "en" ? "Local price report" : "Báo giá địa phương"} onMouseDown={(event) => event.stopPropagation()}>
         <div className="price-report-modal-head">
           <div>
-            <span>{PRICE_VIEW_META[crop].title}</span>
-            <h3>Báo giá tại địa phương</h3>
+            <span>{language === "en" ? cropLabel(crop, language) : PRICE_VIEW_META[crop].title}</span>
+            <h3>{language === "en" ? "Report a local price" : "Báo giá tại địa phương"}</h3>
           </div>
-          <button type="button" onClick={onClose} aria-label="Đóng">×</button>
+          <button type="button" onClick={onClose} aria-label={language === "en" ? "Close" : "Đóng"}>×</button>
         </div>
         <form onSubmit={(event) => void submitReport(event)}>
           <label>
-            Vùng/tỉnh
+            {language === "en" ? "Area/province" : "Vùng/tỉnh"}
             <select value={regionId} onChange={(event) => setRegionId(Number(event.target.value))}>
               {regions.map((region) => (
                 <option value={region.region_id} key={region.region_id}>
@@ -799,7 +904,7 @@ function PriceReportModal({
             </select>
           </label>
           <label>
-            Loại nông sản
+            {language === "en" ? "Variety" : "Loại nông sản"}
             <select value={varietyId} onChange={(event) => setVarietyId(Number(event.target.value))}>
               {varieties.map((variety) => (
                 <option value={variety.variety_id} key={variety.variety_id}>
@@ -809,25 +914,25 @@ function PriceReportModal({
             </select>
           </label>
           <label>
-            Giá hiện tại (đ/kg)
-            <input value={price} onChange={(event) => setPrice(event.target.value)} inputMode="numeric" placeholder="Ví dụ: 85000" />
+            {language === "en" ? "Current price (VND/kg)" : "Giá hiện tại (đ/kg)"}
+            <input value={price} onChange={(event) => setPrice(event.target.value)} inputMode="numeric" placeholder={language === "en" ? "Example: 85000" : "Ví dụ: 85000"} />
           </label>
           <label>
-            Loại hàng
-            <input value={grade} onChange={(event) => setGrade(event.target.value)} placeholder="Ví dụ: loại 1, xô, đẹp..." />
+            {language === "en" ? "Grade" : "Loại hàng"}
+            <input value={grade} onChange={(event) => setGrade(event.target.value)} placeholder={language === "en" ? "Example: grade 1, bulk, premium..." : "Ví dụ: loại 1, xô, đẹp..."} />
           </label>
           <label>
-            Tên người báo giá (không bắt buộc)
+            {language === "en" ? "Reporter name (optional)" : "Tên người báo giá (không bắt buộc)"}
             <input value={reporterName} onChange={(event) => setReporterName(event.target.value)} />
           </label>
           <label>
-            Ghi chú (không bắt buộc)
-            <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={3} placeholder="Nguồn giá, chợ/đại lý, điều kiện hàng..." />
+            {language === "en" ? "Notes (optional)" : "Ghi chú (không bắt buộc)"}
+            <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={3} placeholder={language === "en" ? "Price source, market/dealer, product condition..." : "Nguồn giá, chợ/đại lý, điều kiện hàng..."} />
           </label>
           {message ? <p className="price-report-message">{message}</p> : null}
           <div className="price-report-actions">
-            <button type="button" onClick={onClose}>Hủy</button>
-            <button type="submit" disabled={busy}>{busy ? "Đang lưu..." : "Lưu giá"}</button>
+            <button type="button" onClick={onClose}>{language === "en" ? "Cancel" : "Hủy"}</button>
+            <button type="submit" disabled={busy}>{busy ? (language === "en" ? "Saving..." : "Đang lưu...") : (language === "en" ? "Save price" : "Lưu giá")}</button>
           </div>
         </form>
       </div>
@@ -873,12 +978,13 @@ function topicFromPath(): NewsTopic {
 }
 
 function LeadNewsCard({ item }: { item: RankedArticle }) {
+  const { language } = useLanguage();
   return (
     <article className="news-lead">
       <NewsImage article={item.article} />
       <div className="news-lead-copy">
         <div className="news-meta-line">
-          <span>{item.topic}</span>
+          <span>{topicLabel(item.topic, language)}</span>
           <ImpactBadge impact={item.impact} />
         </div>
         <h2>{displayTitle(item.article.title, 86)}</h2>
@@ -891,8 +997,8 @@ function LeadNewsCard({ item }: { item: RankedArticle }) {
             {formatDate(item.article.published_at ?? item.article.scraped_at)}
           </small>
         </div>
-        <Link to={newsPath(item.article)}>
-          Đọc bản tin
+        <Link to={withLanguagePrefix(newsPath(item.article), language)}>
+          {language === "en" ? "Read story" : "Đọc bản tin"}
           <ExternalLink size={16} />
         </Link>
       </div>
@@ -952,16 +1058,18 @@ function NewsImage({ article }: { article: NewsArticle }) {
 }
 
 function ImpactBadge({ impact }: { impact: string }) {
+  const { language } = useLanguage();
   return (
     <em className={`impact-badge ${impact === "Tác động giá cao" ? "high" : ""}`}>
       <Activity size={12} />
-      {impact}
+      {language === "en" ? (impact === "Tác động giá cao" ? "High price impact" : "Market note") : impact}
     </em>
   );
 }
 
 function RelatedTag({ relation }: { relation: string }) {
-  return <small className="related-tag">Liên quan: {relation}</small>;
+  const { language } = useLanguage();
+  return <small className="related-tag">{language === "en" ? "Related" : "Liên quan"}: {language === "en" ? relationLabel(relation) : relation}</small>;
 }
 
 function topicCount(items: { topic: NewsTopic }[], topic: NewsTopic) {
@@ -993,7 +1101,7 @@ function recencyScore(dateValue: number) {
   return 0;
 }
 
-function buildDigest(items: RankedArticle[]) {
+function buildDigest(items: RankedArticle[], language: "vi" | "en") {
   const lines: string[] = [];
   const highImpact = items.filter((item) => item.impact === "Tác động giá cao").length;
   const topTopics = TOPICS.filter((topic) => topic !== "Tất cả")
@@ -1002,13 +1110,21 @@ function buildDigest(items: RankedArticle[]) {
     .sort((a, b) => b.count - a.count)
     .slice(0, 3);
 
-  if (highImpact) lines.push(`${highImpact} tin đang được xếp vào nhóm có thể tác động mạnh tới giá hoặc chi phí đầu vào.`);
-  if (topTopics.length) lines.push(`Chủ đề nổi bật: ${topTopics.map((item) => `${item.topic.toLowerCase()} (${item.count})`).join(", ")}.`);
-  if (items[0]) lines.push(`Tin cần đọc trước: ${displayTitle(items[0].article.title, 95)}`);
+  if (highImpact) {
+    lines.push(language === "en"
+      ? `${highImpact} stories are flagged as likely to affect prices or input costs.`
+      : `${highImpact} tin đang được xếp vào nhóm có thể tác động mạnh tới giá hoặc chi phí đầu vào.`);
+  }
+  if (topTopics.length) {
+    lines.push(language === "en"
+      ? `Leading topics: ${topTopics.map((item) => `${topicLabel(item.topic, language).toLowerCase()} (${item.count})`).join(", ")}.`
+      : `Chủ đề nổi bật: ${topTopics.map((item) => `${item.topic.toLowerCase()} (${item.count})`).join(", ")}.`);
+  }
+  if (items[0]) lines.push(language === "en" ? `Start with: ${displayTitle(items[0].article.title, 95)}` : `Tin cần đọc trước: ${displayTitle(items[0].article.title, 95)}`);
   return lines.slice(0, 3);
 }
 
-function buildMarketWatch(items: RankedArticle[]) {
+function buildMarketWatch(items: RankedArticle[], language: "vi" | "en") {
   return (TOPICS.filter((topic) => topic !== "Tất cả") as Exclude<NewsTopic, "Tất cả">[])
     .map((topic) => {
       const related = items.filter((item) => item.topic === topic);
@@ -1016,7 +1132,9 @@ function buildMarketWatch(items: RankedArticle[]) {
       return {
         topic,
         count: related.length,
-        note: high ? `${high} tin tác động cao` : "Chưa có biến động lớn"
+        note: high
+          ? language === "en" ? `${high} high-impact stories` : `${high} tin tác động cao`
+          : language === "en" ? "No major movement yet" : "Chưa có biến động lớn"
       };
     })
     .filter((item) => item.count > 0)

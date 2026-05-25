@@ -20,7 +20,7 @@ import { TickerTape } from "./components/TickerTape";
 import { SiteFooter } from "./components/SiteFooter";
 import { SeoHead } from "./components/SeoHead";
 import { useAuth } from "./contexts/AuthContext";
-import { LanguageProvider } from "./contexts/LanguageContext";
+import { LanguageProvider, useLanguage, type AppLanguage } from "./contexts/LanguageContext";
 import {
   fetchAvailableVarieties,
   exportCsvUrl,
@@ -68,6 +68,7 @@ import {
   type Variety
 } from "./lib/api";
 import { cropSeoLabels, forecastPath, publicGuideSlug } from "./lib/seo";
+import { splitLanguagePath, withLanguagePrefix } from "./lib/localizedRoutes";
 
 const DataGrid = lazy(() => import("./components/DataGrid").then(({ DataGrid }) => ({ default: DataGrid })));
 const AnalysisBrief = lazy(() => import("./components/AnalysisBrief").then(({ AnalysisBrief }) => ({ default: AnalysisBrief })));
@@ -127,6 +128,142 @@ const cropLabels: Record<CropType, string> = {
   lua: "lúa"
 };
 
+const cropLabelsEn: Record<CropType, string> = {
+  sau_rieng: "durian",
+  ca_phe: "coffee",
+  ho_tieu: "black pepper",
+  lua: "rice"
+};
+
+const appCopy = {
+  vi: {
+    regionFallback: "Vùng trồng",
+    varietyFallback: "Giống",
+    marketDataDescription: "Dữ liệu giá, dự báo và cảnh báo theo vùng trồng đang chọn.",
+    refreshing: "Đang làm mới...",
+    refreshPrice: "Làm mới giá",
+    refreshPriceAria: "Làm mới giá",
+    dataWindow: "Khung dữ liệu",
+    latestPrice: "Giá mới nhất",
+    scraping: "Đang quét...",
+    scrapePrices: "Quét giá",
+    runScrapeNow: "Chạy scrape giá ngay",
+    analysisTools: "Công cụ phân tích giá",
+    chart: "Biểu đồ",
+    analysis: "Phân tích",
+    technical: "Kỹ thuật",
+    data: "Dữ liệu",
+    regionLabel: "Tỉnh/vùng trồng",
+    loading: "Đang tải",
+    varietyLabel: "Giống",
+    retry: "Thử lại",
+    loadingMarket: "Đang tải dữ liệu thị trường...",
+    loadingUi: "Đang tải giao diện...",
+    forecastTitle: (cropName: string) => `Giá ${cropName} hôm nay & dự báo 30 ngày`,
+    forecastDescription: (cropName: string) =>
+      `Cập nhật giá ${cropName} mới nhất theo tỉnh, vùng trồng và giống. Xem biểu đồ lịch sử, dự báo 30 ngày, cảnh báo bán và độ tin cậy dữ liệu.`,
+    quoteTitleToday: (cropName: string) => `Giá ${cropName} hôm nay`,
+    quoteForecast: (province?: string | null) => `Dự báo 30 ngày${province ? ` tại ${province}` : ""}`,
+    timeRange: "Khoảng thời gian",
+    days: "ngày",
+    dataLayers: "Lớp dữ liệu",
+    price: "Giá",
+    forecast: "Dự báo",
+    rain: "Mưa",
+    alerts: "Cảnh báo",
+    noRainData: "Chưa có dữ liệu lượng mưa cho khoảng thời gian này",
+    pinMarket: "Ghim thị trường",
+    selectedRegionFallback: "vùng đang chọn",
+    selectedVarietyFallback: "giống đang chọn",
+    accountProfitGate: "Vui lòng đăng nhập hoặc đăng ký tài khoản để tính lợi nhuận.",
+    analyticsAuthMessage: "Vui lòng đăng nhập hoặc đăng ký tài khoản để xem mục này.",
+    fertilizerAuthMessage: "Vui lòng đăng nhập hoặc đăng ký tài khoản trước khi tính khuyến nghị.",
+    advisoryAuthMessage: "Vui lòng đăng nhập hoặc đăng ký tài khoản để sử dụng công cụ này.",
+    errorFallback: "Một phần dữ liệu dự báo chưa tải được. Bạn có thể thử lại sau ít phút.",
+    errorTitleUser: "Cần kiểm tra lại thông tin",
+    errorTitleData: "Dữ liệu đang được cập nhật",
+    noProductData: "Chưa có dữ liệu giá cho sản phẩm này.",
+    noRegionData: "Chưa có dữ liệu giá cho tỉnh/vùng trồng này.",
+    loadDataError: "Không tải được dữ liệu.",
+    loadContentError: "Không tải được nội dung.",
+    loadGuidesError: "Không tải được hướng dẫn kỹ thuật.",
+    saveWatchlistError: "Không lưu được danh sách ghim",
+    invalidEmail: "Email không hợp lệ",
+    invalidPassword: "Mật khẩu cần tối thiểu 8 ký tự và có ít nhất 1 chữ số",
+    missingName: "Vui lòng nhập họ tên",
+    authFailed: "Không đăng nhập được",
+    platformJobError: "Không chạy được job",
+    newsUpdateError: "Không cập nhật được tin tức",
+    updatedToday: "Cập nhật hôm nay",
+    updatedDaysAgo: (days: number) => `Cập nhật ${days} ngày trước`,
+    staleDaysAgo: (days: number) => `Dữ liệu ${days} ngày trước`,
+    oldDataDays: (days: number) => `Dữ liệu cũ ${days} ngày`
+  },
+  en: {
+    regionFallback: "Growing region",
+    varietyFallback: "Variety",
+    marketDataDescription: "Price history, forecasts and alerts for the selected growing region.",
+    refreshing: "Refreshing...",
+    refreshPrice: "Refresh prices",
+    refreshPriceAria: "Refresh prices",
+    dataWindow: "Data window",
+    latestPrice: "Latest price",
+    scraping: "Scraping...",
+    scrapePrices: "Scrape prices",
+    runScrapeNow: "Run price scrape now",
+    analysisTools: "Price analysis tools",
+    chart: "Chart",
+    analysis: "Analysis",
+    technical: "Technical",
+    data: "Data",
+    regionLabel: "Province/growing region",
+    loading: "Loading",
+    varietyLabel: "Variety",
+    retry: "Try again",
+    loadingMarket: "Loading market data...",
+    loadingUi: "Loading interface...",
+    forecastTitle: (cropName: string) => `${cropName} price today & 30-day forecast`,
+    forecastDescription: (cropName: string) =>
+      `Track the latest ${cropName} prices by province, growing region and variety, with history, a 30-day forecast, sell signals and data-confidence notes.`,
+    quoteTitleToday: (cropName: string) => `${cropName} price today`,
+    quoteForecast: (province?: string | null) => `30-day forecast${province ? ` in ${province}` : ""}`,
+    timeRange: "Time range",
+    days: "days",
+    dataLayers: "Data layers",
+    price: "Price",
+    forecast: "Forecast",
+    rain: "Rain",
+    alerts: "Alerts",
+    noRainData: "Rainfall data is not available for this range",
+    pinMarket: "Pin market",
+    selectedRegionFallback: "selected region",
+    selectedVarietyFallback: "selected variety",
+    accountProfitGate: "Please sign in or create an account to calculate farm profit.",
+    analyticsAuthMessage: "Please sign in or create an account to view this section.",
+    fertilizerAuthMessage: "Please sign in or create an account before calculating a fertilizer recommendation.",
+    advisoryAuthMessage: "Please sign in or create an account to use this tool.",
+    errorFallback: "Some forecast data could not be loaded yet. Please try again in a few minutes.",
+    errorTitleUser: "Check your details",
+    errorTitleData: "Data is being updated",
+    noProductData: "No price data is available for this product yet.",
+    noRegionData: "No price data is available for this province or growing region yet.",
+    loadDataError: "Could not load the data.",
+    loadContentError: "Could not load the content.",
+    loadGuidesError: "Could not load the technical guides.",
+    saveWatchlistError: "Could not save the pinned markets.",
+    invalidEmail: "Please enter a valid email address.",
+    invalidPassword: "Password must be at least 8 characters and include at least one number.",
+    missingName: "Please enter your full name.",
+    authFailed: "Could not sign in.",
+    platformJobError: "Could not run the job.",
+    newsUpdateError: "Could not update the news.",
+    updatedToday: "Updated today",
+    updatedDaysAgo: (days: number) => `Updated ${days} days ago`,
+    staleDaysAgo: (days: number) => `Data from ${days} days ago`,
+    oldDataDays: (days: number) => `Old data: ${days} days`
+  }
+} satisfies Record<AppLanguage, Record<string, unknown>>;
+
 type MainSection =
   | "home"
   | "analytics"
@@ -171,9 +308,16 @@ const validCrops: CropType[] = ["sau_rieng", "ca_phe", "ho_tieu", "lua"];
 const validNewsViews: NewsView[] = ["latest", "sau_rieng", "ca_phe", "ho_tieu"];
 const gatedAnalyticsTabs: AnalyticsTab[] = ["analysis", "technical", "data"];
 const gatedAdvisorySections: MainSection[] = ["sellingTime", "arbitrage", "crossCrop"];
-const ANALYTICS_AUTH_MESSAGE = "Vui lòng đăng nhập hoặc đăng ký tài khoản để xem mục này.";
-const FERTILIZER_AUTH_MESSAGE = "Vui lòng đăng nhập hoặc đăng ký tài khoản trước khi tính khuyến nghị.";
-const ADVISORY_AUTH_MESSAGE = "Vui lòng đăng nhập hoặc đăng ký tài khoản để sử dụng công cụ này.";
+const AUTH_GATE_MESSAGES = new Set([
+  appCopy.vi.analyticsAuthMessage,
+  appCopy.vi.fertilizerAuthMessage,
+  appCopy.vi.advisoryAuthMessage,
+  appCopy.vi.accountProfitGate,
+  appCopy.en.analyticsAuthMessage,
+  appCopy.en.fertilizerAuthMessage,
+  appCopy.en.advisoryAuthMessage,
+  appCopy.en.accountProfitGate
+]);
 const newsViewPaths: Record<PriceNewsView, string> = {
   sau_rieng: "gia-sau-rieng",
   ca_phe: "gia-ca-phe",
@@ -212,6 +356,7 @@ function getInitialRoute(pathnameInput = window.location.pathname, search = wind
   } catch {
     pathname = pathnameInput.replace(/\/+$/, "") || "/";
   }
+  pathname = splitLanguagePath(pathname).pathname;
   const fallback: InitialRoute = {
     section: getInitialSection(search),
     crop: getInitialCrop(search),
@@ -264,7 +409,7 @@ export function App() {
   );
 }
 
-function routeToUrl(route: InitialRoute) {
+function routeToUrl(route: InitialRoute, language: AppLanguage = "vi") {
   if (route.notFound) return `${window.location.pathname}${window.location.search}`;
   const params = new URLSearchParams();
   let path = "/";
@@ -297,27 +442,28 @@ function routeToUrl(route: InitialRoute) {
   } else if (route.section === "methodology") {
     path = "/thuat-toan-du-bao";
   }
-  return params.toString() ? `${path}?${params}` : path;
+  const unprefixed = params.toString() ? `${path}?${params}` : path;
+  return withLanguagePrefix(unprefixed, language);
 }
 
 const TECHNICAL_ERROR_PATTERN = /api|json|unexpected token|doctype|failed to fetch|networkerror|syntaxerror|html|stack|trace|chunkload/i;
-const USER_ACTION_ERROR_PATTERN = /^(email|mật khẩu|mat khau|vui lòng|vui long)/i;
+const USER_ACTION_ERROR_PATTERN = /^(email|password|please|full name|mật khẩu|mat khau|vui lòng|vui long)/i;
 
-function safeErrorCopy(message: string | null) {
+function safeErrorCopy(message: string | null, language: AppLanguage) {
   const clean = (message ?? "").replace(/\s+/g, " ").trim();
-  const fallback = "Một phần dữ liệu dự báo chưa tải được. Bạn có thể thử lại sau ít phút.";
+  const fallback = appCopy[language].errorFallback;
   if (!clean) return fallback;
   if (USER_ACTION_ERROR_PATTERN.test(clean) || clean.toLowerCase().includes("chưa có dữ liệu")) return clean;
   if (TECHNICAL_ERROR_PATTERN.test(clean)) return fallback;
   return clean.length > 150 ? fallback : clean;
 }
 
-function safeErrorTitle(message: string | null) {
+function safeErrorTitle(message: string | null, language: AppLanguage) {
   const clean = message ?? "";
   if (USER_ACTION_ERROR_PATTERN.test(clean) || clean.toLowerCase().includes("chưa có dữ liệu")) {
-    return "Cần kiểm tra lại thông tin";
+    return appCopy[language].errorTitleUser;
   }
-  return "Dữ liệu đang được cập nhật";
+  return appCopy[language].errorTitleData;
 }
 
 function canRetryError(message: string | null) {
@@ -328,6 +474,8 @@ function canRetryError(message: string | null) {
 function RoutedApp() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { language, setLanguage } = useLanguage();
+  const copy = appCopy[language];
   const [initialRoute] = useState<InitialRoute>(() => getInitialRoute(location.pathname, location.search));
   const [crop, setCrop] = useState<CropType>(initialRoute.crop);
   const [regionId, setRegionId] = useState(1);
@@ -389,8 +537,8 @@ function RoutedApp() {
 
   async function loadContent(signal?: AbortSignal) {
     const [newsPayload, guidePayload] = await Promise.all([
-      fetchNews(signal),
-      fetchGuides(undefined, section === "guides" ? 300 : 12, signal)
+      fetchNews(signal, language),
+      fetchGuides(undefined, section === "guides" ? 300 : 12, signal, language)
     ]);
     setNewsArticles(newsPayload);
     setGuides(guidePayload);
@@ -417,7 +565,7 @@ function RoutedApp() {
         setForecast([]);
         setSignals([]);
         setMetrics(null);
-        setError("Chưa có dữ liệu giá cho sản phẩm này.");
+        setError(copy.noProductData);
         return;
       }
 
@@ -435,7 +583,7 @@ function RoutedApp() {
         setForecast([]);
         setSignals([]);
         setMetrics(null);
-        setError("Chưa có dữ liệu giá cho tỉnh/vùng trồng này.");
+        setError(copy.noRegionData);
         return;
       }
 
@@ -485,7 +633,7 @@ function RoutedApp() {
       setMarketComparison(comparisonPayload);
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
-      setError(err instanceof Error ? err.message : "Không tải được dữ liệu.");
+      setError(err instanceof Error ? err.message : copy.loadDataError);
     } finally {
       setLoading(false);
     }
@@ -495,10 +643,10 @@ function RoutedApp() {
     const controller = new AbortController();
     void loadContent(controller.signal).catch((err) => {
       if (err instanceof DOMException && err.name === "AbortError") return;
-      setError(err instanceof Error ? err.message : "Không tải được nội dung.");
+      setError(err instanceof Error ? err.message : copy.loadContentError);
     });
     const newsRefreshTimer = window.setInterval(() => {
-      void fetchNews()
+      void fetchNews(undefined, language)
         .then(setNewsArticles)
         .catch((err) => {
           console.warn("[App] background news refresh failed", err);
@@ -508,11 +656,16 @@ function RoutedApp() {
       controller.abort();
       window.clearInterval(newsRefreshTimer);
     };
-  }, []);
+  }, [language]);
 
   useEffect(() => {
     const route = getInitialRoute(location.pathname, location.search);
-    const canonicalUrl = routeToUrl(route);
+    const pathLanguage = splitLanguagePath(location.pathname).language;
+    const routeLanguage = pathLanguage ?? language;
+    if (pathLanguage && pathLanguage !== language) {
+      setLanguage(pathLanguage);
+    }
+    const canonicalUrl = routeToUrl(route, routeLanguage);
     const canonicalWithSearch =
       (route.section === "news" && !route.newsSlug && location.search) ||
       (route.section === "yieldFeedback" && location.search) ||
@@ -530,7 +683,7 @@ function RoutedApp() {
     setNewsSlug(route.newsSlug);
     setGuideSlug(route.guideSlug);
     setNotFound(route.notFound);
-  }, [location.pathname, location.search, navigate]);
+  }, [language, location.pathname, location.search, navigate, setLanguage]);
 
   useEffect(() => {
     const onInternalLinkClick = (event: MouseEvent) => {
@@ -540,11 +693,11 @@ function RoutedApp() {
       const url = new URL(target.href, window.location.origin);
       if (url.origin !== window.location.origin) return;
       event.preventDefault();
-      navigate(`${url.pathname}${url.search}${url.hash}`);
+      navigate(withLanguagePrefix(`${url.pathname}${url.search}${url.hash}`, language));
     };
     document.addEventListener("click", onInternalLinkClick);
     return () => document.removeEventListener("click", onInternalLinkClick);
-  }, [navigate]);
+  }, [language, navigate]);
 
   useEffect(() => {
     if (section !== "analytics") return;
@@ -556,14 +709,14 @@ function RoutedApp() {
   useEffect(() => {
     if (section !== "guides" || guides.length >= 80) return;
     const controller = new AbortController();
-    void fetchGuides(undefined, 300, controller.signal)
+    void fetchGuides(undefined, 300, controller.signal, language)
       .then(setGuides)
       .catch((err) => {
         if (err instanceof DOMException && err.name === "AbortError") return;
-        setError(err instanceof Error ? err.message : "Không tải được hướng dẫn kỹ thuật.");
+        setError(err instanceof Error ? err.message : copy.loadGuidesError);
       });
     return () => controller.abort();
-  }, [section, guides.length]);
+  }, [language, section, guides.length]);
 
   useEffect(() => {
     localStorage.setItem("agri_price.watchlist", JSON.stringify(watchlist));
@@ -596,8 +749,8 @@ function RoutedApp() {
     }
     if (advisoryGatePromptedRef.current === section) return;
     advisoryGatePromptedRef.current = section;
-    requestAccountAccess(ADVISORY_AUTH_MESSAGE);
-  }, [authToken, section]);
+    requestAccountAccess(copy.advisoryAuthMessage);
+  }, [authToken, copy.advisoryAuthMessage, section]);
 
   const latestPrice = useMemo(() => historical.at(-1)?.max_price_vnd ?? 0, [historical]);
   const visibleHistorical = useMemo(() => {
@@ -635,11 +788,11 @@ function RoutedApp() {
   const freshnessDays = quality?.freshness_days ?? null;
   const freshnessLabel = useMemo(() => {
     if (freshnessDays == null) return null;
-    if (freshnessDays <= 1) return "C\u1eadp nh\u1eadt h\u00f4m nay";
-    if (freshnessDays <= 3) return `C\u1eadp nh\u1eadt ${freshnessDays} ng\u00e0y tr\u01b0\u1edbc`;
-    if (freshnessDays <= 14) return `D\u1eef li\u1ec7u ${freshnessDays} ng\u00e0y tr\u01b0\u1edbc`;
-    return `D\u1eef li\u1ec7u c\u0169 ${freshnessDays} ng\u00e0y`;
-  }, [freshnessDays]);
+    if (freshnessDays <= 1) return copy.updatedToday;
+    if (freshnessDays <= 3) return copy.updatedDaysAgo(freshnessDays);
+    if (freshnessDays <= 14) return copy.staleDaysAgo(freshnessDays);
+    return copy.oldDataDays(freshnessDays);
+  }, [copy, freshnessDays]);
   const freshnessClass = freshnessDays == null
     ? ""
     : freshnessDays <= 3
@@ -647,7 +800,7 @@ function RoutedApp() {
       : freshnessDays <= 14
         ? "stale"
         : "very-stale";
-  const cropLabel = cropLabels[crop];
+  const cropLabel = language === "en" ? cropLabelsEn[crop] : cropLabels[crop];
   const activeTab = tabs.find((tab) => tab.value === crop) ?? tabs[0];
   const ActiveIcon = activeTab.Icon;
   const selectedRegion = regions.find((item) => item.region_id === regionId);
@@ -671,7 +824,7 @@ function RoutedApp() {
       });
       await syncWatchlist(authToken);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Không lưu được danh sách ghim");
+      setError(err instanceof Error ? err.message : copy.saveWatchlistError);
     }
   }
 
@@ -684,7 +837,7 @@ function RoutedApp() {
     setCrop(nextCrop as CropType);
     setRegionId(Number(nextRegionId));
     setVarietyId(Number(nextVarietyId));
-    navigate(forecastPath(nextCrop as CropType));
+    navigate(withLanguagePrefix(forecastPath(nextCrop as CropType), language));
   }
 
   function openAnalytics(nextCrop: CropType) {
@@ -696,7 +849,7 @@ function RoutedApp() {
     setAnalyticsTab("chart");
     setPriceMenuOpen(false);
     setFertilizerMenuOpen(false);
-    navigate(forecastPath(nextCrop));
+    navigate(withLanguagePrefix(forecastPath(nextCrop), language));
   }
 
   function requestAccountAccess(message: string) {
@@ -713,7 +866,7 @@ function RoutedApp() {
     if (!open) {
       setPendingAnalyticsTab(null);
       setError((current) =>
-        current === ANALYTICS_AUTH_MESSAGE || current === FERTILIZER_AUTH_MESSAGE || current === ADVISORY_AUTH_MESSAGE ? null : current
+        current && AUTH_GATE_MESSAGES.has(current) ? null : current
       );
     }
   }
@@ -721,7 +874,7 @@ function RoutedApp() {
   function openAnalyticsTab(nextTab: AnalyticsTab) {
     if (!authToken && gatedAnalyticsTabs.includes(nextTab)) {
       setPendingAnalyticsTab(nextTab);
-      requestAccountAccess(ANALYTICS_AUTH_MESSAGE);
+      requestAccountAccess(copy.analyticsAuthMessage);
       return;
     }
     setPendingAnalyticsTab(null);
@@ -738,9 +891,12 @@ function RoutedApp() {
     setNewsMenuOpen(false);
     setFertilizerMenuOpen(false);
     navigate(
-      nextView === "latest"
-        ? "/tin-tuc"
-        : `/tin-tuc/${newsViewPaths[nextView as PriceNewsView]}`
+      withLanguagePrefix(
+        nextView === "latest"
+          ? "/tin-tuc"
+          : `/tin-tuc/${newsViewPaths[nextView as PriceNewsView]}`,
+        language
+      )
     );
   }
 
@@ -752,7 +908,26 @@ function RoutedApp() {
     setNewsMenuOpen(false);
     setPriceMenuOpen(false);
     setFertilizerMenuOpen(false);
-    navigate(routeToUrl({ section: nextSection, crop, newsView: "latest", newsSlug: "", guideSlug: "", notFound: false }));
+    navigate(routeToUrl({ section: nextSection, crop, newsView: "latest", newsSlug: "", guideSlug: "", notFound: false }, language));
+  }
+
+  function toggleRouteLanguage() {
+    const nextLanguage: AppLanguage = language === "vi" ? "en" : "vi";
+    setLanguage(nextLanguage);
+    const route = getInitialRoute(location.pathname, location.search);
+    const target = routeToUrl(
+      {
+        ...route,
+        crop,
+        newsView,
+        newsSlug,
+        guideSlug,
+        section,
+        notFound
+      },
+      nextLanguage
+    );
+    navigate(target, { replace: false });
   }
 
   async function handleAuth(mode: "login" | "register") {
@@ -761,15 +936,15 @@ function RoutedApp() {
     const password = authPassword.trim();
     const displayName = authName.trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Email không hợp lệ");
+      setError(copy.invalidEmail);
       return;
     }
     if (password.length < 8 || !/\d/.test(password)) {
-      setError("Mật khẩu cần tối thiểu 8 ký tự và có ít nhất 1 chữ số");
+      setError(copy.invalidPassword);
       return;
     }
     if (mode === "register" && displayName.length < 2) {
-      setError("Vui lòng nhập họ tên");
+      setError(copy.missingName);
       return;
     }
     try {
@@ -779,7 +954,7 @@ function RoutedApp() {
       setAuthOpen(false);
       await loadAccountData(session.access_token, session.user);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Không đăng nhập được");
+      setError(err instanceof Error ? err.message : copy.authFailed);
     }
   }
 
@@ -820,7 +995,7 @@ function RoutedApp() {
         await loadContent();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Không chạy được job");
+      setError(err instanceof Error ? err.message : copy.platformJobError);
     } finally {
       setPlatformBusy(false);
     }
@@ -833,9 +1008,9 @@ function RoutedApp() {
         if (!user?.is_admin) return;
         await scrapeNews(authToken);
       }
-      setNewsArticles(await fetchNews());
+      setNewsArticles(await fetchNews(undefined, language));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Không cập nhật được tin tức");
+    setError(err instanceof Error ? err.message : copy.newsUpdateError);
     } finally {
       setContentBusy(false);
     }
@@ -889,6 +1064,7 @@ function RoutedApp() {
         onAuthEmailChange={setAuthEmail}
         onAuthPasswordChange={setAuthPassword}
         onAuthSubmit={(mode) => void handleAuth(mode)}
+        onLanguageToggle={toggleRouteLanguage}
       />
 
       {section === "analytics" ? <TickerTape points={tickerPoints} /> : null}
@@ -900,16 +1076,16 @@ function RoutedApp() {
               <div className="quote-title-row">
                 <ActiveIcon size={20} />
                 <h1>
-                  <span className="quote-h1-line1">Giá {cropLabel} hôm nay{"\u00a0"}</span>
+                  <span className="quote-h1-line1">{copy.quoteTitleToday(cropLabel)}{"\u00a0"}</span>
                   <span className="quote-h1-line2">
-                    {`Dự báo 30 ngày${selectedRegion?.province ? ` tại ${selectedRegion.province}` : ""}`}
+                    {copy.quoteForecast(selectedRegion?.province)}
                   </span>
                 </h1>
               </div>
               <FreshnessBanner />
               <div className="quote-meta">
-                <span>{selectedRegion?.province ?? selectedRegion?.region_name ?? "Vùng trồng"}</span>
-                <span>{selectedVariety?.name ?? "Giống"}</span>
+                <span>{selectedRegion?.province ?? selectedRegion?.region_name ?? copy.regionFallback}</span>
+                <span>{selectedVariety?.name ?? copy.varietyFallback}</span>
                 <span>VND/kg</span>
               </div>
               <div className="quote-price-row">
@@ -918,12 +1094,12 @@ function RoutedApp() {
                   {quoteChangePct >= 0 ? "+" : ""}
                   {quoteChangePct.toFixed(2)}%
                 </span>
-                <small>VND/kg · {selectedVariety?.name ?? "Giống"}</small>
+                <small>VND/kg · {selectedVariety?.name ?? copy.varietyFallback}</small>
                 {freshnessLabel ? (
                   <small className={`freshness-badge ${freshnessClass}`}>{freshnessLabel}</small>
                 ) : null}
               </div>
-              <p>Dữ liệu giá, dự báo và cảnh báo theo vùng trồng đang chọn.</p>
+              <p>{copy.marketDataDescription}</p>
             </div>
 
             <div className="quote-side">
@@ -932,17 +1108,17 @@ function RoutedApp() {
                 className="quote-refresh-button"
                 onClick={() => void loadData()}
                 disabled={loading}
-                aria-label="L\u00e0m m\u1edbi gi\u00e1"
+                aria-label={copy.refreshPriceAria}
               >
                 <RefreshCw size={18} />
-                {loading ? "Đang làm mới..." : "Làm mới giá"}
+                {loading ? copy.refreshing : copy.refreshPrice}
               </button>
               <div className="quote-range">
-                <span>Khung dữ liệu</span>
-                <strong className="num">{days} ngày</strong>
+                <span>{copy.dataWindow}</span>
+                <strong className="num">{days} {copy.days}</strong>
               </div>
               <div className="quote-range">
-                <span>Giá mới nhất</span>
+                <span>{copy.latestPrice}</span>
                 <strong className="num">{latestPrice.toLocaleString("vi-VN")}</strong>
               </div>
               {user?.is_admin ? (
@@ -951,30 +1127,30 @@ function RoutedApp() {
                   className="quote-side-action"
                   onClick={() => void runJob("scrape")}
                   disabled={platformBusy}
-                  title="Chạy scrape giá ngay"
+                  title={copy.runScrapeNow}
                 >
                   <RefreshCw size={14} />
-                  {platformBusy ? "Đang quét..." : "Quét giá"}
+                  {platformBusy ? copy.scraping : copy.scrapePrices}
                 </button>
               ) : null}
             </div>
           </header>
 
-          <nav className="market-subnav" aria-label="Công cụ phân tích giá">
-            <button type="button" className={analyticsTab === "chart" ? "active" : ""} onClick={() => openAnalyticsTab("chart")}>Biểu đồ</button>
-            <button type="button" className={analyticsTab === "analysis" ? "active" : ""} onClick={() => openAnalyticsTab("analysis")}>Phân tích</button>
-            <button type="button" className={analyticsTab === "technical" ? "active" : ""} onClick={() => openAnalyticsTab("technical")}>Kỹ thuật</button>
-            <button type="button" className={analyticsTab === "data" ? "active" : ""} onClick={() => openAnalyticsTab("data")}>Dữ liệu</button>
+          <nav className="market-subnav" aria-label={copy.analysisTools}>
+            <button type="button" className={analyticsTab === "chart" ? "active" : ""} onClick={() => openAnalyticsTab("chart")}>{copy.chart}</button>
+            <button type="button" className={analyticsTab === "analysis" ? "active" : ""} onClick={() => openAnalyticsTab("analysis")}>{copy.analysis}</button>
+            <button type="button" className={analyticsTab === "technical" ? "active" : ""} onClick={() => openAnalyticsTab("technical")}>{copy.technical}</button>
+            <button type="button" className={analyticsTab === "data" ? "active" : ""} onClick={() => openAnalyticsTab("data")}>{copy.data}</button>
           </nav>
 
           <section className="control-band">
             <div className="filter-group">
               <Filter size={18} />
               <label>
-                Tỉnh/vùng trồng
+                {copy.regionLabel}
                 <select value={regionId} onChange={(event) => setRegionId(Number(event.target.value))}>
                   {regions.length === 0 ? (
-                    <option value={regionId}>Đang tải</option>
+                    <option value={regionId}>{copy.loading}</option>
                   ) : (
                     regions.map((region) => (
                       <option value={region.region_id} key={region.region_id}>
@@ -985,7 +1161,7 @@ function RoutedApp() {
                 </select>
               </label>
               <label>
-                Giống
+                {copy.varietyLabel}
                 <select value={varietyId} onChange={(event) => setVarietyId(Number(event.target.value))}>
                   {varieties.map((variety) => (
                     <option value={variety.variety_id} key={variety.variety_id}>
@@ -997,7 +1173,7 @@ function RoutedApp() {
             </div>
             <div className="market-status">
               <Database size={18} />
-              <span>Giá mới nhất</span>
+              <span>{copy.latestPrice}</span>
               <strong className="num">{latestPrice.toLocaleString("vi-VN")} VND/kg</strong>
             </div>
           </section>
@@ -1007,15 +1183,15 @@ function RoutedApp() {
       {showErrorBanner ? (
         <div className="error-banner" role="status" aria-live="polite">
           <div className="error-banner-copy">
-            <strong>{safeErrorTitle(error)}</strong>
-            <span>{safeErrorCopy(error)}</span>
+            <strong>{safeErrorTitle(error, language)}</strong>
+            <span>{safeErrorCopy(error, language)}</span>
           </div>
-          {canRetryError(error) ? <button type="button" onClick={retryAfterError}>Thử lại</button> : null}
+          {canRetryError(error) ? <button type="button" onClick={retryAfterError}>{copy.retry}</button> : null}
         </div>
       ) : null}
-      {loading && section === "analytics" ? <div className="loading">Đang tải dữ liệu thị trường...</div> : null}
+      {loading && section === "analytics" ? <div className="loading">{copy.loadingMarket}</div> : null}
 
-      <Suspense fallback={<div className="section-fallback">Đang tải giao diện...</div>}>
+      <Suspense fallback={<div className="section-fallback">{copy.loadingUi}</div>}>
       {notFound ? <NotFoundPage /> : null}
       {!notFound && section === "home" ? (
         <HomePage
@@ -1029,13 +1205,13 @@ function RoutedApp() {
       {!notFound && section === "analytics" ? (
         <>
           <SeoHead
-            title={`Giá ${cropSeoLabels[crop]} hôm nay & dự báo 30 ngày`}
-            description={`Cập nhật giá ${cropSeoLabels[crop]} mới nhất theo tỉnh, vùng trồng và giống. Xem biểu đồ lịch sử, dự báo 30 ngày, cảnh báo bán và độ tin cậy dữ liệu.`}
+            title={copy.forecastTitle(language === "en" ? cropLabelsEn[crop] : cropSeoLabels[crop])}
+            description={copy.forecastDescription(language === "en" ? cropLabelsEn[crop] : cropSeoLabels[crop])}
             canonical={forecastPath(crop)}
             schemaJsonLd={buildPriceSchema({
               cropLabel: cropSeoLabels[crop],
-              regionLabel: selectedRegion?.province ?? selectedRegion?.region_name ?? "Việt Nam",
-              varietyLabel: selectedVariety?.name ?? cropSeoLabels[crop],
+              regionLabel: selectedRegion?.province ?? selectedRegion?.region_name ?? (language === "en" ? "Vietnam" : "Việt Nam"),
+              varietyLabel: selectedVariety?.name ?? (language === "en" ? cropLabelsEn[crop] : cropSeoLabels[crop]),
               latestPrice,
               historical: visibleHistorical
             })}
@@ -1044,7 +1220,7 @@ function RoutedApp() {
             <>
               <section className="chart-toolbar">
                 <div className="chart-control-group">
-                  <span className="control-label">Khoảng thời gian</span>
+                  <span className="control-label">{copy.timeRange}</span>
                   <div className="segmented">
                   {[30, 90, 180].map((value) => (
                     <button
@@ -1053,31 +1229,31 @@ function RoutedApp() {
                       key={value}
                       onClick={() => setDays(value)}
                     >
-                      {value} ngày
+                      {value} {copy.days}
                     </button>
                   ))}
                   </div>
                 </div>
                 <div className="chart-control-group chart-control-group--layers">
-                  <span className="control-label">Lớp dữ liệu</span>
+                  <span className="control-label">{copy.dataLayers}</span>
                   <div className="layer-toggles">
-                  <button type="button" className={layers.price ? "active" : ""} onClick={() => toggleLayer("price")}>Giá</button>
-                  <button type="button" className={layers.forecast ? "active" : ""} onClick={() => toggleLayer("forecast")}>Dự báo</button>
+                  <button type="button" className={layers.price ? "active" : ""} onClick={() => toggleLayer("price")}>{copy.price}</button>
+                  <button type="button" className={layers.forecast ? "active" : ""} onClick={() => toggleLayer("forecast")}>{copy.forecast}</button>
                   <button
                     type="button"
                     className={layers.rain && hasRainData ? "active" : ""}
                     onClick={() => toggleLayer("rain")}
                     disabled={!hasRainData}
-                    title={hasRainData ? undefined : "Chưa có dữ liệu lượng mưa cho khoảng thời gian này"}
+                    title={hasRainData ? undefined : copy.noRainData}
                   >
-                    Mưa
+                    {copy.rain}
                   </button>
-                  <button type="button" className={layers.signals ? "active" : ""} onClick={() => toggleLayer("signals")}>Cảnh báo</button>
+                  <button type="button" className={layers.signals ? "active" : ""} onClick={() => toggleLayer("signals")}>{copy.alerts}</button>
                   </div>
                 </div>
                 <button type="button" className="pin-button" onClick={() => void addWatchlist()}>
                   <Pin size={16} />
-                Ghim thị trường
+                {copy.pinMarket}
                 </button>
               </section>
               <MasterChart
@@ -1107,8 +1283,8 @@ function RoutedApp() {
             <>
               <AnalysisBrief
                 cropLabel={cropLabel}
-            regionLabel={selectedRegion?.province ?? selectedRegion?.region_name ?? "vùng đang chọn"}
-            varietyLabel={selectedVariety?.name ?? "giống đang chọn"}
+            regionLabel={selectedRegion?.province ?? selectedRegion?.region_name ?? copy.selectedRegionFallback}
+            varietyLabel={selectedVariety?.name ?? copy.selectedVarietyFallback}
                 historical={visibleHistorical}
                 forecast={forecast}
                 explanation={changeExplanation}
@@ -1136,33 +1312,33 @@ function RoutedApp() {
       {!notFound && section === "guides" && !guideSlug ? <GuideLibrary guides={guides} /> : null}
       {!notFound && section === "inputPrices" ? <InputPricesPage /> : null}
       {!notFound && section === "roi" ? (
-        <RoiCalculatorPage authToken={authToken} onRequireAuth={() => requestAccountAccess("Vui lòng đăng nhập hoặc đăng ký tài khoản để tính lợi nhuận.")} />
+        <RoiCalculatorPage authToken={authToken} onRequireAuth={() => requestAccountAccess(copy.accountProfitGate)} />
       ) : null}
       {!notFound && section === "fertilizer" ? (
         <AdvisoryHub
           authToken={authToken}
-          onRequireAuth={() => requestAccountAccess(FERTILIZER_AUTH_MESSAGE)}
+          onRequireAuth={() => requestAccountAccess(copy.fertilizerAuthMessage)}
         />
       ) : null}
       {!notFound && section === "sellingTime" ? (
         <AdvisoryHub
           tool="sellingTime"
           authToken={authToken}
-          onRequireAuth={() => requestAccountAccess(ADVISORY_AUTH_MESSAGE)}
+          onRequireAuth={() => requestAccountAccess(copy.advisoryAuthMessage)}
         />
       ) : null}
       {!notFound && section === "arbitrage" ? (
         <AdvisoryHub
           tool="arbitrage"
           authToken={authToken}
-          onRequireAuth={() => requestAccountAccess(ADVISORY_AUTH_MESSAGE)}
+          onRequireAuth={() => requestAccountAccess(copy.advisoryAuthMessage)}
         />
       ) : null}
       {!notFound && section === "crossCrop" ? (
         <AdvisoryHub
           tool="crossCrop"
           authToken={authToken}
-          onRequireAuth={() => requestAccountAccess(ADVISORY_AUTH_MESSAGE)}
+          onRequireAuth={() => requestAccountAccess(copy.advisoryAuthMessage)}
         />
       ) : null}
       {!notFound && section === "fertilizerMethodology" ? <FertilizerMethodology /> : null}

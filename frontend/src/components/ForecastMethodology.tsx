@@ -11,6 +11,7 @@ import {
   type LucideIcon
 } from "./icons";
 import { SeoHead } from "./SeoHead";
+import { useLanguage } from "../contexts/LanguageContext";
 
 const faqSchema = {
   "@context": "https://schema.org",
@@ -52,6 +53,9 @@ const faqSchema = {
 };
 
 export function ForecastMethodology() {
+  const { language } = useLanguage();
+  if (language === "en") return <EnglishForecastMethodology />;
+
   return (
     <section className="method-page">
       <SeoHead
@@ -291,6 +295,143 @@ export function ForecastMethodology() {
           </li>
           <li>
             Scientific Reports (2025), <a href="https://www.nature.com/articles/s41598-025-97724-7" target="_blank" rel="noreferrer">RNN/GNN agricultural price prediction with weather variables</a>.
+          </li>
+        </ul>
+      </section>
+    </section>
+  );
+}
+
+function EnglishForecastMethodology() {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: "How does the agricultural price forecast work?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "The system separates data by crop, province or region, variety and grade, then combines recent prices, trend, weather signals and confidence ranges to produce a 30-day forecast."
+        }
+      },
+      {
+        "@type": "Question",
+        name: "What data goes into the model?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Inputs include VND/kg prices, production area, variety, grade, temperature, rainfall, maturity signals and transaction volume when the source provides it."
+        }
+      }
+    ]
+  };
+
+  return (
+    <section className="method-page">
+      <SeoHead
+        title="Agricultural price forecast methodology"
+        description="A practical explanation of the data, 30-day forecast logic, LSTM upgrade path, MAE/RMSE backtesting and confidence ranges used in the agricultural price forecast."
+        canonical="/thuat-toan-du-bao"
+        schemaJsonLd={schema}
+      />
+      <header className="method-hero">
+        <span>
+          <Brain size={18} />
+          Forecast method
+        </span>
+        <h1>How the agricultural price forecast works</h1>
+        <p>
+          This page explains how price, region, variety, weather and maturity data become a 30-day forecast. The current production layer is intentionally auditable, while the LSTM layer can replace it once backtests prove it is more stable.
+        </p>
+      </header>
+
+      <div className="method-layout">
+        <article className="method-article">
+          <section>
+            <h2>1. Forecast unit</h2>
+            <p>
+              Agricultural prices are not one national time series. A realistic forecast is calculated by crop, province or region, variety and grade, so Robusta coffee in Gia Lai is not mixed with durian in the Mekong Delta.
+            </p>
+            <FormulaBlock label="Forecast unit">
+              y&#770;<sub>c,r,v</sub>(t + h), &nbsp; h = 1, 2, ..., 30
+            </FormulaBlock>
+          </section>
+
+          <section>
+            <h2>2. Data window and cleaning</h2>
+            <p>
+              Each run uses the latest available price window, prioritizes comparable quality grades and fills only short gaps with the nearest valid value. That keeps the forecast stable without inventing a national average when a local series is thin.
+            </p>
+            <FormulaBlock label="Input window">
+              W<sub>t</sub> = {"{"}x<sub>i</sub>{"}"}<sub>i=t-59</sub><sup>t</sup>, &nbsp;
+              x<sub>i</sub> = [p<sub>i</sub>, T<sub>i</sub>, R<sub>i</sub>, M<sub>i</sub>, V<sub>i</sub>]
+            </FormulaBlock>
+          </section>
+
+          <section>
+            <h2>3. Trend, short-term movement and weather signal</h2>
+            <p>
+              The model compares the recent seven-day level with the longer local baseline, then adds a bounded short-term movement term. Weather and maturity signals are used as cautious nudges, not as a promise that price must move in one direction.
+            </p>
+            <FormulaBlock label="Trend">
+              b<sub>t</sub> = (S<sub>t</sub> - L<sub>t</sub>) / min(30, n)
+            </FormulaBlock>
+          </section>
+
+          <section>
+            <h2>4. Final 30-day forecast</h2>
+            <p>
+              The daily forecast starts from the latest local price and adds trend, seasonal movement and agronomic adjustment. On the chart, this is the base scenario, so it should be read together with the confidence range.
+            </p>
+            <FormulaBlock label="30-day forecast">
+              y&#770;(t+h) = max(25,000, p<sub>t</sub> + b<sub>t</sub>h + season<sub>h</sub> + w<sub>t</sub>h)
+            </FormulaBlock>
+          </section>
+
+          <section>
+            <h2>5. Backtesting and confidence range</h2>
+            <p>
+              MAE shows the average miss in VND/kg. RMSE penalizes large misses more heavily, which is useful when a crop, province or variety has sudden supply or weather shocks. The confidence band reminds users that the forecast is a reference signal, not a guaranteed trading price.
+            </p>
+            <FormulaBlock label="Error metrics">
+              MAE = average(|forecast - actual|)
+              <br />
+              RMSE = sqrt(average((forecast - actual)<sup>2</sup>))
+            </FormulaBlock>
+          </section>
+
+          <section>
+            <h2>6. Where LSTM fits</h2>
+            <p>
+              LSTM is useful only when the historical data is long, clean and consistently backtested. The safe path is to keep the current auditable model as the baseline, train LSTM offline, then deploy it only after rolling backtests show lower error for each crop and region group.
+            </p>
+          </section>
+        </article>
+
+        <aside className="method-sidebar">
+          <MethodCard icon={Database} title="Data window" value="60 days" detail="Separated by crop, region and variety" />
+          <MethodCard icon={LineChart} title="Forecast horizon" value="30 days" detail="Daily forecast without looking into future data" />
+          <MethodCard icon={Calculator} title="Error metrics" value="MAE / RMSE" detail="Rolling time-series validation" />
+          <MethodCard icon={Activity} title="Agronomic signals" value="Rain / heat / maturity" detail="The model does not rely on price alone" />
+          <MethodCard icon={ClipboardCheck} title="Auditability" value="Baseline first" detail="LSTM replaces it only after better backtests" />
+          <MethodCard icon={ShieldCheck} title="Transparency" value="Open logic" detail="Readable, testable and upgradeable" />
+        </aside>
+      </div>
+
+      <section className="method-sources">
+        <div>
+          <BookOpenCheck size={18} />
+          <h2>References</h2>
+        </div>
+        <ul>
+          <li>
+            Hochreiter, S. & Schmidhuber, J. (1997), <a href="https://direct.mit.edu/neco/article/9/8/1735/6109/Long-Short-Term-Memory" target="_blank" rel="noreferrer">Long Short-Term Memory</a>, Neural Computation.
+          </li>
+          <li>
+            Hyndman, R. & Athanasopoulos, G. (2021), <a href="https://otexts.com/fpp3/" target="_blank" rel="noreferrer">Forecasting: Principles and Practice</a>, OTexts.
+          </li>
+          <li>
+            Yang et al. (2022), <a href="https://www.mdpi.com/2077-0472/12/2/256" target="_blank" rel="noreferrer">Dual Input Attention LSTM for agricultural commodity prices</a>, Agriculture.
           </li>
         </ul>
       </section>

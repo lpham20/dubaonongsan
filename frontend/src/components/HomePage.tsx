@@ -27,6 +27,8 @@ import {
   type UsdVndRate
 } from "../lib/api";
 import { newsPath } from "../lib/seo";
+import { useLanguage } from "../contexts/LanguageContext";
+import { withLanguagePrefix } from "../lib/localizedRoutes";
 
 type Props = {
   news: NewsArticle[];
@@ -166,6 +168,82 @@ const fallbackNews: NewsArticle[] = [
 ];
 
 export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuides }: Props) {
+  const { language } = useLanguage();
+  const copy = language === "en"
+    ? {
+        seoTitle: "Vietnam agricultural price forecasts and technical farming guides",
+        seoDescription: "Daily coffee, durian, pepper and rice prices, 30-day regional forecasts, market news and practical farming guides for Vietnam.",
+        siteName: "Agri Price Forecast",
+        schemaDescription: "Vietnam agricultural market forecasts, farming guides and news",
+        kicker: "Agri Price Forecast",
+        heroTitle: "Market intelligence and practical farming knowledge in one place",
+        searchLabel: "Search crops or market news",
+        searchPlaceholder: "Search: coffee, durian, fertilizer...",
+        searchButton: "Search news",
+        marketNews: "Market news",
+        forecastDurian: "Durian forecast",
+        forecastCoffee: "Coffee forecast",
+        forecastPepper: "Pepper forecast",
+        forecastRice: "Rice forecast",
+        dataDesk: "Data desk",
+        trackedGroups: "4 data groups tracked",
+        agriPrices: "Crop prices",
+        inputs: "Inputs",
+        fertilizerAndCosts: "Fertilizer and input costs",
+        impactNews: "Impact news",
+        impactNewsDesc: "Exports, policy and weather",
+        featured: "Featured story",
+        updating: "The market brief is being updated.",
+        readNews: "Read story",
+        alerts: "Market alerts",
+        market: "Market",
+        allNews: "View all news",
+        priceForecast: "Price forecasts",
+        forecastModel: "30/90/180-day models",
+        marketBrief: "Market brief",
+        guideWorkflows: "Technical workflows",
+        newGuides: (count: number) => (count ? `${count} new guides` : "Production guide library"),
+        commodityProfiles: "Commodity profiles",
+        commodityList: "Coffee, durian, pepper, rice",
+        livePrices: "Live prices"
+      }
+    : {
+        seoTitle: "Dự báo giá nông sản & hướng dẫn kỹ thuật Việt Nam",
+        seoDescription: "Cập nhật giá cà phê, sầu riêng, hồ tiêu, lúa hằng ngày. Dự báo 30 ngày theo vùng trồng, bản tin thị trường và hướng dẫn kỹ thuật nông nghiệp.",
+        siteName: "Dự báo nông sản",
+        schemaDescription: "Nền tảng tin tức, kỹ thuật và dự báo giá nông sản Việt Nam",
+        kicker: "Dự báo nông sản",
+        heroTitle: "Nền tảng tri thức và dự báo thị trường nông nghiệp toàn diện",
+        searchLabel: "Tìm nhanh cây trồng hoặc tin thị trường",
+        searchPlaceholder: "Tìm nhanh: cà phê, sầu riêng, phân bón...",
+        searchButton: "Tìm tin",
+        marketNews: "Tin thị trường",
+        forecastDurian: "Dự báo sầu riêng",
+        forecastCoffee: "Dự báo cà phê",
+        forecastPepper: "Dự báo hồ tiêu",
+        forecastRice: "Dự báo lúa",
+        dataDesk: "Bàn dữ liệu",
+        trackedGroups: "4 nhóm dữ liệu đang theo dõi",
+        agriPrices: "Giá nông sản",
+        inputs: "Vật tư",
+        fertilizerAndCosts: "Phân bón, chi phí đầu vào",
+        impactNews: "Tin tác động",
+        impactNewsDesc: "Xuất khẩu, chính sách, thời tiết",
+        featured: "Tin tiêu điểm",
+        updating: "Bản tin đang được cập nhật.",
+        readNews: "Đọc bản tin",
+        alerts: "Cảnh báo thị trường",
+        market: "Thị trường",
+        allNews: "Xem toàn bộ bản tin",
+        priceForecast: "Dự báo giá",
+        forecastModel: "Mô hình 30/90/180 ngày",
+        marketBrief: "Bản tin thị trường",
+        guideWorkflows: "Quy trình kỹ thuật",
+        newGuides: (count: number) => (count ? `${count} hướng dẫn mới` : "Cẩm nang canh tác"),
+        commodityProfiles: "Hồ sơ hàng hóa",
+        commodityList: "Cà phê, sầu riêng, hồ tiêu, lúa",
+        livePrices: "Giá trực tuyến"
+      };
   const navigate = useNavigate();
   const [liveTicker, setLiveTicker] = useState<HomeTickerState>({ coffee: [], durian: [], pepper: [], rice: [] });
   const [usdVndRate, setUsdVndRate] = useState<UsdVndRate | null>(null);
@@ -215,21 +293,21 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const query = searchQuery.trim();
-    navigate(query ? `/tin-tuc?q=${encodeURIComponent(query)}` : "/tin-tuc");
+    navigate(withLanguagePrefix(query ? `/tin-tuc?q=${encodeURIComponent(query)}` : "/tin-tuc", language));
   }
 
   return (
     <section className="home-page finance-home">
       <SeoHead
-        title="Dự báo giá nông sản & hướng dẫn kỹ thuật Việt Nam"
-        description="Cập nhật giá cà phê, sầu riêng, hồ tiêu, lúa hằng ngày. Dự báo 30 ngày theo vùng trồng, bản tin thị trường và hướng dẫn kỹ thuật nông nghiệp."
+        title={copy.seoTitle}
+        description={copy.seoDescription}
         canonical="/"
         schemaJsonLd={{
           "@context": "https://schema.org",
           "@type": "WebPage",
-          name: "Dự báo nông sản",
+          name: copy.siteName,
           url: "https://dubaonongsan.com/",
-          description: "Nền tảng tin tức, kỹ thuật và dự báo giá nông sản Việt Nam",
+          description: copy.schemaDescription,
           speakable: {
             "@type": "SpeakableSpecification",
             cssSelector: [".home-market-hero h1", ".home-market-hero p"]
@@ -242,43 +320,43 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
         <div className="home-hero-copy">
           <span className="home-kicker">
             <Sprout size={18} />
-            Dự báo nông sản
+            {copy.kicker}
           </span>
-          <h1>Nền tảng tri thức và dự báo thị trường nông nghiệp toàn diện</h1>
+          <h1>{copy.heroTitle}</h1>
 
           <form className="home-quick-search" role="search" onSubmit={handleSearch}>
             <Search size={19} />
             <input
               name="q"
-              aria-label="Tìm nhanh cây trồng hoặc tin thị trường"
-              placeholder="Tìm nhanh: cà phê, sầu riêng, phân bón..."
+              aria-label={copy.searchLabel}
+              placeholder={copy.searchPlaceholder}
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
             />
             <button className="home-search-filter" type="submit">
-              Tìm tin
+              {copy.searchButton}
             </button>
             <button className="home-search-filter" type="button" onClick={onOpenNews}>
-              Tin thị trường
+              {copy.marketNews}
               <ChevronDown size={15} />
             </button>
           </form>
 
           <div className="home-hero-actions">
             <button type="button" onClick={() => onOpenAnalytics("sau_rieng")}>
-              Dự báo sầu riêng
+              {copy.forecastDurian}
               <ArrowRight size={17} />
             </button>
             <button type="button" onClick={() => onOpenAnalytics("ca_phe")}>
-              Dự báo cà phê
+              {copy.forecastCoffee}
               <ArrowRight size={17} />
             </button>
             <button type="button" onClick={() => onOpenAnalytics("ho_tieu")}>
-              Dự báo hồ tiêu
+              {copy.forecastPepper}
               <ArrowRight size={17} />
             </button>
             <button type="button" onClick={() => onOpenAnalytics("lua")}>
-              Dự báo lúa
+              {copy.forecastRice}
               <ArrowRight size={17} />
             </button>
           </div>
@@ -286,21 +364,21 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
 
         <aside className="home-hero-terminal" aria-label="Tóm tắt thị trường">
           <div>
-            <span>Bàn dữ liệu</span>
-            <strong>4 nhóm dữ liệu đang theo dõi</strong>
+            <span>{copy.dataDesk}</span>
+            <strong>{copy.trackedGroups}</strong>
           </div>
           <dl>
             <div>
-              <dt>Giá nông sản</dt>
+              <dt>{copy.agriPrices}</dt>
               <dd>Cà phê, sầu riêng, hồ tiêu, lúa</dd>
             </div>
             <div>
-              <dt>Vật tư</dt>
-              <dd>Phân bón, chi phí đầu vào</dd>
+              <dt>{copy.inputs}</dt>
+              <dd>{copy.fertilizerAndCosts}</dd>
             </div>
             <div>
-              <dt>Tin tác động</dt>
-              <dd>Xuất khẩu, chính sách, thời tiết</dd>
+              <dt>{copy.impactNews}</dt>
+              <dd>{copy.impactNewsDesc}</dd>
             </div>
           </dl>
         </aside>
@@ -348,17 +426,17 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
           <div className="lead-market-copy">
             <span className="story-label">
               <Newspaper size={16} />
-              Tin tiêu điểm
+              {copy.featured}
             </span>
             <h2>{displayTitle(lead.title, 96)}</h2>
-            <p>{displayTitle(lead.summary || lead.excerpt || "Bản tin đang được cập nhật.", 190)}</p>
+            <p>{displayTitle(lead.summary || lead.excerpt || copy.updating, 190)}</p>
             <div className="story-meta">
               <Clock3 size={15} />
               <span>{formatDate(lead.published_at || lead.scraped_at)}</span>
               <span>{lead.source_name}</span>
             </div>
-            <Link className="story-link" to={lead.source_url === "#" ? "/tin-tuc" : newsPath(lead)}>
-              Đọc bản tin
+            <Link className="story-link" to={withLanguagePrefix(lead.source_url === "#" ? "/tin-tuc" : newsPath(lead), language)}>
+              {copy.readNews}
               <ArrowRight size={16} />
             </Link>
           </div>
@@ -367,19 +445,19 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
         <aside className="market-alert-panel">
           <div className="panel-heading">
             <ShieldAlert size={18} />
-            <h2>Cảnh báo thị trường</h2>
+            <h2>{copy.alerts}</h2>
           </div>
           <div className="alert-list">
             {marketAlerts.map((item) => (
-              <Link to={item.source_url === "#" ? "/tin-tuc" : newsPath(item)} key={item.article_id}>
-                <span>{item.category || "Thị trường"}</span>
+              <Link to={withLanguagePrefix(item.source_url === "#" ? "/tin-tuc" : newsPath(item), language)} key={item.article_id}>
+                <span>{item.category || copy.market}</span>
                 <strong>{displayTitle(item.title, 74)}</strong>
                 <small>{formatDate(item.published_at || item.scraped_at)}</small>
               </Link>
             ))}
           </div>
           <button type="button" onClick={onOpenNews}>
-            Xem toàn bộ bản tin
+            {copy.allNews}
             <ArrowRight size={16} />
           </button>
         </aside>
@@ -388,23 +466,23 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
       <section className="home-ops-strip">
         <button type="button" onClick={() => onOpenAnalytics("sau_rieng")}>
           <BarChart3 size={20} />
-          <span>Dự báo giá</span>
-          <strong>Mô hình 30/90/180 ngày</strong>
+          <span>{copy.priceForecast}</span>
+          <strong>{copy.forecastModel}</strong>
         </button>
         <button type="button" onClick={onOpenNews}>
           <Bell size={20} />
-          <span>Bản tin thị trường</span>
-          <strong>Tin giá, phân bón, chính sách</strong>
+          <span>{copy.marketBrief}</span>
+          <strong>{copy.fertilizerAndCosts}</strong>
         </button>
         <button type="button" onClick={onOpenGuides}>
           <BookOpenCheck size={20} />
-          <span>Quy trình kỹ thuật</span>
-          <strong>{guidePreview.length ? `${guidePreview.length} hướng dẫn mới` : "Cẩm nang canh tác"}</strong>
+          <span>{copy.guideWorkflows}</span>
+          <strong>{copy.newGuides(guidePreview.length)}</strong>
         </button>
         <button type="button" onClick={() => onOpenAnalytics("ca_phe")}>
           <Coffee size={20} />
-          <span>Hồ sơ hàng hóa</span>
-          <strong>Cà phê, sầu riêng, hồ tiêu, lúa</strong>
+          <span>{copy.commodityProfiles}</span>
+          <strong>{copy.commodityList}</strong>
         </button>
       </section>
     </section>
@@ -412,12 +490,13 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
 }
 
 function PriceTicker({ items }: { items: TickerItem[] }) {
+  const { language } = useLanguage();
   const repeated = [...items, ...items];
 
   return (
-    <div className="home-price-ticker" aria-label="Dải băng giá nông sản">
+    <div className="home-price-ticker" aria-label={language === "en" ? "Agricultural price ticker" : "Dải băng giá nông sản"}>
       <div className="home-price-ticker-label">
-        Giá trực tuyến
+        {language === "en" ? "Live prices" : "Giá trực tuyến"}
       </div>
       <div className="home-price-track">
         <div className="home-price-content">

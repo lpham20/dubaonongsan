@@ -16,6 +16,8 @@ import { Link } from "react-router-dom";
 import { SeoHead } from "./SeoHead";
 import type { GuidePost } from "../lib/api";
 import { guidePath } from "../lib/seo";
+import { useLanguage } from "../contexts/LanguageContext";
+import { withLanguagePrefix } from "../lib/localizedRoutes";
 
 type Props = {
   guides: GuidePost[];
@@ -51,6 +53,34 @@ const CROP_META: Record<string, { plant: string; family: string }> = {
 };
 
 export function GuideLibrary({ guides }: Props) {
+  const { language } = useLanguage();
+  const copy = language === "en"
+    ? {
+        seoTitle: "Crop production guides for durian, coffee, pepper and rice",
+        seoDescription: "A practical farming guide library covering crop care, pest prevention, disease control and field-ready production workflows.",
+        kicker: "Farming guides",
+        title: "Crop production techniques",
+        description: "Choose a crop group, select a crop, then read either field guides or care workflows by topic.",
+        mobileFilters: "Mobile guide filters",
+        shortcut: "Your shortcuts",
+        plants: "crops",
+        search: "Search technical guides",
+        minutes: "min read",
+        openGuide: "Open full guide"
+      }
+    : {
+        seoTitle: "Quy trình kỹ thuật trồng sầu riêng, cà phê, hồ tiêu và lúa",
+        seoDescription: "Thư viện hướng dẫn kỹ thuật nông nghiệp: cẩm nang, chăm sóc cây trồng, phòng trừ sâu bệnh và quy trình canh tác dễ tra cứu.",
+        kicker: "Hướng dẫn nông nghiệp",
+        title: "Quy trình kỹ thuật trồng trọt",
+        description: "Chọn nhóm cây, chọn cây trồng rồi đọc cẩm nang hoặc quy trình chăm sóc theo từng chủ đề.",
+        mobileFilters: "Bộ lọc hướng dẫn trên di động",
+        shortcut: "Lối tắt của bạn",
+        plants: "cây",
+        search: "Tìm bài kỹ thuật",
+        minutes: "phút đọc",
+        openGuide: "Mở bài hướng dẫn đầy đủ"
+      };
   const normalizedGuides = useMemo(() => guides.map(toGuideView).sort(sortGuides), [guides]);
   const [activeFamily, setActiveFamily] = useState("Cây công nghiệp");
   const [activePlant, setActivePlant] = useState("");
@@ -100,22 +130,22 @@ export function GuideLibrary({ guides }: Props) {
   return (
     <section className="content-page guide-workspace">
       <SeoHead
-        title="Quy trình kỹ thuật trồng sầu riêng, cà phê, hồ tiêu và lúa"
-        description="Thư viện hướng dẫn kỹ thuật nông nghiệp: cẩm nang, chăm sóc cây trồng, phòng trừ sâu bệnh và quy trình canh tác dễ tra cứu."
+        title={copy.seoTitle}
+        description={copy.seoDescription}
         canonical="/huong-dan"
       />
       <div className="content-hero guide-hero compact-guide-hero">
         <div>
           <span>
             <BookOpenCheck size={18} />
-            Hướng dẫn nông nghiệp
+            {copy.kicker}
           </span>
-          <h1>Quy trình kỹ thuật trồng trọt</h1>
-          <p>Chọn nhóm cây, chọn cây trồng rồi đọc cẩm nang hoặc quy trình chăm sóc theo từng chủ đề.</p>
+          <h1>{copy.title}</h1>
+          <p>{copy.description}</p>
         </div>
       </div>
 
-      <div className="guide-mobile-filter-strip" aria-label="Bộ lọc hướng dẫn trên di động">
+      <div className="guide-mobile-filter-strip" aria-label={copy.mobileFilters}>
         <div className="plant-strip">
           {familyStats.map((item) => (
             <button
@@ -128,7 +158,7 @@ export function GuideLibrary({ guides }: Props) {
                 setSelectedSlug("");
               }}
             >
-              {item.family} <small>({item.count})</small>
+              {displayFamily(item.family, language)} <small>({item.count})</small>
             </button>
           ))}
         </div>
@@ -143,7 +173,7 @@ export function GuideLibrary({ guides }: Props) {
                 setSelectedSlug("");
               }}
             >
-              {item.plant} <small>({item.count})</small>
+              {displayPlant(item.plant, language)} <small>({item.count})</small>
             </button>
           ))}
         </div>
@@ -152,7 +182,7 @@ export function GuideLibrary({ guides }: Props) {
       <div className="guide-layout">
         <aside className="guide-sidebar">
           <div className="quick-panel">
-            <h2>Lối tắt của bạn</h2>
+            <h2>{copy.shortcut}</h2>
             {familyStats.map((item) => (
               <button
                 type="button"
@@ -165,8 +195,8 @@ export function GuideLibrary({ guides }: Props) {
                 }}
               >
                 <Sprout size={17} />
-                <span>{item.family}</span>
-                <small>{item.plants} cây</small>
+                <span>{displayFamily(item.family, language)}</span>
+                <small>{item.plants} {copy.plants}</small>
               </button>
             ))}
           </div>
@@ -175,7 +205,7 @@ export function GuideLibrary({ guides }: Props) {
         <div className="guide-main">
           <div className="tech-title">
             <Layers3 size={18} />
-            <h2>{currentFamily}</h2>
+            <h2>{displayFamily(currentFamily, language)}</h2>
           </div>
 
           <div className="family-grid">
@@ -191,8 +221,8 @@ export function GuideLibrary({ guides }: Props) {
                 }}
               >
                 <GuideFamilyArt family={item.family} />
-                <strong>{item.family}</strong>
-                <span>{item.count} bài kỹ thuật</span>
+                <strong>{displayFamily(item.family, language)}</strong>
+                <span>{language === "en" ? `${item.count} technical guides` : `${item.count} bài kỹ thuật`}</span>
               </button>
             ))}
           </div>
@@ -208,7 +238,7 @@ export function GuideLibrary({ guides }: Props) {
                   setSelectedSlug("");
                 }}
               >
-                {item.plant}
+                {displayPlant(item.plant, language)}
                 <small>{item.count}</small>
               </button>
             ))}
@@ -229,7 +259,7 @@ export function GuideLibrary({ guides }: Props) {
                     }}
                   >
                     {item.section === "Cẩm nang" ? <BookOpenCheck size={15} /> : <Sprout size={15} />}
-                    {item.section}
+                    {displaySection(item.section, language)}
                     <small>{item.count}</small>
                   </button>
                 ))}
@@ -243,7 +273,7 @@ export function GuideLibrary({ guides }: Props) {
                     setQuery(event.target.value);
                     setSelectedSlug("");
                   }}
-                  placeholder="Tìm bài kỹ thuật"
+                  placeholder={copy.search}
                 />
               </label>
 
@@ -259,13 +289,15 @@ export function GuideLibrary({ guides }: Props) {
                     <span className="guide-list-copy">
                       <strong>{guide.title}</strong>
                       <small>
-                        {guide.section} · {guide.plant} · {estimateReadingMinutes(guide.content)} phút đọc
+                        {displaySection(guide.section, language)} · {displayPlant(guide.plant, language)} · {estimateReadingMinutes(guide.content)} {copy.minutes}
                       </small>
                     </span>
                     <ChevronRight size={15} />
                   </button>
                 ))}
-                {visibleGuides.length === 0 ? <div className="guide-empty">Không có bài phù hợp.</div> : null}
+                {visibleGuides.length === 0 ? (
+                  <div className="guide-empty">{language === "en" ? "No matching guides." : "Không có bài phù hợp."}</div>
+                ) : null}
               </div>
             </aside>
 
@@ -275,27 +307,27 @@ export function GuideLibrary({ guides }: Props) {
                   <header className="guide-article-header">
                     <div className="guide-tag-row">
                       <span>{selectedGuide.category}</span>
-                      <span>{selectedGuide.family}</span>
-                      <span>{selectedGuide.plant}</span>
+                      <span>{displayFamily(selectedGuide.family, language)}</span>
+                      <span>{displayPlant(selectedGuide.plant, language)}</span>
                     </div>
                     <h2>{selectedGuide.title}</h2>
                     <p>{selectedGuide.summary}</p>
                     <div className="guide-meta-grid">
                       <small>
                         <Clock3 size={15} />
-                        {estimateReadingMinutes(selectedGuide.content)} phút đọc
+                        {estimateReadingMinutes(selectedGuide.content)} {copy.minutes}
                       </small>
                       <small>
                         <Gauge size={15} />
-                        {technicalDifficulty(selectedGuide.content)}
+                        {technicalDifficulty(selectedGuide.content, language)}
                       </small>
                       <small>
                         <CalendarClock size={15} />
-                        Cập nhật {formatGuideDate(selectedGuide.published_at)}
+                        {language === "en" ? "Updated" : "Cập nhật"} {formatGuideDate(selectedGuide.published_at, language)}
                       </small>
                     </div>
-                    <Link className="guide-canonical-link" to={guidePath(selectedGuide.slug)}>
-                      Mở trang riêng của bài hướng dẫn
+                    <Link className="guide-canonical-link" to={withLanguagePrefix(guidePath(selectedGuide.slug), language)}>
+                      {copy.openGuide}
                     </Link>
                   </header>
                   <div className="guide-article-layout">
@@ -304,7 +336,9 @@ export function GuideLibrary({ guides }: Props) {
                   </div>
                 </>
               ) : (
-                <div className="guide-empty">Chọn một cây trồng để xem hướng dẫn.</div>
+                <div className="guide-empty">
+                  {language === "en" ? "Choose a crop to view its guides." : "Chọn một cây trồng để xem hướng dẫn."}
+                </div>
               )}
             </article>
           </div>
@@ -315,6 +349,7 @@ export function GuideLibrary({ guides }: Props) {
 }
 
 function GuideContent({ content, postId }: { content: string; postId: number }) {
+  const { language } = useLanguage();
   const lines = content
     .split(/\n+/)
     .map((line) => line.trim())
@@ -333,7 +368,7 @@ function GuideContent({ content, postId }: { content: string; postId: number }) 
       continue;
     }
     if (!current) {
-      current = { heading: "Ghi chú kỹ thuật", body: [], bullets: [], tables: [], images: [] };
+      current = { heading: language === "en" ? "Field notes" : "Ghi chú kỹ thuật", body: [], bullets: [], tables: [], images: [] };
       blocks.push(current);
     }
     if (line.startsWith("|")) {
@@ -363,11 +398,11 @@ function GuideContent({ content, postId }: { content: string; postId: number }) 
     <div className="guide-body structured-guide-body">
       {blocks.map((block) => (
         <section key={block.heading}>
-          <h3>{block.heading}</h3>
+          <h3>{block.heading || (language === "en" ? "Field notes" : "Ghi chú kỹ thuật")}</h3>
           {block.body.map((line) => (
-            <p key={line}>{renderInlineMarkdown(line)}</p>
+            <p key={line}>{renderInlineMarkdown(line, language)}</p>
           ))}
-          {block.tables.map((table, index) => renderMarkdownTable(table, index))}
+          {block.tables.map((table, index) => renderMarkdownTable(table, index, language))}
           {block.images.length ? (
             <div className="guide-image-grid">
               {block.images.map((image) => (
@@ -389,7 +424,7 @@ function GuideContent({ content, postId }: { content: string; postId: number }) 
           {block.bullets.length ? (
             <ul>
               {block.bullets.map((line) => (
-                <li key={line}>{renderInlineMarkdown(line)}</li>
+                <li key={line}>{renderInlineMarkdown(line, language)}</li>
               ))}
             </ul>
           ) : null}
@@ -400,15 +435,16 @@ function GuideContent({ content, postId }: { content: string; postId: number }) 
 }
 
 function GuideReferencePanel({ guide }: { guide: GuideView }) {
-  const specs = standardSpecs(guide);
-  const supplies = relatedSupplies(guide);
+  const { language } = useLanguage();
+  const specs = standardSpecs(guide, language);
+  const supplies = relatedSupplies(guide, language);
 
   return (
-    <aside className="guide-reference-panel" aria-label="Thông tin tra cứu nhanh">
+    <aside className="guide-reference-panel" aria-label={language === "en" ? "Quick reference" : "Thông tin tra cứu nhanh"}>
       <section>
         <div>
           <Ruler size={17} />
-          <h3>Thông số tiêu chuẩn</h3>
+          <h3>{language === "en" ? "Standard checks" : "Thông số tiêu chuẩn"}</h3>
         </div>
         <dl>
           {specs.map((item) => (
@@ -423,7 +459,7 @@ function GuideReferencePanel({ guide }: { guide: GuideView }) {
       <section>
         <div>
           <PackageCheck size={17} />
-          <h3>Vật tư liên quan</h3>
+          <h3>{language === "en" ? "Related supplies" : "Vật tư liên quan"}</h3>
         </div>
         <ul>
           {supplies.map((item) => (
@@ -440,56 +476,105 @@ function estimateReadingMinutes(content: string) {
   return Math.max(2, Math.ceil(words / 230));
 }
 
-function technicalDifficulty(content: string) {
+function technicalDifficulty(content: string, language: "vi" | "en" = "vi") {
   const normalized = content.toLowerCase();
   const complexSignals = ["phun", "bệnh", "sâu", "liều", "ppm", "nấm", "cắt tỉa", "xử lý"];
   const score = complexSignals.filter((signal) => normalized.includes(signal)).length;
+  if (language === "en") {
+    if (score >= 4) return "Difficulty: advanced";
+    if (score >= 2) return "Difficulty: intermediate";
+    return "Difficulty: basic";
+  }
   if (score >= 4) return "Độ khó: nâng cao";
   if (score >= 2) return "Độ khó: trung bình";
   return "Độ khó: cơ bản";
 }
 
-function standardSpecs(guide: GuideView) {
+function standardSpecs(guide: GuideView, language: "vi" | "en" = "vi") {
   const plant = guide.plant.toLowerCase();
+  const groupLabel = language === "en" ? "Crop group" : "Nhóm cây";
+  const intervalLabel = language === "en" ? "Check interval" : "Chu kỳ kiểm tra";
+  const focusLabel = language === "en" ? "Watch first" : "Ưu tiên theo dõi";
   if (plant.includes("cà phê") || plant.includes("tiêu")) {
     return [
-      { label: "Nhóm cây", value: guide.family },
-      { label: "Chu kỳ kiểm tra", value: "7-10 ngày/lần" },
-      { label: "Ưu tiên theo dõi", value: "Ẩm độ đất, tán lá, sâu bệnh" }
+      { label: groupLabel, value: displayFamily(guide.family, language) },
+      { label: intervalLabel, value: language === "en" ? "Every 7-10 days" : "7-10 ngày/lần" },
+      { label: focusLabel, value: language === "en" ? "Soil moisture, canopy, pests and diseases" : "Ẩm độ đất, tán lá, sâu bệnh" }
     ];
   }
   if (plant.includes("lúa")) {
     return [
-      { label: "Nhóm cây", value: guide.family },
-      { label: "Chu kỳ kiểm tra", value: "3-5 ngày/lần" },
-      { label: "Ưu tiên theo dõi", value: "Mực nước, rầy, bệnh lá" }
+      { label: groupLabel, value: displayFamily(guide.family, language) },
+      { label: intervalLabel, value: language === "en" ? "Every 3-5 days" : "3-5 ngày/lần" },
+      { label: focusLabel, value: language === "en" ? "Water level, planthoppers and leaf diseases" : "Mực nước, rầy, bệnh lá" }
     ];
   }
   return [
-    { label: "Nhóm cây", value: guide.family },
-    { label: "Chu kỳ kiểm tra", value: "5-7 ngày/lần" },
-    { label: "Ưu tiên theo dõi", value: "Tán cây, trái, rễ và thoát nước" }
+    { label: groupLabel, value: displayFamily(guide.family, language) },
+    { label: intervalLabel, value: language === "en" ? "Every 5-7 days" : "5-7 ngày/lần" },
+    { label: focusLabel, value: language === "en" ? "Canopy, fruit, roots and drainage" : "Tán cây, trái, rễ và thoát nước" }
   ];
 }
 
-function relatedSupplies(guide: GuideView) {
+function relatedSupplies(guide: GuideView, language: "vi" | "en" = "vi") {
   const text = `${guide.title} ${guide.summary} ${guide.content}`.toLowerCase();
   const supplies = new Set<string>();
-  if (text.includes("bệnh") || text.includes("nấm") || text.includes("loét")) supplies.add("Bộ test/ghi nhận sâu bệnh");
-  if (text.includes("cắt") || text.includes("tỉa") || text.includes("tạo tán")) supplies.add("Kéo cắt tỉa, dụng cụ vệ sinh vết cắt");
-  if (text.includes("tưới") || text.includes("nước") || text.includes("ẩm")) supplies.add("Cảm biến ẩm đất hoặc sổ theo dõi tưới");
-  if (text.includes("phun")) supplies.add("Bình phun, đồ bảo hộ, nhãn ghi liều dùng");
+  if (text.includes("bệnh") || text.includes("disease") || text.includes("nấm") || text.includes("fung") || text.includes("loét")) {
+    supplies.add(language === "en" ? "Pest and disease scouting log" : "Bộ test/ghi nhận sâu bệnh");
+  }
+  if (text.includes("cắt") || text.includes("prun") || text.includes("tỉa") || text.includes("tạo tán")) {
+    supplies.add(language === "en" ? "Pruning shears and cut-sanitizing tools" : "Kéo cắt tỉa, dụng cụ vệ sinh vết cắt");
+  }
+  if (text.includes("tưới") || text.includes("irrig") || text.includes("nước") || text.includes("ẩm")) {
+    supplies.add(language === "en" ? "Soil moisture sensor or irrigation log" : "Cảm biến ẩm đất hoặc sổ theo dõi tưới");
+  }
+  if (text.includes("phun") || text.includes("spray")) {
+    supplies.add(language === "en" ? "Sprayer, protective gear and dose label" : "Bình phun, đồ bảo hộ, nhãn ghi liều dùng");
+  }
   if (!supplies.size) {
-    supplies.add("Sổ ghi chép vườn");
-    supplies.add("Dụng cụ kiểm tra hiện trường");
+    supplies.add(language === "en" ? "Orchard record book" : "Sổ ghi chép vườn");
+    supplies.add(language === "en" ? "Field inspection kit" : "Dụng cụ kiểm tra hiện trường");
   }
   return Array.from(supplies).slice(0, 4);
 }
 
-function formatGuideDate(value: string) {
+function formatGuideDate(value: string, language: "vi" | "en" = "vi") {
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "đang cập nhật";
-  return date.toLocaleDateString("vi-VN");
+  if (Number.isNaN(date.getTime())) return language === "en" ? "updating" : "đang cập nhật";
+  return date.toLocaleDateString(language === "en" ? "en-US" : "vi-VN");
+}
+
+function displayFamily(value: string, language: "vi" | "en") {
+  if (language !== "en") return value;
+  const labels: Record<string, string> = {
+    "Cây ăn quả": "Fruit crops",
+    "Cây công nghiệp": "Industrial crops",
+    "Cây lương thực": "Food crops",
+    "Cây trồng khác": "Other crops"
+  };
+  return labels[value] ?? value;
+}
+
+function displayPlant(value: string, language: "vi" | "en") {
+  if (language !== "en") return value;
+  const labels: Record<string, string> = {
+    "Sầu riêng": "Durian",
+    "Mít": "Jackfruit",
+    "Thanh long": "Dragon fruit",
+    "Cam": "Citrus",
+    "Xoài": "Mango",
+    "Chôm chôm": "Rambutan",
+    "Cà phê": "Coffee",
+    "Tiêu": "Black pepper",
+    "Lúa": "Rice",
+    "Ớt": "Chili"
+  };
+  return labels[value] ?? value;
+}
+
+function displaySection(value: string, language: "vi" | "en") {
+  if (language !== "en") return value;
+  return value === "Chăm sóc" ? "Care" : "Field guide";
 }
 
 function guideImageUrl(postId: number, imageIndex: number) {
@@ -524,19 +609,19 @@ function parseTableRow(line: string) {
     .filter(Boolean);
 }
 
-function renderMarkdownTable(table: string[][], index: number) {
+function renderMarkdownTable(table: string[][], index: number, language: "vi" | "en" = "vi") {
   if (!table.length) return null;
   const [head, ...rows] = table;
   return (
     <div className="guide-markdown-table" key={`table-${index}`}>
       <table>
         <thead>
-          <tr>{head.map((cell) => <th key={cell}>{renderInlineMarkdown(cell)}</th>)}</tr>
+          <tr>{head.map((cell) => <th key={cell}>{renderInlineMarkdown(cell, language)}</th>)}</tr>
         </thead>
         <tbody>
           {rows.map((row, rowIndex) => (
             <tr key={`${rowIndex}-${row.join("|")}`}>
-              {head.map((_, cellIndex) => <td key={cellIndex}>{renderInlineMarkdown(row[cellIndex] ?? "")}</td>)}
+              {head.map((_, cellIndex) => <td key={cellIndex}>{renderInlineMarkdown(row[cellIndex] ?? "", language)}</td>)}
             </tr>
           ))}
         </tbody>
@@ -545,7 +630,7 @@ function renderMarkdownTable(table: string[][], index: number) {
   );
 }
 
-function renderInlineMarkdown(text: string) {
+function renderInlineMarkdown(text: string, language: "vi" | "en" = "vi") {
   const cleaned = text.replace(/^\[[ xX]\]\s*/, "");
   const parts = cleaned.split(/(\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g).filter(Boolean);
   return parts.map((part, index) => {
@@ -553,7 +638,7 @@ function renderInlineMarkdown(text: string) {
     if (link) {
       const [, label, href] = link;
       return href.startsWith("/") ? (
-        <Link to={href} key={`${part}-${index}`}>{label}</Link>
+        <Link to={withLanguagePrefix(href, language)} key={`${part}-${index}`}>{label}</Link>
       ) : (
         <a href={href} key={`${part}-${index}`} target="_blank" rel="noreferrer">{label}</a>
       );
@@ -576,7 +661,8 @@ function GuideFamilyArt({ family }: { family: string }) {
 
 function toGuideView(guide: GuidePost): GuideView {
   const cropMeta = guide.crop_type ? CROP_META[guide.crop_type] : undefined;
-  const section = guide.category.toLowerCase().startsWith("chăm sóc") ? "Chăm sóc" : "Cẩm nang";
+  const category = guide.category.toLowerCase();
+  const section = category.startsWith("chăm sóc") || category.startsWith("care") ? "Chăm sóc" : "Cẩm nang";
   const plant = cropMeta?.plant ?? plantFromCategory(guide.category, guide.crop_type);
   return {
     ...guide,

@@ -13,10 +13,13 @@ import {
   type Region,
   type SellingTimeResponse
 } from "../lib/api";
+import { useLanguage, type AppLanguage } from "../contexts/LanguageContext";
+import { cropLabel } from "../lib/displayLabels";
 
 export type AdvisoryTool = "fertilizer" | "sellingTime" | "arbitrage" | "crossCrop";
 
-const toolMeta: Record<AdvisoryTool, { kicker: string; title: string; description: string; canonical: string; Icon: typeof Calculator }> = {
+const toolMeta: Record<AppLanguage, Record<AdvisoryTool, { kicker: string; title: string; description: string; canonical: string; Icon: typeof Calculator }>> = {
+  vi: {
   fertilizer: {
     kicker: "Khuyến nghị",
     title: "Khuyến nghị bón phân",
@@ -45,6 +48,37 @@ const toolMeta: Record<AdvisoryTool, { kicker: string; title: string; descriptio
     canonical: "/so-sanh-cay-trong",
     Icon: Sprout
   }
+  },
+  en: {
+    fertilizer: {
+      kicker: "Advisory",
+      title: "Fertilizer recommendation",
+      description: "Calculate crop-specific fertilizer recommendations from production area, crop stage and field data you enter.",
+      canonical: "/khuyen-nghi-bon-phan",
+      Icon: Leaf
+    },
+    sellingTime: {
+      kicker: "Selling timing",
+      title: "Choose a selling window from the price forecast",
+      description: "Rank the best selling days in the next 30 days using crop price forecasts and storage costs.",
+      canonical: "/thoi-diem-ban",
+      Icon: BarChart3
+    },
+    arbitrage: {
+      kicker: "Regional spread",
+      title: "Scan crop price spreads by province",
+      description: "Compare low-price and high-price provinces after estimated transport costs.",
+      canonical: "/chenh-lech-vung",
+      Icon: GitCompareArrows
+    },
+    crossCrop: {
+      kicker: "Crop comparison",
+      title: "Compare farm profit by crop and province",
+      description: "Estimate reference profit across durian, coffee, pepper and rice using price, yield and province suitability.",
+      canonical: "/so-sanh-cay-trong",
+      Icon: Sprout
+    }
+  }
 };
 
 const cropOptions: { value: CropType | ""; label: string }[] = [
@@ -55,8 +89,8 @@ const cropOptions: { value: CropType | ""; label: string }[] = [
   { value: "lua", label: "Lúa" }
 ];
 
-function formatVnd(value: number) {
-  return `${Math.round(value).toLocaleString("vi-VN")} đ`;
+function formatVnd(value: number, language: AppLanguage = "vi") {
+  return `${Math.round(value).toLocaleString(language === "en" ? "en-US" : "vi-VN")} VND`;
 }
 
 function regionLabel(region: Region) {
@@ -72,7 +106,8 @@ export function AdvisoryHub({
   onRequireAuth: () => void;
   tool?: AdvisoryTool;
 }) {
-  const meta = toolMeta[tool];
+  const { language } = useLanguage();
+  const meta = toolMeta[language][tool];
   const ToolIcon = meta.Icon;
   const locked = tool !== "fertilizer" && !authToken;
   const activeAuthToken = authToken ?? "";
@@ -111,16 +146,17 @@ export function AdvisoryHub({
 }
 
 function AdvisoryAccountGate({ onRequireAuth }: { onRequireAuth: () => void }) {
+  const { language } = useLanguage();
   return (
     <section className="input-price-panel roi-panel advisory-auth-gate">
       <div className="input-section-heading compact roi-section-heading">
-        <h2><ShieldCheck size={18} /> Cần tài khoản để sử dụng</h2>
-        <p>Đăng nhập hoặc đăng ký để mở công cụ tính toán và lưu phiên làm việc.</p>
+        <h2><ShieldCheck size={18} /> {language === "en" ? "Account required" : "Cần tài khoản để sử dụng"}</h2>
+        <p>{language === "en" ? "Log in or create an account to use this tool and save your work sessions." : "Đăng nhập hoặc đăng ký để mở công cụ tính toán và lưu phiên làm việc."}</p>
       </div>
       <div className="advisory-auth-gate-body">
-        <p>Các công cụ quyết định dùng dữ liệu dự báo và dữ liệu vùng, nên hệ thống yêu cầu tài khoản để kiểm soát phiên tính và lịch sử sử dụng.</p>
+        <p>{language === "en" ? "These decision tools use forecast and regional data, so an account helps keep calculations traceable and saved to the right workspace." : "Các công cụ quyết định dùng dữ liệu dự báo và dữ liệu vùng, nên hệ thống yêu cầu tài khoản để kiểm soát phiên tính và lịch sử sử dụng."}</p>
         <button type="button" className="roi-primary-button" onClick={onRequireAuth}>
-          Đăng nhập / đăng ký
+          {language === "en" ? "Log in / register" : "Đăng nhập / đăng ký"}
         </button>
       </div>
     </section>
@@ -128,6 +164,7 @@ function AdvisoryAccountGate({ onRequireAuth }: { onRequireAuth: () => void }) {
 }
 
 function SellingTimePanel({ authToken }: { authToken: string }) {
+  const { language } = useLanguage();
   const [crop, setCrop] = useState<CropType>("sau_rieng");
   const [regions, setRegions] = useState<Region[]>([]);
   const [regionId, setRegionId] = useState<number | "">("");
@@ -153,28 +190,28 @@ function SellingTimePanel({ authToken }: { authToken: string }) {
     setError(null);
     postSellingTime(authToken, { crop, region_id: typeof regionId === "number" ? regionId : null, quantity_kg: quantity, storage_cost_vnd_per_kg_per_day: storageCost })
       .then(setResult)
-      .catch((err) => setError(err instanceof Error ? err.message : "Không tính được thời điểm bán."))
+      .catch((err) => setError(err instanceof Error ? err.message : language === "en" ? "Could not calculate the selling window." : "Không tính được thời điểm bán."))
       .finally(() => setLoading(false));
   }
 
   return (
     <section className="advisory-tool">
       <div className="advisory-tool-head">
-        <h2>Thời điểm bán nông sản</h2>
-        <p>Xếp hạng 5 ngày bán tốt nhất trong 30 ngày theo dự báo giá nông sản và chi phí lưu kho.</p>
+        <h2>{language === "en" ? "Crop selling timing" : "Thời điểm bán nông sản"}</h2>
+        <p>{language === "en" ? "Rank the five strongest selling windows in the next 30 days using price forecasts and storage costs." : "Xếp hạng 5 ngày bán tốt nhất trong 30 ngày theo dự báo giá nông sản và chi phí lưu kho."}</p>
       </div>
       {error ? <div className="input-price-error">{error}</div> : null}
       <div className="advisory-form-row">
         <label>
-          Cây trồng
+          {language === "en" ? "Crop" : "Cây trồng"}
           <select value={crop} onChange={(event) => setCrop(event.target.value as CropType)}>
             {cropOptions.filter((item) => item.value).map((item) => (
-              <option key={item.value} value={item.value}>{item.label}</option>
+              <option key={item.value} value={item.value}>{cropLabel(item.value, language)}</option>
             ))}
           </select>
         </label>
         <label>
-          Tỉnh/vùng trồng
+          {language === "en" ? "Province/production area" : "Tỉnh/vùng trồng"}
           <select value={regionId} onChange={(event) => setRegionId(Number(event.target.value) || "")}>
             {regions.map((region) => (
               <option key={region.region_id} value={region.region_id}>{regionLabel(region)}</option>
@@ -182,30 +219,30 @@ function SellingTimePanel({ authToken }: { authToken: string }) {
           </select>
         </label>
         <label>
-          Số lượng (kg)
+          {language === "en" ? "Quantity (kg)" : "Số lượng (kg)"}
           <input type="number" min="1" value={quantity} onChange={(event) => setQuantity(Number(event.target.value))} />
         </label>
         <label>
-          Lưu kho đ/kg/ngày
+          {language === "en" ? "Storage cost VND/kg/day" : "Lưu kho đ/kg/ngày"}
           <input type="number" min="0" value={storageCost} onChange={(event) => setStorageCost(Number(event.target.value))} />
         </label>
         <button type="button" className="roi-primary-button" onClick={submit} disabled={loading}>
           <RefreshCw size={16} />
-          {loading ? "Đang tính" : "Tính thời điểm bán"}
+          {loading ? (language === "en" ? "Calculating" : "Đang tính") : (language === "en" ? "Calculate selling window" : "Tính thời điểm bán")}
         </button>
       </div>
       {result ? (
         <div className="advisory-result-grid">
           <article className="advisory-highlight">
-            <span>Ngày tốt nhất</span>
-            <strong>{new Date(result.best_window.date).toLocaleDateString("vi-VN")}</strong>
-            <small>{result.best_window.uplift_pct_vs_today > 0 ? "+" : ""}{result.best_window.uplift_pct_vs_today}% so với hôm nay</small>
+            <span>{language === "en" ? "Best day" : "Ngày tốt nhất"}</span>
+            <strong>{new Date(result.best_window.date).toLocaleDateString(language === "en" ? "en-US" : "vi-VN")}</strong>
+            <small>{result.best_window.uplift_pct_vs_today > 0 ? "+" : ""}{result.best_window.uplift_pct_vs_today}% {language === "en" ? "vs today" : "so với hôm nay"}</small>
           </article>
           {result.top_5_windows.map((item) => (
             <article key={item.date}>
-              <span>{new Date(item.date).toLocaleDateString("vi-VN")}</span>
-              <strong>{formatVnd(item.forecast_price_vnd_per_kg)}/kg</strong>
-              <small>Doanh thu ròng {formatVnd(item.net_revenue_vnd)}</small>
+              <span>{new Date(item.date).toLocaleDateString(language === "en" ? "en-US" : "vi-VN")}</span>
+              <strong>{formatVnd(item.forecast_price_vnd_per_kg, language)}/kg</strong>
+              <small>{language === "en" ? "Net revenue" : "Doanh thu ròng"} {formatVnd(item.net_revenue_vnd, language)}</small>
             </article>
           ))}
         </div>
@@ -215,6 +252,7 @@ function SellingTimePanel({ authToken }: { authToken: string }) {
 }
 
 function ArbitragePanel({ authToken }: { authToken: string }) {
+  const { language } = useLanguage();
   const [crop, setCrop] = useState<CropType | "">("");
   const [result, setResult] = useState<ArbitrageResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -231,52 +269,53 @@ function ArbitragePanel({ authToken }: { authToken: string }) {
   return (
     <section className="advisory-tool">
       <div className="advisory-tool-head">
-        <h2>Chênh lệch vùng giá</h2>
-        <p>Lọc các cặp tỉnh có chênh lệch giá sau chi phí vận chuyển ước tính.</p>
+        <h2>{language === "en" ? "Regional price spread" : "Chênh lệch vùng giá"}</h2>
+        <p>{language === "en" ? "Filter province pairs where the price spread remains positive after estimated transport cost." : "Lọc các cặp tỉnh có chênh lệch giá sau chi phí vận chuyển ước tính."}</p>
       </div>
       <div className="advisory-form-row compact">
         <label>
-          Cây trồng
+          {language === "en" ? "Crop" : "Cây trồng"}
           <select value={crop} onChange={(event) => setCrop(event.target.value as CropType | "")}>
             {cropOptions.map((item) => (
-              <option key={item.value || "all"} value={item.value}>{item.label}</option>
+              <option key={item.value || "all"} value={item.value}>{cropLabel(item.value, language)}</option>
             ))}
           </select>
         </label>
         <button type="button" className="roi-primary-button" onClick={load} disabled={loading}>
-          {loading ? "Đang quét" : "Quét chênh lệch"}
+          {loading ? (language === "en" ? "Scanning" : "Đang quét") : (language === "en" ? "Scan spreads" : "Quét chênh lệch")}
         </button>
       </div>
       <div className="input-table-wrap advisory-table">
         <table>
           <thead>
             <tr>
-              <th>Cây</th>
-              <th>Tỉnh giá thấp</th>
-              <th>Tỉnh giá cao</th>
-              <th>Chênh lệch ròng</th>
+              <th>{language === "en" ? "Crop" : "Cây"}</th>
+              <th>{language === "en" ? "Lower-price province" : "Tỉnh giá thấp"}</th>
+              <th>{language === "en" ? "Higher-price province" : "Tỉnh giá cao"}</th>
+              <th>{language === "en" ? "Net spread" : "Chênh lệch ròng"}</th>
               <th>%</th>
             </tr>
           </thead>
           <tbody>
             {(result?.items ?? []).map((item) => (
               <tr key={`${item.crop}-${item.from_region}-${item.to_region}`}>
-                <td>{item.crop_label_vi}</td>
+                <td>{cropLabel(item.crop, language)}</td>
                 <td>{item.from_region}</td>
                 <td>{item.to_region}</td>
-                <td>{formatVnd(item.net_spread_vnd_per_kg)}/kg</td>
+                <td>{formatVnd(item.net_spread_vnd_per_kg, language)}/kg</td>
                 <td>{item.net_spread_pct.toFixed(1)}%</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {result ? <p className="advisory-disclaimer">{result.assumption_vi}</p> : null}
+      {result ? <p className="advisory-disclaimer">{language === "en" ? "Transport cost is estimated from the current regional data and should be checked against real logistics quotes." : result.assumption_vi}</p> : null}
     </section>
   );
 }
 
 function CrossCropPanel({ authToken }: { authToken: string }) {
+  const { language } = useLanguage();
   const [regions, setRegions] = useState<Region[]>([]);
   const [regionId, setRegionId] = useState<number | "">("");
   const [area, setArea] = useState(1);
@@ -308,20 +347,20 @@ function CrossCropPanel({ authToken }: { authToken: string }) {
     setError(null);
     postCrossCommodity(authToken, { region_id: Number(regionId), area_hectares: area })
       .then(setResult)
-      .catch((err) => setError(err instanceof Error ? err.message : "Không so sánh được cây trồng."))
+      .catch((err) => setError(err instanceof Error ? err.message : language === "en" ? "Could not compare crops." : "Không so sánh được cây trồng."))
       .finally(() => setLoading(false));
   }
 
   return (
     <section className="advisory-tool">
       <div className="advisory-tool-head">
-        <h2>So sánh cây trồng</h2>
-        <p>So nhanh lợi nhuận tham khảo giữa 4 cây theo giá, năng suất và độ phù hợp của tỉnh.</p>
+        <h2>{language === "en" ? "Crop comparison" : "So sánh cây trồng"}</h2>
+        <p>{language === "en" ? "Quickly compare reference profit across four crops by price, yield and province suitability." : "So nhanh lợi nhuận tham khảo giữa 4 cây theo giá, năng suất và độ phù hợp của tỉnh."}</p>
       </div>
       {error ? <div className="input-price-error">{error}</div> : null}
       <div className="advisory-form-row compact">
         <label>
-          Tỉnh/vùng trồng
+          {language === "en" ? "Province/production area" : "Tỉnh/vùng trồng"}
           <select value={regionId} onChange={(event) => setRegionId(Number(event.target.value) || "")}>
             {regions.map((region) => (
               <option key={region.region_id} value={region.region_id}>{regionLabel(region)}</option>
@@ -329,31 +368,33 @@ function CrossCropPanel({ authToken }: { authToken: string }) {
           </select>
         </label>
         <label>
-          Diện tích (ha)
+          {language === "en" ? "Area (ha)" : "Diện tích (ha)"}
           <input type="number" min="0.1" step="0.1" value={area} onChange={(event) => setArea(Number(event.target.value))} />
         </label>
         <button type="button" className="roi-primary-button" onClick={submit} disabled={loading}>
-          {loading ? "Đang so sánh" : "So sánh"}
+          {loading ? (language === "en" ? "Comparing" : "Đang so sánh") : (language === "en" ? "Compare" : "So sánh")}
         </button>
       </div>
       {result ? (
         <>
-          <p className="advisory-context">Tỉnh đang so sánh: <strong>{result.province ?? result.region_name}</strong></p>
+          <p className="advisory-context">{language === "en" ? "Province being compared" : "Tỉnh đang so sánh"}: <strong>{result.province ?? result.region_name}</strong></p>
           <div className="cross-crop-bars">
             {result.items.map((item) => (
               <article key={item.crop}>
                 <div>
-                  <span>{item.crop_label_vi}</span>
-                  <strong>{formatVnd(item.estimated_profit_vnd)}</strong>
+                  <span>{cropLabel(item.crop, language)}</span>
+                  <strong>{formatVnd(item.estimated_profit_vnd, language)}</strong>
                 </div>
                 <i style={{ width: `${Math.max(8, (Math.abs(item.estimated_profit_vnd) / maxProfit) * 100)}%` }} />
-                <small>Độ phù hợp {Math.round(item.suitability_score * 100)}% · Tỷ suất lợi nhuận {item.roi_score.toFixed(1)}%</small>
+                <small>{language === "en" ? "Suitability" : "Độ phù hợp"} {Math.round(item.suitability_score * 100)}% · {language === "en" ? "Profit ratio" : "Tỷ suất lợi nhuận"} {item.roi_score.toFixed(1)}%</small>
               </article>
             ))}
           </div>
           <div className="advisory-disclaimer">
-            {result.intercropping_vi.map((note) => <p key={note}>{note}</p>)}
-            <p>{result.disclaimer_vi}</p>
+            {language === "vi"
+              ? result.intercropping_vi.map((note) => <p key={note}>{note}</p>)
+              : <p>Use this comparison as a screening layer. Field suitability, disease pressure, cash flow and market access still need local checks.</p>}
+            <p>{language === "en" ? "Profit figures are estimates for comparison only, not a guaranteed farm result." : result.disclaimer_vi}</p>
           </div>
         </>
       ) : null}

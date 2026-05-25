@@ -58,6 +58,7 @@ export type AppHeaderProps = {
   onAuthEmailChange: (value: string) => void;
   onAuthPasswordChange: (value: string) => void;
   onAuthSubmit: (mode: AuthMode) => void;
+  onLanguageToggle?: () => void;
 };
 
 export type HeaderSurfaceProps = AppHeaderProps & {

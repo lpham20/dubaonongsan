@@ -979,25 +979,26 @@ export function runPlatformJob(token: string, job: "scrape" | "news" | "input-pr
   return authJson<Record<string, unknown>>(`/api/v1/platform/jobs/${job}`, token, { method: "POST" });
 }
 
-export function fetchNews(signal?: AbortSignal) {
-  return getJson<NewsArticle[]>("/api/v1/content/news?limit=2000", signal);
+export function fetchNews(signal?: AbortSignal, language: "vi" | "en" = "vi") {
+  const limit = language === "en" ? 120 : 2000;
+  return getJson<NewsArticle[]>(`/api/v1/content/news?limit=${limit}&lang=${language}`, signal);
 }
 
-export function fetchNewsDetail(slug: string, signal?: AbortSignal) {
-  return getJson<NewsArticle>(`/api/v1/content/news/${encodeURIComponent(slug)}`, signal);
+export function fetchNewsDetail(slug: string, signal?: AbortSignal, language: "vi" | "en" = "vi") {
+  return getJson<NewsArticle>(`/api/v1/content/news/${encodeURIComponent(slug)}?lang=${language}`, signal);
 }
 
 export function scrapeNews(token: string) {
   return authJson<Record<string, unknown>>("/api/v1/content/news/scrape", token, { method: "POST" });
 }
 
-export function fetchGuides(crop?: CropType, limit = 120, signal?: AbortSignal) {
-  const cropParam = crop ? `?crop=${crop}&limit=${limit}` : `?limit=${limit}`;
+export function fetchGuides(crop?: CropType, limit = 120, signal?: AbortSignal, language: "vi" | "en" = "vi") {
+  const cropParam = crop ? `?crop=${crop}&limit=${limit}&lang=${language}` : `?limit=${limit}&lang=${language}`;
   return getJson<GuidePost[]>(`/api/v1/content/guides${cropParam}`, signal);
 }
 
-export function fetchGuideDetail(slug: string, signal?: AbortSignal) {
-  return getJson<GuidePost>(`/api/v1/content/guides/${encodeURIComponent(slug)}`, signal);
+export function fetchGuideDetail(slug: string, signal?: AbortSignal, language: "vi" | "en" = "vi") {
+  return getJson<GuidePost>(`/api/v1/content/guides/${encodeURIComponent(slug)}?lang=${language}`, signal);
 }
 
 export function subscribeNewsletter(email: string) {

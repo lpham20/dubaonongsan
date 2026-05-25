@@ -1,15 +1,17 @@
 import { memo } from "react";
 import { Activity, BarChart3, Gauge, LineChart, TrendingDown, TrendingUp } from "./icons";
 import type { PricePoint, TradingSignal } from "../lib/api";
+import { useLanguage, type AppLanguage } from "../contexts/LanguageContext";
 
 type Props = {
   points: PricePoint[];
   signals: TradingSignal[];
 };
 
-const money = (value: number) => `${Math.round(value).toLocaleString("vi-VN")} VND/kg`;
+const money = (value: number, language: AppLanguage = "vi") => `${Math.round(value).toLocaleString(language === "en" ? "en-US" : "vi-VN")} VND/kg`;
 
 function TechnicalPanelComponent({ points, signals }: Props) {
+  const { language } = useLanguage();
   const prices = points
     .filter((point) => typeof point.max_price_vnd === "number")
     .map((point) => Number(point.max_price_vnd));
@@ -20,7 +22,11 @@ function TechnicalPanelComponent({ points, signals }: Props) {
   const support = nearestSupport(prices, latest);
   const resistance = nearestResistance(prices, latest);
   const trendScore = scoreTrend(latest, sma7, sma30, support, resistance, volatility, signals.length);
-  const signalLabel = trendScore >= 2 ? "Có thể giữ hàng" : trendScore <= -2 ? "Nên bán giảm rủi ro" : "Theo dõi thêm";
+  const signalLabel = trendScore >= 2
+    ? language === "en" ? "Can hold part of stock" : "Có thể giữ hàng"
+    : trendScore <= -2
+      ? language === "en" ? "Consider selling to reduce risk" : "Nên bán giảm rủi ro"
+      : language === "en" ? "Watch for confirmation" : "Theo dõi thêm";
   const SignalIcon = trendScore >= 2 ? TrendingUp : trendScore <= -2 ? TrendingDown : Activity;
 
   return (
@@ -28,35 +34,35 @@ function TechnicalPanelComponent({ points, signals }: Props) {
       <div className="technical-summary">
         <span>
           <Gauge size={17} />
-          Tín hiệu giá
+          {language === "en" ? "Price signal" : "Tín hiệu giá"}
         </span>
         <h2>{signalLabel}</h2>
         <p>
-          Hệ thống so sánh giá hiện tại với mặt bằng 7 ngày, 30 ngày, vùng giá mua đỡ gần nhất và vùng giá dễ bị chặn lại.
-          Nếu giá tiến sát vùng trên nhưng lực mua không mạnh, nên cân nhắc bán một phần. Nếu giá giữ trên vùng dưới và nhu cầu thu mua còn đều,
-          có thể giữ lại một phần sản lượng thay vì bán vội.
+          {language === "en"
+            ? "The system compares the current price with the 7-day level, 30-day level, nearest support area and likely resistance area. If price is near resistance without strong buying, selling part of the stock may reduce risk. If price holds above support and demand is still steady, holding part of the volume can be reasonable."
+            : "Hệ thống so sánh giá hiện tại với mặt bằng 7 ngày, 30 ngày, vùng giá mua đỡ gần nhất và vùng giá dễ bị chặn lại. Nếu giá tiến sát vùng trên nhưng lực mua không mạnh, nên cân nhắc bán một phần. Nếu giá giữ trên vùng dưới và nhu cầu thu mua còn đều, có thể giữ lại một phần sản lượng thay vì bán vội."}
         </p>
       </div>
 
       <div className="technical-cards">
-        <TechnicalCard icon={SignalIcon} label="Tổng hợp" value={signalLabel} detail={`${signals.length} cảnh báo đang mở`} />
-        <TechnicalCard icon={LineChart} label="Mặt bằng 7 ngày" value={money(sma7 || latest)} detail={latest >= sma7 ? "Giá cao hơn gần đây" : "Giá thấp hơn gần đây"} />
-        <TechnicalCard icon={BarChart3} label="Mặt bằng 30 ngày" value={money(sma30 || latest)} detail={latest >= sma30 ? "Nền giá còn tốt" : "Nền giá đang yếu"} />
-        <TechnicalCard icon={Activity} label="Dao động 30 ngày" value={`${volatility.toFixed(2)}%`} detail="Mức lên xuống quanh giá trung bình" />
+        <TechnicalCard icon={SignalIcon} label={language === "en" ? "Summary" : "Tổng hợp"} value={signalLabel} detail={`${signals.length} ${language === "en" ? "open alerts" : "cảnh báo đang mở"}`} />
+        <TechnicalCard icon={LineChart} label={language === "en" ? "7-day level" : "Mặt bằng 7 ngày"} value={money(sma7 || latest, language)} detail={latest >= sma7 ? (language === "en" ? "Price is above the recent level" : "Giá cao hơn gần đây") : (language === "en" ? "Price is below the recent level" : "Giá thấp hơn gần đây")} />
+        <TechnicalCard icon={BarChart3} label={language === "en" ? "30-day level" : "Mặt bằng 30 ngày"} value={money(sma30 || latest, language)} detail={latest >= sma30 ? (language === "en" ? "The price base is still firm" : "Nền giá còn tốt") : (language === "en" ? "The price base is weakening" : "Nền giá đang yếu")} />
+        <TechnicalCard icon={Activity} label={language === "en" ? "30-day volatility" : "Dao động 30 ngày"} value={`${volatility.toFixed(2)}%`} detail={language === "en" ? "Movement around the average price" : "Mức lên xuống quanh giá trung bình"} />
       </div>
 
       <div className="technical-levels">
         <article>
-          <span>Vùng mua đỡ gần</span>
-          <strong>{money(support || latest)}</strong>
+          <span>{language === "en" ? "Nearest support area" : "Vùng mua đỡ gần"}</span>
+          <strong>{money(support || latest, language)}</strong>
         </article>
         <article>
-          <span>Giá hiện tại</span>
-          <strong>{money(latest)}</strong>
+          <span>{language === "en" ? "Current price" : "Giá hiện tại"}</span>
+          <strong>{money(latest, language)}</strong>
         </article>
         <article>
-          <span>Vùng giá dễ chững</span>
-          <strong>{money(resistance || latest)}</strong>
+          <span>{language === "en" ? "Likely resistance area" : "Vùng giá dễ chững"}</span>
+          <strong>{money(resistance || latest, language)}</strong>
         </article>
       </div>
     </section>

@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { AlertTriangle, ArrowDownRight, ArrowUpRight, BadgeCheck, Download, MapPinned, Pin } from "./icons";
 import type { DataQuality, HeatmapCell, Mover, StrategyAlert } from "../lib/api";
+import { useLanguage, type AppLanguage } from "../contexts/LanguageContext";
 
 type Props = {
   quality: DataQuality | null;
@@ -15,7 +16,7 @@ type Props = {
   exportPdfUrl: string;
 };
 
-const money = (value: number) => `${Math.round(value).toLocaleString("vi-VN")} VND/kg`;
+const money = (value: number, language: AppLanguage = "vi") => `${Math.round(value).toLocaleString(language === "en" ? "en-US" : "vi-VN")} VND/kg`;
 
 function IntelligencePanelsComponent({
   quality,
@@ -29,20 +30,21 @@ function IntelligencePanelsComponent({
   exportXlsxUrl,
   exportPdfUrl
 }: Props) {
+  const { language } = useLanguage();
   return (
     <section className="intel-grid">
       <article className="intel-panel data-quality">
         <div className="panel-heading">
           <BadgeCheck size={18} />
-          <h3>Độ tin cậy dữ liệu</h3>
+          <h3>{language === "en" ? "Data confidence" : "Độ tin cậy dữ liệu"}</h3>
         </div>
         <div className="quality-score num">{quality?.score ?? "-"}<span>/100</span></div>
-        <p>{quality?.note ?? "Đang tính chất lượng dữ liệu."}</p>
+        <p>{language === "en" ? "Data quality is scored from source coverage, history depth and observed-versus-filled points." : quality?.note ?? "Đang tính chất lượng dữ liệu."}</p>
         <div className="quality-tags">
-          <span>{quality?.source_count ?? 0} nguồn</span>
-          <span>{quality?.history_points ?? 0} điểm</span>
-          <span>{quality?.observed_points ?? 0} quan sát</span>
-          <span>{quality?.synthetic_points ?? 0} nội suy</span>
+          <span>{quality?.source_count ?? 0} {language === "en" ? "sources" : "nguồn"}</span>
+          <span>{quality?.history_points ?? 0} {language === "en" ? "points" : "điểm"}</span>
+          <span>{quality?.observed_points ?? 0} {language === "en" ? "observed" : "quan sát"}</span>
+          <span>{quality?.synthetic_points ?? 0} {language === "en" ? "filled" : "nội suy"}</span>
         </div>
         {quality?.risk_flags?.length ? (
           <div className="risk-flags">
@@ -68,7 +70,7 @@ function IntelligencePanelsComponent({
       <article className="intel-panel">
         <div className="panel-heading">
           <Pin size={18} />
-          <h3>Danh sách ghim</h3>
+          <h3>{language === "en" ? "Watchlist" : "Danh sách ghim"}</h3>
         </div>
         {watchlist.length ? (
           <div className="watchlist">
@@ -82,14 +84,14 @@ function IntelligencePanelsComponent({
             })}
           </div>
         ) : (
-          <p>Chưa có thị trường nào được ghim.</p>
+          <p>{language === "en" ? "No markets pinned yet." : "Chưa có thị trường nào được ghim."}</p>
         )}
       </article>
 
       <article className="intel-panel movers-panel">
         <div className="panel-heading">
           <ArrowUpRight size={18} />
-          <h3>Tăng mạnh</h3>
+          <h3>{language === "en" ? "Strong gainers" : "Tăng mạnh"}</h3>
         </div>
         <MoverList rows={gainers} positive />
       </article>
@@ -97,7 +99,7 @@ function IntelligencePanelsComponent({
       <article className="intel-panel movers-panel">
         <div className="panel-heading">
           <ArrowDownRight size={18} />
-          <h3>Giảm mạnh</h3>
+          <h3>{language === "en" ? "Strong decliners" : "Giảm mạnh"}</h3>
         </div>
         <MoverList rows={losers} />
       </article>
@@ -105,13 +107,13 @@ function IntelligencePanelsComponent({
       <article className="intel-panel heatmap-panel">
         <div className="panel-heading">
           <MapPinned size={18} />
-          <h3>Bản đồ nhiệt vùng</h3>
+          <h3>{language === "en" ? "Regional heatmap" : "Bản đồ nhiệt vùng"}</h3>
         </div>
         <div className="heatmap-list">
           {heatmap.slice(0, 10).map((cell) => (
             <div className="heatmap-row" key={`${cell.region_id}-${cell.province}`}>
               <span>{cell.province ?? cell.region}</span>
-              <strong className="num">{money(cell.avg_price_vnd)}</strong>
+              <strong className="num">{money(cell.avg_price_vnd, language)}</strong>
               <em className={cell.change_pct >= 0 ? "positive num" : "negative num"}>
                 {cell.change_pct >= 0 ? "+" : ""}
                 {cell.change_pct}%
@@ -124,14 +126,14 @@ function IntelligencePanelsComponent({
       <article className="intel-panel alerts-panel">
         <div className="panel-heading">
           <AlertTriangle size={18} />
-          <h3>Cảnh báo chiến lược</h3>
+          <h3>{language === "en" ? "Strategy alerts" : "Cảnh báo chiến lược"}</h3>
         </div>
         <div className="alerts-list">
           {alerts.map((alert) => (
             <div className="alert-row" key={`${alert.level}-${alert.title}`}>
               <span>{alert.level}</span>
-              <strong>{alert.title}</strong>
-              <p>{alert.message}</p>
+              <strong>{language === "en" ? "Market alert" : alert.title}</strong>
+              <p>{language === "en" ? "Review the current price, trend and forecast range before making a sales decision." : alert.message}</p>
             </div>
           ))}
         </div>

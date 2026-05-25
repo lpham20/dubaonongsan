@@ -1,6 +1,8 @@
 import { useInsertionEffect } from "react";
+import { useLanguage } from "../contexts/LanguageContext";
 import { safeJsonLd } from "../lib/jsonLd";
 import { canonicalUrl, compactText, DEFAULT_OG_IMAGE, SITE_NAME } from "../lib/seo";
+import { withLanguagePrefix } from "../lib/localizedRoutes";
 
 type Props = {
   title: string;
@@ -22,11 +24,13 @@ const managedMetaSelectors = [
   "meta[property='og:image:type']",
   "meta[property='og:image:width']",
   "meta[property='og:image:height']",
+  "meta[property='og:locale']",
   "meta[name='twitter:title']",
   "meta[name='twitter:description']",
   "meta[name='twitter:image']",
   "meta[property='article:published_time']",
-  "link[rel='canonical']"
+  "link[rel='canonical']",
+  "link[rel='alternate'][hreflang]"
 ];
 const JSON_LD_NONCE = "dubaonongsan-jsonld";
 
@@ -39,9 +43,13 @@ export function SeoHead({
   publishedAt,
   schemaJsonLd
 }: Props) {
+  const { language } = useLanguage();
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
   const fullDescription = compactText(description, 160);
-  const fullCanonical = canonicalUrl(canonical);
+  const localizedCanonical = withLanguagePrefix(canonical, language);
+  const fullCanonical = canonicalUrl(localizedCanonical);
+  const alternateVi = canonicalUrl(withLanguagePrefix(canonical, "vi"));
+  const alternateEn = canonicalUrl(withLanguagePrefix(canonical, "en"));
 
   useInsertionEffect(() => {
     document.title = fullTitle;
@@ -53,6 +61,7 @@ export function SeoHead({
     upsertMeta("property", "og:description", fullDescription);
     upsertMeta("property", "og:type", type);
     upsertMeta("property", "og:url", fullCanonical);
+    upsertMeta("property", "og:locale", language === "en" ? "en_US" : "vi_VN");
     upsertMeta("property", "og:image", image);
     upsertMeta("property", "og:image:type", image.endsWith(".webp") ? "image/webp" : "image/jpeg");
     upsertMeta("property", "og:image:width", "1200");
@@ -65,7 +74,10 @@ export function SeoHead({
     canonicalTag.rel = "canonical";
     canonicalTag.href = fullCanonical;
     document.head.appendChild(canonicalTag);
-  }, [fullTitle, fullDescription, fullCanonical, image, publishedAt, type]);
+    upsertAlternate("vi", alternateVi);
+    upsertAlternate("en", alternateEn);
+    upsertAlternate("x-default", alternateVi);
+  }, [alternateEn, alternateVi, fullTitle, fullDescription, fullCanonical, image, language, publishedAt, type]);
 
   const schemas = Array.isArray(schemaJsonLd) ? schemaJsonLd : schemaJsonLd ? [schemaJsonLd] : [];
 
@@ -88,4 +100,12 @@ function upsertMeta(attribute: "name" | "property", key: string, content: string
   meta.setAttribute(attribute, key);
   meta.content = content;
   document.head.appendChild(meta);
+}
+
+function upsertAlternate(hreflang: string, href: string) {
+  const link = document.createElement("link");
+  link.rel = "alternate";
+  link.hreflang = hreflang;
+  link.href = href;
+  document.head.appendChild(link);
 }

@@ -2,6 +2,16 @@ import { useMemo, useState } from "react";
 import { AlertTriangle, Calculator, ClipboardCheck, Gauge, Leaf, PackageCheck, Ruler, ShieldAlert, Sprout } from "./icons";
 import { SeoHead } from "./SeoHead";
 import { recommendFertilizer, type FertilizerCrop, type FertilizerKSource, type FertilizerRecommendation, type FertilizerRequest, type FertilizerStage, type SoilTexture } from "../lib/api";
+import { useLanguage } from "../contexts/LanguageContext";
+import { withLanguagePrefix } from "../lib/localizedRoutes";
+import {
+  confidenceLabel as localizedConfidenceLabel,
+  fertilizerCropLabel,
+  fertilizerStageLabel,
+  soilTextureLabel,
+  translateFertilizerProduct,
+  translateFertilizerSplit
+} from "../lib/displayLabels";
 
 const cropOptions: { value: FertilizerCrop; label: string; defaultDensity: number; defaultYield: number; texture: SoilTexture }[] = [
   { value: "robusta_coffee", label: "Cà phê Robusta", defaultDensity: 1100, defaultYield: 3.5, texture: "basaltic_red" },
@@ -83,20 +93,160 @@ const initialForm: FormState = {
   province: "Đắk Lắk"
 };
 
+const fertilizerCopy = {
+  vi: {
+    seoTitle: "Khuyến nghị bón phân NPK theo phân tích đất",
+    seoDescription: "Công cụ tính khuyến nghị NPK, vôi và hữu cơ cho cà phê Robusta, hồ tiêu và sầu riêng theo chỉ tiêu đất.",
+    title: "Khuyến nghị bón phân theo phân tích đất",
+    intro: "Nhập chỉ tiêu đất, năng suất mục tiêu và điều kiện vườn để nhận lượng phân thương mại theo kg/ha, kèm lịch chia đợt và cảnh báo an toàn.",
+    resultIncludes: "Kết quả sau khi tính gồm",
+    includeNpk: "N-P-K và vôi theo kg/ha/năm",
+    includeSchedule: "Lịch bón theo từng đợt",
+    includeSafety: "Cảnh báo an toàn và độ tin cậy",
+    groups: "3 nhóm thông tin",
+    gardenInfo: "Thông tin vườn",
+    gardenNote: "Giữ giá trị mặc định nếu chưa có số liệu chính xác.",
+    crop: "Cây trồng",
+    stage: "Giai đoạn",
+    durianVariety: "Giống sầu riêng",
+    otherVariety: "Khác",
+    kSource: "Nguồn kali dự kiến",
+    targetYield: "Năng suất mục tiêu (tấn/ha)",
+    density: "Mật độ cây/ha",
+    province: "Tỉnh/vùng",
+    soilMetrics: "Chỉ tiêu đất",
+    soilNote: "Các trường có thể chỉnh theo phiếu phân tích đất.",
+    soilType: "Loại đất",
+    organicCarbon: "Chất hữu cơ OC (%)",
+    totalNitrogen: "Đạm tổng số (%)",
+    availableP: "Lân dễ tiêu (mg/100g)",
+    exchangeableK: "Kali trao đổi (mg K2O/100g)",
+    adjustment: "Điều kiện hiệu chỉnh",
+    adjustmentNote: "Dùng để điều chỉnh liều theo điều kiện thực tế của vườn.",
+    rainfall: "Lượng mưa năm (mm)",
+    slope: "Độ dốc (%)",
+    orchardAge: "Tuổi vườn",
+    irrigation: "Có tưới chủ động",
+    calculating: "Đang tính...",
+    calculate: "Tính khuyến nghị",
+    privacy: "Thông tin chỉ dùng để tính khuyến nghị bón phân hiện tại.",
+    errorTitle: "Không tính được khuyến nghị",
+    errorBody: "Không tính được khuyến nghị lúc này. Vui lòng thử lại sau ít phút.",
+    noResult: "Chưa có kết quả",
+    activeNutrients: "kg hoạt chất/ha/năm: Đạm N - Lân P2O5 - Kali K2O",
+    confidence: "Độ tin cậy",
+    previewLabel: "Kết quả sẽ gồm",
+    previewNpkTitle: "N-P-K và vôi",
+    previewNpkBody: "Tóm tắt lượng hoạt chất theo kg/ha/năm.",
+    previewScheduleTitle: "Lịch bón theo đợt",
+    previewScheduleBody: "Chia thành các cửa sổ bón phù hợp mùa vụ.",
+    previewSafetyTitle: "Cảnh báo an toàn",
+    previewSafetyBody: "Hiển thị rủi ro pH thấp, hữu cơ thấp hoặc liều cao.",
+    lime: "Vôi",
+    sessionTitle: "Mã phiên và độ tin cậy",
+    sessionCode: "Mã khuyến nghị",
+    yieldReport: "Báo cáo năng suất sau thu hoạch",
+    calibrationLink: "Xem cách hiệu chuẩn",
+    confidenceFallback: "Độ tin cậy phụ thuộc cây trồng, dữ liệu đất nhập vào và mức hiệu chỉnh đang có.",
+    safetyTitle: "Cảnh báo an toàn",
+    scheduleTitle: "Lịch bón theo phân thương mại",
+    yearlyProductTitle: "Tổng lượng phân thương mại cả năm",
+    bags50kg: "bao 50 kg",
+    whyTitle: "Vì sao ra khuyến nghị này?",
+    rationaleFallback: "Khuyến nghị được tính từ chỉ tiêu đất, năng suất mục tiêu và các hệ số điều chỉnh theo điều kiện vườn.",
+    factorMultiplier: "Hệ số hiệu chỉnh",
+    beforeAdjustment: "trước hiệu chỉnh",
+    emptyTitle: "Nhập phiếu phân tích đất để bắt đầu",
+    emptyBody: "Công cụ sẽ trả về lượng phân thương mại, cảnh báo, độ tin cậy và vết tính toán. Chỉ tiêu thiếu sẽ được giả định ở mức trung bình và ghi rõ trong kết quả.",
+    warningCritical: "Cảnh báo quan trọng",
+    warning: "Cần lưu ý",
+    info: "Thông tin"
+  },
+  en: {
+    seoTitle: "Soil-test fertilizer recommendation for NPK planning",
+    seoDescription: "Estimate NPK, lime and organic matter needs for Robusta coffee, black pepper and durian from soil-test data.",
+    title: "Fertilizer recommendation from soil-test data",
+    intro: "Enter soil indicators, target yield and orchard conditions to estimate commercial fertilizer rates, split timing and safety flags.",
+    resultIncludes: "After calculation you will get",
+    includeNpk: "N-P-K and lime rates in kg/ha/year",
+    includeSchedule: "Application schedule by split",
+    includeSafety: "Safety warnings and confidence level",
+    groups: "3 data groups",
+    gardenInfo: "Orchard information",
+    gardenNote: "Keep the defaults if you do not have precise field data yet.",
+    crop: "Crop",
+    stage: "Growth stage",
+    durianVariety: "Durian variety",
+    otherVariety: "Other",
+    kSource: "Preferred potassium source",
+    targetYield: "Target yield (tonnes/ha)",
+    density: "Plant density/ha",
+    province: "Province/area",
+    soilMetrics: "Soil indicators",
+    soilNote: "Adjust these fields to match your soil-test sheet.",
+    soilType: "Soil type",
+    organicCarbon: "Organic carbon OC (%)",
+    totalNitrogen: "Total nitrogen (%)",
+    availableP: "Available phosphorus (mg/100g)",
+    exchangeableK: "Exchangeable potassium (mg K2O/100g)",
+    adjustment: "Adjustment conditions",
+    adjustmentNote: "Used to fine-tune the rate for real orchard conditions.",
+    rainfall: "Annual rainfall (mm)",
+    slope: "Slope (%)",
+    orchardAge: "Orchard age",
+    irrigation: "Active irrigation available",
+    calculating: "Calculating...",
+    calculate: "Calculate recommendation",
+    privacy: "This information is used only for the current fertilizer calculation.",
+    errorTitle: "Could not calculate recommendation",
+    errorBody: "The recommendation could not be calculated right now. Please try again in a few minutes.",
+    noResult: "No result yet",
+    activeNutrients: "kg active nutrients/ha/year: Nitrogen N - Phosphate P2O5 - Potash K2O",
+    confidence: "Confidence",
+    previewLabel: "The result will include",
+    previewNpkTitle: "N-P-K and lime",
+    previewNpkBody: "A yearly active-nutrient summary in kg/ha.",
+    previewScheduleTitle: "Split schedule",
+    previewScheduleBody: "Suggested application windows for the season.",
+    previewSafetyTitle: "Safety flags",
+    previewSafetyBody: "Warnings for low pH, low organic matter or high rates.",
+    lime: "Lime",
+    sessionTitle: "Session code and confidence",
+    sessionCode: "Recommendation code",
+    yieldReport: "Report post-harvest yield",
+    calibrationLink: "See calibration logic",
+    confidenceFallback: "Confidence depends on the crop, soil data quality and the available calibration basis.",
+    safetyTitle: "Safety warnings",
+    scheduleTitle: "Commercial fertilizer schedule",
+    yearlyProductTitle: "Total commercial fertilizer for the year",
+    bags50kg: "50 kg bags",
+    whyTitle: "Why this recommendation?",
+    rationaleFallback: "The recommendation combines soil indicators, target yield and field-condition adjustment factors.",
+    factorMultiplier: "Adjustment factor",
+    beforeAdjustment: "before adjustment",
+    emptyTitle: "Enter soil-test data to start",
+    emptyBody: "The tool will return commercial fertilizer rates, warnings, confidence and a calculation trace. Missing indicators are estimated at a middle baseline and noted in the result.",
+    warningCritical: "Critical warning",
+    warning: "Watch carefully",
+    info: "Information"
+  }
+} as const;
+
 export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdvisorProps) {
+  const { language } = useLanguage();
+  const copy = fertilizerCopy[language];
   const [form, setForm] = useState<FormState>(initialForm);
   const [result, setResult] = useState<FertilizerRecommendation | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const selectedCrop = cropOptions.find((item) => item.value === form.crop) ?? cropOptions[0];
+  const selectedCropLabel = fertilizerCropLabel(selectedCrop.value, language);
   const total = result?.recommendation.annual_total;
   const confidenceLabel = useMemo(() => {
-    if (!result) return "Chưa tính";
-    if (result.confidence.badge_vi) return result.confidence.badge_vi;
-    if (result.confidence.overall === "high") return "Cao";
-    if (result.confidence.overall === "medium") return "Trung bình";
-    return "Thấp";
-  }, [result]);
+    if (!result) return language === "en" ? "Not calculated" : "Chưa tính";
+    if (language === "vi" && result.confidence.badge_vi) return result.confidence.badge_vi;
+    return localizedConfidenceLabel(result.confidence.overall, language);
+  }, [language, result]);
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -148,7 +298,7 @@ export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdviso
         climate: { annual_rainfall_mm: numberOrNull(form.annual_rainfall_mm), irrigation_available: form.irrigation_available },
         field: { slope_pct: numberOrNull(form.slope_pct), years_under_current_crop: numberOrNull(form.years_under_current_crop) },
         preferences: {
-          language: "vi",
+          language,
           include_product_mix: true,
           preferred_brand: kSourceToBrand(form.preferred_k_source),
           preferred_k_source: form.preferred_k_source
@@ -157,7 +307,7 @@ export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdviso
       setResult(await recommendFertilizer(payload, authToken));
     } catch (err) {
       console.warn("[FertilizerAdvisor] recommendation failed", err);
-      setError("Không tính được khuyến nghị lúc này. Vui lòng thử lại sau ít phút.");
+      setError(copy.errorBody);
     } finally {
       setBusy(false);
     }
@@ -166,21 +316,21 @@ export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdviso
   return (
     <section className="fertilizer-page">
       <SeoHead
-        title="Khuyến nghị bón phân NPK theo phân tích đất"
-        description="Công cụ tính khuyến nghị NPK, vôi và hữu cơ cho cà phê Robusta, hồ tiêu và sầu riêng theo chỉ tiêu đất."
+        title={copy.seoTitle}
+        description={copy.seoDescription}
         canonical="/khuyen-nghi-bon-phan"
       />
       <header className="fertilizer-hero fertilizer-advisor-hero">
         <div>
-          <h1>Khuyến nghị bón phân theo phân tích đất</h1>
-          <p>Nhập chỉ tiêu đất, năng suất mục tiêu và điều kiện vườn để nhận lượng phân thương mại theo kg/ha, kèm lịch chia đợt và cảnh báo an toàn.</p>
+          <h1>{copy.title}</h1>
+          <p>{copy.intro}</p>
         </div>
-        <aside className="fertilizer-intro-card" aria-label="Nội dung kết quả">
-          <strong>Kết quả sau khi tính gồm</strong>
+        <aside className="fertilizer-intro-card" aria-label={copy.resultIncludes}>
+          <strong>{copy.resultIncludes}</strong>
           <ul>
-            <li>N-P-K và vôi theo kg/ha/năm</li>
-            <li>Lịch bón theo từng đợt</li>
-            <li>Cảnh báo an toàn và độ tin cậy</li>
+            <li>{copy.includeNpk}</li>
+            <li>{copy.includeSchedule}</li>
+            <li>{copy.includeSafety}</li>
           </ul>
         </aside>
       </header>
@@ -188,34 +338,34 @@ export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdviso
       <div className="fertilizer-layout">
         <form className="fertilizer-form" onSubmit={(event) => { event.preventDefault(); void submit(); }}>
           <div className="fertilizer-form-head">
-            <strong>{selectedCrop.label}</strong>
-            <span>3 nhóm thông tin</span>
+            <strong>{selectedCropLabel}</strong>
+            <span>{copy.groups}</span>
           </div>
 
           <section className="fertilizer-form-section">
-            <SectionTitle step="1" Icon={Sprout} title="Thông tin vườn" note="Giữ giá trị mặc định nếu chưa có số liệu chính xác." />
+            <SectionTitle step="1" Icon={Sprout} title={copy.gardenInfo} note={copy.gardenNote} />
             <label>
-              Cây trồng
+              {copy.crop}
               <select value={form.crop} onChange={(event) => chooseCrop(event.target.value as FertilizerCrop)}>
-                {cropOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                {cropOptions.map((item) => <option key={item.value} value={item.value}>{fertilizerCropLabel(item.value, language)}</option>)}
               </select>
             </label>
             <label>
-              Giai đoạn
+              {copy.stage}
               <select value={form.growth_stage} onChange={(event) => update("growth_stage", event.target.value as FertilizerStage)}>
-                {stageOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                {stageOptions.map((item) => <option key={item.value} value={item.value}>{fertilizerStageLabel(item.value, language)}</option>)}
               </select>
             </label>
             {form.crop === "durian" ? (
               <div className="fertilizer-two">
                 <label>
-                  Giống sầu riêng
+                  {copy.durianVariety}
                   <select value={form.variety || "Ri6"} onChange={(event) => update("variety", event.target.value)}>
-                    {durianVarieties.map((item) => <option key={item} value={item}>{item}</option>)}
+                    {durianVarieties.map((item) => <option key={item} value={item}>{language === "en" && item === "Khác" ? copy.otherVariety : item}</option>)}
                   </select>
                 </label>
                 <label>
-                  Nguồn kali dự kiến
+                  {copy.kSource}
                   <select value={form.preferred_k_source} onChange={(event) => update("preferred_k_source", event.target.value as FertilizerKSource)}>
                     {kSourceOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
                   </select>
@@ -224,77 +374,77 @@ export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdviso
             ) : null}
             <div className="fertilizer-two">
               <label>
-                Năng suất mục tiêu (tấn/ha)
+                {copy.targetYield}
                 <input value={form.yield_target_t_ha} onChange={(event) => update("yield_target_t_ha", event.target.value)} inputMode="decimal" />
               </label>
               <label>
-                Mật độ cây/ha
+                {copy.density}
                 <input value={form.tree_density_per_ha} onChange={(event) => update("tree_density_per_ha", event.target.value)} inputMode="numeric" />
               </label>
             </div>
             <label>
-              Tỉnh/vùng
+              {copy.province}
               <input value={form.province} onChange={(event) => update("province", event.target.value)} />
             </label>
           </section>
 
           <section className="fertilizer-form-section">
-            <SectionTitle step="2" Icon={Ruler} title="Chỉ tiêu đất" note="Các trường có thể chỉnh theo phiếu phân tích đất." />
+            <SectionTitle step="2" Icon={Ruler} title={copy.soilMetrics} note={copy.soilNote} />
             <label>
-              Loại đất
+              {copy.soilType}
               <select value={form.texture} onChange={(event) => update("texture", event.target.value as SoilTexture)}>
-                {textureOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                {textureOptions.map((item) => <option key={item.value} value={item.value}>{soilTextureLabel(item.value, language)}</option>)}
               </select>
             </label>
             <div className="fertilizer-two">
               <label>pH KCl<input value={form.ph_kcl} onChange={(event) => update("ph_kcl", event.target.value)} inputMode="decimal" /></label>
-              <label>Chất hữu cơ OC (%)<input value={form.organic_carbon_pct} onChange={(event) => update("organic_carbon_pct", event.target.value)} inputMode="decimal" /></label>
-              <label>Đạm tổng số (%)<input value={form.total_n_pct} onChange={(event) => update("total_n_pct", event.target.value)} inputMode="decimal" /></label>
-              <label>Lân dễ tiêu (mg/100g)<input value={form.available_p_mg_per_100g} onChange={(event) => update("available_p_mg_per_100g", event.target.value)} inputMode="decimal" /></label>
-              <label>Kali trao đổi (mg K2O/100g)<input value={form.exchangeable_k2o_mg_per_100g} onChange={(event) => update("exchangeable_k2o_mg_per_100g", event.target.value)} inputMode="decimal" /></label>
+              <label>{copy.organicCarbon}<input value={form.organic_carbon_pct} onChange={(event) => update("organic_carbon_pct", event.target.value)} inputMode="decimal" /></label>
+              <label>{copy.totalNitrogen}<input value={form.total_n_pct} onChange={(event) => update("total_n_pct", event.target.value)} inputMode="decimal" /></label>
+              <label>{copy.availableP}<input value={form.available_p_mg_per_100g} onChange={(event) => update("available_p_mg_per_100g", event.target.value)} inputMode="decimal" /></label>
+              <label>{copy.exchangeableK}<input value={form.exchangeable_k2o_mg_per_100g} onChange={(event) => update("exchangeable_k2o_mg_per_100g", event.target.value)} inputMode="decimal" /></label>
               <label>CEC (cmolc/kg)<input value={form.cec_cmolc_per_kg} onChange={(event) => update("cec_cmolc_per_kg", event.target.value)} inputMode="decimal" /></label>
             </div>
           </section>
 
           <section className="fertilizer-form-section">
-            <SectionTitle step="3" Icon={Gauge} title="Điều kiện hiệu chỉnh" note="Dùng để điều chỉnh liều theo điều kiện thực tế của vườn." />
+            <SectionTitle step="3" Icon={Gauge} title={copy.adjustment} note={copy.adjustmentNote} />
             <div className="fertilizer-two">
-              <label>Lượng mưa năm (mm)<input value={form.annual_rainfall_mm} onChange={(event) => update("annual_rainfall_mm", event.target.value)} inputMode="numeric" /></label>
-              <label>Độ dốc (%)<input value={form.slope_pct} onChange={(event) => update("slope_pct", event.target.value)} inputMode="decimal" /></label>
-              <label>Tuổi vườn<input value={form.years_under_current_crop} onChange={(event) => update("years_under_current_crop", event.target.value)} inputMode="numeric" /></label>
-              <label className="fertilizer-check"><input type="checkbox" checked={form.irrigation_available} onChange={(event) => update("irrigation_available", event.target.checked)} /> Có tưới chủ động</label>
+              <label>{copy.rainfall}<input value={form.annual_rainfall_mm} onChange={(event) => update("annual_rainfall_mm", event.target.value)} inputMode="numeric" /></label>
+              <label>{copy.slope}<input value={form.slope_pct} onChange={(event) => update("slope_pct", event.target.value)} inputMode="decimal" /></label>
+              <label>{copy.orchardAge}<input value={form.years_under_current_crop} onChange={(event) => update("years_under_current_crop", event.target.value)} inputMode="numeric" /></label>
+              <label className="fertilizer-check"><input type="checkbox" checked={form.irrigation_available} onChange={(event) => update("irrigation_available", event.target.checked)} /> {copy.irrigation}</label>
             </div>
           </section>
 
           <div className="fertilizer-submit-card">
             <button className="fertilizer-submit" type="submit" disabled={busy}>
               <Calculator size={18} />
-              {busy ? "Đang tính..." : "Tính khuyến nghị"}
+              {busy ? copy.calculating : copy.calculate}
             </button>
-            <p>Thông tin chỉ dùng để tính khuyến nghị bón phân hiện tại.</p>
-            {error ? <div className="fertilizer-error" role="alert"><strong>Không tính được khuyến nghị</strong><span>{error}</span></div> : null}
+            <p>{copy.privacy}</p>
+            {error ? <div className="fertilizer-error" role="alert"><strong>{copy.errorTitle}</strong><span>{error}</span></div> : null}
           </div>
         </form>
 
         <div className={`fertilizer-results ${result ? "has-result" : "is-empty"}`}>
           <section className="fertilizer-summary">
             <div>
-              <span>{selectedCrop.label}</span>
-              <h2>{total ? `${total.n_kg_ha} - ${total.p2o5_kg_ha} - ${total.k2o_kg_ha}` : "Chưa có kết quả"}</h2>
-              <p>kg hoạt chất/ha/năm: Đạm N - Lân P2O5 - Kali K2O</p>
+              <span>{selectedCropLabel}</span>
+              <h2>{total ? `${total.n_kg_ha} - ${total.p2o5_kg_ha} - ${total.k2o_kg_ha}` : copy.noResult}</h2>
+              <p>{copy.activeNutrients}</p>
             </div>
             <div
               className={`fertilizer-confidence confidence-${result?.confidence.calibration_tier ?? result?.confidence.overall ?? "none"}`}
-              title={result?.confidence.explain_vi ?? undefined}
+              title={language === "vi" ? result?.confidence.explain_vi ?? undefined : copy.confidenceFallback}
             >
               <ShieldAlert size={18} />
-              {result ? confidenceLabel : `Độ tin cậy: ${confidenceLabel}`}
+              {result ? confidenceLabel : `${copy.confidence}: ${confidenceLabel}`}
             </div>
             {!result ? (
-              <div className="fertilizer-preview-list" aria-label="Kết quả sẽ gồm">
-                <article><strong>N-P-K và vôi</strong><span>Tóm tắt lượng hoạt chất theo kg/ha/năm.</span></article>
-                <article><strong>Lịch bón theo đợt</strong><span>Chia thành các cửa sổ bón phù hợp mùa vụ.</span></article>
-                <article><strong>Cảnh báo an toàn</strong><span>Hiển thị rủi ro pH thấp, hữu cơ thấp hoặc liều cao.</span></article>
+              <div className="fertilizer-preview-list" aria-label={copy.previewLabel}>
+                <article><strong>{copy.previewNpkTitle}</strong><span>{copy.previewNpkBody}</span></article>
+                <article><strong>{copy.previewScheduleTitle}</strong><span>{copy.previewScheduleBody}</span></article>
+                <article><strong>{copy.previewSafetyTitle}</strong><span>{copy.previewSafetyBody}</span></article>
               </div>
             ) : null}
           </section>
@@ -302,51 +452,51 @@ export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdviso
           {result ? (
             <>
               <section className="fertilizer-kpi-grid">
-                <Kpi label="Đạm N" value={result.recommendation.annual_total.n_kg_ha} before={result.recommendation.annual_total.n_kg_ha_before_adjustment} />
-                <Kpi label="Lân P2O5" value={result.recommendation.annual_total.p2o5_kg_ha} before={result.recommendation.annual_total.p2o5_kg_ha_before_adjustment} />
-                <Kpi label="Kali K2O" value={result.recommendation.annual_total.k2o_kg_ha} before={result.recommendation.annual_total.k2o_kg_ha_before_adjustment} />
-                <Kpi label="Vôi" value={result.recommendation.annual_total.lime_kg_ha} unit="kg/ha" />
+                <Kpi label={language === "en" ? "Nitrogen N" : "Đạm N"} value={result.recommendation.annual_total.n_kg_ha} before={result.recommendation.annual_total.n_kg_ha_before_adjustment} beforeLabel={copy.beforeAdjustment} />
+                <Kpi label={language === "en" ? "Phosphate P2O5" : "Lân P2O5"} value={result.recommendation.annual_total.p2o5_kg_ha} before={result.recommendation.annual_total.p2o5_kg_ha_before_adjustment} beforeLabel={copy.beforeAdjustment} />
+                <Kpi label={language === "en" ? "Potash K2O" : "Kali K2O"} value={result.recommendation.annual_total.k2o_kg_ha} before={result.recommendation.annual_total.k2o_kg_ha_before_adjustment} beforeLabel={copy.beforeAdjustment} />
+                <Kpi label={copy.lime} value={result.recommendation.annual_total.lime_kg_ha} unit="kg/ha" beforeLabel={copy.beforeAdjustment} />
               </section>
 
               <section className="fertilizer-panel fertilizer-session-panel">
-                <h3><ClipboardCheck size={17} /> Mã phiên và độ tin cậy</h3>
+                <h3><ClipboardCheck size={17} /> {copy.sessionTitle}</h3>
                 <div className="fertilizer-session-row">
                   <div>
-                    <span>Mã khuyến nghị</span>
+                    <span>{copy.sessionCode}</span>
                     <strong>{result.session_code ?? result.request_id.slice(0, 8).toUpperCase()}</strong>
                   </div>
-                  <a href={`/bao-cao-nang-suat?sid=${encodeURIComponent(result.session_code ?? result.request_id.slice(0, 8).toUpperCase())}`}>
-                    Báo cáo năng suất sau thu hoạch
+                  <a href={withLanguagePrefix(`/bao-cao-nang-suat?sid=${encodeURIComponent(result.session_code ?? result.request_id.slice(0, 8).toUpperCase())}`, language)}>
+                    {copy.yieldReport}
                   </a>
                 </div>
                 <p>
-                  {result.confidence.explain_vi ?? "Độ tin cậy phụ thuộc cây trồng, dữ liệu đất nhập vào và mức hiệu chỉnh đang có."}{" "}
-                  <a href="/khuyen-nghi-bon-phan/logic">Xem cách hiệu chuẩn</a>
+                  {language === "vi" ? result.confidence.explain_vi ?? copy.confidenceFallback : copy.confidenceFallback}{" "}
+                  <a href={withLanguagePrefix("/khuyen-nghi-bon-phan/logic", language)}>{copy.calibrationLink}</a>
                 </p>
               </section>
 
               <section className="fertilizer-panel">
-                <h3><AlertTriangle size={17} /> Cảnh báo an toàn</h3>
+                <h3><AlertTriangle size={17} /> {copy.safetyTitle}</h3>
                 {result.warnings.map((warning) => (
                   <article key={`${warning.code}-${warning.message_vi}`} className={`fertilizer-warning ${warning.level}`}>
-                    <strong>{warningLabel(warning.level)}</strong>
-                    <p>{warning.message_vi}</p>
+                    <strong>{warningLabel(warning.level, language)}</strong>
+                    <p>{language === "en" ? warning.message_en : warning.message_vi}</p>
                   </article>
                 ))}
               </section>
 
               <section className="fertilizer-panel">
-                <h3><ClipboardCheck size={17} /> Lịch bón theo phân thương mại</h3>
+                <h3><ClipboardCheck size={17} /> {copy.scheduleTitle}</h3>
                 <div className="fertilizer-splits">
                   {result.recommendation.splits.map((split) => (
                     <article key={split.split_index}>
                       <span>{split.calendar_window}</span>
-                      <strong>{split.name_vi}</strong>
+                      <strong>{translateFertilizerSplit(split.name_vi, language)}</strong>
                       <div className="fertilizer-split-products">
                         {split.commercial_products.map((product) => (
                           <small key={product.sku}>
-                            {product.name_vi}: <b>{product.kg_ha_yr.toLocaleString("vi-VN")} kg/ha</b>
-                            {product.bags_50kg_ha > 0 ? ` (${product.bags_50kg_ha} bao 50 kg)` : ""}
+                            {translateFertilizerProduct(product.name_vi, language)}: <b>{product.kg_ha_yr.toLocaleString(language === "en" ? "en-US" : "vi-VN")} kg/ha</b>
+                            {product.bags_50kg_ha > 0 ? ` (${product.bags_50kg_ha} ${copy.bags50kg})` : ""}
                           </small>
                         ))}
                       </div>
@@ -356,26 +506,26 @@ export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdviso
               </section>
 
               <section className="fertilizer-panel">
-                <h3><PackageCheck size={17} /> Tổng lượng phân thương mại cả năm</h3>
+                <h3><PackageCheck size={17} /> {copy.yearlyProductTitle}</h3>
                 {result.recommendation.product_mix_options[0]?.products.map((product) => (
                   <div className="fertilizer-product" key={product.sku}>
-                    <span>{product.name_vi}</span>
-                    <strong>{product.kg_ha_yr.toLocaleString("vi-VN")} kg/ha</strong>
-                    <small>{product.bags_50kg_ha} bao 50 kg</small>
+                    <span>{translateFertilizerProduct(product.name_vi, language)}</span>
+                    <strong>{product.kg_ha_yr.toLocaleString(language === "en" ? "en-US" : "vi-VN")} kg/ha</strong>
+                    <small>{product.bags_50kg_ha} {copy.bags50kg}</small>
                   </div>
                 ))}
               </section>
 
               <section className="fertilizer-panel">
-                <h3><Leaf size={17} /> Vì sao ra khuyến nghị này?</h3>
-                <p>{result.recommendation.annual_total.rationale_vi}</p>
+                <h3><Leaf size={17} /> {copy.whyTitle}</h3>
+                <p>{language === "vi" ? result.recommendation.annual_total.rationale_vi : copy.rationaleFallback}</p>
                 <div className="fertilizer-factor-grid">
                   {result.recommendation.annual_total.adjustment_factors.breakdown.map((factor) => (
                     <article key={factor.code}>
-                      <strong>{factorName(factor.name)}</strong>
-                      <span>Hệ số hiệu chỉnh</span>
+                      <strong>{factorName(factor.name, language)}</strong>
+                      <span>{copy.factorMultiplier}</span>
                       <small>Đạm x{factor.n} - Lân x{factor.p} - Kali x{factor.k}</small>
-                      {factor.rationale_vi ? <p>{factor.rationale_vi}</p> : null}
+                      {language === "vi" && factor.rationale_vi ? <p>{factor.rationale_vi}</p> : null}
                     </article>
                   ))}
                 </div>
@@ -383,8 +533,8 @@ export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdviso
             </>
           ) : (
             <section className="fertilizer-empty">
-              <h2>Nhập phiếu phân tích đất để bắt đầu</h2>
-              <p>Công cụ sẽ trả về lượng phân thương mại, cảnh báo, độ tin cậy và vết tính toán. Chỉ tiêu thiếu sẽ được giả định ở mức trung bình và ghi rõ trong kết quả.</p>
+              <h2>{copy.emptyTitle}</h2>
+              <p>{copy.emptyBody}</p>
             </section>
           )}
         </div>
@@ -405,24 +555,37 @@ function SectionTitle({ step, Icon, title, note }: { step: string; Icon: typeof 
   );
 }
 
-function Kpi({ label, value, before, unit = "kg/ha" }: { label: string; value: number; before?: number; unit?: string }) {
+function Kpi({ label, value, before, unit = "kg/ha", beforeLabel = "trước hiệu chỉnh" }: { label: string; value: number; before?: number; unit?: string; beforeLabel?: string }) {
   return (
     <article>
       <span>{label}</span>
       <strong>{value.toLocaleString("vi-VN")}</strong>
-      <small>{unit}{before !== undefined ? ` - trước hiệu chỉnh ${before.toLocaleString("vi-VN")}` : ""}</small>
+      <small>{unit}{before !== undefined ? ` - ${beforeLabel} ${before.toLocaleString("vi-VN")}` : ""}</small>
     </article>
   );
 }
 
-function warningLabel(level: string) {
+function warningLabel(level: string, language: "vi" | "en" = "vi") {
+  if (language === "en") {
+    if (level === "critical") return "Critical warning";
+    if (level === "warning") return "Watch carefully";
+    return "Information";
+  }
   if (level === "critical") return "Cảnh báo quan trọng";
   if (level === "warning") return "Cần lưu ý";
   return "Thông tin";
 }
 
-function factorName(name: string) {
+function factorName(name: string, language: "vi" | "en" = "vi") {
   const normalized = name.toLowerCase();
+  if (language === "en") {
+    if (normalized.includes("moisture")) return "Irrigation and rainfall";
+    if (normalized.includes("texture")) return "Soil texture";
+    if (normalized.includes("slope")) return "Field slope";
+    if (normalized.includes("age")) return "Orchard age";
+    if (normalized.includes("organic")) return "Organic matter";
+    return name;
+  }
   if (normalized.includes("moisture")) return "Nước tưới và lượng mưa";
   if (normalized.includes("texture")) return "Kết cấu đất";
   if (normalized.includes("slope")) return "Độ dốc lô đất";

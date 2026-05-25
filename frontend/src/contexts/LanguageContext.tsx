@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { splitLanguagePath } from "../lib/localizedRoutes";
 
 export type AppLanguage = "vi" | "en";
 
@@ -12,6 +13,8 @@ const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 function readInitialLanguage(): AppLanguage {
   if (typeof window === "undefined") return "vi";
+  const pathLanguage = splitLanguagePath(window.location.pathname).language;
+  if (pathLanguage) return pathLanguage;
   const stored = window.localStorage.getItem("marketai.language");
   return stored === "en" ? "en" : "vi";
 }

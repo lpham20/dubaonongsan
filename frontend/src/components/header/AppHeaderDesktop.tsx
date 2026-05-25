@@ -220,7 +220,7 @@ export function AppHeaderDesktop({
       </div>
       <div className="account-menu">
         <button type="button" className="language-toggle" onClick={onLanguageToggle} aria-label={copy.switchLanguage}>
-          <span className="language-flag" aria-hidden="true">{copy.languageFlag}</span>
+          <span className={`language-flag language-flag-${language}`} aria-hidden="true" />
           <span>{copy.languageLabel}</span>
         </button>
         <button type="button" className="account-trigger" onClick={() => onAuthOpenChange(!authOpen)}>
