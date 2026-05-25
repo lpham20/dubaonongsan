@@ -18,7 +18,6 @@ import {
   fetchAvailableVarieties,
   fetchDailyPriceBoard,
   fetchRegions,
-  fetchTickerPrices,
   reportLocalPrice,
   type CropType,
   type NewsArticle,
@@ -30,6 +29,7 @@ import { newsPath } from "../lib/seo";
 import { useLanguage } from "../contexts/LanguageContext";
 import { withLanguagePrefix } from "../lib/localizedRoutes";
 import { cropLabel } from "../lib/displayLabels";
+import { LivePriceTicker } from "./LivePriceTicker";
 
 type Props = {
   articles: NewsArticle[];
@@ -63,13 +63,6 @@ type RankedArticle = {
   relation: string;
   score: number;
   dateValue: number;
-};
-
-type TickerItem = {
-  label: string;
-  value: string;
-  change: string;
-  tone: "up" | "down";
 };
 
 type PriceNewsCrop = Exclude<NewsView, "latest">;
@@ -140,14 +133,6 @@ const VIEW_SEO: Record<NewsView, { title: string; description: string; canonical
 };
 const PRICE_DISCLAIMER =
   "Giá dự báo được tổng hợp từ dữ liệu thị trường và xử lý bằng mô hình AI, chỉ mang tính tham khảo — thực tế có thể dao động theo từng vùng và từng thời điểm. Bạn biết giá tại địa phương mình? Chia sẻ để giúp bà con nông dân khác cùng nắm thông tin tốt hơn! (Dubaonongsan cung cấp giá dự báo với mục đích tham khảo và không chịu trách nhiệm đối với các quyết định giao dịch phát sinh từ thông tin này.)";
-
-const FALLBACK_NEWS_TICKER: TickerItem[] = [
-  { label: "Cà phê Robusta", value: "87.800 đ/kg", change: "+1,2%", tone: "up" },
-  { label: "Sầu riêng Ri6", value: "86.000 đ/kg", change: "+0,8%", tone: "up" },
-  { label: "Hồ tiêu đen", value: "145.000 đ/kg", change: "+0,9%", tone: "up" },
-  { label: "Lúa OM 5451", value: "7.800 đ/kg", change: "-0,2%", tone: "down" },
-  { label: "Urea hạt đục", value: "12.400 đ/kg", change: "-0,4%", tone: "down" }
-];
 
 function newsSeoEn(value: NewsView, copy: { seoLatestTitle: string; seoLatestDescription: string }) {
   const seo: Record<NewsView, { title: string; description: string; canonical: string }> = {
@@ -244,12 +229,6 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
   const [sortMode, setSortMode] = useState<SortMode>("newest");
   const [query, setQuery] = useState(() => new URLSearchParams(window.location.search).get("q") ?? "");
   const [newsPage, setNewsPage] = useState(1);
-  const [tickerData, setTickerData] = useState<Record<CropType, PricePoint[]>>({
-    ca_phe: [],
-    sau_rieng: [],
-    ho_tieu: [],
-    lua: []
-  });
   const [priceBoards, setPriceBoards] = useState<Record<PriceNewsCrop, PricePoint[]>>({
     ca_phe: [],
     sau_rieng: [],
@@ -310,7 +289,6 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
   const pagedRest = rest.slice((activePage - 1) * NEWS_PAGE_SIZE, activePage * NEWS_PAGE_SIZE);
   const marketWatch = buildMarketWatch(rankedArticles, language);
   const digest = buildDigest(filteredArticles, language);
-  const tickerItems = useMemo(() => buildNewsTicker(tickerData), [tickerData]);
   const seo = language === "en"
     ? newsSeoEn(activeView, pageCopy)
     : VIEW_SEO[activeView] ?? VIEW_SEO.latest;
@@ -355,27 +333,6 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
   }
 
   useEffect(() => {
-    let active = true;
-
-    Promise.all([
-      fetchTickerPrices("ca_phe"),
-      fetchTickerPrices("sau_rieng"),
-      fetchTickerPrices("ho_tieu"),
-      fetchTickerPrices("lua")
-    ])
-      .then(([coffee, durian, pepper, rice]) => {
-        if (active) setTickerData({ ca_phe: coffee, sau_rieng: durian, ho_tieu: pepper, lua: rice });
-      })
-      .catch(() => {
-        if (active) setTickerData({ ca_phe: [], sau_rieng: [], ho_tieu: [], lua: [] });
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  useEffect(() => {
     if (!activePriceCrop) return;
     const controller = new AbortController();
     void reloadPriceBoard(activePriceCrop, controller.signal);
@@ -390,7 +347,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
         description={seo.description}
         canonical={seo.canonical}
       />
-      <NewsPriceTicker items={tickerItems} />
+      <LivePriceTicker />
 
       {activeView === "latest" ? (
         <div className="content-hero news-hero">
@@ -1112,29 +1069,6 @@ function buildMarketWatch(items: RankedArticle[], language: "vi" | "en") {
     .slice(0, 5);
 }
 
-function NewsPriceTicker({ items }: { items: TickerItem[] }) {
-  const repeated = [...items, ...items, ...items];
-
-  return (
-    <div className="news-price-ticker" aria-label="Dải băng giá nông sản">
-      <span>
-        Giá trực tuyến
-      </span>
-      <div>
-        <div>
-          {repeated.map((item, index) => (
-            <strong key={`${item.label}-${index}`}>
-              {item.label}
-              <b className="num">{item.value}</b>
-              <em className={item.tone}>{item.change}</em>
-            </strong>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function TrendSparkline({ topic, impact }: { topic: NewsTopic; impact: string }) {
   const tone = impact === "Tác động giá cao" && topic !== "Phân bón - vật tư" ? "up" : "down";
   const points = tone === "up" ? [18, 19, 17, 21, 22, 24, 23, 26] : [28, 27, 25, 26, 23, 22, 21, 19];
@@ -1155,64 +1089,6 @@ function TrendSparkline({ topic, impact }: { topic: NewsTopic; impact: string })
       {tone === "up" ? <TrendingUp size={12} x={56} y={2} /> : <TrendingDown size={12} x={56} y={14} />}
     </svg>
   );
-}
-
-function buildNewsTicker(data: Record<CropType, PricePoint[]>): TickerItem[] {
-  const coffee = pointToTicker(data.ca_phe, "Cà phê Robusta", ["robusta", "culi", "arabica"]);
-  const durian = pointToTicker(data.sau_rieng, "Sầu riêng", ["ri6", "dona", "thai", "musang", "black thorn"]);
-  const pepper = pointToTicker(data.ho_tieu, "Hồ tiêu", ["tieu den", "tieu trang", "tieu do"]);
-  const rice = pointToTicker(data.lua, "Lúa", ["om", "dai thom", "nang hoa", "jasmine"]);
-  return [
-    coffee ?? FALLBACK_NEWS_TICKER[0],
-    durian ?? FALLBACK_NEWS_TICKER[1],
-    pepper ?? FALLBACK_NEWS_TICKER[2],
-    rice ?? FALLBACK_NEWS_TICKER[3],
-    FALLBACK_NEWS_TICKER[4]
-  ];
-}
-
-function pointToTicker(points: PricePoint[], fallbackLabel: string, keywords: string[]) {
-  const selected = selectTickerSeries(points, keywords);
-  if (!selected.length) return null;
-  const latest = selected[0];
-  const change = computeTickerChange(selected);
-  return {
-    label: latest.variety || fallbackLabel,
-    value: formatTickerPrice(pointPrice(latest)),
-    change: formatTickerChange(change),
-    tone: change >= 0 ? "up" : "down"
-  } satisfies TickerItem;
-}
-
-function selectTickerSeries(points: PricePoint[], keywords: string[]) {
-  const normalizedKeywords = keywords.map((keyword) => normalize(keyword));
-  const matched = points.filter((point) => normalizedKeywords.some((keyword) => normalize(point.variety).includes(keyword)));
-  return (matched.length ? matched : points)
-    .filter((point) => pointPrice(point) > 0)
-    .sort((left, right) => new Date(right.timestamp).getTime() - new Date(left.timestamp).getTime());
-}
-
-function pointPrice(point: PricePoint) {
-  const min = point.min_price_vnd ?? point.max_price_vnd ?? 0;
-  const max = point.max_price_vnd ?? point.min_price_vnd ?? 0;
-  return Math.round((min + max) / 2);
-}
-
-function computeTickerChange(points: PricePoint[]) {
-  if (points.length < 2) return 0;
-  const latest = pointPrice(points[0]);
-  const previous = pointPrice(points[Math.min(points.length - 1, 8)]);
-  if (!previous) return 0;
-  return ((latest - previous) / previous) * 100;
-}
-
-function formatTickerPrice(value: number) {
-  return `${Math.round(value).toLocaleString("vi-VN")} đ/kg`;
-}
-
-function formatTickerChange(value: number) {
-  if (!Number.isFinite(value) || Math.abs(value) < 0.05) return "0,0%";
-  return `${value > 0 ? "+" : ""}${value.toLocaleString("vi-VN", { maximumFractionDigits: 1 })}%`;
 }
 
 function detectTopic(article: NewsArticle): NewsTopic {

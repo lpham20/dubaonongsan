@@ -3751,8 +3751,11 @@
     position: static !important;
     top: auto !important;
     align-self: stretch !important;
-    width: calc(100% + var(--shell-pad-mobile) * 2) !important;
-    margin: 0 calc(-1 * var(--shell-pad-mobile)) !important;
+    width: 100vw !important;
+    margin-right: calc(50% - 50vw) !important;
+    margin-left: calc(50% - 50vw) !important;
+    padding-right: var(--shell-pad-mobile) !important;
+    padding-left: var(--shell-pad-mobile) !important;
   }
 
   .finance-news-page .news-topic-tabs button,

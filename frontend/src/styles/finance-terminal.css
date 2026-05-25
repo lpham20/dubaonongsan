@@ -304,6 +304,14 @@ h5 {
   font-weight: var(--fw-bold);
 }
 
+.news-price-ticker {
+  width: 100vw;
+  margin-right: calc(50% - 50vw);
+  margin-left: calc(50% - 50vw);
+  padding-right: 0;
+  padding-left: 0;
+}
+
 .ticker-label,
 .home-price-ticker-label,
 .news-price-ticker > span {
@@ -324,12 +332,22 @@ h5 {
   white-space: nowrap;
 }
 
+.news-price-ticker > span {
+  margin-left: 0;
+  padding-right: 22px;
+  padding-left: max(var(--shell-pad-desktop), 16px);
+}
+
 @media (min-width: 861px) {
   .ticker-label,
-  .home-price-ticker-label,
-  .news-price-ticker > span {
+  .home-price-ticker-label {
     padding-right: 22px;
     padding-left: calc(var(--shell-pad-desktop) + 20px);
+  }
+
+  .news-price-ticker > span {
+    padding-right: 22px;
+    padding-left: max(var(--shell-pad-desktop), 24px);
   }
 }
 
