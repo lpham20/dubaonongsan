@@ -75,7 +75,6 @@ export function YieldFeedbackPage() {
       };
       setResult(await submitYieldFeedback(sessionCode, payload, token));
     } catch (err) {
-      console.warn("[YieldFeedbackPage] feedback failed", err);
       setError(err instanceof Error ? err.message : isEnglish ? "Could not send the yield report right now." : "Không gửi được báo cáo năng suất lúc này.");
     } finally {
       setBusy(false);

@@ -45,7 +45,6 @@ if (import.meta.env.PROD) {
   updateServiceWorker = registerSW({
     immediate: true,
     onNeedRefresh() {
-      console.info("Có phiên bản mới, đang tải lại để cập nhật giao diện.");
       void updateServiceWorker?.(true);
     },
     onRegisteredSW(_swUrl, registration) {
@@ -55,7 +54,6 @@ if (import.meta.env.PROD) {
       }, 60 * 60 * 1000);
     },
     onOfflineReady() {
-      console.info("Dự báo nông sản đã sẵn sàng dùng ở chế độ offline.");
     }
   });
 }

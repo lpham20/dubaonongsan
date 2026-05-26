@@ -38,7 +38,7 @@ export function GuideDetailPage({ slug }: { slug: string }) {
 
   useEffect(() => {
     const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => controller.abort(), 8000);
+    const timeoutId = window.setTimeout(() => controller.abort(), 20_000);
     setLoading(true);
     setFailed(false);
     setGuide(null);
@@ -49,7 +49,6 @@ export function GuideDetailPage({ slug }: { slug: string }) {
           if (!controller.signal.aborted) setFailed(true);
           return;
         }
-        console.error("[GuideDetailPage] fetch failed", { slug, err });
         if (!controller.signal.aborted) setFailed(true);
       })
       .finally(() => {
@@ -232,8 +231,7 @@ function safeParseGuideBlocks(guide: GuidePost, language: "vi" | "en" = "vi") {
   try {
     const blocks = parseGuideBlocks(guide.content);
     return blocks.length ? blocks : [{ heading: language === "en" ? "Technical note" : "Ghi chú kỹ thuật", items: [{ type: "paragraph" as const, text: guide.summary }], body: [guide.summary], bullets: [], tables: [], images: [] }];
-  } catch (err) {
-    console.error("[GuideDetailPage] parse failed", { slug: guide.slug, err });
+  } catch {
     const fallbackText = guide.summary || guide.title;
     return [{ heading: language === "en" ? "Technical note" : "Ghi chú kỹ thuật", items: [{ type: "paragraph" as const, text: fallbackText }], body: [fallbackText], bullets: [], tables: [], images: [] }];
   }

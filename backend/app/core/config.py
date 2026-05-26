@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     news_scrape_daily_minute: int = 0
     data_quality_interval_minutes: int = 60 * 24
     retrain_interval_minutes: int = 60 * 24
+    rate_limit_storage_uri: str = "memory://"
+    sentry_dsn: str = ""
     world_fertilizer_current_retry_attempts: int = 3
     world_fertilizer_current_retry_delay_seconds: int = 60
     ml_artifacts: str = "/app/ml_artifacts"

@@ -29,6 +29,15 @@
 		-Server
 	}
 
+	log {
+		output file /var/log/caddy/frontend.log {
+			roll_size 100MB
+			roll_keep 7
+		}
+		format json
+		level INFO
+	}
+
 	@seoHtml {
 		path / /tin-tuc /huong-dan /khuyen-nghi-bon-phan /bao-cao-nang-suat /thuat-toan-du-bao /khuyen-nghi-bon-phan/logic /tin-tuc/* /huong-dan/* /du-bao-gia/*
 	}

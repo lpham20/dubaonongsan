@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 import html
 import ipaddress
 import re
+import time
 from urllib.parse import urlparse
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
@@ -44,6 +45,8 @@ ALLOWED_IMAGE_HOSTS = {
     "nongsanviet.nongnghiepmoitruong.vn",
 }
 MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
+MAX_IMAGE_PROXY_CACHE_ITEMS = 64
+IMAGE_PROXY_CACHE_TTL_SECONDS = 6 * 60 * 60
 SAFE_IMAGE_CONTENT_TYPES = {
     "image/jpeg",
     "image/png",
@@ -52,6 +55,7 @@ SAFE_IMAGE_CONTENT_TYPES = {
     "image/avif",
 }
 SITE_BASE = "https://dubaonongsan.com"
+_IMAGE_PROXY_CACHE: dict[str, tuple[float, bytes, str]] = {}
 
 
 def _slug_text(value: str) -> str:
@@ -199,7 +203,9 @@ def news_detail(
 
 
 @router.post("/content/news/scrape")
+@limiter.limit("2/minute")
 def scrape_news(
+    request: Request,
     _: AppUser = Depends(require_admin),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -488,6 +494,15 @@ def guide_image_proxy(
     if known_image is None:
         raise HTTPException(status_code=404, detail="Ảnh không nằm trong thư viện hướng dẫn")
 
+    cached_image = _image_cache_get(image_url)
+    if cached_image is not None:
+        content, content_type = cached_image
+        return Response(
+            content=content,
+            media_type=content_type,
+            headers={"Cache-Control": "public, max-age=86400", "X-Content-Type-Options": "nosniff"},
+        )
+
     try:
         upstream = requests.get(
             image_url,
@@ -518,8 +533,30 @@ def guide_image_proxy(
     content_type = upstream.headers.get("content-type", "image/jpeg").split(";", 1)[0].strip()
     if content_type not in SAFE_IMAGE_CONTENT_TYPES:
         raise HTTPException(status_code=404, detail="Tệp không phải ảnh")
+    content = b"".join(chunks)
+    _image_cache_set(image_url, content, content_type)
     return Response(
-        content=b"".join(chunks),
+        content=content,
         media_type=content_type,
         headers={"Cache-Control": "public, max-age=86400", "X-Content-Type-Options": "nosniff"},
     )
+
+
+def _image_cache_get(url: str) -> tuple[bytes, str] | None:
+    cached = _IMAGE_PROXY_CACHE.get(url)
+    if cached is None:
+        return None
+    cached_at, content, content_type = cached
+    if time.monotonic() - cached_at > IMAGE_PROXY_CACHE_TTL_SECONDS:
+        _IMAGE_PROXY_CACHE.pop(url, None)
+        return None
+    return content, content_type
+
+
+def _image_cache_set(url: str, content: bytes, content_type: str) -> None:
+    if len(content) > MAX_IMAGE_SIZE_BYTES:
+        return
+    while len(_IMAGE_PROXY_CACHE) >= MAX_IMAGE_PROXY_CACHE_ITEMS:
+        oldest = min(_IMAGE_PROXY_CACHE, key=lambda key: _IMAGE_PROXY_CACHE[key][0])
+        _IMAGE_PROXY_CACHE.pop(oldest, None)
+    _IMAGE_PROXY_CACHE[url] = (time.monotonic(), content, content_type)

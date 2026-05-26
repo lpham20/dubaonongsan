@@ -4,8 +4,8 @@ import { login as apiLogin, logout as apiLogout, register as apiRegister, type A
 type AuthContextValue = {
   token: string;
   user: AuthUser | null;
-  signIn: (email: string, password: string) => Promise<AuthSession>;
-  signUp: (email: string, password: string, displayName: string) => Promise<AuthSession>;
+  signIn: (email: string, password: string, signal?: AbortSignal) => Promise<AuthSession>;
+  signUp: (email: string, password: string, displayName: string, signal?: AbortSignal) => Promise<AuthSession>;
   signOut: () => Promise<void>;
 };
 
@@ -34,14 +34,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(USER_KEY);
   }
 
-  async function signIn(email: string, password: string) {
-    const session = await apiLogin(email, password);
+  async function signIn(email: string, password: string, signal?: AbortSignal) {
+    const session = await apiLogin(email, password, signal);
+    if (signal?.aborted) throw new DOMException("Authentication request was cancelled.", "AbortError");
     persist(session);
     return session;
   }
 
-  async function signUp(email: string, password: string, displayName: string) {
-    const session = await apiRegister(email, password, displayName);
+  async function signUp(email: string, password: string, displayName: string, signal?: AbortSignal) {
+    const session = await apiRegister(email, password, displayName, signal);
+    if (signal?.aborted) throw new DOMException("Authentication request was cancelled.", "AbortError");
     persist(session);
     return session;
   }
@@ -49,9 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function signOut() {
     const currentToken = token;
     if (currentToken) {
-      await apiLogout(currentToken).catch((err) => {
-        console.warn("[AuthContext] logout failed", err);
-      });
+      await apiLogout(currentToken).catch(() => undefined);
     }
     setToken("");
     setUser(null);

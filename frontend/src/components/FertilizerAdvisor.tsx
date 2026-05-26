@@ -305,8 +305,7 @@ export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdviso
         }
       };
       setResult(await recommendFertilizer(payload, authToken));
-    } catch (err) {
-      console.warn("[FertilizerAdvisor] recommendation failed", err);
+    } catch {
       setError(copy.errorBody);
     } finally {
       setBusy(false);

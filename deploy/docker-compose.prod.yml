@@ -29,6 +29,17 @@ services:
         max-size: "10m"
         max-file: "5"
 
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "64mb", "--maxmemory-policy", "allkeys-lru"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    mem_limit: 96m
+
   api:
     build:
       context: ../backend
@@ -42,8 +53,11 @@ services:
       MARKETAI_JOB_LOCK_DIR: /app/.job_locks
       MARKETAI_ML_ARTIFACTS: /app/ml_artifacts
       MARKETAI_ML_MAX_MODELS: "1"
+      MARKETAI_RATE_LIMIT_STORAGE_URI: redis://redis:6379/0
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     volumes:
       - job_locks:/app/.job_locks
@@ -83,11 +97,14 @@ services:
       MARKETAI_JOB_LOCK_DIR: /app/.job_locks
       MARKETAI_ML_ARTIFACTS: /app/ml_artifacts
       MARKETAI_ML_MAX_MODELS: "1"
+      MARKETAI_RATE_LIMIT_STORAGE_URI: redis://redis:6379/0
     volumes:
       - job_locks:/app/.job_locks
       - ml_artifacts:/app/ml_artifacts
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import json,sys,urllib.request; r=urllib.request.urlopen('http://api:8010/api/v1/health/scrape', timeout=10); body=json.loads(r.read().decode()); sys.exit(0 if body.get('status') == 'ok' else 1)\""]
@@ -126,6 +143,11 @@ services:
       api:
         condition: service_healthy
     mem_limit: 160m
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider --header 'Host: dubaonongsan.com' http://127.0.0.1/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
 
   postgres-backup:
     image: postgres:16-alpine

@@ -6,7 +6,7 @@ from typing import Any
 
 import requests
 
-from app.ingestion.http import DEFAULT_HEADERS
+from app.ingestion.http import request_headers
 from app.ingestion.world_fertilizer_records import WorldFertilizerObservation, WorldFertilizerScrapeResult
 
 
@@ -32,7 +32,7 @@ class TradingEconomicsUreaDailyScraper:
 
         start_date = _backfill_start_date()
         end_date = datetime.now(UTC).date()
-        headers = {**DEFAULT_HEADERS, "Accept": "application/json", "Authorization": api_key}
+        headers = request_headers({"Accept": "application/json", "Authorization": api_key})
         observations: list[WorldFertilizerObservation] = []
         for window_start, window_end in _request_windows(start_date, end_date):
             response = requests.get(

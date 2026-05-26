@@ -19,7 +19,7 @@ export function NewsDetailPage({ slug }: { slug: string }) {
 
   useEffect(() => {
     const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => controller.abort(), 8000);
+    const timeoutId = window.setTimeout(() => controller.abort(), 20_000);
     setLoading(true);
     setFailed(false);
     setArticle(null);
@@ -30,7 +30,6 @@ export function NewsDetailPage({ slug }: { slug: string }) {
           if (!controller.signal.aborted) setFailed(true);
           return;
         }
-        console.error("[NewsDetailPage] fetch failed", { slug, err });
         if (!controller.signal.aborted) setFailed(true);
       })
       .finally(() => {

@@ -395,18 +395,21 @@ def _aggregate_daily_input_prices(history: list[dict]) -> list[tuple[datetime, f
         confidence_total = 0.0
         weighted_package = 0.0
         weighted_normalized = 0.0
+        weighted_package_size = 0.0
         for row in rows:
             package_price = float(row.get("package_price_vnd") or 0)
             normalized_price = float(row.get("normalized_price_vnd") or 0)
+            package_size = float(row.get("package_size_kg") or 0)
             if package_price <= 0 or normalized_price <= 0:
                 continue
             weight = max(0.2, min(1.0, float(row.get("confidence_score") or 0.55)))
             confidence_total += weight
             weighted_package += package_price * weight
             weighted_normalized += normalized_price * weight
+            weighted_package_size += max(0.1, package_size) * weight
         if confidence_total <= 0:
             continue
-        package_size = float(rows[0].get("package_size_kg") or 1)
+        package_size = weighted_package_size / confidence_total if weighted_package_size > 0 else 1.0
         points.append((ts, weighted_package / confidence_total, weighted_normalized / confidence_total, package_size))
     return points
 
@@ -444,7 +447,7 @@ def _seasonal_multiplier(value: datetime) -> float:
     february_trough = _cyclic_peak(month, 2, width=1.9)
     seasonal_signal = max(spring_summer_peak, winter_spring_peak) - 0.65 * max(august_trough, february_trough)
     seasonal_signal = max(-1.0, min(1.0, seasonal_signal))
-    return 1 + SEASONAL_AMPLITUDE * seasonal_signal
+    return max(0.65, 1 + SEASONAL_AMPLITUDE * seasonal_signal)
 
 
 def _cyclic_peak(month: float, center: float, *, width: float) -> float:

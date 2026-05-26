@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 import logging
 import logging.config
 import os
+from pathlib import Path
 import time
 import uuid
 from fastapi import FastAPI, Request
@@ -69,6 +70,16 @@ API_SECURITY_HEADERS = {
     "Permissions-Policy": "camera=(), microphone=(), geolocation=(), interest-cohort=()",
     "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
 }
+
+if settings.sentry_dsn:
+    import sentry_sdk
+
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        environment=settings.environment,
+        traces_sample_rate=0.05 if settings.environment == "production" else 0.0,
+        send_default_pii=False,
+    )
 
 
 def _ensure_demo_user(db: Session) -> None:
@@ -177,4 +188,12 @@ async def request_id_middleware(request: Request, call_next):
 
 @app.get("/health")
 def health() -> dict:
-    return {"status": "ok", "service": settings.app_name}
+    artifacts_dir = Path(settings.ml_artifacts)
+    expected_artifacts = [artifacts_dir / f"lstm_{crop}.tflite" for crop in ("sau_rieng", "ca_phe", "ho_tieu", "lua")]
+    expected_artifacts.append(artifacts_dir / "world_lstm_urea.tflite")
+    return {
+        "status": "ok",
+        "service": settings.app_name,
+        "ml_artifacts_present": sum(1 for path in expected_artifacts if path.exists()),
+        "ml_artifacts_expected": len(expected_artifacts),
+    }

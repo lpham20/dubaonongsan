@@ -9,7 +9,7 @@ import zipfile
 
 import requests
 
-from app.ingestion.http import DEFAULT_HEADERS, fetch_html
+from app.ingestion.http import fetch_html, request_headers
 from app.ingestion.world_fertilizer_records import WorldFertilizerObservation, WorldFertilizerScrapeResult
 
 
@@ -51,7 +51,7 @@ class WorldBankPinkSheetScraper:
 
     def scrape(self) -> WorldFertilizerScrapeResult:
         excel_url = self._find_pink_sheet_excel_url()
-        response = requests.get(excel_url, headers=DEFAULT_HEADERS, timeout=60)
+        response = requests.get(excel_url, headers=request_headers(), timeout=60)
         response.raise_for_status()
         observations = parse_world_bank_pink_sheet_xlsx(response.content, source_url=excel_url)
         return WorldFertilizerScrapeResult(source=self.source, source_url=excel_url, observations=observations)

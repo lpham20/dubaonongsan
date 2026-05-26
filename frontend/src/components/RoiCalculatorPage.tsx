@@ -127,6 +127,7 @@ export function RoiCalculatorPage({
     { id: "line-2", name: "Kali", kg_per_ha: "180", price_vnd_per_kg: "15200" }
   ]);
   const nextLineId = useRef(2);
+  const submitControllerRef = useRef<AbortController | null>(null);
   const [save, setSave] = useState(false);
   const [result, setResult] = useState<RoiCalculateResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -148,6 +149,8 @@ export function RoiCalculatorPage({
     setYieldTarget(nextCrop.defaultYield);
     setSellPrice(nextCrop.defaultPrice);
   }, [crop]);
+
+  useEffect(() => () => submitControllerRef.current?.abort(), []);
 
   const sensitivityRows = useMemo(() => result?.sensitivity.matrix ?? [], [result]);
 
@@ -171,18 +174,32 @@ export function RoiCalculatorPage({
       onRequireAuth();
       return;
     }
+    const safeArea = Math.max(0.01, Number(area) || 0);
+    const safeYield = Math.max(0.01, Number(yieldTarget) || 0);
+    const safeSellPrice = Math.max(0, Number(sellPrice) || 0);
+    const safeFertilizerTotal = Math.max(0, Number(fertilizerTotal) || 0);
+    const safeOtherCost = Math.max(0, Number(otherCost) || 0);
+    const safeLaborCost = Math.max(0, Number(laborCost) || 0);
+    setArea(safeArea);
+    setYieldTarget(safeYield);
+    setSellPrice(safeSellPrice);
+    setFertilizerTotal(safeFertilizerTotal);
+    setOtherCost(safeOtherCost);
+    setLaborCost(safeLaborCost);
+    submitControllerRef.current?.abort();
     const controller = new AbortController();
+    submitControllerRef.current = controller;
     setLoading(true);
     setError(null);
     calculateRoi(
       authToken,
       {
         crop,
-        crop_area_ha: area,
-        expected_yield_t_ha: yieldTarget,
-        expected_sell_price_vnd_per_kg: sellPrice,
+        crop_area_ha: safeArea,
+        expected_yield_t_ha: safeYield,
+        expected_sell_price_vnd_per_kg: safeSellPrice,
         region_id: typeof regionId === "number" ? regionId : null,
-        fertilizer_total_cost_vnd_per_ha: mode === "simple" ? fertilizerTotal : null,
+        fertilizer_total_cost_vnd_per_ha: mode === "simple" ? safeFertilizerTotal : null,
         fertilizer_lines:
           mode === "detail"
             ? fertilizerLines
@@ -193,15 +210,23 @@ export function RoiCalculatorPage({
                   price_vnd_per_kg: positiveMoneyNumber(line.price_vnd_per_kg)
                 }))
             : [],
-        other_input_cost_vnd_per_ha: otherCost,
-        labor_cost_vnd_per_ha: laborCost,
+        other_input_cost_vnd_per_ha: safeOtherCost,
+        labor_cost_vnd_per_ha: safeLaborCost,
         save
       },
       controller.signal
     )
-      .then(setResult)
+      .then(setResult, (err) => {
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        throw err;
+      })
       .catch((err) => setError(err instanceof Error ? err.message : language === "en" ? "Could not calculate profit." : "Không tính được lợi nhuận."))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (submitControllerRef.current === controller) {
+          submitControllerRef.current = null;
+          setLoading(false);
+        }
+      });
   }
 
   return (

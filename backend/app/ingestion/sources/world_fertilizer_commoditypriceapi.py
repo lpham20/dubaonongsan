@@ -7,7 +7,7 @@ from typing import Any
 
 import requests
 
-from app.ingestion.http import DEFAULT_HEADERS
+from app.ingestion.http import request_headers
 from app.ingestion.world_fertilizer_records import WorldFertilizerObservation, WorldFertilizerScrapeResult
 
 
@@ -30,7 +30,7 @@ class CommodityPriceApiUreaPublicScraper:
     def scrape(self) -> WorldFertilizerScrapeResult:
         page_response = requests.get(
             SOURCE_URL,
-            headers={**DEFAULT_HEADERS, "Accept": "text/html"},
+            headers=request_headers({"Accept": "text/html"}),
             timeout=45,
         )
         page_response.raise_for_status()
@@ -40,14 +40,13 @@ class CommodityPriceApiUreaPublicScraper:
         response = requests.post(
             SOURCE_URL,
             data=json.dumps([PUBLIC_HISTORY_DAYS, SYMBOL]),
-            headers={
-                **DEFAULT_HEADERS,
+            headers=request_headers({
                 "Accept": "text/x-component",
                 "Content-Type": "text/plain;charset=UTF-8",
                 "Next-Action": action_id,
                 "Next-Router-State-Tree": NEXT_ROUTER_STATE_TREE,
                 "Referer": SOURCE_URL,
-            },
+            }),
             timeout=60,
         )
         response.raise_for_status()

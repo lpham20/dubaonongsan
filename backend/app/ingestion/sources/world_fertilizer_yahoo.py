@@ -7,7 +7,7 @@ from urllib.parse import quote
 
 import requests
 
-from app.ingestion.http import DEFAULT_HEADERS
+from app.ingestion.http import request_headers
 from app.ingestion.world_fertilizer_records import WorldFertilizerObservation, WorldFertilizerScrapeResult
 
 
@@ -36,7 +36,7 @@ class YahooUreaFuturesDailyScraper:
                 "includePrePost": "false",
                 "events": "history",
             },
-            headers={**DEFAULT_HEADERS, "Accept": "application/json"},
+            headers=request_headers({"Accept": "application/json"}),
             timeout=45,
         )
         response.raise_for_status()

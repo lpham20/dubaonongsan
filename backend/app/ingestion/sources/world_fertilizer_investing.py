@@ -6,7 +6,7 @@ from typing import Any
 
 import requests
 
-from app.ingestion.http import DEFAULT_HEADERS
+from app.ingestion.http import request_headers
 from app.ingestion.world_fertilizer_records import WorldFertilizerObservation, WorldFertilizerScrapeResult
 
 
@@ -23,7 +23,7 @@ class InvestingUreaCurrentScraper:
     def scrape(self) -> WorldFertilizerScrapeResult:
         response = requests.get(
             READER_URL,
-            headers={**DEFAULT_HEADERS, "Accept": "text/plain, text/markdown, */*"},
+            headers=request_headers({"Accept": "text/plain, text/markdown, */*"}),
             timeout=45,
         )
         response.raise_for_status()

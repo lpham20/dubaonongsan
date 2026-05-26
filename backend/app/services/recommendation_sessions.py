@@ -9,7 +9,6 @@ from fastapi import HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core.client_ip import get_client_ip
 from app.models import AppUser, RecommendationSession, YieldFeedback
 
 _SESSION_CODE_RE = re.compile(r"^[0-9a-f]{8}$")
@@ -25,12 +24,13 @@ def log_recommendation_session(
     result: dict[str, Any],
 ) -> RecommendationSession:
     now = datetime.now(UTC)
+    session_id = _new_unique_session_id(db)
     annual = result.get("recommendation", {}).get("annual_total", {})
     confidence = result.get("confidence", {})
     soil = payload.get("soil") or {}
     location = payload.get("location") or {}
     session = RecommendationSession(
-        session_id=str(uuid4()),
+        session_id=session_id,
         user_id=user.user_id,
         crop=payload.get("crop"),
         variety=payload.get("variety"),
@@ -48,7 +48,7 @@ def log_recommendation_session(
         knowledge_base_version=result.get("knowledge_base_version"),
         request_json=payload,
         response_json=result,
-        ip_address=get_client_ip(request),
+        ip_address=None,
         user_agent=request.headers.get("user-agent", "")[:500] or None,
         created_at=now,
         created_date=now.date(),
@@ -57,6 +57,16 @@ def log_recommendation_session(
     db.commit()
     db.refresh(session)
     return session
+
+
+def _new_unique_session_id(db: Session, attempts: int = 8) -> str:
+    for _ in range(attempts):
+        session_id = str(uuid4())
+        prefix = session_id[:8]
+        collision = db.scalar(select(RecommendationSession.session_id).where(RecommendationSession.session_id.like(f"{prefix}%")).limit(1))
+        if collision is None:
+            return session_id
+    raise RuntimeError("Could not allocate a unique recommendation session code")
 
 
 def save_yield_feedback(

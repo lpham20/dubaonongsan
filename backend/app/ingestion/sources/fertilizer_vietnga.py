@@ -7,7 +7,7 @@ import unicodedata
 from bs4 import BeautifulSoup
 import requests
 
-from app.ingestion.http import DEFAULT_HEADERS, fetch_html
+from app.ingestion.http import fetch_html, request_headers
 from app.ingestion.input_price_records import InputPriceObservation, InputPriceScrapeResult
 from app.ingestion.parsing import normalize_space
 
@@ -97,7 +97,7 @@ class VietNgaFertilizerPriceScraper:
 
     @staticmethod
     def _fetch_price_table(date_id: str) -> str:
-        headers = {**DEFAULT_HEADERS, "Referer": PAGE_URL, "X-Requested-With": "XMLHttpRequest"}
+        headers = request_headers({"Referer": PAGE_URL, "X-Requested-With": "XMLHttpRequest"})
         response = requests.post(AJAX_URL, data={"date": date_id, "area": "all"}, headers=headers, timeout=20)
         response.raise_for_status()
         payload = response.json()

@@ -937,21 +937,22 @@ export function exportPdfUrl(crop: CropType, regionId: number, varietyId: number
   return apiUrl(`/api/v1/analytics/export.pdf?crop=${crop}&region_id=${regionId}&variety=${varietyId}`);
 }
 
-export function login(email: string, password: string) {
-  return getAuth("/api/v1/auth/login", { email, password });
+export function login(email: string, password: string, signal?: AbortSignal) {
+  return getAuth("/api/v1/auth/login", { email, password }, signal);
 }
 
-export function register(email: string, password: string, displayName?: string) {
-  return getAuth("/api/v1/auth/register", { email, password, display_name: displayName });
+export function register(email: string, password: string, displayName?: string, signal?: AbortSignal) {
+  return getAuth("/api/v1/auth/register", { email, password, display_name: displayName }, signal);
 }
 
 export function logout(token: string) {
   return authJson<void>("/api/v1/auth/logout", token, { method: "POST" });
 }
 
-function getAuth(url: string, payload: Record<string, string | undefined>) {
+function getAuth(url: string, payload: Record<string, string | undefined>, signal?: AbortSignal) {
   return requestJson<AuthSession>(url, {
     method: "POST",
+    signal,
     body: JSON.stringify(payload)
   });
 }

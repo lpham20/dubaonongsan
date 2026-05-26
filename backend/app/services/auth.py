@@ -20,6 +20,7 @@ from app.models import AppUser, RevokedToken
 bearer_scheme = HTTPBearer(auto_error=False)
 JWT_ALGORITHM = "HS256"
 JWT_ISSUER = "marketai"
+JWT_AUDIENCE = "marketai-web"
 
 
 def _legacy_hash_password(password: str, salt: str) -> str:
@@ -58,6 +59,7 @@ def create_access_token(user: AppUser) -> str:
         "iat": now,
         "exp": now + timedelta(minutes=settings.auth_token_minutes),
         "iss": JWT_ISSUER,
+        "aud": JWT_AUDIENCE,
         "jti": secrets.token_urlsafe(16),
     }
     return jwt.encode(payload, settings.auth_token_secret, algorithm=JWT_ALGORITHM)
@@ -71,7 +73,21 @@ def decode_access_token(token: str, db: Session | None = None, verify_revoked: b
             settings.auth_token_secret,
             algorithms=[JWT_ALGORITHM],
             issuer=JWT_ISSUER,
+            audience=JWT_AUDIENCE,
         )
+    except jwt.MissingRequiredClaimError as exc:
+        if str(getattr(exc, "claim", "")) != "aud":
+            raise HTTPException(status_code=401, detail="Token không hợp lệ") from exc
+        try:
+            payload = jwt.decode(
+                token,
+                settings.auth_token_secret,
+                algorithms=[JWT_ALGORITHM],
+                issuer=JWT_ISSUER,
+                options={"verify_aud": False},
+            )
+        except jwt.PyJWTError as legacy_exc:
+            raise HTTPException(status_code=401, detail="Token không hợp lệ") from legacy_exc
     except jwt.PyJWTError as exc:
         raise HTTPException(status_code=401, detail="Token không hợp lệ") from exc
     if db is not None and verify_revoked:

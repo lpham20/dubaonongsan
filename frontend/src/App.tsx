@@ -536,6 +536,7 @@ function RoutedApp() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const loadDataRequestRef = useRef(0);
+  const authControllerRef = useRef<AbortController | null>(null);
 
   async function loadContent(signal?: AbortSignal) {
     const [newsPayload, guidePayload] = await Promise.all([
@@ -655,9 +656,7 @@ function RoutedApp() {
     const newsRefreshTimer = window.setInterval(() => {
       void fetchNews(undefined, language)
         .then(setNewsArticles)
-        .catch((err) => {
-          console.warn("[App] background news refresh failed", err);
-        });
+        .catch(() => undefined);
     }, 15 * 60 * 1000);
     return () => {
       controller.abort();
@@ -875,6 +874,8 @@ function RoutedApp() {
   function handleAuthOpenChange(open: boolean) {
     setAuthOpen(open);
     if (!open) {
+      authControllerRef.current?.abort();
+      authControllerRef.current = null;
       setPendingAnalyticsTab(null);
       setError((current) =>
         current && AUTH_GATE_MESSAGES.has(current) ? null : current
@@ -958,14 +959,23 @@ function RoutedApp() {
       setError(copy.missingName);
       return;
     }
+    authControllerRef.current?.abort();
+    const controller = new AbortController();
+    authControllerRef.current = controller;
     try {
       const session = mode === "login"
-        ? await signIn(email, password)
-        : await signUp(email, password, displayName);
+        ? await signIn(email, password, controller.signal)
+        : await signUp(email, password, displayName, controller.signal);
+      if (controller.signal.aborted || authControllerRef.current !== controller) return;
       setAuthOpen(false);
       await loadAccountData(session.access_token, session.user);
     } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
       setError(err instanceof Error ? err.message : copy.authFailed);
+    } finally {
+      if (authControllerRef.current === controller) {
+        authControllerRef.current = null;
+      }
     }
   }
 

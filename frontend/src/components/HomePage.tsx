@@ -254,17 +254,18 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
   const leadWebpUrl = localWebpSource(leadImageUrl);
   const marketAlerts = articles.slice(1, 6);
   const guidePreview = guides.slice(0, 3);
-  const tickerItems = useMemo(() => buildTickerItems(liveTicker, usdVndRate), [liveTicker, usdVndRate]);
-  const dataCards = useMemo(() => buildMarketCards(liveTicker), [liveTicker]);
+  const tickerItems = useMemo(() => buildTickerItems(liveTicker, usdVndRate, language), [language, liveTicker, usdVndRate]);
+  const dataCards = useMemo(() => buildMarketCards(liveTicker, language), [language, liveTicker]);
 
   useEffect(() => {
     let active = true;
+    const controller = new AbortController();
 
     Promise.all([
-      fetchTickerPrices("ca_phe"),
-      fetchTickerPrices("sau_rieng"),
-      fetchTickerPrices("ho_tieu"),
-      fetchTickerPrices("lua")
+      fetchTickerPrices("ca_phe", controller.signal),
+      fetchTickerPrices("sau_rieng", controller.signal),
+      fetchTickerPrices("ho_tieu", controller.signal),
+      fetchTickerPrices("lua", controller.signal)
     ])
       .then(([coffee, durian, pepper, rice]) => {
         if (active) {
@@ -277,7 +278,7 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
         }
       });
 
-    fetchUsdVndRate()
+    fetchUsdVndRate(controller.signal)
       .then((rate) => {
         if (active) setUsdVndRate(rate);
       })
@@ -287,6 +288,7 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
 
     return () => {
       active = false;
+      controller.abort();
     };
   }, []);
 
@@ -432,7 +434,7 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
             <p>{displayTitle(lead.summary || lead.excerpt || copy.updating, 190)}</p>
             <div className="story-meta">
               <Clock3 size={15} />
-              <span>{formatDate(lead.published_at || lead.scraped_at)}</span>
+              <span>{formatDate(lead.published_at || lead.scraped_at, language)}</span>
               <span>{lead.source_name}</span>
             </div>
             <Link className="story-link" to={withLanguagePrefix(lead.source_url === "#" ? "/tin-tuc" : newsPath(lead), language)}>
@@ -452,7 +454,7 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
               <Link to={withLanguagePrefix(item.source_url === "#" ? "/tin-tuc" : newsPath(item), language)} key={item.article_id}>
                 <span>{item.category || copy.market}</span>
                 <strong>{displayTitle(item.title, 74)}</strong>
-                <small>{formatDate(item.published_at || item.scraped_at)}</small>
+                <small>{formatDate(item.published_at || item.scraped_at, language)}</small>
               </Link>
             ))}
           </div>
@@ -534,8 +536,8 @@ function Sparkline({ points, tone }: { points: number[]; tone: "up" | "down" }) 
   );
 }
 
-function buildTickerItems(live: HomeTickerState, usdVndRate: UsdVndRate | null): TickerItem[] {
-  const usdTicker = usdRateToTicker(usdVndRate) ?? fallbackTicker[6];
+function buildTickerItems(live: HomeTickerState, usdVndRate: UsdVndRate | null, language: "vi" | "en" = "vi"): TickerItem[] {
+  const usdTicker = usdRateToTicker(usdVndRate, language) ?? fallbackTicker[6];
   if (!live.coffee.length && !live.durian.length && !live.pepper.length && !live.rice.length) {
     return [...fallbackTicker.slice(0, 6), usdTicker];
   }
@@ -550,17 +552,17 @@ function buildTickerItems(live: HomeTickerState, usdVndRate: UsdVndRate | null):
   ];
 }
 
-function usdRateToTicker(rate: UsdVndRate | null): TickerItem | null {
+function usdRateToTicker(rate: UsdVndRate | null, language: "vi" | "en" = "vi"): TickerItem | null {
   if (!rate?.transfer) return null;
   return {
     label: "USD/VND VCB",
-    value: Math.round(rate.transfer).toLocaleString("vi-VN"),
-    change: rate.as_of ? `VCB ${formatShortDate(rate.as_of)}` : "VCB",
+    value: Math.round(rate.transfer).toLocaleString(localeFor(language)),
+    change: rate.as_of ? `VCB ${formatShortDate(rate.as_of, language)}` : "VCB",
     tone: "up"
   };
 }
 
-function buildMarketCards(live: HomeTickerState): MarketCard[] {
+function buildMarketCards(live: HomeTickerState, _language: "vi" | "en" = "vi"): MarketCard[] {
   if (!live.coffee.length && !live.durian.length && !live.pepper.length && !live.rice.length) return fallbackMarketCards;
 
   return [
@@ -640,17 +642,21 @@ function formatPrice(value: number) {
   return `${Math.round(value).toLocaleString("vi-VN")} đ/kg`;
 }
 
-function formatShortDate(value: string) {
+function localeFor(language: "vi" | "en") {
+  return language === "en" ? "en-US" : "vi-VN";
+}
+
+function formatShortDate(value: string, language: "vi" | "en" = "vi") {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
-  const parts = new Intl.DateTimeFormat("vi-VN", {
+  const parts = new Intl.DateTimeFormat(localeFor(language), {
     day: "2-digit",
     month: "2-digit",
     timeZone: "Asia/Ho_Chi_Minh"
   }).formatToParts(date);
   const day = parts.find((part) => part.type === "day")?.value ?? "";
   const month = parts.find((part) => part.type === "month")?.value ?? "";
-  return day && month ? `${day}/${month}` : "";
+  return day && month ? (language === "en" ? `${month}/${day}` : `${day}/${month}`) : "";
 }
 
 function formatChange(value: number) {
@@ -717,9 +723,9 @@ function localWebpSource(src: string) {
   return src.replace(/\.jpg$/i, ".webp");
 }
 
-function formatDate(value: string | null) {
+function formatDate(value: string | null, language: "vi" | "en" = "vi") {
   if (!value) return "Đang cập nhật";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Đang cập nhật";
-  return new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
+  return new Intl.DateTimeFormat(localeFor(language), { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BarChart3, Calculator, GitCompareArrows, Leaf, RefreshCw, ShieldCheck, Sprout } from "./icons";
 import { FertilizerAdvisor } from "./FertilizerAdvisor";
 import { SeoHead } from "./SeoHead";
@@ -173,6 +173,7 @@ function SellingTimePanel({ authToken }: { authToken: string }) {
   const [result, setResult] = useState<SellingTimeResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const submitControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -185,13 +186,30 @@ function SellingTimePanel({ authToken }: { authToken: string }) {
     return () => controller.abort();
   }, [crop]);
 
+  useEffect(() => () => submitControllerRef.current?.abort(), []);
+
   function submit() {
+    const safeQuantity = Math.max(1, Number(quantity) || 0);
+    const safeStorageCost = Math.max(0, Number(storageCost) || 0);
+    setQuantity(safeQuantity);
+    setStorageCost(safeStorageCost);
+    submitControllerRef.current?.abort();
+    const controller = new AbortController();
+    submitControllerRef.current = controller;
     setLoading(true);
     setError(null);
-    postSellingTime(authToken, { crop, region_id: typeof regionId === "number" ? regionId : null, quantity_kg: quantity, storage_cost_vnd_per_kg_per_day: storageCost })
-      .then(setResult)
+    postSellingTime(authToken, { crop, region_id: typeof regionId === "number" ? regionId : null, quantity_kg: safeQuantity, storage_cost_vnd_per_kg_per_day: safeStorageCost }, controller.signal)
+      .then(setResult, (err) => {
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        throw err;
+      })
       .catch((err) => setError(err instanceof Error ? err.message : language === "en" ? "Could not calculate the selling window." : "Không tính được thời điểm bán."))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (submitControllerRef.current === controller) {
+          submitControllerRef.current = null;
+          setLoading(false);
+        }
+      });
   }
 
   return (
@@ -256,15 +274,30 @@ function ArbitragePanel({ authToken }: { authToken: string }) {
   const [crop, setCrop] = useState<CropType | "">("");
   const [result, setResult] = useState<ArbitrageResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const loadControllerRef = useRef<AbortController | null>(null);
 
   function load() {
+    loadControllerRef.current?.abort();
+    const controller = new AbortController();
+    loadControllerRef.current = controller;
     setLoading(true);
-    fetchArbitrage(authToken, { crop })
+    fetchArbitrage(authToken, { crop, signal: controller.signal })
       .then(setResult)
-      .finally(() => setLoading(false));
+      .catch((err) => {
+        if (err instanceof DOMException && err.name === "AbortError") return;
+      })
+      .finally(() => {
+        if (loadControllerRef.current === controller) {
+          loadControllerRef.current = null;
+          setLoading(false);
+        }
+      });
   }
 
-  useEffect(load, []);
+  useEffect(() => {
+    load();
+    return () => loadControllerRef.current?.abort();
+  }, []);
 
   return (
     <section className="advisory-tool">
@@ -322,6 +355,7 @@ function CrossCropPanel({ authToken }: { authToken: string }) {
   const [result, setResult] = useState<CrossCommodityResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const submitControllerRef = useRef<AbortController | null>(null);
   const maxProfit = useMemo(() => Math.max(1, ...(result?.items.map((item) => Math.abs(item.estimated_profit_vnd)) ?? [1])), [result]);
 
   useEffect(() => {
@@ -341,14 +375,29 @@ function CrossCropPanel({ authToken }: { authToken: string }) {
     return () => controller.abort();
   }, []);
 
+  useEffect(() => () => submitControllerRef.current?.abort(), []);
+
   function submit() {
     if (!regionId) return;
+    const safeArea = Math.max(0.1, Number(area) || 0);
+    setArea(safeArea);
+    submitControllerRef.current?.abort();
+    const controller = new AbortController();
+    submitControllerRef.current = controller;
     setLoading(true);
     setError(null);
-    postCrossCommodity(authToken, { region_id: Number(regionId), area_hectares: area })
-      .then(setResult)
+    postCrossCommodity(authToken, { region_id: Number(regionId), area_hectares: safeArea }, controller.signal)
+      .then(setResult, (err) => {
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        throw err;
+      })
       .catch((err) => setError(err instanceof Error ? err.message : language === "en" ? "Could not compare crops." : "Không so sánh được cây trồng."))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (submitControllerRef.current === controller) {
+          submitControllerRef.current = null;
+          setLoading(false);
+        }
+      });
   }
 
   return (

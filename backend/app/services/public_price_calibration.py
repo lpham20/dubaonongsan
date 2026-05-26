@@ -262,6 +262,7 @@ class PublicPriceCalibrationService:
         )
 
     def _anchor_prices(self, region_id: int, variety_id: int) -> list[float]:
+        since = datetime.now(UTC) - timedelta(days=max(self.days * 2, 180))
         rows = self.db.scalars(
             select(DailyMarketPrice.max_price_vnd)
             .where(DailyMarketPrice.crop_type == self.crop_type)
@@ -270,6 +271,7 @@ class PublicPriceCalibrationService:
             .where(DailyMarketPrice.quality_grade == CALIBRATION_GRADE)
             .where(DailyMarketPrice.exchange_source != BACKFILL_SOURCE)
             .where(DailyMarketPrice.max_price_vnd.is_not(None))
+            .where(DailyMarketPrice.record_timestamp >= since)
             .order_by(DailyMarketPrice.record_timestamp.desc())
             .limit(20)
         ).all()
