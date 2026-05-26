@@ -100,13 +100,6 @@ def downgrade() -> None:
 
     if bind.dialect.name == "postgresql":
         op.alter_column(
-            "recommendation_sessions",
-            "confidence_score",
-            type_=sa.Numeric(4, 2),
-            existing_type=sa.Numeric(4, 3),
-            existing_nullable=True,
-        )
-        op.alter_column(
             "agri_input_price_observations",
             "confidence_score",
             type_=sa.Numeric(4, 2),
@@ -174,11 +167,4 @@ def _alter_confidence_precision() -> None:
         type_=sa.Numeric(4, 3),
         existing_type=sa.Numeric(4, 2),
         existing_nullable=False,
-    )
-    op.alter_column(
-        "recommendation_sessions",
-        "confidence_score",
-        type_=sa.Numeric(4, 3),
-        existing_type=sa.Numeric(4, 2),
-        existing_nullable=True,
     )
