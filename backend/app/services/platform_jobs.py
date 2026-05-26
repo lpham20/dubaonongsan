@@ -34,7 +34,7 @@ from app.ml_engine.evaluator import ForecastEvaluator
 from app.models import DailyMarketPrice, DurianVariety, ModelTrainingRun, PlatformJobRun, ProductionRegion, RecommendationSession, ScrapeRun, YieldFeedback
 from app.services.content_portal import ContentPortalService
 from app.services.crop_catalog import CROP_TYPES, ensure_crop_catalog
-from app.services.auth import cleanup_expired_revoked_tokens
+from app.services.auth import cleanup_expired_refresh_tokens, cleanup_expired_revoked_tokens
 from app.services.market_intelligence import MarketIntelligenceService
 from app.services.ml_model_versions import record_crop_model_version, record_world_fertilizer_model_version
 from app.services.model_ready_backfill import ModelReadyBackfillService
@@ -260,8 +260,13 @@ class PlatformJobService:
         with job_lock("revoked_token_cleanup"):
             job = self._start_job("revoked_token_cleanup")
             try:
-                deleted = cleanup_expired_revoked_tokens(self.db)
-                summary = {"deleted": deleted}
+                revoked_deleted = cleanup_expired_revoked_tokens(self.db)
+                refresh_deleted = cleanup_expired_refresh_tokens(self.db)
+                summary = {
+                    "deleted": revoked_deleted,
+                    "revoked_access_tokens_deleted": revoked_deleted,
+                    "refresh_tokens_deleted": refresh_deleted,
+                }
                 self._finish_job(job, STATUS_SUCCESS, summary)
                 return summary
             except Exception as exc:

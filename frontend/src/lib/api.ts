@@ -267,6 +267,8 @@ export type AuthUser = {
 
 export type AuthSession = {
   access_token: string;
+  refresh_token: string;
+  refresh_expires_at: string;
   token_type: "bearer";
   user: AuthUser;
 };
@@ -555,6 +557,7 @@ const jsonHeaders = { Accept: "application/json", "Content-Type": "application/j
 const GET_RETRY_DELAY_MS = 450;
 const AUTH_EXPIRED_EVENT = "marketai:auth-expired";
 const inFlightGetRequests = new Map<string, Promise<unknown>>();
+let authRecoveryHandler: (() => Promise<string | null>) | null = null;
 
 function apiUrl(path: string) {
   if (/^https?:\/\//i.test(path)) return path;
@@ -597,6 +600,10 @@ export function onAuthExpired(handler: () => void) {
   if (typeof window === "undefined") return () => undefined;
   window.addEventListener(AUTH_EXPIRED_EVENT, handler);
   return () => window.removeEventListener(AUTH_EXPIRED_EVENT, handler);
+}
+
+export function setAuthRecoveryHandler(handler: (() => Promise<string | null>) | null) {
+  authRecoveryHandler = handler;
 }
 
 function notifyAuthExpired() {
@@ -710,6 +717,10 @@ async function authJson<T>(url: string, token: string, init?: RequestInit): Prom
     return await requestJson<T>(url, { ...init, headers: authHeaders(token) });
   } catch (error) {
     if (error instanceof ApiRequestError && error.status === 401) {
+      const refreshedToken = await authRecoveryHandler?.();
+      if (refreshedToken && refreshedToken !== token) {
+        return requestJson<T>(url, { ...init, headers: authHeaders(refreshedToken) });
+      }
       notifyAuthExpired();
     }
     throw error;
@@ -981,8 +992,19 @@ export function register(email: string, password: string, displayName?: string, 
   return getAuth("/api/v1/auth/register", { email, password, display_name: displayName }, signal);
 }
 
-export function logout(token: string) {
-  return authJson<void>("/api/v1/auth/logout", token, { method: "POST" });
+export function refreshAuth(refreshToken: string, signal?: AbortSignal) {
+  return requestJson<AuthSession>("/api/v1/auth/refresh", {
+    method: "POST",
+    signal,
+    body: JSON.stringify({ refresh_token: refreshToken })
+  });
+}
+
+export function logout(token: string, refreshToken?: string) {
+  return authJson<void>("/api/v1/auth/logout", token, {
+    method: "POST",
+    body: JSON.stringify({ refresh_token: refreshToken })
+  });
 }
 
 function getAuth(url: string, payload: Record<string, string | undefined>, signal?: AbortSignal) {

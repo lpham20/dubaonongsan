@@ -247,8 +247,18 @@ class AuthUserOut(BaseModel):
 
 class AuthTokenOut(BaseModel):
     access_token: str
+    refresh_token: str
+    refresh_expires_at: datetime
     token_type: str = "bearer"
     user: AuthUserOut
+
+
+class AuthRefreshRequest(BaseModel):
+    refresh_token: str = Field(min_length=32, max_length=512)
+
+
+class AuthLogoutRequest(BaseModel):
+    refresh_token: str | None = Field(default=None, min_length=32, max_length=512)
 
 
 class WatchlistItemIn(BaseModel):

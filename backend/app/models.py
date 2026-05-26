@@ -287,6 +287,25 @@ class RevokedToken(Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
 
 
+class AuthRefreshToken(Base):
+    __tablename__ = "auth_refresh_tokens"
+    __table_args__ = (
+        UniqueConstraint("token_hash", name="uq_auth_refresh_tokens_hash"),
+        Index("ix_auth_refresh_tokens_user_active", "user_id", "revoked_at", "expires_at"),
+    )
+
+    token_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_users.user_id", ondelete="CASCADE"), index=True, nullable=False)
+    token_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    family_id: Mapped[str] = mapped_column(String(64), index=True, nullable=False)
+    issued_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True, nullable=False)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True)
+    replaced_by_token_id: Mapped[int | None] = mapped_column(Integer, index=True)
+    user_agent: Mapped[str | None] = mapped_column(String(500))
+    ip_address: Mapped[str | None] = mapped_column(String(64))
+
+
 class WatchlistItem(Base):
     __tablename__ = "watchlist_items"
     __table_args__ = (

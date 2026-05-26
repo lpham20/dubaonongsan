@@ -1,6 +1,6 @@
 from datetime import UTC, datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Body, Depends, HTTPException, Request, Response
 from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy import desc, func, select
 from sqlalchemy.exc import IntegrityError
@@ -10,14 +10,27 @@ from app.core.config import get_settings
 from app.core.rate_limit import limiter
 from app.db import get_db
 from app.models import AppUser, WatchlistItem
-from app.schemas import AuthCredentials, AuthRegisterCredentials, AuthTokenOut, AuthUserOut, WatchlistItemIn, WatchlistItemOut
+from app.schemas import (
+    AuthCredentials,
+    AuthLogoutRequest,
+    AuthRefreshRequest,
+    AuthRegisterCredentials,
+    AuthTokenOut,
+    AuthUserOut,
+    WatchlistItemIn,
+    WatchlistItemOut,
+)
 from app.services.auth import (
     bearer_scheme,
     create_access_token,
+    create_refresh_token,
     current_user,
+    decode_access_token,
     hash_password,
     password_needs_rehash,
+    revoke_refresh_token,
     revoke_access_token,
+    rotate_refresh_token,
     verify_password,
 )
 
@@ -37,8 +50,16 @@ def user_out(user: AppUser) -> AuthUserOut:
     )
 
 
-def auth_response(user: AppUser) -> AuthTokenOut:
-    return AuthTokenOut(access_token=create_access_token(user), user=user_out(user))
+def auth_response(user: AppUser, db: Session, request: Request) -> AuthTokenOut:
+    refresh_token, refresh_row = create_refresh_token(db, user, request=request)
+    db.commit()
+    db.refresh(refresh_row)
+    return AuthTokenOut(
+        access_token=create_access_token(user),
+        refresh_token=refresh_token,
+        refresh_expires_at=refresh_row.expires_at,
+        user=user_out(user),
+    )
 
 
 def _as_aware_utc(value: datetime) -> datetime:
@@ -62,7 +83,7 @@ def register(request: Request, payload: AuthRegisterCredentials, db: Session = D
         db.rollback()
         raise HTTPException(status_code=409, detail="Email đã tồn tại") from exc
     db.refresh(user)
-    return auth_response(user)
+    return auth_response(user, db, request)
 
 
 @router.post("/auth/login", response_model=AuthTokenOut)
@@ -90,7 +111,19 @@ def login(request: Request, payload: AuthCredentials, db: Session = Depends(get_
         db.refresh(user)
     db.commit()
     db.refresh(user)
-    return auth_response(user)
+    return auth_response(user, db, request)
+
+
+@router.post("/auth/refresh", response_model=AuthTokenOut)
+@limiter.limit("20/minute")
+def refresh_token(request: Request, payload: AuthRefreshRequest, db: Session = Depends(get_db)) -> AuthTokenOut:
+    user, raw_refresh_token, refresh_row = rotate_refresh_token(db, payload.refresh_token, request=request)
+    return AuthTokenOut(
+        access_token=create_access_token(user),
+        refresh_token=raw_refresh_token,
+        refresh_expires_at=refresh_row.expires_at,
+        user=user_out(user),
+    )
 
 
 @router.get("/auth/me", response_model=AuthUserOut)
@@ -100,12 +133,21 @@ def me(user: AppUser = Depends(current_user)) -> AuthUserOut:
 
 @router.post("/auth/logout", status_code=204)
 def logout(
-    user: AppUser = Depends(current_user),
+    payload: AuthLogoutRequest | None = Body(default=None),
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     db: Session = Depends(get_db),
 ) -> Response:
+    user: AppUser | None = None
     if credentials is not None:
-        revoke_access_token(db, credentials.credentials, user)
+        try:
+            token_payload = decode_access_token(credentials.credentials, db=db, verify_revoked=False)
+            user = db.get(AppUser, int(token_payload["sub"]))
+            if user is not None:
+                revoke_access_token(db, credentials.credentials, user)
+        except (HTTPException, KeyError, TypeError, ValueError):
+            user = None
+    if payload and payload.refresh_token:
+        revoke_refresh_token(db, payload.refresh_token, user=user)
     return Response(status_code=204)
 
 

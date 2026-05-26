@@ -11,13 +11,8 @@ import {
 import { useLanguage, type AppLanguage } from "../contexts/LanguageContext";
 import { cropLabel, displayProvince } from "../lib/displayLabels";
 import { withLanguagePrefix } from "../lib/localizedRoutes";
-
-const cropOptions: { value: CropType; label: string; defaultYield: number; defaultPrice: number }[] = [
-  { value: "ca_phe", label: "Cà phê", defaultYield: 3.5, defaultPrice: 95_000 },
-  { value: "sau_rieng", label: "Sầu riêng", defaultYield: 18, defaultPrice: 72_000 },
-  { value: "ho_tieu", label: "Hồ tiêu", defaultYield: 2.6, defaultPrice: 135_000 },
-  { value: "lua", label: "Lúa", defaultYield: 6.5, defaultPrice: 8_500 }
-];
+import { ROI_CROP_OPTIONS } from "../lib/cropOptions";
+import { numberInputValue } from "../lib/numberInput";
 
 type InputMode = "simple" | "detail";
 
@@ -114,7 +109,7 @@ export function RoiCalculatorPage({
   const [regions, setRegions] = useState<Region[]>([]);
   const [mode, setMode] = useState<InputMode>("simple");
   const [crop, setCrop] = useState<CropType>("ca_phe");
-  const selectedCrop = cropOptions.find((item) => item.value === crop) ?? cropOptions[0];
+  const selectedCrop = ROI_CROP_OPTIONS.find((item) => item.value === crop) ?? ROI_CROP_OPTIONS[0];
   const [regionId, setRegionId] = useState<number | "">("");
   const [area, setArea] = useState(2);
   const [yieldTarget, setYieldTarget] = useState(selectedCrop.defaultYield);
@@ -145,7 +140,7 @@ export function RoiCalculatorPage({
   }, [crop]);
 
   useEffect(() => {
-    const nextCrop = cropOptions.find((item) => item.value === crop) ?? cropOptions[0];
+    const nextCrop = ROI_CROP_OPTIONS.find((item) => item.value === crop) ?? ROI_CROP_OPTIONS[0];
     setYieldTarget(nextCrop.defaultYield);
     setSellPrice(nextCrop.defaultPrice);
   }, [crop]);
@@ -261,7 +256,7 @@ export function RoiCalculatorPage({
             <label>
               {language === "en" ? "Crop" : "Cây trồng"}
               <select value={crop} onChange={(event) => setCrop(event.target.value as CropType)}>
-                {cropOptions.map((item) => (
+                {ROI_CROP_OPTIONS.map((item) => (
                   <option key={item.value} value={item.value}>
                     {cropLabel(item.value, language)}
                   </option>
@@ -280,11 +275,11 @@ export function RoiCalculatorPage({
             </label>
             <label>
               {language === "en" ? "Area (ha)" : "Diện tích (ha)"}
-              <input type="number" min="0.01" step="0.1" value={area} onChange={(event) => setArea(Number(event.target.value))} />
+              <input type="number" min="0.01" step="0.1" value={area} onChange={(event) => setArea(numberInputValue(event.target.value, 0.01, area))} />
             </label>
             <label>
               {language === "en" ? "Expected yield (tonnes/ha)" : "Năng suất kỳ vọng (tấn/ha)"}
-              <input type="number" min="0.1" step="0.1" value={yieldTarget} onChange={(event) => setYieldTarget(Number(event.target.value))} />
+              <input type="number" min="0.1" step="0.1" value={yieldTarget} onChange={(event) => setYieldTarget(numberInputValue(event.target.value, 0.1, yieldTarget))} />
             </label>
             <label>
               {language === "en" ? "Expected selling price (VND/kg)" : "Giá bán kỳ vọng (VND/kg)"}

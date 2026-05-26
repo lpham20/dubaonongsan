@@ -22,6 +22,7 @@ class Settings(BaseSettings):
         description="Comma-separated old JWT secrets accepted during controlled key rotation.",
     )
     auth_token_minutes: int = 60 * 24 * 7
+    auth_refresh_token_days: int = 30
     public_api_key: str = Field(default="", description="Required in production")
     iot_api_key: str = Field(default="", description="API key for IoT telemetry devices")
     start_scheduler_in_api: bool = True

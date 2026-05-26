@@ -15,8 +15,8 @@ import {
 } from "../lib/api";
 import { useLanguage, type AppLanguage } from "../contexts/LanguageContext";
 import { cropLabel, displayProvince } from "../lib/displayLabels";
-
-export type AdvisoryTool = "fertilizer" | "sellingTime" | "arbitrage" | "crossCrop";
+import { MARKET_CROP_OPTIONS } from "../lib/cropOptions";
+import { numberInputValue } from "../lib/numberInput";
 
 const toolMeta: Record<AppLanguage, Record<AdvisoryTool, { kicker: string; title: string; description: string; canonical: string; Icon: typeof Calculator }>> = {
   vi: {
@@ -81,13 +81,7 @@ const toolMeta: Record<AppLanguage, Record<AdvisoryTool, { kicker: string; title
   }
 };
 
-const cropOptions: { value: CropType | ""; label: string }[] = [
-  { value: "", label: "Tất cả" },
-  { value: "sau_rieng", label: "Sầu riêng" },
-  { value: "ca_phe", label: "Cà phê" },
-  { value: "ho_tieu", label: "Hồ tiêu" },
-  { value: "lua", label: "Lúa" }
-];
+export type AdvisoryTool = "fertilizer" | "sellingTime" | "arbitrage" | "crossCrop";
 
 function formatVnd(value: number, language: AppLanguage = "vi") {
   return `${Math.round(value).toLocaleString(language === "en" ? "en-US" : "vi-VN")} VND`;
@@ -95,6 +89,10 @@ function formatVnd(value: number, language: AppLanguage = "vi") {
 
 function regionLabel(region: Region) {
   return displayProvince(region.province, region.region_name);
+}
+
+function concreteCropOptions() {
+  return MARKET_CROP_OPTIONS.filter((item): item is { value: CropType } => Boolean(item.value));
 }
 
 export function AdvisoryHub({
@@ -223,7 +221,7 @@ function SellingTimePanel({ authToken }: { authToken: string }) {
         <label>
           {language === "en" ? "Crop" : "Cây trồng"}
           <select value={crop} onChange={(event) => setCrop(event.target.value as CropType)}>
-            {cropOptions.filter((item) => item.value).map((item) => (
+            {concreteCropOptions().map((item) => (
               <option key={item.value} value={item.value}>{cropLabel(item.value, language)}</option>
             ))}
           </select>
@@ -238,11 +236,11 @@ function SellingTimePanel({ authToken }: { authToken: string }) {
         </label>
         <label>
           {language === "en" ? "Quantity (kg)" : "Số lượng (kg)"}
-          <input type="number" min="1" value={quantity} onChange={(event) => setQuantity(Number(event.target.value))} />
+          <input type="number" min="1" value={quantity} onChange={(event) => setQuantity(numberInputValue(event.target.value, 1))} />
         </label>
         <label>
           {language === "en" ? "Storage cost VND/kg/day" : "Lưu kho đ/kg/ngày"}
-          <input type="number" min="0" value={storageCost} onChange={(event) => setStorageCost(Number(event.target.value))} />
+          <input type="number" min="0" value={storageCost} onChange={(event) => setStorageCost(numberInputValue(event.target.value, 0))} />
         </label>
         <button type="button" className="roi-primary-button" onClick={submit} disabled={loading}>
           <RefreshCw size={16} />
@@ -309,7 +307,7 @@ function ArbitragePanel({ authToken }: { authToken: string }) {
         <label>
           {language === "en" ? "Crop" : "Cây trồng"}
           <select value={crop} onChange={(event) => setCrop(event.target.value as CropType | "")}>
-            {cropOptions.map((item) => (
+            {MARKET_CROP_OPTIONS.map((item) => (
               <option key={item.value || "all"} value={item.value}>{cropLabel(item.value, language)}</option>
             ))}
           </select>
@@ -360,7 +358,7 @@ function CrossCropPanel({ authToken }: { authToken: string }) {
 
   useEffect(() => {
     const controller = new AbortController();
-    Promise.all(cropOptions.filter((item): item is { value: CropType; label: string } => Boolean(item.value)).map((item) => fetchRegions(item.value, controller.signal)))
+    Promise.all(concreteCropOptions().map((item) => fetchRegions(item.value, controller.signal)))
       .then((groups) => {
         const byProvince = new Map<string, Region>();
         groups.flat().forEach((region) => {
@@ -418,7 +416,7 @@ function CrossCropPanel({ authToken }: { authToken: string }) {
         </label>
         <label>
           {language === "en" ? "Area (ha)" : "Diện tích (ha)"}
-          <input type="number" min="0.1" step="0.1" value={area} onChange={(event) => setArea(Number(event.target.value))} />
+          <input type="number" min="0.1" step="0.1" value={area} onChange={(event) => setArea(numberInputValue(event.target.value, 0.1))} />
         </label>
         <button type="button" className="roi-primary-button" onClick={submit} disabled={loading}>
           {loading ? (language === "en" ? "Comparing" : "Đang so sánh") : (language === "en" ? "Compare" : "So sánh")}
