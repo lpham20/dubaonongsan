@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
+import html
 import re
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
@@ -170,6 +171,15 @@ class SensorTelemetryIn(BaseModel):
     status: str | None = Field(default=None, examples=["Sẵn sàng thu hoạch"])
     timestamp: datetime
 
+    @field_validator("timestamp")
+    @classmethod
+    def timestamp_in_reasonable_range(cls, value: datetime) -> datetime:
+        observed_at = value if value.tzinfo is not None else value.replace(tzinfo=UTC)
+        now = datetime.now(UTC)
+        if observed_at < now - timedelta(days=30) or observed_at > now + timedelta(hours=6):
+            raise ValueError("Timestamp cảm biến nằm ngoài khoảng hợp lệ.")
+        return value
+
 
 class SensorTelemetryOut(SensorTelemetryIn):
     id: int
@@ -340,6 +350,14 @@ class UserPriceReportIn(BaseModel):
     quality_grade: str | None = Field(default=None, max_length=50)
     reporter_name: str | None = Field(default=None, max_length=120)
     note: str | None = Field(default=None, max_length=300)
+
+    @field_validator("quality_grade", "reporter_name", "note")
+    @classmethod
+    def strip_html(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        cleaned = re.sub(r"<[^>]*>", "", value).strip()
+        return html.escape(cleaned, quote=False) or None
 
 
 class UserPriceReportOut(BaseModel):

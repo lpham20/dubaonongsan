@@ -30,9 +30,15 @@ def backtest(crop_type: str, snapshot_path: Path, artifacts_dir: Path, min_impro
         for start in range(start_from, max_start, scaler.horizon_days):
             window = series[start : start + scaler.lookback_window]
             actual_rows = series[start + scaler.lookback_window : start + scaler.lookback_window + scaler.horizon_days]
-            actual = np.asarray([float(row["max_price_vnd"]) for row in actual_rows], dtype=np.float32)
+            last_price = float(window[-1].get("max_price_vnd") or 0.0)
+            if last_price <= 0:
+                continue
+            actual_values = [float(row.get("max_price_vnd") or 0.0) for row in actual_rows]
+            if any(value <= 0 for value in actual_values):
+                continue
+            actual = np.asarray(actual_values, dtype=np.float32)
             pred = _predict(interpreter, input_details, output_details, scaler, window, region_id, variety_id)
-            baseline = np.repeat(float(window[-1]["max_price_vnd"]), len(actual))
+            baseline = np.repeat(last_price, len(actual))
             model_errors.extend((pred[: len(actual)] - actual).tolist())
             baseline_errors.extend((baseline - actual).tolist())
         if not model_errors:

@@ -308,7 +308,7 @@ const validSections: MainSection[] = [
 const validCrops: CropType[] = ["sau_rieng", "ca_phe", "ho_tieu", "lua"];
 const validNewsViews: NewsView[] = ["latest", "sau_rieng", "ca_phe", "ho_tieu"];
 const gatedAnalyticsTabs: AnalyticsTab[] = ["analysis", "technical", "data"];
-const gatedAdvisorySections: MainSection[] = ["sellingTime", "arbitrage", "crossCrop"];
+const gatedAdvisorySections: MainSection[] = ["fertilizer", "sellingTime", "arbitrage", "crossCrop"];
 const AUTH_GATE_MESSAGES = new Set([
   appCopy.vi.analyticsAuthMessage,
   appCopy.vi.fertilizerAuthMessage,
@@ -535,6 +535,7 @@ function RoutedApp() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const loadDataRequestRef = useRef(0);
 
   async function loadContent(signal?: AbortSignal) {
     const [newsPayload, guidePayload] = await Promise.all([
@@ -546,6 +547,8 @@ function RoutedApp() {
   }
 
   async function loadData(signal?: AbortSignal) {
+    const requestId = ++loadDataRequestRef.current;
+    const isStale = () => Boolean(signal?.aborted) || requestId !== loadDataRequestRef.current;
     setLoading(true);
     setError(null);
     try {
@@ -553,6 +556,7 @@ function RoutedApp() {
         fetchRegions(crop, signal),
         fetchTickerPrices(crop, signal)
       ]);
+      if (isStale()) return;
 
       const nextRegionId = regionsPayload.some((item) => item.region_id === regionId)
         ? regionId
@@ -571,6 +575,7 @@ function RoutedApp() {
       }
 
       const availableVarietiesPayload = await fetchAvailableVarieties(crop, nextRegionId, signal);
+      if (isStale()) return;
       const nextVarietyId = availableVarietiesPayload.some((item) => item.variety_id === varietyId)
         ? varietyId
         : availableVarietiesPayload[0]?.variety_id;
@@ -620,6 +625,7 @@ function RoutedApp() {
         fetchChangeExplanation(crop, nextRegionId, nextVarietyId, signal),
         fetchMarketComparison(crop, nextRegionId, nextVarietyId, signal)
       ]);
+      if (isStale()) return;
 
       setHistorical(historicalPayload);
       setForecast(forecastPayload);
@@ -633,10 +639,10 @@ function RoutedApp() {
       setChangeExplanation(explanationPayload);
       setMarketComparison(comparisonPayload);
     } catch (err) {
-      if (err instanceof DOMException && err.name === "AbortError") return;
+      if (isStale() || (err instanceof DOMException && err.name === "AbortError")) return;
       setError(err instanceof Error ? err.message : copy.loadDataError);
     } finally {
-      setLoading(false);
+      if (!isStale()) setLoading(false);
     }
   }
 
@@ -705,7 +711,7 @@ function RoutedApp() {
     const controller = new AbortController();
     void loadData(controller.signal);
     return () => controller.abort();
-  }, [section, crop, regionId, varietyId, days]);
+  }, [section, crop, regionId, varietyId, days, language]);
 
   useEffect(() => {
     if (section !== "guides" || guides.length >= 80) return;
@@ -720,7 +726,11 @@ function RoutedApp() {
   }, [language, section, guides.length]);
 
   useEffect(() => {
-    localStorage.setItem("agri_price.watchlist", JSON.stringify(watchlist));
+    try {
+      localStorage.setItem("agri_price.watchlist", JSON.stringify(watchlist));
+    } catch {
+      // Safari private mode can deny writes; the server-side watchlist still works after login.
+    }
   }, [watchlist]);
 
   useEffect(() => {

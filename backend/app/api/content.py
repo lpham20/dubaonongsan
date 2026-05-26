@@ -2,9 +2,6 @@ from datetime import UTC, datetime
 import html
 import ipaddress
 import re
-import socket
-import threading
-from contextlib import contextmanager
 from urllib.parse import urlparse
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
@@ -47,8 +44,14 @@ ALLOWED_IMAGE_HOSTS = {
     "nongsanviet.nongnghiepmoitruong.vn",
 }
 MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
+SAFE_IMAGE_CONTENT_TYPES = {
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+    "image/avif",
+}
 SITE_BASE = "https://dubaonongsan.com"
-_DNS_PIN_LOCK = threading.Lock()
 
 
 def _slug_text(value: str) -> str:
@@ -72,6 +75,10 @@ def _news_slug(article: NewsArticle) -> str:
     if article.public_slug:
         return article.public_slug
     return f"{article.article_id}-{_slug_from_url(article.source_url, article.title)}"
+
+
+def _cdata(value: str | None) -> str:
+    return f"<![CDATA[{(value or '').replace(']]>', ']]]]><![CDATA[>')}]]>"
 
 
 def _news_out(article: NewsArticle, lang: str = "vi") -> dict:
@@ -317,12 +324,12 @@ def news_rss(db: Session = Depends(get_db)) -> Response:
         items.append(
             f"""
     <item>
-      <title><![CDATA[{article.title}]]></title>
+      <title>{_cdata(article.title)}</title>
       <link>{html.escape(link)}</link>
       <guid>{html.escape(link)}</guid>
-      <description><![CDATA[{article.summary}]]></description>
+      <description>{_cdata(article.summary)}</description>
       <pubDate>{pub_date}</pubDate>
-      <category><![CDATA[{article.category}]]></category>
+      <category>{_cdata(article.category)}</category>
     </item>"""
         )
 
@@ -441,24 +448,6 @@ def _resolve_public_ip(host: str) -> str | None:
     return infos[0][4][0]
 
 
-@contextmanager
-def _pinned_dns(host: str, public_ip: str):
-    original_getaddrinfo = socket.getaddrinfo
-    clean_host = host.lower().strip().rstrip(".")
-
-    def pinned_getaddrinfo(name, port, *args, **kwargs):
-        if str(name).lower().strip().rstrip(".") == clean_host:
-            return original_getaddrinfo(public_ip, port, *args, **kwargs)
-        return original_getaddrinfo(name, port, *args, **kwargs)
-
-    with _DNS_PIN_LOCK:
-        socket.getaddrinfo = pinned_getaddrinfo
-        try:
-            yield
-        finally:
-            socket.getaddrinfo = original_getaddrinfo
-
-
 @router.get("/content/guide-images/{post_id}/{image_index}")
 def guide_image_by_index(
     post_id: int,
@@ -500,34 +489,37 @@ def guide_image_proxy(
         raise HTTPException(status_code=404, detail="Ảnh không nằm trong thư viện hướng dẫn")
 
     try:
-        with _pinned_dns(host, public_ip):
-            upstream = requests.get(
-                image_url,
-                timeout=12,
-                stream=True,
-                allow_redirects=False,
-                headers={
-                    "User-Agent": "Mozilla/5.0 (compatible; MarketAI/1.0)",
-                    "Accept": "image/avif,image/webp,image/apng,image/*",
-                },
-            )
+        upstream = requests.get(
+            image_url,
+            timeout=12,
+            stream=True,
+            allow_redirects=False,
+            headers={
+                "User-Agent": "Mozilla/5.0 (compatible; MarketAI/1.0)",
+                "Accept": "image/avif,image/webp,image/gif,image/png,image/jpeg",
+            },
+        )
         upstream.raise_for_status()
         content_length = int(upstream.headers.get("content-length", 0))
         if content_length > MAX_IMAGE_SIZE_BYTES:
             raise HTTPException(status_code=413, detail="Ảnh quá lớn")
-        content = b""
+        chunks: list[bytes] = []
+        total_size = 0
         for chunk in upstream.iter_content(chunk_size=8192):
-            content += chunk
-            if len(content) > MAX_IMAGE_SIZE_BYTES:
+            if not chunk:
+                continue
+            chunks.append(chunk)
+            total_size += len(chunk)
+            if total_size > MAX_IMAGE_SIZE_BYTES:
                 raise HTTPException(status_code=413, detail="Ảnh quá lớn")
     except requests.RequestException as exc:
         raise HTTPException(status_code=404, detail="Không tải được ảnh hướng dẫn") from exc
 
     content_type = upstream.headers.get("content-type", "image/jpeg").split(";", 1)[0].strip()
-    if not content_type.startswith("image/"):
+    if content_type not in SAFE_IMAGE_CONTENT_TYPES:
         raise HTTPException(status_code=404, detail="Tệp không phải ảnh")
     return Response(
-        content=content,
+        content=b"".join(chunks),
         media_type=content_type,
-        headers={"Cache-Control": "public, max-age=86400"},
+        headers={"Cache-Control": "public, max-age=86400", "X-Content-Type-Options": "nosniff"},
     )

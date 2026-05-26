@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
@@ -14,7 +14,7 @@ class WorldFertilizerObservation:
     source_url: str | None
     price_usd_per_tonne: float
     confidence_score: float
-    raw_json: dict[str, Any] = field(default_factory=dict)
+    raw_json: dict[str, Any] | None = None
 
 
 @dataclass(slots=True)

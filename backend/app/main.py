@@ -62,6 +62,13 @@ logging.config.dictConfig(
     }
 )
 logger = logging.getLogger("marketai")
+API_SECURITY_HEADERS = {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+    "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
+}
 
 
 def _ensure_demo_user(db: Session) -> None:
@@ -150,6 +157,12 @@ async def request_id_middleware(request: Request, call_next):
     response = await call_next(request)
     duration_ms = (time.perf_counter() - start) * 1000
     response.headers["X-Request-ID"] = request_id
+    for name, value in API_SECURITY_HEADERS.items():
+        if name not in response.headers:
+            response.headers[name] = value
+    if settings.environment == "production":
+        if "Strict-Transport-Security" not in response.headers:
+            response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload"
     safe_path = request.url.path.replace("\n", "\\n").replace("\r", "\\r")
     logger.info(
         "request_completed method=%s path=%s status=%s duration_ms=%.2f request_id=%s",

@@ -52,12 +52,12 @@ def parse_yahoo_urea_chart(payload: dict[str, Any], *, symbol: str = DEFAULT_SYM
         raise ValueError(f"Yahoo Finance chart did not return Urea history: {error or 'empty result'}")
 
     timestamps = result.get("timestamp") or []
-    quote = ((result.get("indicators") or {}).get("quote") or [{}])[0]
-    opens = quote.get("open") or []
-    highs = quote.get("high") or []
-    lows = quote.get("low") or []
-    closes = quote.get("close") or []
-    volumes = quote.get("volume") or []
+    quote_data = ((result.get("indicators") or {}).get("quote") or [{}])[0]
+    opens = quote_data.get("open") or []
+    highs = quote_data.get("high") or []
+    lows = quote_data.get("low") or []
+    closes = quote_data.get("close") or []
+    volumes = quote_data.get("volume") or []
     meta = result.get("meta") or {}
     source_url = f"https://finance.yahoo.com/quote/{quote_symbol(symbol)}/history"
 

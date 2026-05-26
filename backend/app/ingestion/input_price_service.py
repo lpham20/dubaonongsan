@@ -127,6 +127,14 @@ class InputPriceIngestionService:
         updated = 0
         pending: dict[tuple, AgriInputPriceObservation] = {}
         for observation in result.observations:
+            if observation.package_size_kg < 0.1:
+                logger.warning(
+                    "Skipping input price with invalid package_size_kg source=%s product=%s package_size=%s",
+                    observation.source,
+                    observation.product_slug,
+                    observation.package_size_kg,
+                )
+                continue
             product = self._get_or_create_product(observation)
             key = (
                 product.product_id,

@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, model_validator
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
+from app.core.rate_limit import limiter
 from app.db import get_db
 from app.models import AppUser
 from app.services.auth import current_user
@@ -120,6 +121,7 @@ class YieldFeedbackResponse(BaseModel):
 
 @router.post("/fertilizer/recommend")
 @router.post("/recommend", include_in_schema=False)
+@limiter.limit("12/minute")
 def fertilizer_recommendation(
     payload: RecommendRequest,
     request: Request,
@@ -136,7 +138,7 @@ def fertilizer_recommendation(
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except KeyError as exc:
-        raise HTTPException(status_code=422, detail=f"Dữ liệu đầu vào chưa phù hợp: {exc}") from exc
+        raise HTTPException(status_code=422, detail="Dữ liệu đầu vào chưa phù hợp. Vui lòng kiểm tra lại biểu mẫu.") from exc
 
 
 @router.post("/sessions/{session_id}/feedback", response_model=YieldFeedbackResponse, status_code=201)

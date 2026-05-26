@@ -447,23 +447,45 @@ def _model_rows(rows: list[WorldCommodityPrice], source_mode: str) -> list[World
     if source_mode == "daily_signal":
         primary_rows = [row for row in rows if row.source in PRIMARY_DAILY_SIGNAL_SOURCES]
         if _has_recent_daily_signal(primary_rows):
-            return primary_rows
-        return [row for row in rows if row.source in DAILY_SIGNAL_SOURCES]
+            return _select_consistent_quote_rows(primary_rows)
+        return _select_consistent_quote_rows([row for row in rows if row.source in DAILY_SIGNAL_SOURCES])
     official_rows = [row for row in rows if row.source == "worldbank_pinksheet"]
     return official_rows or rows
 
 
-def _has_recent_daily_signal(rows: list[WorldCommodityPrice]) -> bool:
-    if len({row.observed_at.date() for row in rows}) < DAILY_SIGNAL_MIN_POINTS:
-        return False
-    recent_cutoff = datetime.now(UTC) - timedelta(days=45)
+def _select_consistent_quote_rows(rows: list[WorldCommodityPrice]) -> list[WorldCommodityPrice]:
+    if not rows:
+        return []
+    by_quote_type: dict[str, list[WorldCommodityPrice]] = {}
     for row in rows:
-        observed_at = row.observed_at
-        if observed_at.tzinfo is None:
-            observed_at = observed_at.replace(tzinfo=UTC)
-        if observed_at >= recent_cutoff:
-            return True
-    return False
+        by_quote_type.setdefault(row.quote_type, []).append(row)
+    if len(by_quote_type) == 1:
+        return rows
+
+    def score(items: list[WorldCommodityPrice]) -> tuple[int, datetime, int, float]:
+        latest = max(_aware_utc(row.observed_at) for row in items)
+        distinct_days = len({row.observed_at.date() for row in items})
+        avg_confidence = sum(float(row.confidence_score or 0) for row in items) / max(1, len(items))
+        recent_signal = 1 if _has_recent_daily_signal(items) else 0
+        return (recent_signal, latest, distinct_days, avg_confidence)
+
+    selected_quote_type, selected_rows = max(by_quote_type.items(), key=lambda item: score(item[1]))
+    logger.info(
+        "Selected world fertilizer quote_type=%s among %d quote types for model consistency",
+        selected_quote_type,
+        len(by_quote_type),
+    )
+    return selected_rows
+
+
+def _has_recent_daily_signal(rows: list[WorldCommodityPrice]) -> bool:
+    recent_cutoff = datetime.now(UTC) - timedelta(days=45)
+    recent_days = {row.observed_at.date() for row in rows if _aware_utc(row.observed_at) >= recent_cutoff}
+    return len(recent_days) >= DAILY_SIGNAL_MIN_POINTS
+
+
+def _aware_utc(value: datetime) -> datetime:
+    return value if value.tzinfo is not None else value.replace(tzinfo=UTC)
 
 
 def _data_quality(rows: list[WorldCommodityPrice], points: list[tuple[datetime, float, str]], source_mode: str) -> dict:

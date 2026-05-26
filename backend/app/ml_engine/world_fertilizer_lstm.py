@@ -102,6 +102,7 @@ def load_world_fertilizer_lstm_artifact(commodity_slug: str) -> WorldFertilizerL
         interpreter = tflite.Interpreter(model_path=str(model_path))
         interpreter.allocate_tensors()
         scaler = json.loads(scaler_path.read_text(encoding="utf-8"))
+        _validate_scaler(scaler, commodity_slug=key)
         meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
         artifact = WorldFertilizerLSTMArtifact(
             commodity_slug=key,
@@ -141,6 +142,27 @@ def _build_feature_tensor(points: list[tuple[datetime, float, str]], scaler: dic
     std = np.where(std < 1e-6, 1.0, std)
     normalized = (raw - mean) / std
     return normalized[None, :, :]
+
+
+def _validate_scaler(scaler: dict[str, Any], *, commodity_slug: str) -> None:
+    required = {
+        "commodity_slug",
+        "lookback_window",
+        "horizon_days",
+        "feature_columns",
+        "feature_mean",
+        "feature_std",
+        "target_mean",
+        "target_std",
+    }
+    missing = required - set(scaler)
+    if missing:
+        raise ValueError(f"World fertilizer scaler missing keys: {sorted(missing)}")
+    if str(scaler.get("commodity_slug")) != commodity_slug:
+        raise ValueError(f"World fertilizer scaler commodity mismatch: {scaler.get('commodity_slug')} != {commodity_slug}")
+    feature_count = len(scaler.get("feature_columns") or [])
+    if len(scaler.get("feature_mean") or []) != feature_count or len(scaler.get("feature_std") or []) != feature_count:
+        raise ValueError("World fertilizer scaler feature dimensions are inconsistent")
 
 
 def _raw_features(points: list[tuple[datetime, float, str]]) -> np.ndarray:

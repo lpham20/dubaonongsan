@@ -46,6 +46,7 @@ services:
       postgres:
         condition: service_healthy
     volumes:
+      - job_locks:/app/.job_locks
       - ml_artifacts:/app/ml_artifacts:ro
     expose:
       - "8010"

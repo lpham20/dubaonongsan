@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+import hmac
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from sqlalchemy import desc, select
@@ -17,7 +18,7 @@ router = APIRouter(prefix=settings.api_prefix, tags=["public"])
 
 
 def require_public_api_key(x_api_key: str | None = Header(default=None)) -> None:
-    if x_api_key != settings.public_api_key:
+    if not x_api_key or not hmac.compare_digest(x_api_key, settings.public_api_key):
         raise HTTPException(status_code=401, detail="API key không hợp lệ")
 
 

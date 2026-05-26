@@ -2,7 +2,7 @@ from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.security import HTTPAuthorizationCredentials
-from sqlalchemy import desc, select
+from sqlalchemy import desc, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -24,6 +24,8 @@ from app.services.auth import (
 
 settings = get_settings()
 router = APIRouter(prefix=settings.api_prefix, tags=["auth"])
+DUMMY_BCRYPT_HASH = "$2b$12$nP8tU4ECiTAA0st3I4n8kOu5.Pwbjyf4On1.hKHmtxkOjD/o/uZiC"
+MAX_WATCHLIST_ITEMS_PER_USER = 50
 
 
 def user_out(user: AppUser) -> AuthUserOut:
@@ -69,10 +71,10 @@ def login(request: Request, payload: AuthCredentials, db: Session = Depends(get_
     email = payload.email.strip().lower()
     user = db.scalar(select(AppUser).where(AppUser.email == email))
     now = datetime.now(UTC)
+    password_ok = verify_password(payload.password, user.password_hash if user is not None else DUMMY_BCRYPT_HASH)
     if user and user.locked_until and _as_aware_utc(user.locked_until) > now:
-        wait_min = int((_as_aware_utc(user.locked_until) - now).total_seconds() // 60) + 1
-        raise HTTPException(status_code=429, detail=f"Tai khoan tam khoa. Thu lai sau {wait_min} phut.")
-    if user is None or not verify_password(payload.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Email hoặc mật khẩu không đúng")
+    if user is None or not password_ok:
         if user is not None:
             user.failed_login_attempts = (user.failed_login_attempts or 0) + 1
             if user.failed_login_attempts >= 5:
@@ -125,6 +127,16 @@ def save_watchlist_item(
     user: AppUser = Depends(current_user),
     db: Session = Depends(get_db),
 ) -> WatchlistItem:
+    existing_count = db.scalar(select(func.count()).select_from(WatchlistItem).where(WatchlistItem.user_id == user.user_id)) or 0
+    existing_item = db.scalar(
+        select(WatchlistItem)
+        .where(WatchlistItem.user_id == user.user_id)
+        .where(WatchlistItem.crop_type == payload.crop_type)
+        .where(WatchlistItem.region_id == payload.region_id)
+        .where(WatchlistItem.variety_id == payload.variety_id)
+    )
+    if existing_item is None and existing_count >= MAX_WATCHLIST_ITEMS_PER_USER:
+        raise HTTPException(status_code=400, detail="Danh sách ghim đã đạt giới hạn 50 mục.")
     item = WatchlistItem(
         user_id=user.user_id,
         crop_type=payload.crop_type,

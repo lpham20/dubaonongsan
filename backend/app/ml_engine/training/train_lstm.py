@@ -58,29 +58,40 @@ def train(
         target_mode=target_mode,
     )
 
-    x_chunks: list[np.ndarray] = []
-    y_chunks: list[np.ndarray] = []
+    train_x_chunks: list[np.ndarray] = []
+    train_y_chunks: list[np.ndarray] = []
+    val_x_chunks: list[np.ndarray] = []
+    val_y_chunks: list[np.ndarray] = []
     for series in eligible.values():
         x, y = build_training_windows(series, scaler, stride=stride)
         if len(x):
-            x_chunks.append(x)
-            y_chunks.append(y)
-    if not x_chunks:
+            if len(x) == 1:
+                train_x_chunks.append(x)
+                train_y_chunks.append(y)
+                continue
+            split_index = min(len(x) - 1, max(1, int(len(x) * 0.82)))
+            train_x_chunks.append(x[:split_index])
+            train_y_chunks.append(y[:split_index])
+            val_x_chunks.append(x[split_index:])
+            val_y_chunks.append(y[split_index:])
+    if not train_x_chunks:
         raise RuntimeError(f"No training windows built for crop={crop_type}")
 
-    x_all = np.concatenate(x_chunks, axis=0)
-    y_all = np.concatenate(y_chunks, axis=0)
-    order = np.arange(len(x_all))
-    np.random.shuffle(order)
-    x_all = x_all[order]
-    y_all = y_all[order]
+    x_train = np.concatenate(train_x_chunks, axis=0)
+    y_train = np.concatenate(train_y_chunks, axis=0)
+    if val_x_chunks:
+        x_val = np.concatenate(val_x_chunks, axis=0)
+        y_val = np.concatenate(val_y_chunks, axis=0)
+    elif len(x_train) > 1:
+        x_train, x_val = x_train[:-1], x_train[-1:]
+        y_train, y_val = y_train[:-1], y_train[-1:]
+    else:
+        raise RuntimeError(f"Not enough windows for validation crop={crop_type}")
 
-    split = max(1, int(len(x_all) * 0.82))
-    x_train, x_val = x_all[:split], x_all[split:]
-    y_train, y_val = y_all[:split], y_all[split:]
-    if not len(x_val):
-        x_train, x_val = x_all[:-1], x_all[-1:]
-        y_train, y_val = y_all[:-1], y_all[-1:]
+    order = np.arange(len(x_train))
+    np.random.shuffle(order)
+    x_train = x_train[order]
+    y_train = y_train[order]
 
     model = _build_model(lookback_window, len(FEATURE_COLUMNS), horizon_days)
     callbacks = [
@@ -195,6 +206,7 @@ def _decode_targets(scaler: Scaler, values: np.ndarray, last_price: np.ndarray) 
 def _set_determinism() -> None:
     random.seed(42)
     np.random.seed(42)
+    tf.keras.utils.set_random_seed(42)
     tf.random.set_seed(42)
 
 

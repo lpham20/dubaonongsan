@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-from app.ingestion.sources.world_fertilizer_investing import parse_investing_urea_current
+from app.ingestion.sources.world_fertilizer_investing import READER_URL, SOURCE_URL, parse_investing_urea_current
 from app.ingestion.world_fertilizer_registry import build_world_fertilizer_scrapers
 
 
@@ -33,6 +33,11 @@ Bien do ngay
     assert row.observed_at == datetime(2026, 5, 22, tzinfo=UTC)
     assert row.raw_json["symbol"] == "UMEc1"
     assert row.raw_json["change_pct"] == -1.81
+
+
+def test_investing_reader_url_has_single_scheme():
+    assert READER_URL == f"https://r.jina.ai/{SOURCE_URL}"
+    assert "http://https://" not in READER_URL
 
 
 def test_investing_urea_source_is_selectable_but_not_default():

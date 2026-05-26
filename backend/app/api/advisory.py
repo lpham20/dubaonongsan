@@ -4,13 +4,14 @@ from datetime import UTC, date, datetime
 from statistics import median
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import desc, select
 from sqlalchemy.orm import Session
 
 from app.core.admin_units import is_crop_province, is_production_region, normalize_province_name
 from app.core.config import get_settings
+from app.core.rate_limit import limiter
 from app.db import get_db
 from app.ml_engine.lstm_forecaster import ForecastConfig, LSTMForecaster
 from app.models import AppUser, DailyMarketPrice, ProductionRegion
@@ -69,7 +70,9 @@ class CrossCommodityRequest(BaseModel):
 
 
 @router.post("/selling-time")
+@limiter.limit("30/minute")
 def selling_time(
+    request: Request,
     payload: SellingTimeRequest,
     _: AppUser = Depends(current_user),
     db: Session = Depends(get_db),
@@ -116,7 +119,9 @@ def selling_time(
 
 
 @router.get("/arbitrage")
+@limiter.limit("30/minute")
 def arbitrage(
+    request: Request,
     crop_type: Crop | None = Query(default=None),
     min_net_spread_pct: float = Query(default=3, ge=0, le=100),
     max_distance_km: float = Query(default=700, ge=10, le=3000),
@@ -167,7 +172,9 @@ def arbitrage(
 
 
 @router.post("/cross-commodity")
+@limiter.limit("30/minute")
 def cross_commodity(
+    request: Request,
     payload: CrossCommodityRequest,
     _: AppUser = Depends(current_user),
     db: Session = Depends(get_db),

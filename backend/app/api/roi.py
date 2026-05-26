@@ -4,12 +4,13 @@ from datetime import UTC, datetime
 from statistics import median
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field, model_validator
 from sqlalchemy import desc, select
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
+from app.core.rate_limit import limiter
 from app.db import get_db
 from app.ml_engine.lstm_forecaster import ForecastConfig, LSTMForecaster
 from app.models import AppUser, DailyMarketPrice, RoiScenario
@@ -79,7 +80,9 @@ class RoiCalculateResponse(BaseModel):
 
 
 @router.post("/roi/calculate", response_model=RoiCalculateResponse)
+@limiter.limit("20/minute")
 def calculate_roi(
+    request: Request,
     payload: RoiCalculateRequest,
     user: AppUser = Depends(current_user),
     db: Session = Depends(get_db),
@@ -88,7 +91,9 @@ def calculate_roi(
 
 
 @router.post("/advisory/roi/calculate", response_model=RoiCalculateResponse)
+@limiter.limit("20/minute")
 def calculate_advisory_roi(
+    request: Request,
     payload: RoiCalculateRequest,
     user: AppUser = Depends(current_user),
     db: Session = Depends(get_db),

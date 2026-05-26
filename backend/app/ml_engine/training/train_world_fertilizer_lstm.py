@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import argparse
-from datetime import datetime
+from datetime import UTC, datetime
 import json
 import logging
 from pathlib import Path
@@ -56,11 +56,8 @@ def train(
         base_prices.append(base_price)
     x_all = np.stack(windows)
     y_raw = np.stack(targets)
-    # Keep the model anchored to the no-change baseline. Commodity futures can
-    # jump around sparse contract periods, so a zero-return center avoids a
-    # learned drift that performs worse than simply holding today's quote.
     target_mean = 0.0
-    target_std = max(float(y_raw.std()), 1e-6)
+    target_std = max(float(np.sqrt(np.mean(np.square(y_raw)))), 1e-6)
     y_all = ((y_raw - target_mean) / target_std).astype(np.float32)
     base_all = np.asarray(base_prices, dtype=np.float32)
 
@@ -133,7 +130,7 @@ def train(
         "validation_windows": int(len(x_val)),
         "epochs_requested": epochs,
         "epochs_ran": len(history.history.get("loss", [])),
-        "trained_at": datetime.utcnow().isoformat() + "Z",
+        "trained_at": datetime.now(UTC).isoformat(),
         **metrics,
     }
     meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")

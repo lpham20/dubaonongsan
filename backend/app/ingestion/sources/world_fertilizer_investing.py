@@ -12,7 +12,7 @@ from app.ingestion.world_fertilizer_records import WorldFertilizerObservation, W
 
 SOURCE = "investing_urea_current"
 SOURCE_URL = "https://vn.investing.com/commodities/urea-granular-fob-middle-east-futures"
-READER_URL = f"https://r.jina.ai/http://{SOURCE_URL}"
+READER_URL = f"https://r.jina.ai/{SOURCE_URL}"
 QUOTE_TYPE = "Investing Urea Granular FOB Middle East futures current"
 
 

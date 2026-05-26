@@ -41,43 +41,48 @@ def load_lstm_artifact(crop_type: str) -> TFLiteArtifact | None:
             _CACHE.move_to_end(key)
             return cached
 
-    artifacts_dir = Path(settings.ml_artifacts)
-    model_path = artifacts_dir / f"lstm_{key}.tflite"
-    scaler_path = artifacts_dir / f"lstm_{key}.scaler.json"
-    meta_path = artifacts_dir / f"lstm_{key}.meta.json"
-    if not model_path.exists() or not scaler_path.exists():
-        return None
-
-    try:
-        tflite = _load_tflite_module()
-        interpreter = tflite.Interpreter(model_path=str(model_path))
-        interpreter.allocate_tensors()
-        scaler = Scaler.from_json(scaler_path.read_text(encoding="utf-8"))
-        if meta_path.exists():
-            meta = json.loads(meta_path.read_text(encoding="utf-8"))
-            meta_target_mode = meta.get("target_mode")
-            if meta_target_mode and scaler.target_mode != meta_target_mode:
-                logger.error(
-                    "TFLite target_mode mismatch crop=%s scaler=%s meta=%s; refusing to load",
-                    key,
-                    scaler.target_mode,
-                    meta_target_mode,
-                )
-                return None
-        artifact = TFLiteArtifact(
-            crop_type=key,
-            interpreter=interpreter,
-            scaler=scaler,
-            input_details=interpreter.get_input_details(),
-            output_details=interpreter.get_output_details(),
-            model_path=model_path,
-            lock=threading.Lock(),
-        )
-    except Exception as exc:
-        logger.exception("Failed to load TFLite artifact crop=%s: %s", key, exc)
-        return None
-
     with _CACHE_LOCK:
+        cached = _CACHE.get(key)
+        if cached is not None:
+            _CACHE.move_to_end(key)
+            return cached
+
+        artifacts_dir = Path(settings.ml_artifacts)
+        model_path = artifacts_dir / f"lstm_{key}.tflite"
+        scaler_path = artifacts_dir / f"lstm_{key}.scaler.json"
+        meta_path = artifacts_dir / f"lstm_{key}.meta.json"
+        if not model_path.exists() or not scaler_path.exists():
+            return None
+
+        try:
+            tflite = _load_tflite_module()
+            interpreter = tflite.Interpreter(model_path=str(model_path))
+            interpreter.allocate_tensors()
+            scaler = Scaler.from_json(scaler_path.read_text(encoding="utf-8"))
+            if meta_path.exists():
+                meta = json.loads(meta_path.read_text(encoding="utf-8"))
+                meta_target_mode = meta.get("target_mode")
+                if meta_target_mode and scaler.target_mode != meta_target_mode:
+                    logger.error(
+                        "TFLite target_mode mismatch crop=%s scaler=%s meta=%s; refusing to load",
+                        key,
+                        scaler.target_mode,
+                        meta_target_mode,
+                    )
+                    return None
+            artifact = TFLiteArtifact(
+                crop_type=key,
+                interpreter=interpreter,
+                scaler=scaler,
+                input_details=interpreter.get_input_details(),
+                output_details=interpreter.get_output_details(),
+                model_path=model_path,
+                lock=threading.Lock(),
+            )
+        except Exception as exc:
+            logger.exception("Failed to load TFLite artifact crop=%s: %s", key, exc)
+            return None
+
         _CACHE[key] = artifact
         _CACHE.move_to_end(key)
         max_models = max(1, int(settings.ml_max_models or 1))

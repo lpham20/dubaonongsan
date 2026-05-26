@@ -70,7 +70,9 @@ class LSTMForecaster:
         last_price = float(feature_window[-1].get("max_price_vnd") or 0)
         y = artifact.scaler.denormalize_forecast(np.asarray(y_norm, dtype=np.float32), last_price=last_price)
         if len(y) < self.config.horizon_days:
-            y = np.pad(y, (0, self.config.horizon_days - len(y)), mode="edge")
+            raise ValueError(
+                f"TFLite artifact returned {len(y)} days, expected {self.config.horizon_days}; refusing to pad forecast"
+            )
         y = y[: self.config.horizon_days]
 
         price_floor = max(1000.0, last_price * 0.5) if last_price > 0 else 1000.0
@@ -105,11 +107,16 @@ class LSTMForecaster:
         avg = mean(values)
         return math.sqrt(mean([(value - avg) ** 2 for value in values]))
 
-    @staticmethod
-    def _weather_bias(window: list[dict]) -> float:
+    def _weather_bias(self, window: list[dict]) -> float:
         if not window:
             return 0.0
         rain = mean([float(row.get("precipitation_mm") or 0) for row in window])
         temp = mean([float(row.get("temp_max_celsius") or 30) for row in window])
         maturity = mean([float(row.get("maturity_index") or 6) for row in window])
-        return (temp - 31.5) * 18 - max(0, rain - 20) * 12 + max(0, maturity - 7) * 22
+        temp_coef, rain_coef, maturity_coef = {
+            "sau_rieng": (18.0, 12.0, 22.0),
+            "ca_phe": (9.0, 7.0, 11.0),
+            "ho_tieu": (8.0, 6.0, 10.0),
+            "lua": (2.0, 2.0, 3.0),
+        }.get(self.crop_type, (8.0, 6.0, 10.0))
+        return (temp - 31.5) * temp_coef - max(0, rain - 20) * rain_coef + max(0, maturity - 7) * maturity_coef

@@ -278,6 +278,20 @@ def test_world_fertilizer_forecast_returns_daily_percent_changes(client):
                     created_at=datetime.now(UTC),
                 )
             )
+            db.add(
+                WorldCommodityPrice(
+                    commodity_slug="urea",
+                    quote_type="CME Urea Granular FOB Middle East futures continuous",
+                    source="yahoo_urea_futures_daily",
+                    source_url="https://example.test/yahoo-urea",
+                    observed_at=start + timedelta(days=index),
+                    price_usd_per_tonne=900 + index,
+                    currency="USD",
+                    confidence_score=0.75,
+                    raw_json={"symbol": "UME=F"},
+                    created_at=datetime.now(UTC),
+                )
+            )
         db.add(
             WorldCommodityPrice(
                 commodity_slug="urea",
@@ -306,6 +320,7 @@ def test_world_fertilizer_forecast_returns_daily_percent_changes(client):
     assert payload["source_mode"] == "daily_signal"
     assert payload["data_quality"]["history_points"] >= 14
     assert payload["base_price_usd_per_tonne"] == 628
+    assert payload["quote_type"] == "Trading Economics Urea benchmark"
     assert len(payload["forecast_daily"]) == 30
     assert len(payload["forecast_weekly"]) >= 4
     first = payload["forecast_daily"][0]
@@ -587,7 +602,8 @@ def test_login_lockout_after_5_failed_attempts(client):
         "/api/v1/auth/login",
         json={"email": "lockout@example.com", "password": "CorrectPass123"},
     )
-    assert response.status_code == 429
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Email hoặc mật khẩu không đúng"
 
 
 def test_logout_revokes_token_and_cleanup_job(client):

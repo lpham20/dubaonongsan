@@ -109,7 +109,7 @@ export function AdvisoryHub({
   const { language } = useLanguage();
   const meta = toolMeta[language][tool];
   const ToolIcon = meta.Icon;
-  const locked = tool !== "fertilizer" && !authToken;
+  const locked = !authToken;
   const activeAuthToken = authToken ?? "";
   const pageClassName = tool === "fertilizer"
     ? "advisory-page"
@@ -135,8 +135,8 @@ export function AdvisoryHub({
       ) : null}
 
       <div className={tool === "fertilizer" ? "advisory-content advisory-content--flush" : "advisory-content advisory-standard-content"}>
-        {tool === "fertilizer" ? <FertilizerAdvisor authToken={authToken} onRequireAuth={onRequireAuth} /> : null}
         {locked ? <AdvisoryAccountGate onRequireAuth={onRequireAuth} /> : null}
+        {!locked && tool === "fertilizer" ? <FertilizerAdvisor authToken={authToken} onRequireAuth={onRequireAuth} /> : null}
         {!locked && tool === "sellingTime" ? <SellingTimePanel authToken={activeAuthToken} /> : null}
         {!locked && tool === "arbitrage" ? <ArbitragePanel authToken={activeAuthToken} /> : null}
         {!locked && tool === "crossCrop" ? <CrossCropPanel authToken={activeAuthToken} /> : null}
