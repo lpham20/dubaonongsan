@@ -420,6 +420,11 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
                 width="800"
                 height="450"
                 onError={(event) => {
+                  if (event.currentTarget.dataset.fallbackApplied === "true") {
+                    event.currentTarget.style.display = "none";
+                    return;
+                  }
+                  event.currentTarget.dataset.fallbackApplied = "true";
                   event.currentTarget.src = "/coffee-hero-photo.jpg";
                 }}
               />

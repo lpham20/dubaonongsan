@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 import pytest
 
 from app.core.job_status import STATUS_DUPLICATE, STATUS_SUCCESS, is_success_status
-from app.models import WorldCommodityForecast
+from app.models import RecommendationSession, WorldCommodityForecast
 
 
 def test_job_status_accepts_canonical_and_legacy_success_values():
@@ -34,3 +34,10 @@ def test_world_commodity_forecast_points_are_validated():
             model_kind="test",
             base_price_usd_per_tonne=500,
         )
+
+
+def test_leaf_analysis_relationship_preserves_child_rows_on_session_delete():
+    relationship = RecommendationSession.__mapper__.relationships["leaf_analyses"]
+
+    assert "delete-orphan" not in relationship.cascade
+    assert relationship.passive_deletes is True

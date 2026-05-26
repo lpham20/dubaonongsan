@@ -330,7 +330,7 @@ class RecommendationSession(Base):
     created_date: Mapped[date | None] = mapped_column(Date, index=True)
 
     feedback: Mapped["YieldFeedback | None"] = relationship(back_populates="session", cascade="all, delete-orphan")
-    leaf_analyses: Mapped[list["LeafAnalysis"]] = relationship(back_populates="session", cascade="all, delete-orphan")
+    leaf_analyses: Mapped[list["LeafAnalysis"]] = relationship(back_populates="session", passive_deletes=True)
 
 
 class YieldFeedback(Base):

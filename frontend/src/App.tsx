@@ -122,6 +122,11 @@ const tabs: { value: CropType; label: string; Icon: typeof Leaf }[] = [
   { value: "lua", label: "Lúa", Icon: Sprout }
 ];
 
+const HISTORICAL_FETCH_LIMIT_FACTOR = 4;
+const MIN_HISTORICAL_FETCH_POINTS = 60;
+const NEWS_REFRESH_INTERVAL_MS = 15 * 60 * 1000;
+const MAX_WATCHLIST_ITEMS = 8;
+
 const cropLabels: Record<CropType, string> = {
   sau_rieng: "sầu riêng",
   ca_phe: "cà phê",
@@ -619,7 +624,10 @@ function RoutedApp() {
         explanationPayload,
         comparisonPayload
       ] = await Promise.all([
-        fetchHistorical(crop, nextRegionId, nextVarietyId, { limit: Math.max(days * 4, 60), signal }),
+        fetchHistorical(crop, nextRegionId, nextVarietyId, {
+          limit: Math.max(days * HISTORICAL_FETCH_LIMIT_FACTOR, MIN_HISTORICAL_FETCH_POINTS),
+          signal
+        }),
         fetchForecast(crop, nextRegionId, nextVarietyId, signal),
         fetchSignals(crop, nextRegionId, nextVarietyId, signal),
         fetchMetrics(crop, nextRegionId, nextVarietyId, signal),
@@ -662,7 +670,7 @@ function RoutedApp() {
       void fetchNews(undefined, language)
         .then(setNewsArticles)
         .catch(() => undefined);
-    }, 15 * 60 * 1000);
+    }, NEWS_REFRESH_INTERVAL_MS);
     return () => {
       controller.abort();
       window.clearInterval(newsRefreshTimer);
@@ -828,7 +836,7 @@ function RoutedApp() {
   }
 
   async function addWatchlist() {
-    setWatchlist((current) => (current.includes(watchKey) ? current : [watchKey, ...current].slice(0, 8)));
+    setWatchlist((current) => (current.includes(watchKey) ? current : [watchKey, ...current].slice(0, MAX_WATCHLIST_ITEMS)));
     if (!authToken || !selectedRegion || !selectedVariety) return;
     try {
       await saveWatchlistItem(authToken, {

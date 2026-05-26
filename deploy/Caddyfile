@@ -56,8 +56,6 @@
 		rewrite * /api/v1/sitemap.xml
 		reverse_proxy api:8010 {
 			header_up X-Real-IP {remote_host}
-			header_up X-Forwarded-For {remote_host}
-			header_up X-Forwarded-Proto {scheme}
 		}
 		header Cache-Control "public, max-age=300, must-revalidate"
 		header X-Robots-Tag "index, follow"
@@ -66,8 +64,6 @@
 	handle /api/v1/llm-content/* {
 		reverse_proxy api:8010 {
 			header_up X-Real-IP {remote_host}
-			header_up X-Forwarded-For {remote_host}
-			header_up X-Forwarded-Proto {scheme}
 		}
 		header X-Robots-Tag "index, follow"
 	}
@@ -76,8 +72,6 @@
 		rewrite * /api/v1/rss/news.xml
 		reverse_proxy api:8010 {
 			header_up X-Real-IP {remote_host}
-			header_up X-Forwarded-For {remote_host}
-			header_up X-Forwarded-Proto {scheme}
 		}
 		header Cache-Control "public, max-age=600"
 		header X-Robots-Tag "index, follow"
@@ -86,8 +80,6 @@
 	handle /api/* {
 		reverse_proxy api:8010 {
 			header_up X-Real-IP {remote_host}
-			header_up X-Forwarded-For {remote_host}
-			header_up X-Forwarded-Proto {scheme}
 		}
 		header X-Robots-Tag "noindex, nofollow, noarchive"
 	}
@@ -220,8 +212,6 @@ EOF
 
 	reverse_proxy api:8010 {
 		header_up X-Real-IP {remote_host}
-		header_up X-Forwarded-For {remote_host}
-		header_up X-Forwarded-Proto {scheme}
 		health_uri /health
 		health_interval 30s
 		health_timeout 5s
