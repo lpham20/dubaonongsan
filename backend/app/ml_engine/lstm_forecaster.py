@@ -11,6 +11,10 @@ from app.ml_engine.model_registry import load_lstm_artifact
 
 logger = logging.getLogger(__name__)
 
+BASELINE_LOW_PRICE_FLOOR_RATIO = 0.55
+BASELINE_LOW_PRICE_ABSOLUTE_FLOOR = 1000.0
+BASELINE_HIGH_VALUE_FLOOR = 25000.0
+
 
 @dataclass(frozen=True)
 class ForecastConfig:
@@ -94,7 +98,11 @@ class LSTMForecaster:
         last_price = prices[-1]
 
         forecasts: list[float] = []
-        price_floor = max(1000.0, last_price * 0.55) if last_price < 25000 else 25000.0
+        price_floor = (
+            max(BASELINE_LOW_PRICE_ABSOLUTE_FLOOR, last_price * BASELINE_LOW_PRICE_FLOOR_RATIO)
+            if last_price < BASELINE_HIGH_VALUE_FLOOR
+            else BASELINE_HIGH_VALUE_FLOOR
+        )
         for day in range(1, self.config.horizon_days + 1):
             seasonal = math.sin(day / 4.8) * volatility * 0.09
             weather_bias = self._weather_bias(feature_window[-min(len(feature_window), 14) :])

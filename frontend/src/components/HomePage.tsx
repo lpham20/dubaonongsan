@@ -543,10 +543,10 @@ function buildTickerItems(live: HomeTickerState, usdVndRate: UsdVndRate | null, 
   }
 
   return [
-    pointToTicker(live.coffee, "Cà phê Robusta", ["Robusta", "Culi", "Arabica"]) ?? fallbackTicker[0],
-    pointToTicker(live.durian, "Sầu riêng", ["Ri6", "Dona", "Thái", "Musang", "Black Thorn"]) ?? fallbackTicker[1],
-    pointToTicker(live.pepper, "Hồ tiêu", ["Tiêu đen", "Tiêu trắng", "Tiêu đỏ"]) ?? fallbackTicker[2],
-    pointToTicker(live.rice, "Lúa", ["OM", "Đài thơm", "Nàng Hoa", "Jasmine"]) ?? fallbackTicker[3],
+    pointToTicker(live.coffee, "Cà phê Robusta", ["Robusta", "Culi", "Arabica"], language) ?? fallbackTicker[0],
+    pointToTicker(live.durian, "Sầu riêng", ["Ri6", "Dona", "Thái", "Musang", "Black Thorn"], language) ?? fallbackTicker[1],
+    pointToTicker(live.pepper, "Hồ tiêu", ["Tiêu đen", "Tiêu trắng", "Tiêu đỏ"], language) ?? fallbackTicker[2],
+    pointToTicker(live.rice, "Lúa", ["OM", "Đài thơm", "Nàng Hoa", "Jasmine"], language) ?? fallbackTicker[3],
     fallbackTicker[5],
     usdTicker
   ];
@@ -562,22 +562,22 @@ function usdRateToTicker(rate: UsdVndRate | null, language: "vi" | "en" = "vi"):
   };
 }
 
-function buildMarketCards(live: HomeTickerState, _language: "vi" | "en" = "vi"): MarketCard[] {
+function buildMarketCards(live: HomeTickerState, language: "vi" | "en" = "vi"): MarketCard[] {
   if (!live.coffee.length && !live.durian.length && !live.pepper.length && !live.rice.length) return fallbackMarketCards;
 
   return [
-    pointToCard(live.coffee, fallbackMarketCards[0], ["Robusta", "Culi"]),
-    pointToCard(live.durian, fallbackMarketCards[1], ["Ri6", "Sầu"]),
-    pointToCard(live.durian, fallbackMarketCards[2], ["Dona", "Thái", "Musang", "Black Thorn"]),
-    pointToCard(live.pepper, fallbackMarketCards[3], ["Tiêu đen", "Tiêu trắng", "Tiêu đỏ"]),
-    pointToCard(live.rice, fallbackMarketCards[4], ["OM", "Đài thơm", "Nàng Hoa", "Jasmine"]),
-    pointToCard(live.rice, fallbackMarketCards[5], ["ST25"]),
-    pointToCard(live.pepper, fallbackMarketCards[6], ["Tiêu đen"]),
-    pointToCard(live.pepper, fallbackMarketCards[7], ["Tiêu trắng"])
+    pointToCard(live.coffee, fallbackMarketCards[0], ["Robusta", "Culi"], language),
+    pointToCard(live.durian, fallbackMarketCards[1], ["Ri6", "Sầu"], language),
+    pointToCard(live.durian, fallbackMarketCards[2], ["Dona", "Thái", "Musang", "Black Thorn"], language),
+    pointToCard(live.pepper, fallbackMarketCards[3], ["Tiêu đen", "Tiêu trắng", "Tiêu đỏ"], language),
+    pointToCard(live.rice, fallbackMarketCards[4], ["OM", "Đài thơm", "Nàng Hoa", "Jasmine"], language),
+    pointToCard(live.rice, fallbackMarketCards[5], ["ST25"], language),
+    pointToCard(live.pepper, fallbackMarketCards[6], ["Tiêu đen"], language),
+    pointToCard(live.pepper, fallbackMarketCards[7], ["Tiêu trắng"], language)
   ];
 }
 
-function pointToTicker(points: PricePoint[], fallbackLabel: string, keywords: string[]): TickerItem | null {
+function pointToTicker(points: PricePoint[], fallbackLabel: string, keywords: string[], language: "vi" | "en"): TickerItem | null {
   const selected = selectSeries(points, keywords);
   if (!selected.length) return null;
   const latest = selected[0];
@@ -586,13 +586,13 @@ function pointToTicker(points: PricePoint[], fallbackLabel: string, keywords: st
 
   return {
     label: `${latest.variety || fallbackLabel}${location ? ` ${location}` : ""}`,
-    value: formatPrice(pointPrice(latest)),
-    change: formatChange(change),
+    value: formatPrice(pointPrice(latest), language),
+    change: formatChange(change, language),
     tone: change >= 0 ? "up" : "down"
   };
 }
 
-function pointToCard(points: PricePoint[], fallback: MarketCard, keywords: string[]): MarketCard {
+function pointToCard(points: PricePoint[], fallback: MarketCard, keywords: string[], language: "vi" | "en"): MarketCard {
   const selected = selectSeries(points, keywords);
   if (!selected.length) return fallback;
   const latest = selected[0];
@@ -606,8 +606,8 @@ function pointToCard(points: PricePoint[], fallback: MarketCard, keywords: strin
   return {
     label: latest.variety || fallback.label,
     sublabel: latest.province || latest.region || fallback.sublabel,
-    value: formatPrice(pointPrice(latest)),
-    change: formatChange(change),
+    value: formatPrice(pointPrice(latest), language),
+    change: formatChange(change, language),
     tone: change >= 0 ? "up" : "down",
     points: sparklinePoints.length >= 3 ? sparklinePoints : fallback.points
   };
@@ -638,8 +638,8 @@ function computeChange(points: PricePoint[]) {
   return ((latest - previous) / previous) * 100;
 }
 
-function formatPrice(value: number) {
-  return `${Math.round(value).toLocaleString("vi-VN")} đ/kg`;
+function formatPrice(value: number, language: "vi" | "en" = "vi") {
+  return `${Math.round(value).toLocaleString(localeFor(language))} ${language === "en" ? "VND/kg" : "đ/kg"}`;
 }
 
 function localeFor(language: "vi" | "en") {
@@ -659,10 +659,10 @@ function formatShortDate(value: string, language: "vi" | "en" = "vi") {
   return day && month ? (language === "en" ? `${month}/${day}` : `${day}/${month}`) : "";
 }
 
-function formatChange(value: number) {
-  if (!Number.isFinite(value) || Math.abs(value) < 0.05) return "0,0%";
+function formatChange(value: number, language: "vi" | "en" = "vi") {
+  if (!Number.isFinite(value) || Math.abs(value) < 0.05) return `${(0).toLocaleString(localeFor(language), { maximumFractionDigits: 1 })}%`;
   const prefix = value > 0 ? "+" : "";
-  return `${prefix}${value.toLocaleString("vi-VN", { maximumFractionDigits: 1 })}%`;
+  return `${prefix}${value.toLocaleString(localeFor(language), { maximumFractionDigits: 1 })}%`;
 }
 
 function normalizeText(value: string | null | undefined) {

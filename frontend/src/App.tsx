@@ -477,6 +477,7 @@ function RoutedApp() {
   const navigate = useNavigate();
   const { language, setLanguage } = useLanguage();
   const copy = appCopy[language];
+  const numberLocale = language === "en" ? "en-US" : "vi-VN";
   const [initialRoute] = useState<InitialRoute>(() => getInitialRoute(location.pathname, location.search));
   const [crop, setCrop] = useState<CropType>(initialRoute.crop);
   const [regionId, setRegionId] = useState(1);
@@ -1112,7 +1113,7 @@ function RoutedApp() {
                 <span>VND/kg</span>
               </div>
               <div className="quote-price-row">
-                <strong className="num">{latestPrice.toLocaleString("vi-VN")}</strong>
+                <strong className="num">{latestPrice.toLocaleString(numberLocale)}</strong>
                 <span className={quoteChangePct >= 0 ? "quote-change positive num" : "quote-change negative num"}>
                   {quoteChangePct >= 0 ? "+" : ""}
                   {quoteChangePct.toFixed(2)}%
@@ -1142,7 +1143,7 @@ function RoutedApp() {
               </div>
               <div className="quote-range">
                 <span>{copy.latestPrice}</span>
-                <strong className="num">{latestPrice.toLocaleString("vi-VN")}</strong>
+                <strong className="num">{latestPrice.toLocaleString(numberLocale)}</strong>
               </div>
               {user?.is_admin ? (
                 <button
@@ -1197,7 +1198,7 @@ function RoutedApp() {
             <div className="market-status">
               <Database size={18} />
               <span>{copy.latestPrice}</span>
-              <strong className="num">{latestPrice.toLocaleString("vi-VN")} VND/kg</strong>
+              <strong className="num">{latestPrice.toLocaleString(numberLocale)} VND/kg</strong>
             </div>
           </section>
         </>

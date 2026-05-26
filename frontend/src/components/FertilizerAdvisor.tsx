@@ -451,10 +451,10 @@ export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdviso
           {result ? (
             <>
               <section className="fertilizer-kpi-grid">
-                <Kpi label={language === "en" ? "Nitrogen N" : "Đạm N"} value={result.recommendation.annual_total.n_kg_ha} before={result.recommendation.annual_total.n_kg_ha_before_adjustment} beforeLabel={copy.beforeAdjustment} />
-                <Kpi label={language === "en" ? "Phosphate P2O5" : "Lân P2O5"} value={result.recommendation.annual_total.p2o5_kg_ha} before={result.recommendation.annual_total.p2o5_kg_ha_before_adjustment} beforeLabel={copy.beforeAdjustment} />
-                <Kpi label={language === "en" ? "Potash K2O" : "Kali K2O"} value={result.recommendation.annual_total.k2o_kg_ha} before={result.recommendation.annual_total.k2o_kg_ha_before_adjustment} beforeLabel={copy.beforeAdjustment} />
-                <Kpi label={copy.lime} value={result.recommendation.annual_total.lime_kg_ha} unit="kg/ha" beforeLabel={copy.beforeAdjustment} />
+                <Kpi label={language === "en" ? "Nitrogen N" : "Đạm N"} value={result.recommendation.annual_total.n_kg_ha} before={result.recommendation.annual_total.n_kg_ha_before_adjustment} beforeLabel={copy.beforeAdjustment} language={language} />
+                <Kpi label={language === "en" ? "Phosphate P2O5" : "Lân P2O5"} value={result.recommendation.annual_total.p2o5_kg_ha} before={result.recommendation.annual_total.p2o5_kg_ha_before_adjustment} beforeLabel={copy.beforeAdjustment} language={language} />
+                <Kpi label={language === "en" ? "Potash K2O" : "Kali K2O"} value={result.recommendation.annual_total.k2o_kg_ha} before={result.recommendation.annual_total.k2o_kg_ha_before_adjustment} beforeLabel={copy.beforeAdjustment} language={language} />
+                <Kpi label={copy.lime} value={result.recommendation.annual_total.lime_kg_ha} unit="kg/ha" beforeLabel={copy.beforeAdjustment} language={language} />
               </section>
 
               <section className="fertilizer-panel fertilizer-session-panel">
@@ -554,12 +554,13 @@ function SectionTitle({ step, Icon, title, note }: { step: string; Icon: typeof 
   );
 }
 
-function Kpi({ label, value, before, unit = "kg/ha", beforeLabel = "trước hiệu chỉnh" }: { label: string; value: number; before?: number; unit?: string; beforeLabel?: string }) {
+function Kpi({ label, value, before, unit = "kg/ha", beforeLabel = "trước hiệu chỉnh", language = "vi" }: { label: string; value: number; before?: number; unit?: string; beforeLabel?: string; language?: "vi" | "en" }) {
+  const locale = language === "en" ? "en-US" : "vi-VN";
   return (
     <article>
       <span>{label}</span>
-      <strong>{value.toLocaleString("vi-VN")}</strong>
-      <small>{unit}{before !== undefined ? ` - ${beforeLabel} ${before.toLocaleString("vi-VN")}` : ""}</small>
+      <strong>{value.toLocaleString(locale)}</strong>
+      <small>{unit}{before !== undefined ? ` - ${beforeLabel} ${before.toLocaleString(locale)}` : ""}</small>
     </article>
   );
 }

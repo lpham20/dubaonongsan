@@ -1,5 +1,6 @@
 import { KeyRound, Play, RefreshCw, ServerCog } from "./icons";
 import type { AuthUser, ModelTrainingRun, PlatformJobRun } from "../lib/api";
+import { useLanguage } from "../contexts/LanguageContext";
 
 type Props = {
   user: AuthUser | null;
@@ -24,6 +25,7 @@ export function ProductionPanel({
   onRunDataQuality,
   onRunRetrain
 }: Props) {
+  const { language } = useLanguage();
   if (!user) return null;
   const latestJob = jobs[0];
   const latestModel = modelRuns[0];
@@ -65,19 +67,19 @@ export function ProductionPanel({
         <StatusCell
           label="Lần thu thập gần nhất"
           value={latestJob ? formatStatus(latestJob.status) : "Chưa chạy"}
-          detail={latestJob ? `${formatJobName(latestJob.job_name)} - ${formatDate(latestJob.started_at)}` : "Lịch chạy nền đang chờ chu kỳ"}
+          detail={latestJob ? `${formatJobName(latestJob.job_name)} - ${formatDate(latestJob.started_at, language)}` : "Lịch chạy nền đang chờ chu kỳ"}
         />
         <StatusCell
           label="Kiểm tra dữ liệu gần nhất"
           value={latestQuality ? formatStatus(latestQuality.status) : "Chưa chạy"}
-          detail={latestQuality ? formatDate(latestQuality.started_at) : "Chạy hằng ngày sau khi thu thập"}
+          detail={latestQuality ? formatDate(latestQuality.started_at, language) : "Chạy hằng ngày sau khi thu thập"}
         />
         <StatusCell
           label="Lần huấn luyện mô hình gần nhất"
           value={latestModel ? formatStatus(latestModel.status) : "Chưa chạy"}
           detail={
             latestModel?.rmse_vnd_per_kg
-              ? `RMSE ${Math.round(latestModel.rmse_vnd_per_kg).toLocaleString("vi-VN")} VND/kg`
+              ? `RMSE ${Math.round(latestModel.rmse_vnd_per_kg).toLocaleString(localeFor(language))} VND/kg`
               : "Có thể chạy thủ công hoặc theo chu kỳ"
           }
         />
@@ -110,8 +112,12 @@ function StatusCell({ label, value, detail }: { label: string; value: string; de
   );
 }
 
-function formatDate(value: string) {
-  return new Date(value).toLocaleString("vi-VN");
+function localeFor(language: "vi" | "en" = "vi") {
+  return language === "en" ? "en-US" : "vi-VN";
+}
+
+function formatDate(value: string, language: "vi" | "en" = "vi") {
+  return new Date(value).toLocaleString(localeFor(language));
 }
 
 function formatJobName(value: string) {

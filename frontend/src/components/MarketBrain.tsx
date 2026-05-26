@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { BarChart3, Brain, GitCompareArrows } from "./icons";
 import type { ChangeExplanation, MarketComparison, MarketIndex } from "../lib/api";
+import { useLanguage } from "../contexts/LanguageContext";
 
 type Props = {
   marketIndex: MarketIndex | null;
@@ -8,9 +9,10 @@ type Props = {
   comparison: MarketComparison | null;
 };
 
-const money = (value: number) => `${Math.round(value).toLocaleString("vi-VN")} VND/kg`;
+const money = (value: number, language: "vi" | "en") => `${Math.round(value).toLocaleString(language === "en" ? "en-US" : "vi-VN")} VND/kg`;
 
 function MarketBrainComponent({ marketIndex, explanation, comparison }: Props) {
+  const { language } = useLanguage();
   return (
     <section className="brain-grid">
       <article className="brain-panel index-panel">
@@ -18,7 +20,7 @@ function MarketBrainComponent({ marketIndex, explanation, comparison }: Props) {
           <BarChart3 size={18} />
           <h3>{marketIndex?.name ?? "Chỉ số thị trường"}</h3>
         </div>
-        <strong className="brain-number">{money(marketIndex?.latest_value_vnd ?? 0)}</strong>
+        <strong className="brain-number">{money(marketIndex?.latest_value_vnd ?? 0, language)}</strong>
         <span className={(marketIndex?.change_pct_7d ?? 0) >= 0 ? "positive" : "negative"}>
           {(marketIndex?.change_pct_7d ?? 0) >= 0 ? "+" : ""}
           {marketIndex?.change_pct_7d ?? 0}% / 7 ngày
@@ -52,7 +54,7 @@ function MarketBrainComponent({ marketIndex, explanation, comparison }: Props) {
           {comparison?.peers.slice(0, 6).map((peer) => (
             <div className="compare-row" key={peer.label}>
               <span>{peer.label}</span>
-              <strong>{money(peer.avg_price_vnd)}</strong>
+              <strong>{money(peer.avg_price_vnd, language)}</strong>
               <em className={peer.premium_pct >= 0 ? "positive" : "negative"}>
                 {peer.premium_pct >= 0 ? "+" : ""}
                 {peer.premium_pct}%

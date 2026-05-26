@@ -347,14 +347,16 @@ def _sensitivity_table(revenue_per_ha: float, cost_per_ha: float, fertilizer_cos
         for fertilizer_price_delta_pct in (-15, 0, 15):
             adjusted_revenue = revenue_per_ha * (1 + sell_price_delta_pct / 100)
             adjusted_cost = fixed_cost_per_ha + fertilizer_cost_per_ha * (1 + fertilizer_price_delta_pct / 100)
-            adjusted_profit = adjusted_revenue - adjusted_cost
-            roi = adjusted_profit / adjusted_cost * 100 if adjusted_cost > 0 else 0
+            adjusted_profit_per_ha = adjusted_revenue - adjusted_cost
+            roi = adjusted_profit_per_ha / adjusted_cost * 100 if adjusted_cost > 0 else 0
             scenarios.append(
                 {
                     "sell_price_delta_pct": sell_price_delta_pct,
                     "fertilizer_price_delta_pct": fertilizer_price_delta_pct,
                     "roi_pct": round(roi, 1),
-                    "net_profit_vnd": round(adjusted_profit * area_ha, 2),
+                    "net_profit_vnd_per_ha": round(adjusted_profit_per_ha, 2),
+                    "net_profit_vnd_total": round(adjusted_profit_per_ha * area_ha, 2),
+                    "net_profit_vnd": round(adjusted_profit_per_ha * area_ha, 2),
                 }
             )
     return {"matrix": scenarios}

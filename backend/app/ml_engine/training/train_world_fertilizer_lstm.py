@@ -144,7 +144,6 @@ def _build_model(lookback_window: int, feature_count: int, horizon_days: int) ->
         24,
         activation="tanh",
         recurrent_activation="sigmoid",
-        unroll=True,
         name="world_price_lstm",
     )(inputs)
     x = tf.keras.layers.Dense(48, activation="relu", name="world_forecast_dense")(x)

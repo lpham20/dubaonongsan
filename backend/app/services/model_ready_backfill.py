@@ -14,6 +14,7 @@ from app.models import DailyMarketPrice, DurianVariety, ProductionRegion
 BACKFILL_SOURCE = "Nội suy từ giá vùng"
 MODEL_READY_DAYS = 240
 MODEL_READY_GRADE = "Loại A"
+ANCHOR_LOOKBACK_DAYS = 365
 
 NON_PRODUCTION_REGIONS = {"Thị trường Việt Nam", "Chợ đầu mối TP.HCM"}
 
@@ -237,6 +238,11 @@ class ModelReadyBackfillService:
             filters.append(DailyMarketPrice.variety_id == variety_id)
         if filters:
             stmt = stmt.where(and_(*filters))
+        latest = self.db.scalar(
+            select(func.max(DailyMarketPrice.record_timestamp)).where(DailyMarketPrice.crop_type == self.crop_type)
+        )
+        if latest is not None:
+            stmt = stmt.where(DailyMarketPrice.record_timestamp >= latest - timedelta(days=ANCHOR_LOOKBACK_DAYS))
         rows = self.db.scalars(stmt.order_by(DailyMarketPrice.record_timestamp.desc()).limit(240)).all()
         return [float(row) for row in rows]
 

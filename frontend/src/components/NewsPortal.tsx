@@ -451,7 +451,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
                     <TrendSparkline topic={topic} impact={impact} />
                   </div>
                   <small>
-                    {impact} · {formatDate(article.published_at ?? article.scraped_at)}
+                    {impact} · {formatDate(article.published_at ?? article.scraped_at, language)}
                   </small>
                 </Link>
               ))}
@@ -484,9 +484,9 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
       {rest.length ? (
         <>
         <div className="news-archive-heading">
-          <h2>Kho tin thị trường</h2>
+          <h2>{language === "en" ? "Market news archive" : "Kho tin thị trường"}</h2>
           <span>
-            Hiển thị {(activePage - 1) * NEWS_PAGE_SIZE + 1}-{Math.min(activePage * NEWS_PAGE_SIZE, rest.length)} / {rest.length} tin
+            {language === "en" ? "Showing" : "Hiển thị"} {(activePage - 1) * NEWS_PAGE_SIZE + 1}-{Math.min(activePage * NEWS_PAGE_SIZE, rest.length)} / {rest.length} {language === "en" ? "stories" : "tin"}
           </span>
         </div>
         <div className="news-list">
@@ -495,7 +495,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
               <NewsImage article={article} />
               <div>
                 <div className="news-meta-line">
-                  <span>{topic}</span>
+                  <span>{topicLabel(topic, language)}</span>
                   <ImpactBadge impact={impact} />
                 </div>
                 <h3>{displayTitle(article.title, 92)}</h3>
@@ -503,9 +503,9 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
                 <RelatedTag relation={relation} />
                 <div className="news-source-row">
                   <small>{article.source_name}</small>
-                  <small className="num">{formatDate(article.published_at ?? article.scraped_at)}</small>
+                  <small className="num">{formatDate(article.published_at ?? article.scraped_at, language)}</small>
                   <Link to={withLanguagePrefix(newsPath(article), language)}>
-                    Xem chi tiết
+                    {language === "en" ? "Read details" : "Xem chi tiết"}
                     <ExternalLink size={14} />
                   </Link>
                 </div>
@@ -514,7 +514,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
           ))}
         </div>
         {pageCount > 1 ? (
-          <nav className="news-pagination" aria-label="Phân trang tin tức">
+          <nav className="news-pagination" aria-label={language === "en" ? "News pagination" : "Phân trang tin tức"}>
             {paginationItems(activePage, pageCount).map((item, index) =>
               item === "..." ? (
                 <span key={`gap-${index}`}>...</span>
@@ -575,7 +575,7 @@ function PriceBoardSection({
     <section className="news-price-board">
       <div className="news-price-board-header">
         <div>
-          <h1>{language === "en" ? `${cropName} prices today, ${formatDate(latestDate)}` : `${meta.title} hôm nay ngày ${formatDate(latestDate)}`}</h1>
+          <h1>{language === "en" ? `${cropName} prices today, ${formatDate(latestDate, language)}` : `${meta.title} hôm nay ngày ${formatDate(latestDate, language)}`}</h1>
           <div className="news-price-board-meta">
             <span>{language === "en" ? "Agricultural price board" : "Bảng giá nông sản"}</span>
             <FreshnessBanner />
@@ -625,15 +625,15 @@ function PriceBoardSection({
                     </td>
                     <td><span lang={languageForCropName(row.variety)}>{row.variety}</span></td>
                     <td>{row.quality_grade ?? (language === "en" ? "Market standard" : "Chuẩn thị trường")}</td>
-                    <td className="num">{formatMoney(row.min_price_vnd ?? row.max_price_vnd)}</td>
-                    <td className="num">{formatMoney(row.max_price_vnd ?? row.min_price_vnd)}</td>
-                    <td className="num">{formatDate(row.timestamp)}</td>
+                    <td className="num">{formatMoney(row.min_price_vnd ?? row.max_price_vnd, language)}</td>
+                    <td className="num">{formatMoney(row.max_price_vnd ?? row.min_price_vnd, language)}</td>
+                    <td className="num">{formatDate(row.timestamp, language)}</td>
                     <td>
                       {row.farmer_report_price_vnd ? (
                         <>
-                          <strong>{formatMoney(row.farmer_report_price_vnd)}</strong>
+                          <strong>{formatMoney(row.farmer_report_price_vnd, language)}</strong>
                           <small>
-                            {row.farmer_report_quality_grade ?? (language === "en" ? "Reference price" : "Giá tham khảo")} · {row.farmer_reported_at ? formatDate(row.farmer_reported_at) : ""}
+                            {row.farmer_report_quality_grade ?? (language === "en" ? "Reference price" : "Giá tham khảo")} · {row.farmer_reported_at ? formatDate(row.farmer_reported_at, language) : ""}
                           </small>
                         </>
                       ) : (
@@ -653,7 +653,7 @@ function PriceBoardSection({
                     <strong>{row.province ?? row.region}</strong>
                     {row.province && row.region !== row.province ? <small>{row.region}</small> : null}
                   </div>
-                  <span className="num">{formatDate(row.timestamp)}</span>
+                  <span className="num">{formatDate(row.timestamp, language)}</span>
                 </div>
                 <div className="news-price-card-meta">
                   <span lang={languageForCropName(row.variety)}>{row.variety}</span>
@@ -662,20 +662,20 @@ function PriceBoardSection({
                 <div className="news-price-card-range">
                   <span>
                     <small>{language === "en" ? "Low price" : "Giá thấp"}</small>
-                    <b className="num">{formatMoney(row.min_price_vnd ?? row.max_price_vnd)}</b>
+                    <b className="num">{formatMoney(row.min_price_vnd ?? row.max_price_vnd, language)}</b>
                   </span>
                   <span>
                     <small>{language === "en" ? "High price" : "Giá cao"}</small>
-                    <b className="num">{formatMoney(row.max_price_vnd ?? row.min_price_vnd)}</b>
+                    <b className="num">{formatMoney(row.max_price_vnd ?? row.min_price_vnd, language)}</b>
                   </span>
                 </div>
                 <div className="news-price-card-footer">
                   {row.farmer_report_price_vnd ? (
                     <>
                       <span>{language === "en" ? "Farmer quote" : "Báo giá nông dân"}</span>
-                      <strong className="num">{formatMoney(row.farmer_report_price_vnd)}</strong>
+                      <strong className="num">{formatMoney(row.farmer_report_price_vnd, language)}</strong>
                       <small>
-                        {row.farmer_report_quality_grade ?? (language === "en" ? "Reference price" : "Giá tham khảo")}{row.farmer_reported_at ? ` · ${formatDate(row.farmer_reported_at)}` : ""}
+                        {row.farmer_report_quality_grade ?? (language === "en" ? "Reference price" : "Giá tham khảo")}{row.farmer_reported_at ? ` · ${formatDate(row.farmer_reported_at, language)}` : ""}
                       </small>
                     </>
                   ) : (
@@ -921,7 +921,7 @@ function LeadNewsCard({ item }: { item: RankedArticle }) {
           <small>{item.article.source_name}</small>
           <small>
             <CalendarDays size={14} />
-            {formatDate(item.article.published_at ?? item.article.scraped_at)}
+            {formatDate(item.article.published_at ?? item.article.scraped_at, language)}
           </small>
         </div>
         <Link to={withLanguagePrefix(newsPath(item.article), language)}>
@@ -934,6 +934,7 @@ function LeadNewsCard({ item }: { item: RankedArticle }) {
 }
 
 function NewsImage({ article }: { article: NewsArticle }) {
+  const { language } = useLanguage();
   const imageUrl = normalizeNewsImageUrl(article.image_url);
   const logoUrl = sourceLogoUrl(article.source_url);
   const [imageFailed, setImageFailed] = useState(false);
@@ -953,7 +954,7 @@ function NewsImage({ article }: { article: NewsArticle }) {
       {hasOriginalImage ? (
         <img
           src={imageUrl}
-          alt={`Ảnh minh họa: ${article.title}`}
+          alt={language === "en" ? `Illustration: ${article.title}` : `Ảnh minh họa: ${article.title}`}
           loading="lazy"
           decoding="async"
           width="320"
@@ -966,7 +967,7 @@ function NewsImage({ article }: { article: NewsArticle }) {
             {logoUrl && !logoFailed ? (
               <img
                 src={logoUrl}
-                alt={`Logo ${article.source_name}`}
+                alt={`${article.source_name} logo`}
                 loading="lazy"
                 decoding="async"
                 width="64"
@@ -1216,17 +1217,21 @@ function normalize(value: string) {
     .toLowerCase();
 }
 
-function formatDate(value: string) {
-  return new Date(value).toLocaleDateString("vi-VN");
+function localeFor(language: "vi" | "en" = "vi") {
+  return language === "en" ? "en-US" : "vi-VN";
+}
+
+function formatDate(value: string, language: "vi" | "en" = "vi") {
+  return new Date(value).toLocaleDateString(localeFor(language));
 }
 
 function priceValue(point: PricePoint) {
   return Math.max(point.min_price_vnd ?? 0, point.max_price_vnd ?? 0);
 }
 
-function formatMoney(value: number | null | undefined) {
+function formatMoney(value: number | null | undefined, language: "vi" | "en" = "vi") {
   if (!value) return "-";
-  return `${Math.round(value).toLocaleString("vi-VN")} đ/kg`;
+  return `${Math.round(value).toLocaleString(localeFor(language))} ${language === "en" ? "VND/kg" : "đ/kg"}`;
 }
 
 function languageForCropName(value: string) {

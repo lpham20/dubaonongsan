@@ -126,4 +126,9 @@ def _load_tflite_module():
 
 
 def _normalize_crop(crop_type: str) -> str:
+    """Normalize route/API crop keys to artifact file keys.
+
+    Public routes use both `sau-rieng` and `sau_rieng`; model artifacts are
+    stored with underscores so cache keys must collapse those variants.
+    """
     return crop_type.strip().lower().replace("-", "_")
