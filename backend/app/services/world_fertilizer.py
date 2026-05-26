@@ -13,6 +13,14 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.cache import invalidate_cache
+from app.core.job_status import (
+    STATUS_DUPLICATE,
+    STATUS_EMPTY,
+    STATUS_FAILED,
+    STATUS_RUNNING,
+    STATUS_SUCCESS,
+    SUCCESS_STATUSES,
+)
 from app.ingestion.world_fertilizer_records import WorldFertilizerObservation, WorldFertilizerScrapeResult
 from app.ingestion.world_fertilizer_registry import build_world_fertilizer_scrapers
 from app.ml_engine.world_fertilizer_lstm import predict_world_fertilizer_lstm
@@ -72,7 +80,7 @@ class WorldFertilizerIngestionService:
                 source=f"world-fertilizer:{scraper.source}",
                 source_url=scraper.source_url,
                 started_at=started_at,
-                status="đang chạy",
+                status=STATUS_RUNNING,
             )
             self.db.add(run)
             self.db.commit()
@@ -105,15 +113,15 @@ class WorldFertilizerIngestionService:
                 inserted, updated = self.store(result)
                 observations = result.observations
                 run.source_url = result.source_url
-                run.status = "thành công"
+                run.status = STATUS_SUCCESS
                 run.records_found = len(observations)
                 run.records_inserted = inserted
                 run.records_updated = updated
                 if len(observations) == 0:
-                    run.status = "trống"
+                    run.status = STATUS_EMPTY
                     run.error_message = "Parser tìm 0 dữ liệu commodity phân bón thế giới."
                 elif inserted == 0 and updated == 0:
-                    run.status = "trùng lặp"
+                    run.status = STATUS_DUPLICATE
                     run.error_message = "Tất cả dữ liệu commodity phân bón thế giới trùng với DB."
                 logger.info(
                     "World fertilizer scrape success: %s found=%d inserted=%d updated=%d",
@@ -126,17 +134,17 @@ class WorldFertilizerIngestionService:
                 self.db.rollback()
                 run = self.db.get(ScrapeRun, run.id)
                 if run:
-                    run.status = "thất bại"
+                    run.status = STATUS_FAILED
                     run.error_message = str(exc)
-                failed_summary = {"source": scraper.source, "source_url": scraper.source_url, "status": "thất bại", "error": str(exc)}
+                failed_summary = {"source": scraper.source, "source_url": scraper.source_url, "status": STATUS_FAILED, "error": str(exc)}
             except Exception as exc:
                 logger.exception("World fertilizer scrape failed: %s", scraper.source)
                 self.db.rollback()
                 run = self.db.get(ScrapeRun, run.id)
                 if run:
-                    run.status = "thất bại"
+                    run.status = STATUS_FAILED
                     run.error_message = str(exc)
-                failed_summary = {"source": scraper.source, "source_url": scraper.source_url, "status": "thất bại", "error": str(exc)}
+                failed_summary = {"source": scraper.source, "source_url": scraper.source_url, "status": STATUS_FAILED, "error": str(exc)}
             finally:
                 if run:
                     run.finished_at = datetime.now(UTC)
@@ -552,10 +560,9 @@ def _data_quality(rows: list[WorldCommodityPrice], points: list[tuple[datetime, 
 def _latest_successful_scrape_run(db: Session, sources: list[str]) -> ScrapeRun | None:
     if not sources:
         return None
-    success_statuses = ("thành công", "trùng lặp", "thanh cong")
     return db.scalar(
         select(ScrapeRun)
-        .where(ScrapeRun.source.in_(sources), ScrapeRun.status.in_(success_statuses))
+        .where(ScrapeRun.source.in_(sources), ScrapeRun.status.in_(SUCCESS_STATUSES))
         .order_by(desc(ScrapeRun.finished_at), desc(ScrapeRun.started_at))
         .limit(1)
     )

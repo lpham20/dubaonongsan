@@ -18,6 +18,15 @@ from sqlalchemy.orm import Session
 from app.core.cache import invalidate_cache
 from app.core.admin_units import is_crop_province
 from app.core.config import get_settings
+from app.core.job_status import (
+    STATUS_FAILED,
+    STATUS_RUNNING,
+    STATUS_SKIPPED,
+    STATUS_SUCCESS,
+    SUCCESS_STATUSES,
+    is_success_status,
+    is_terminal_status,
+)
 from app.db import SessionLocal
 from app.ingestion.input_price_service import InputPriceIngestionService
 from app.ingestion.service import PriceIngestionService
@@ -61,12 +70,12 @@ class PlatformJobService:
                     "public_price_calibration": calibrations,
                 }
                 invalidate_cache()
-                self._finish_job(job, "thành công", summary)
+                self._finish_job(job, STATUS_SUCCESS, summary)
                 return summary
             except Exception as exc:
                 self.db.rollback()
                 job = self.db.get(PlatformJobRun, job.job_id) or job
-                self._finish_job(job, "lỗi", None, str(exc))
+                self._finish_job(job, STATUS_FAILED, None, str(exc))
                 raise
 
     def run_news_scrape(self) -> dict:
@@ -75,12 +84,12 @@ class PlatformJobService:
             try:
                 summary = ContentPortalService(self.db).scrape_news()
                 invalidate_cache("news")
-                self._finish_job(job, "thành công", summary)
+                self._finish_job(job, STATUS_SUCCESS, summary)
                 return summary
             except Exception as exc:
                 self.db.rollback()
                 job = self.db.get(PlatformJobRun, job.job_id) or job
-                self._finish_job(job, "lỗi", None, str(exc))
+                self._finish_job(job, STATUS_FAILED, None, str(exc))
                 raise
 
     def run_input_price_scrape(self) -> dict:
@@ -89,12 +98,12 @@ class PlatformJobService:
             try:
                 summary = {"scrape": InputPriceIngestionService(self.db).scrape_and_store(source=None)}
                 invalidate_cache("input-price")
-                self._finish_job(job, "thành công", summary)
+                self._finish_job(job, STATUS_SUCCESS, summary)
                 return summary
             except Exception as exc:
                 self.db.rollback()
                 job = self.db.get(PlatformJobRun, job.job_id) or job
-                self._finish_job(job, "lỗi", None, str(exc))
+                self._finish_job(job, STATUS_FAILED, None, str(exc))
                 raise
 
     def run_world_fertilizer_scrape(self, source: str | None = None) -> dict:
@@ -106,12 +115,12 @@ class PlatformJobService:
                 summary = {"scrape": WorldFertilizerIngestionService(self.db).scrape_and_store(source=source)}
                 invalidate_cache("world-fertilizer")
                 invalidate_cache("llm-input-prices")
-                self._finish_job(job, "thành công", summary)
+                self._finish_job(job, STATUS_SUCCESS, summary)
                 return summary
             except Exception as exc:
                 self.db.rollback()
                 job = self.db.get(PlatformJobRun, job.job_id) or job
-                self._finish_job(job, "lỗi", None, str(exc))
+                self._finish_job(job, STATUS_FAILED, None, str(exc))
                 raise
 
     def run_world_fertilizer_current_scrape(self, *, skip_if_success_today: bool = True) -> dict:
@@ -122,7 +131,7 @@ class PlatformJobService:
             try:
                 if skip_if_success_today and self._has_successful_scrape_today(f"world-fertilizer:{source}"):
                     summary = {"source": source, "reason": "already_succeeded_today"}
-                    self._finish_job(job, "bỏ qua", summary)
+                    self._finish_job(job, STATUS_SKIPPED, summary)
                     return summary
 
                 from app.services.world_fertilizer import WorldFertilizerIngestionService
@@ -137,20 +146,20 @@ class PlatformJobService:
                         summary = {"source": source, "attempts": attempt, "scrape": scrape_summaries}
                         invalidate_cache("world-fertilizer")
                         invalidate_cache("llm-input-prices")
-                        self._finish_job(job, "thành công", summary)
+                        self._finish_job(job, STATUS_SUCCESS, summary)
                         return summary
                     if attempt < attempts:
                         time.sleep(delay_seconds)
 
                 summary = {"source": source, "attempts": attempts, "scrape": scrape_summaries}
                 message = "CommodityPriceAPI Urea public scrape failed after configured retries."
-                self._finish_job(job, "lỗi", summary, message)
+                self._finish_job(job, STATUS_FAILED, summary, message)
                 raise RuntimeError(message)
             except Exception as exc:
                 self.db.rollback()
                 job = self.db.get(PlatformJobRun, job.job_id) or job
-                if job.status not in {"lỗi", "thành công", "bỏ qua"}:
-                    self._finish_job(job, "lỗi", None, str(exc))
+                if not is_terminal_status(job.status):
+                    self._finish_job(job, STATUS_FAILED, None, str(exc))
                 raise
 
     def run_weather(self) -> dict:
@@ -161,12 +170,12 @@ class PlatformJobService:
 
                 summary = populate_precipitation(self.db, days_back=90)
                 invalidate_cache()
-                self._finish_job(job, "thành công", summary)
+                self._finish_job(job, STATUS_SUCCESS, summary)
                 return summary
             except Exception as exc:
                 self.db.rollback()
                 job = self.db.get(PlatformJobRun, job.job_id) or job
-                self._finish_job(job, "lỗi", None, str(exc))
+                self._finish_job(job, STATUS_FAILED, None, str(exc))
                 raise
 
     def run_data_quality(self) -> dict:
@@ -178,12 +187,12 @@ class PlatformJobService:
                         *(self._quality_summary(crop) for crop in CROP_TYPES),
                     ]
                 }
-                self._finish_job(job, "thành công", summary)
+                self._finish_job(job, STATUS_SUCCESS, summary)
                 return summary
             except Exception as exc:
                 self.db.rollback()
                 job = self.db.get(PlatformJobRun, job.job_id) or job
-                self._finish_job(job, "lỗi", None, str(exc))
+                self._finish_job(job, STATUS_FAILED, None, str(exc))
                 raise
 
     def run_retrain(self) -> dict:
@@ -199,7 +208,7 @@ class PlatformJobService:
                         crop_type=crop,
                         started_at=started,
                         finished_at=datetime.now(UTC),
-                        status="thành công",
+                        status=STATUS_SUCCESS,
                         rmse_vnd_per_kg=metrics.get("rmse_vnd_per_kg"),
                         mae_vnd_per_kg=metrics.get("mae_vnd_per_kg"),
                         backtest_samples=metrics.get("backtest_samples", 0),
@@ -211,12 +220,12 @@ class PlatformJobService:
                 self.db.commit()
                 summary = {"models": results}
                 invalidate_cache()
-                self._finish_job(job, "thành công", summary)
+                self._finish_job(job, STATUS_SUCCESS, summary)
                 return summary
             except Exception as exc:
                 self.db.rollback()
                 job = self.db.get(PlatformJobRun, job.job_id) or job
-                self._finish_job(job, "lỗi", None, str(exc))
+                self._finish_job(job, STATUS_FAILED, None, str(exc))
                 raise
 
     def run_yield_feedback_reminder(self) -> dict:
@@ -237,12 +246,12 @@ class PlatformJobService:
                     "sample_session_codes": [item.session_id[:8].upper() for item in pending[:20]],
                     "note": "Email/SMS chưa cấu hình; job giữ danh sách phiên cần nhắc để Tier 2 có dữ liệu năng suất.",
                 }
-                self._finish_job(job, "thành công", summary)
+                self._finish_job(job, STATUS_SUCCESS, summary)
                 return summary
             except Exception as exc:
                 self.db.rollback()
                 job = self.db.get(PlatformJobRun, job.job_id) or job
-                self._finish_job(job, "lỗi", None, str(exc))
+                self._finish_job(job, STATUS_FAILED, None, str(exc))
                 raise
 
     def run_revoked_token_cleanup(self) -> dict:
@@ -251,12 +260,12 @@ class PlatformJobService:
             try:
                 deleted = cleanup_expired_revoked_tokens(self.db)
                 summary = {"deleted": deleted}
-                self._finish_job(job, "thanh cong", summary)
+                self._finish_job(job, STATUS_SUCCESS, summary)
                 return summary
             except Exception as exc:
                 self.db.rollback()
                 job = self.db.get(PlatformJobRun, job.job_id) or job
-                self._finish_job(job, "loi", None, str(exc))
+                self._finish_job(job, STATUS_FAILED, None, str(exc))
                 raise
 
     def latest_jobs(self, limit: int = 20) -> list[PlatformJobRun]:
@@ -268,14 +277,13 @@ class PlatformJobService:
     def _has_successful_scrape_today(self, source: str) -> bool:
         local_midnight = datetime.now(SCHEDULER_TZ).replace(hour=0, minute=0, second=0, microsecond=0)
         utc_midnight = local_midnight.astimezone(UTC)
-        success_statuses = ("thành công", "trùng lặp", "thanh cong")
         return (
             self.db.scalar(
                 select(ScrapeRun)
                 .where(
                     ScrapeRun.source == source,
                     ScrapeRun.started_at >= utc_midnight,
-                    ScrapeRun.status.in_(success_statuses),
+                    ScrapeRun.status.in_(SUCCESS_STATUSES),
                     ScrapeRun.records_found > 0,
                 )
                 .order_by(desc(ScrapeRun.started_at))
@@ -347,7 +355,7 @@ class PlatformJobService:
         }
 
     def _start_job(self, name: str) -> PlatformJobRun:
-        job = PlatformJobRun(job_name=name, started_at=datetime.now(UTC), status="đang chạy")
+        job = PlatformJobRun(job_name=name, started_at=datetime.now(UTC), status=STATUS_RUNNING)
         self.db.add(job)
         self.db.commit()
         self.db.refresh(job)
@@ -369,10 +377,9 @@ class PlatformJobService:
 
 
 def _world_fertilizer_scrape_succeeded(results: list[dict]) -> bool:
-    success_statuses = {"thành công", "trùng lặp", "thanh cong"}
     for item in results:
         status = str(item.get("status") or "").strip().lower()
-        if status in success_statuses and int(item.get("records_found") or 0) > 0:
+        if is_success_status(status) and int(item.get("records_found") or 0) > 0:
             return True
     return False
 

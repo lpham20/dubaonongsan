@@ -11,6 +11,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.cache import invalidate_cache
+from app.core.job_status import STATUS_DUPLICATE, STATUS_EMPTY, STATUS_FAILED, STATUS_RUNNING, STATUS_SUCCESS
 from app.ingestion.input_price_records import InputPriceObservation, InputPriceScrapeResult
 from app.ingestion.input_price_registry import build_input_price_scrapers
 from app.models import AgriInputPriceObservation, AgriInputProduct, ScrapeRun
@@ -35,7 +36,7 @@ class InputPriceIngestionService:
                 source=f"input:{scraper.source}",
                 source_url=scraper.source_url,
                 started_at=started_at,
-                status="đang chạy",
+                status=STATUS_RUNNING,
             )
             self.db.add(run)
             self.db.commit()
@@ -67,16 +68,16 @@ class InputPriceIngestionService:
                     raise last_error or RuntimeError(f"Input-price scrape did not return a result: {scraper.source}")
                 inserted, updated = self.store(result)
                 observations = result.observations
-                run.status = "thành công"
+                run.status = STATUS_SUCCESS
                 run.records_found = len(result.observations)
                 run.records_inserted = inserted
                 run.records_updated = updated
                 if len(result.observations) == 0:
-                    run.status = "trống"
+                    run.status = STATUS_EMPTY
                     run.error_message = "Parser tìm 0 dữ liệu giá phân bón."
                     logger.warning("Input-price scrape returned 0 records: %s", scraper.source)
                 if inserted == 0 and updated == 0 and len(result.observations) > 0:
-                    run.status = "trùng lặp"
+                    run.status = STATUS_DUPLICATE
                     run.error_message = "Tất cả dữ liệu giá phân bón trùng với DB."
                     logger.info("Input-price scrape parsed %d records but none persisted: %s", len(result.observations), scraper.source)
                 logger.info(
@@ -91,12 +92,12 @@ class InputPriceIngestionService:
                 self.db.rollback()
                 run = self.db.get(ScrapeRun, run.id)
                 if run:
-                    run.status = "thất bại"
+                    run.status = STATUS_FAILED
                     run.error_message = str(exc)
                 failed_summary = {
                     "source": scraper.source,
                     "source_url": scraper.source_url,
-                    "status": "thất bại",
+                    "status": STATUS_FAILED,
                     "error": str(exc),
                 }
             except Exception as exc:
@@ -104,12 +105,12 @@ class InputPriceIngestionService:
                 self.db.rollback()
                 run = self.db.get(ScrapeRun, run.id)
                 if run:
-                    run.status = "thất bại"
+                    run.status = STATUS_FAILED
                     run.error_message = str(exc)
                 failed_summary = {
                     "source": scraper.source,
                     "source_url": scraper.source_url,
-                    "status": "thất bại",
+                    "status": STATUS_FAILED,
                     "error": str(exc),
                 }
             finally:

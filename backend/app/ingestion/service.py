@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.admin_units import normalize_location
+from app.core.job_status import STATUS_DUPLICATE, STATUS_EMPTY, STATUS_FAILED, STATUS_RUNNING, STATUS_SUCCESS
 from app.ingestion.records import PriceObservation, ScrapeResult
 from app.ingestion.registry import build_scrapers
 from app.models import DailyMarketPrice, DurianVariety, ProductionRegion, ScrapeRun
@@ -29,7 +30,7 @@ class PriceIngestionService:
                 source=scraper.source,
                 source_url=scraper.source_url,
                 started_at=started_at,
-                status="đang chạy",
+                status=STATUS_RUNNING,
             )
             self.db.add(run)
             self.db.commit()
@@ -38,19 +39,19 @@ class PriceIngestionService:
                 result = scraper.scrape()
                 inserted, updated = self.store(result)
                 observations = result.observations
-                run.status = "thành công"
+                run.status = STATUS_SUCCESS
                 run.records_found = len(result.observations)
                 run.records_inserted = inserted
                 run.records_updated = updated
                 if len(result.observations) == 0:
-                    run.status = "trống"
+                    run.status = STATUS_EMPTY
                     run.error_message = "Parser tìm 0 dữ liệu - kiểm tra HTML nguồn."
                     logger.warning(
                         "Scrape returned 0 records - possibly source HTML changed or no new prices: %s",
                         scraper.source,
                     )
                 if inserted == 0 and updated == 0 and len(result.observations) > 0:
-                    run.status = "trùng lặp"
+                    run.status = STATUS_DUPLICATE
                     run.error_message = "Tất cả dữ liệu trùng với DB - nguồn chưa cập nhật."
                     logger.warning(
                         "Scrape parsed %d records but none persisted (all dedup): %s",
@@ -69,12 +70,12 @@ class PriceIngestionService:
                 self.db.rollback()
                 run = self.db.get(ScrapeRun, run.id)
                 if run:
-                    run.status = "thất bại"
+                    run.status = STATUS_FAILED
                     run.error_message = str(exc)
                 failed_summary = {
                     "source": scraper.source,
                     "source_url": scraper.source_url,
-                    "status": "thất bại",
+                    "status": STATUS_FAILED,
                     "error": str(exc),
                 }
             except Exception as exc:
@@ -82,12 +83,12 @@ class PriceIngestionService:
                 self.db.rollback()
                 run = self.db.get(ScrapeRun, run.id)
                 if run:
-                    run.status = "thất bại"
+                    run.status = STATUS_FAILED
                     run.error_message = str(exc)
                 failed_summary = {
                     "source": scraper.source,
                     "source_url": scraper.source_url,
-                    "status": "thất bại",
+                    "status": STATUS_FAILED,
                     "error": str(exc),
                 }
             finally:

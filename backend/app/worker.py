@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import argparse
 import signal
 import sys
 import threading
@@ -8,6 +9,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import desc, select
 
+from app.core.job_status import STATUS_EMPTY, SUCCESS_STATUSES
 from app.core.config import get_settings
 from app.db import SessionLocal, init_db
 from app.models import ScrapeRun
@@ -43,16 +45,30 @@ def bootstrap() -> None:
         content.seed_fallback_news()
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(description="Run the MarketAI background worker.")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Bootstrap and validate worker configuration without starting scheduled jobs.",
+    )
+    args = parser.parse_args(argv)
     signal.signal(signal.SIGTERM, handle_shutdown)
     signal.signal(signal.SIGINT, handle_shutdown)
     bootstrap()
     settings = get_settings()
+    if args.dry_run:
+        logger.info(
+            "Worker dry-run completed: scheduler would start with scrape_interval=%d min, news_interval=%d min",
+            settings.scrape_interval_minutes,
+            settings.news_scrape_interval_minutes,
+        )
+        return
     try:
         with SessionLocal() as db:
             last = db.scalar(
                 select(ScrapeRun.finished_at)
-                .where(ScrapeRun.status.in_(["thành công", "trùng lặp", "trống"]))
+                .where(ScrapeRun.status.in_(SUCCESS_STATUSES | {STATUS_EMPTY}))
                 .where(ScrapeRun.finished_at.is_not(None))
                 .order_by(desc(ScrapeRun.finished_at))
                 .limit(1)

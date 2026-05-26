@@ -135,7 +135,11 @@ function formatStatus(value: string) {
   const labels: Record<string, string> = {
     success: "Hoàn tất",
     completed: "Hoàn tất",
+    duplicate: "Trùng dữ liệu",
+    empty: "Không có dữ liệu mới",
+    skipped: "Bỏ qua",
     failed: "Lỗi",
+    error: "Lỗi",
     running: "Đang chạy",
     pending: "Đang chờ"
   };

@@ -2,7 +2,7 @@ from datetime import date, datetime
 from typing import Any
 
 from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Index, Integer, JSON, Numeric, String, Text, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from app.db import Base
 
@@ -151,6 +151,25 @@ class WorldCommodityForecast(Base):
     base_price_usd_per_tonne: Mapped[float | None] = mapped_column(Numeric(12, 2))
     realized_outcome_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
 
+    @validates("forecast_points_json")
+    def _validate_forecast_points(self, _key: str, value: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        if not isinstance(value, list) or not value:
+            raise ValueError("forecast_points_json must be a non-empty list")
+        required = {"date", "price_usd_per_tonne"}
+        for index, point in enumerate(value):
+            if not isinstance(point, dict):
+                raise ValueError(f"forecast point {index} must be an object")
+            missing = required - set(point)
+            if missing:
+                raise ValueError(f"forecast point {index} missing keys: {sorted(missing)}")
+            try:
+                price = float(point["price_usd_per_tonne"])
+            except (TypeError, ValueError) as exc:
+                raise ValueError(f"forecast point {index} has invalid price") from exc
+            if price <= 0:
+                raise ValueError(f"forecast point {index} price must be positive")
+        return value
+
 
 class RoiScenario(Base):
     __tablename__ = "roi_scenarios"
@@ -233,7 +252,7 @@ class ScrapeRun(Base):
     source_url: Mapped[str] = mapped_column(String(500))
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    status: Mapped[str] = mapped_column(String(30), default="đang chạy")
+    status: Mapped[str] = mapped_column(String(30), default="running")
     records_found: Mapped[int] = mapped_column(Integer, default=0)
     records_inserted: Mapped[int] = mapped_column(Integer, default=0)
     records_updated: Mapped[int] = mapped_column(Integer, default=0)
@@ -362,7 +381,7 @@ class PlatformJobRun(Base):
     job_name: Mapped[str] = mapped_column(String(80), index=True)
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    status: Mapped[str] = mapped_column(String(30), default="đang chạy")
+    status: Mapped[str] = mapped_column(String(30), default="running")
     summary: Mapped[str | None] = mapped_column(Text)
     error_message: Mapped[str | None] = mapped_column(Text)
 
@@ -374,7 +393,7 @@ class ModelTrainingRun(Base):
     crop_type: Mapped[str] = mapped_column(String(30), index=True)
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    status: Mapped[str] = mapped_column(String(30), default="đang chạy")
+    status: Mapped[str] = mapped_column(String(30), default="running")
     rmse_vnd_per_kg: Mapped[float | None] = mapped_column(Numeric(12, 2))
     mae_vnd_per_kg: Mapped[float | None] = mapped_column(Numeric(12, 2))
     backtest_samples: Mapped[int] = mapped_column(Integer, default=0)
