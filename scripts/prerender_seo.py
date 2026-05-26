@@ -4,7 +4,7 @@ import html
 import json
 import os
 import re
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlencode, urlparse
 from urllib.request import Request, urlopen
@@ -951,7 +951,7 @@ def render_static_pages() -> list[tuple[str, str | None]]:
         "lua": "lúa",
     }
     urls: list[tuple[str, str | None]] = []
-    today = datetime.now(UTC).date().isoformat()
+    today = datetime.now(timezone.utc).date().isoformat()
     landing_pages = [
         (
             "home.html",
@@ -1276,7 +1276,7 @@ def render_static_pages() -> list[tuple[str, str | None]]:
 
 
 def write_sitemap(urls: list[tuple[str, str | None]]) -> None:
-    today = datetime.now(UTC).date().isoformat()
+    today = datetime.now(timezone.utc).date().isoformat()
     static_urls = [
         (f"{SITE_BASE}/", today),
         (f"{SITE_BASE}/tin-tuc", today),
