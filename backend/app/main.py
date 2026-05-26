@@ -70,6 +70,21 @@ API_SECURITY_HEADERS = {
     "Permissions-Policy": "camera=(), microphone=(), geolocation=(), interest-cohort=()",
     "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
 }
+OPENAPI_TAGS = [
+    {"name": "auth", "description": "Account registration, login, logout and current-user APIs."},
+    {"name": "analytics", "description": "Crop price history, forecast, quality, heatmap and signal APIs."},
+    {"name": "content", "description": "News, guides, RSS, sitemap and user-submitted price reports."},
+    {"name": "fertilizer", "description": "Soil-test fertilizer recommendations and yield feedback."},
+    {"name": "input-prices", "description": "Domestic fertilizer input prices, health and forecast helpers."},
+    {"name": "world-fertilizer", "description": "World Urea, DAP and MOP benchmark history and 30-day forecasts."},
+    {"name": "metadata", "description": "Crop regions, varieties and other selection metadata."},
+    {"name": "roi", "description": "Farm profit calculation and scenario sensitivity APIs."},
+    {"name": "advisory", "description": "Selling timing, regional spreads and crop-comparison advisory APIs."},
+    {"name": "operations", "description": "Admin-only scrape, training, cleanup and platform job controls."},
+    {"name": "public", "description": "Public health endpoints used by monitoring and crawler checks."},
+    {"name": "llm-content", "description": "Markdown endpoints exposed for AI crawlers and search assistants."},
+    {"name": "security", "description": "Security reporting endpoints such as CSP violation reports."},
+]
 
 if settings.sentry_dsn:
     import sentry_sdk
@@ -132,7 +147,7 @@ async def lifespan(_: FastAPI):
     JobScheduler.shutdown()
 
 
-app = FastAPI(title=settings.app_name, version="0.1.0", lifespan=lifespan)
+app = FastAPI(title=settings.app_name, version="0.1.0", lifespan=lifespan, openapi_tags=OPENAPI_TAGS)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)

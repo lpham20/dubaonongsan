@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     create_demo_user: bool = False
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173", "http://127.0.0.1:5173"])
     auth_token_secret: str = Field(default="", description="Required in production")
+    auth_previous_token_secrets: str = Field(
+        default="",
+        description="Comma-separated old JWT secrets accepted during controlled key rotation.",
+    )
     auth_token_minutes: int = 60 * 24 * 7
     public_api_key: str = Field(default="", description="Required in production")
     iot_api_key: str = Field(default="", description="API key for IoT telemetry devices")

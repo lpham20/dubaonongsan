@@ -87,6 +87,10 @@ export function provinceLabel(value: string | null | undefined) {
   return value || "";
 }
 
+export function displayProvince(province: string | null | undefined, region?: string | null) {
+  return province || region || "";
+}
+
 export function translateFertilizerProduct(value: string, language: AppLanguage) {
   if (language === "vi") return value;
   return value

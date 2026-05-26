@@ -7,7 +7,6 @@ import {
   Database,
   Filter,
   Home,
-  IconContext,
   Leaf,
   Newspaper,
   Pin,
@@ -69,6 +68,7 @@ import {
   type Variety
 } from "./lib/api";
 import { cropSeoLabels, forecastPath, publicGuideSlug } from "./lib/seo";
+import { displayProvince } from "./lib/displayLabels";
 import { splitLanguagePath, withLanguagePrefix } from "./lib/localizedRoutes";
 
 const DataGrid = lazy(() => import("./components/DataGrid").then(({ DataGrid }) => ({ default: DataGrid })));
@@ -190,7 +190,7 @@ const appCopy = {
     loadGuidesError: "Không tải được hướng dẫn kỹ thuật.",
     saveWatchlistError: "Không lưu được danh sách ghim",
     invalidEmail: "Email không hợp lệ",
-    invalidPassword: "Mật khẩu cần tối thiểu 8 ký tự và có ít nhất 1 chữ số",
+    invalidPassword: "Mật khẩu cần tối thiểu 10 ký tự, có chữ thường và có ít nhất 1 chữ số hoặc 1 chữ hoa",
     missingName: "Vui lòng nhập họ tên",
     authFailed: "Không đăng nhập được",
     platformJobError: "Không chạy được job",
@@ -253,7 +253,7 @@ const appCopy = {
     loadGuidesError: "Could not load the technical guides.",
     saveWatchlistError: "Could not save the pinned markets.",
     invalidEmail: "Please enter a valid email address.",
-    invalidPassword: "Password must be at least 8 characters and include at least one number.",
+    invalidPassword: "Password must be at least 10 characters, include a lowercase letter, and include a number or uppercase letter.",
     missingName: "Please enter your full name.",
     authFailed: "Could not sign in.",
     platformJobError: "Could not run the job.",
@@ -319,6 +319,10 @@ const AUTH_GATE_MESSAGES = new Set([
   appCopy.en.advisoryAuthMessage,
   appCopy.en.accountProfitGate
 ]);
+
+function isValidAuthPassword(password: string) {
+  return password.length >= 10 && /[a-z]/.test(password) && (/[A-Z]/.test(password) || /\d/.test(password));
+}
 const newsViewPaths: Record<PriceNewsView, string> = {
   sau_rieng: "gia-sau-rieng",
   ca_phe: "gia-ca-phe",
@@ -816,7 +820,7 @@ function RoutedApp() {
   const ActiveIcon = activeTab.Icon;
   const selectedRegion = regions.find((item) => item.region_id === regionId);
   const selectedVariety = varieties.find((item) => item.variety_id === varietyId);
-  const watchKey = `${crop}|${regionId}|${varietyId}|${selectedRegion?.province ?? selectedRegion?.region_name ?? "Vùng"} - ${selectedVariety?.name ?? "Giống"}`;
+  const watchKey = `${crop}|${regionId}|${varietyId}|${displayProvince(selectedRegion?.province, selectedRegion?.region_name) || "Vùng"} - ${selectedVariety?.name ?? "Giống"}`;
 
   function toggleLayer(key: keyof typeof layers) {
     if (key === "rain" && !hasRainData) return;
@@ -952,7 +956,7 @@ function RoutedApp() {
       setError(copy.invalidEmail);
       return;
     }
-    if (password.length < 8 || !/\d/.test(password)) {
+    if (!isValidAuthPassword(password)) {
       setError(copy.invalidPassword);
       return;
     }
@@ -1059,7 +1063,6 @@ function RoutedApp() {
   const appShellClassName = `${baseAppShellClassName}${section === "news" || section === "inputPrices" ? " live-ticker-shell" : ""}`;
 
   return (
-    <IconContext.Provider value={{ size: 18, weight: "regular", mirrored: false }}>
     <main className={appShellClassName}>
       <AppHeader
         section={section}
@@ -1102,13 +1105,13 @@ function RoutedApp() {
                 <h1>
                   <span className="quote-h1-line1">{copy.quoteTitleToday(cropLabel)}{"\u00a0"}</span>
                   <span className="quote-h1-line2">
-                    {copy.quoteForecast(selectedRegion?.province)}
+                    {copy.quoteForecast(displayProvince(selectedRegion?.province, selectedRegion?.region_name) || null)}
                   </span>
                 </h1>
               </div>
               <FreshnessBanner />
               <div className="quote-meta">
-                <span>{selectedRegion?.province ?? selectedRegion?.region_name ?? copy.regionFallback}</span>
+                <span>{displayProvince(selectedRegion?.province, selectedRegion?.region_name) || copy.regionFallback}</span>
                 <span>{selectedVariety?.name ?? copy.varietyFallback}</span>
                 <span>VND/kg</span>
               </div>
@@ -1178,7 +1181,7 @@ function RoutedApp() {
                   ) : (
                     regions.map((region) => (
                       <option value={region.region_id} key={region.region_id}>
-                        {region.province ?? region.region_name}
+                        {displayProvince(region.province, region.region_name)}
                       </option>
                     ))
                   )}
@@ -1234,7 +1237,7 @@ function RoutedApp() {
             canonical={forecastPath(crop)}
             schemaJsonLd={buildPriceSchema({
               cropLabel: cropSeoLabels[crop],
-              regionLabel: selectedRegion?.province ?? selectedRegion?.region_name ?? (language === "en" ? "Vietnam" : "Việt Nam"),
+              regionLabel: displayProvince(selectedRegion?.province, selectedRegion?.region_name) || (language === "en" ? "Vietnam" : "Việt Nam"),
               varietyLabel: selectedVariety?.name ?? (language === "en" ? cropLabelsEn[crop] : cropSeoLabels[crop]),
               latestPrice,
               historical: visibleHistorical
@@ -1307,7 +1310,7 @@ function RoutedApp() {
             <>
               <AnalysisBrief
                 cropLabel={cropLabel}
-            regionLabel={selectedRegion?.province ?? selectedRegion?.region_name ?? copy.selectedRegionFallback}
+            regionLabel={displayProvince(selectedRegion?.province, selectedRegion?.region_name) || copy.selectedRegionFallback}
             varietyLabel={selectedVariety?.name ?? copy.selectedVarietyFallback}
                 historical={visibleHistorical}
                 forecast={forecast}
@@ -1378,7 +1381,6 @@ function RoutedApp() {
         onOpenInputPrices={() => changeSection("inputPrices")}
       />
     </main>
-    </IconContext.Provider>
   );
 }
 

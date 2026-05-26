@@ -553,6 +553,7 @@ const DEFAULT_API_BASE_URL = import.meta.env.PROD ? "https://api.dubaonongsan.co
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? DEFAULT_API_BASE_URL).replace(/\/$/, "");
 const jsonHeaders = { Accept: "application/json", "Content-Type": "application/json" };
 const GET_RETRY_DELAY_MS = 450;
+const inFlightGetRequests = new Map<string, Promise<unknown>>();
 
 function apiUrl(path: string) {
   if (/^https?:\/\//i.test(path)) return path;
@@ -648,24 +649,40 @@ async function requestJson<T>(url: string, init: RequestInit = {}): Promise<T> {
   const method = (init.method ?? "GET").toUpperCase();
   const headers = mergedJsonHeaders(init.headers);
   const attempts = method === "GET" ? 2 : 1;
+  const absoluteUrl = apiUrl(url);
+  const dedupeKey = method === "GET" && !init.signal && !init.body ? absoluteUrl : "";
 
-  for (let attempt = 1; attempt <= attempts; attempt += 1) {
-    try {
-      const response = await fetch(apiUrl(url), { ...init, headers });
-      return await parseJsonResponse<T>(response);
-    } catch (error) {
-      const canRetry =
-        attempt < attempts &&
-        !isAbortError(error) &&
-        !(init.signal instanceof AbortSignal && init.signal.aborted) &&
-        (!(error instanceof ApiRequestError) || error.transient);
-
-      if (!canRetry) throw error;
-      await sleep(GET_RETRY_DELAY_MS);
-    }
+  if (dedupeKey) {
+    const existing = inFlightGetRequests.get(dedupeKey);
+    if (existing) return existing as Promise<T>;
   }
 
-  throw new ApiRequestError("Không kết nối được API. Vui lòng thử lại sau vài giây.", { transient: true });
+  const promise = (async () => {
+    for (let attempt = 1; attempt <= attempts; attempt += 1) {
+      try {
+        const response = await fetch(absoluteUrl, { ...init, headers });
+        return await parseJsonResponse<T>(response);
+      } catch (error) {
+        const canRetry =
+          attempt < attempts &&
+          !isAbortError(error) &&
+          !(init.signal instanceof AbortSignal && init.signal.aborted) &&
+          (!(error instanceof ApiRequestError) || error.transient);
+
+        if (!canRetry) throw error;
+        await sleep(GET_RETRY_DELAY_MS);
+      }
+    }
+
+    throw new ApiRequestError("Không kết nối được API. Vui lòng thử lại sau vài giây.", { transient: true });
+  })();
+
+  if (dedupeKey) {
+    inFlightGetRequests.set(dedupeKey, promise);
+    void promise.finally(() => inFlightGetRequests.delete(dedupeKey)).catch(() => undefined);
+  }
+
+  return promise;
 }
 
 async function getJson<T>(url: string, signal?: AbortSignal): Promise<T> {

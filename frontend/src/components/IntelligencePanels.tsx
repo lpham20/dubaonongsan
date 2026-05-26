@@ -2,6 +2,7 @@ import { memo } from "react";
 import { AlertTriangle, ArrowDownRight, ArrowUpRight, BadgeCheck, Download, MapPinned, Pin } from "./icons";
 import type { DataQuality, HeatmapCell, Mover, StrategyAlert } from "../lib/api";
 import { useLanguage, type AppLanguage } from "../contexts/LanguageContext";
+import { displayProvince } from "../lib/displayLabels";
 
 type Props = {
   quality: DataQuality | null;
@@ -112,7 +113,7 @@ function IntelligencePanelsComponent({
         <div className="heatmap-list">
           {heatmap.slice(0, 10).map((cell) => (
             <div className="heatmap-row" key={`${cell.region_id}-${cell.province}`}>
-              <span>{cell.province ?? cell.region}</span>
+              <span>{displayProvince(cell.province, cell.region)}</span>
               <strong className="num">{money(cell.avg_price_vnd, language)}</strong>
               <em className={cell.change_pct >= 0 ? "positive num" : "negative num"}>
                 {cell.change_pct >= 0 ? "+" : ""}
@@ -150,7 +151,7 @@ function MoverList({ rows, positive = false }: { rows: Mover[]; positive?: boole
       {rows.slice(0, 5).map((row) => (
         <div className="mover-row" key={`${row.province}-${row.variety}`}>
           <div>
-            <strong>{row.province ?? row.region}</strong>
+            <strong>{displayProvince(row.province, row.region)}</strong>
             <span>{row.variety}</span>
           </div>
           <em className={positive ? "positive num" : "negative num"}>

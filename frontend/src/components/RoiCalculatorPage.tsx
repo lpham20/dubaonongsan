@@ -9,7 +9,7 @@ import {
   type RoiCalculateResponse
 } from "../lib/api";
 import { useLanguage, type AppLanguage } from "../contexts/LanguageContext";
-import { cropLabel } from "../lib/displayLabels";
+import { cropLabel, displayProvince } from "../lib/displayLabels";
 import { withLanguagePrefix } from "../lib/localizedRoutes";
 
 const cropOptions: { value: CropType; label: string; defaultYield: number; defaultPrice: number }[] = [
@@ -273,7 +273,7 @@ export function RoiCalculatorPage({
               <select value={regionId} onChange={(event) => setRegionId(Number(event.target.value) || "")}>
                 {regions.map((region) => (
                   <option key={region.region_id} value={region.region_id}>
-                    {region.province ?? region.region_name}
+                    {displayProvince(region.province, region.region_name)}
                   </option>
                 ))}
               </select>

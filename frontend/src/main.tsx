@@ -26,6 +26,8 @@ import "./styles/advisory.css";
 import "./styles/navigation-hierarchy.css";
 import "./styles/live-ticker.css";
 
+const SERVICE_WORKER_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
+
 if (typeof window !== "undefined") {
   window.addEventListener("error", (event) => {
     if (isRecoverableChunkError(event.error ?? event.message)) {
@@ -51,7 +53,7 @@ if (import.meta.env.PROD) {
       void registration?.update();
       window.setInterval(() => {
         void registration?.update();
-      }, 60 * 60 * 1000);
+      }, SERVICE_WORKER_UPDATE_INTERVAL_MS);
     },
     onOfflineReady() {
     }

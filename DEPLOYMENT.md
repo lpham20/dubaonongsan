@@ -1,29 +1,29 @@
-﻿# Triá»ƒn khai NÃ´ng nghiá»‡p sá»‘ chi phÃ­ tháº¥p
+# Triển Khai Dự Báo Nông Sản Chi Phí Thấp
 
-Má»¥c tiÃªu: frontend táº£i nhanh qua CDN, API khÃ´ng ngá»§, worker tá»± quÃ©t giÃ¡/tin tá»©c Ä‘á»‹nh ká»³, dá»¯ liá»‡u lÆ°u bá»n trong PostgreSQL.
+Mục tiêu của bản deploy hiện tại là giữ frontend tải nhanh qua Caddy/Cloudflare, API ổn định, worker chạy nền để quét giá và tin tức định kỳ, còn dữ liệu chính được lưu bền trong PostgreSQL.
 
-## Kiáº¿n trÃºc khuyáº¿n nghá»‹
+## 1. Kiến Trúc Khuyến Nghị
 
-1. Frontend: Cloudflare Pages, miá»…n phÃ­ cho giai Ä‘oáº¡n Ä‘áº§u, build tá»« thÆ° má»¥c `frontend`.
-2. Backend/API: má»™t VPS nhá» cháº¡y Docker Compose.
-3. Database: PostgreSQL cháº¡y cÃ¹ng VPS Ä‘á»ƒ tiáº¿t kiá»‡m chi phÃ­ ban Ä‘áº§u.
-4. Worker ná»n: cháº¡y cÃ¹ng VPS, tÃ¡ch khá»i API Ä‘á»ƒ job quÃ©t giÃ¡, quÃ©t tin, kiá»ƒm tra dá»¯ liá»‡u vÃ  retrain khÃ´ng lÃ m cháº­m request cá»§a ngÆ°á»i dÃ¹ng.
-5. Reverse proxy: Caddy tá»± cáº¥p HTTPS cho `api.dubaonongsan.com`.
+1. Frontend: build từ thư mục `frontend`, phục vụ bằng Caddy trên VPS và đi qua Cloudflare.
+2. Backend/API: một service Docker `api`, expose nội bộ cổng `8010`.
+3. Database: PostgreSQL chạy cùng VPS để tiết kiệm chi phí giai đoạn đầu.
+4. Worker nền: service Docker `worker`, tách khỏi API để job scrape, kiểm tra dữ liệu và train không làm chậm request người dùng.
+5. Reverse proxy: Caddy tự cấp HTTPS cho `dubaonongsan.com`, `www.dubaonongsan.com` và `api.dubaonongsan.com`.
 
-KhÃ´ng nÃªn dÃ¹ng backend miá»…n phÃ­ cÃ³ cÆ¡ cháº¿ sleep náº¿u muá»‘n táº£i á»•n Ä‘á»‹nh dÆ°á»›i 2 giÃ¢y. Khi backend ngá»§, request Ä‘áº§u tiÃªn thÆ°á»ng cháº­m vÃ  lÃ m há»ng tráº£i nghiá»‡m.
+Không nên dùng backend miễn phí có cơ chế sleep nếu muốn trải nghiệm ổn định. Khi backend ngủ, request đầu tiên thường chậm và dễ gây lỗi giao diện.
 
-## 1. Chuáº©n bá»‹ domain vÃ  DNS
+## 2. Chuẩn Bị Domain Và DNS
 
 Trong Cloudflare DNS:
 
-- `dubaonongsan.com` vÃ  `www.dubaonongsan.com`: trá» vá» Cloudflare Pages theo hÆ°á»›ng dáº«n khi add custom domain.
-- `api.dubaonongsan.com`: táº¡o báº£n ghi `A` trá» vá» IP VPS.
+- `dubaonongsan.com` và `www.dubaonongsan.com`: trỏ về IP VPS hoặc cấu hình theo proxy đang dùng.
+- `api.dubaonongsan.com`: tạo bản ghi `A` trỏ về IP VPS.
 
-Khuyáº¿n nghá»‹ lÃºc má»›i cáº¥p SSL: Ä‘á»ƒ `api` á»Ÿ cháº¿ Ä‘á»™ DNS only trÆ°á»›c. Sau khi Caddy cáº¥p chá»©ng chá»‰ thÃ nh cÃ´ng, cÃ³ thá»ƒ báº­t proxy Cloudflare náº¿u cáº§n.
+Khi mới cấp SSL, có thể để bản ghi `api` ở chế độ DNS only trước. Sau khi Caddy cấp chứng chỉ thành công, bật proxy Cloudflare nếu cần.
 
-## 2. Deploy backend trÃªn VPS
+## 3. Deploy Backend Và Frontend Trên VPS
 
-SSH vÃ o VPS rá»“i cÃ i Docker:
+SSH vào VPS rồi cài Docker nếu máy mới:
 
 ```bash
 sudo apt update
@@ -32,153 +32,179 @@ curl -fsSL https://get.docker.com | sh
 sudo usermod -aG docker $USER
 ```
 
-ÄÄƒng xuáº¥t SSH rá»“i Ä‘Äƒng nháº­p láº¡i Ä‘á»ƒ group `docker` cÃ³ hiá»‡u lá»±c.
+Đăng xuất SSH rồi đăng nhập lại để group `docker` có hiệu lực.
 
-Clone repo:
+Clone hoặc cập nhật repo:
 
 ```bash
-git clone <repo-url> nong-nghiep-so
-cd nong-nghiep-so
+git clone <repo-url> dubaonongsan
+cd dubaonongsan
 ```
 
-Táº¡o file mÃ´i trÆ°á»ng:
+Tạo file môi trường:
 
 ```bash
 cp deploy/.env.example deploy/.env
 cp backend/.env.production.example backend/.env.production
 ```
 
-Sá»­a `deploy/.env`:
+Ví dụ `deploy/.env`:
 
 ```env
 POSTGRES_DB=marketai
 POSTGRES_USER=marketai
 POSTGRES_PASSWORD=<mat-khau-db-rat-dai>
+FRONTEND_DOMAIN=dubaonongsan.com,www.dubaonongsan.com
 API_DOMAIN=api.dubaonongsan.com
 ```
 
-Sá»­a `backend/.env.production`:
+Ví dụ `backend/.env.production`:
 
 ```env
+MARKETAI_ENVIRONMENT=production
 MARKETAI_AUTH_TOKEN_SECRET=<chuoi-bi-mat-rat-dai>
+MARKETAI_AUTH_PREVIOUS_TOKEN_SECRETS=
 MARKETAI_PUBLIC_API_KEY=<api-key-public-rat-dai>
+MARKETAI_IOT_API_KEY=<iot-key-rat-dai>
 MARKETAI_CORS_ORIGINS=["https://dubaonongsan.com","https://www.dubaonongsan.com"]
 MARKETAI_START_SCHEDULER_IN_API=false
+MARKETAI_RATE_LIMIT_STORAGE_URI=redis://redis:6379/0
 MARKETAI_NEWS_SCRAPE_INTERVAL_MINUTES=180
-MARKETAI_SCRAPE_INTERVAL_MINUTES=1440
-MARKETAI_NEWS_SCRAPE_DAILY_HOUR=7
-MARKETAI_NEWS_SCRAPE_DAILY_MINUTE=0
+MARKETAI_SCRAPE_INTERVAL_MINUTES=120
+MARKETAI_DATA_QUALITY_INTERVAL_MINUTES=1440
 MARKETAI_RETRAIN_INTERVAL_MINUTES=1440
 ```
 
-Cháº¡y backend:
+Build frontend trước:
 
 ```bash
-cd deploy
-docker compose --env-file .env -f docker-compose.prod.yml up -d --build
-docker compose --env-file .env -f docker-compose.prod.yml ps
+cd frontend
+npm ci
+npm run build
+cd ..
 ```
 
-Kiá»ƒm tra API:
+Build và chạy production compose:
 
 ```bash
-curl https://api.dubaonongsan.com/health
+docker compose -f deploy/docker-compose.prod.yml build api worker
+docker compose -f deploy/docker-compose.prod.yml up -d api worker caddy
+docker compose -f deploy/docker-compose.prod.yml ps
 ```
 
-## 3. Deploy frontend trÃªn Cloudflare Pages
+Kiểm tra migration và API:
 
-Káº¿t ná»‘i repo vá»›i Cloudflare Pages:
-
-- Root directory: `frontend`
-- Build command: `npm run build`
-- Build output directory: `dist`
-- Environment variable:
-
-```env
-VITE_API_BASE_URL=https://api.dubaonongsan.com
+```bash
+docker compose -f deploy/docker-compose.prod.yml exec -T api alembic current
+curl -fsS https://api.dubaonongsan.com/api/v1/health/scrape
+curl -I https://dubaonongsan.com/
 ```
 
-Sau khi deploy xong, gáº¯n custom domain `dubaonongsan.com` vÃ  `www.dubaonongsan.com`.
+## 4. Job Nền Sau Khi Publish
 
-## 4. Job ná»n sau khi publish
+Compose production có các service chính:
 
-Compose production cÃ³ 2 service tÃ¡ch riÃªng:
+- `api`: phục vụ web/mobile request.
+- `worker`: chạy job nền theo lịch.
+- `postgres`: lưu dữ liệu.
+- `redis`: rate limit storage.
+- `caddy`: HTTPS, static frontend, reverse proxy API.
+- `postgres-backup`: backup PostgreSQL hằng ngày.
 
-- `api`: phá»¥c vá»¥ web vÃ  mobile request.
-- `worker`: tá»± cháº¡y job ná»n.
+Lịch mặc định:
 
-Lá»‹ch máº·c Ä‘á»‹nh:
-
-- Quét tin tức: lúc 07:00 mỗi sáng và mỗi 3 giờ.
-- QuÃ©t giÃ¡: má»—i 24 giá».
-- Kiá»ƒm tra cháº¥t lÆ°á»£ng dá»¯ liá»‡u: má»—i 24 giá».
-- Cháº¡y láº¡i Ä‘Ã¡nh giÃ¡ mÃ´ hÃ¬nh: má»—i 24 giá».
+- Quét giá nông sản: theo `MARKETAI_SCRAPE_INTERVAL_MINUTES`.
+- Quét tin tức: theo `MARKETAI_NEWS_SCRAPE_INTERVAL_MINUTES`.
+- Kiểm tra chất lượng dữ liệu: mỗi 24 giờ.
+- Đánh giá/train model: mỗi 24 giờ.
+- Dọn revoked token: mỗi ngày.
 
 Xem log worker:
 
 ```bash
-cd deploy
-docker compose --env-file .env -f docker-compose.prod.yml logs -f worker
+docker compose -f deploy/docker-compose.prod.yml logs -f worker
 ```
 
-Cháº¡y job thá»§ cÃ´ng khi cáº§n:
+Chạy job thủ công khi cần:
 
 ```bash
-docker compose --env-file .env -f docker-compose.prod.yml exec api curl -X POST \
+docker compose -f deploy/docker-compose.prod.yml exec -T api curl -X POST \
   -H "Authorization: Bearer <admin-token>" \
   http://localhost:8010/api/v1/platform/jobs/news
 ```
 
-## 5. Tá»‘i Æ°u Ä‘á»ƒ load dÆ°á»›i 2 giÃ¢y
+## 5. Backup Và Khôi Phục
 
-Viá»‡c quan trá»ng nháº¥t lÃºc Ä‘áº§u:
+Backup tự động chạy trong service `postgres-backup`, lưu file `.dump` ở `deploy/postgres-backup` và giữ 7 ngày gần nhất.
 
-1. Frontend pháº£i náº±m trÃªn Cloudflare Pages/CDN.
-2. API khÃ´ng Ä‘Æ°á»£c ngá»§.
-3. áº¢nh hero vÃ  áº£nh hÆ°á»›ng dáº«n nÃªn chuyá»ƒn sang WebP/AVIF, kÃ­ch thÆ°á»›c thá»±c táº¿ theo layout, trÃ¡nh áº£nh 2-4 MB.
-4. Báº­t gzip/zstd á»Ÿ Caddy, file `deploy/Caddyfile` Ä‘Ã£ cáº¥u hÃ¬nh sáºµn.
-5. Giá»¯ API vÃ  DB cÃ¹ng VPS trong giai Ä‘oáº¡n Ä‘áº§u Ä‘á»ƒ giáº£m latency vÃ  chi phÃ­.
-6. KhÃ´ng expose PostgreSQL ra internet.
-
-Khi traffic tÄƒng:
-
-- TÃ¡ch PostgreSQL sang managed database.
-- ThÃªm Redis cache cho ticker, tin tiÃªu Ä‘iá»ƒm, metadata.
-- DÃ¹ng object storage/CDN cho áº£nh bÃ i viáº¿t.
-- ThÃªm monitoring uptime vÃ  alert Telegram/email.
-
-## 6. Backup vÃ  cáº­p nháº­t
-
-Backup PostgreSQL:
+Backup thủ công:
 
 ```bash
-cd deploy
-docker compose --env-file .env -f docker-compose.prod.yml exec postgres \
-  pg_dump -U marketai marketai > backup-$(date +%F).sql
+docker compose -f deploy/docker-compose.prod.yml exec -T postgres \
+  pg_dump -U marketai -d marketai -Fc -f /tmp/backup-manual.dump
+docker compose -f deploy/docker-compose.prod.yml cp postgres:/tmp/backup-manual.dump ./backup-manual.dump
 ```
 
-Update code:
+Khôi phục vào database mới cần dừng API/worker trước, restore xong mới bật lại:
 
 ```bash
-git pull
-cd deploy
-docker compose --env-file .env -f docker-compose.prod.yml up -d --build
+docker compose -f deploy/docker-compose.prod.yml stop api worker
+docker compose -f deploy/docker-compose.prod.yml exec -T postgres \
+  pg_restore -U marketai -d marketai --clean --if-exists /backups/<file>.dump
+docker compose -f deploy/docker-compose.prod.yml up -d api worker
 ```
 
-Xem log API:
+## 6. Quy Trình Update An Toàn
+
+Trước khi deploy:
 
 ```bash
-cd deploy
-docker compose --env-file .env -f docker-compose.prod.yml logs -f api
+git status --short
+git pull --ff-only origin main
+cd backend && PYTHONPATH=. pytest -q
+cd ../frontend && npm run typecheck && npm run build
 ```
 
-## 7. Checklist trÆ°á»›c khi má»Ÿ public
+Deploy:
 
-- ÄÃ£ Ä‘á»•i toÃ n bá»™ secret trong `backend/.env.production`.
-- `MARKETAI_CORS_ORIGINS` chá»‰ chá»©a domain tháº­t.
-- VPS firewall chá»‰ má»Ÿ `22`, `80`, `443`.
-- `api.dubaonongsan.com/health` tráº£ vá» `{"status":"ok"}`.
-- Cloudflare Pages Ä‘ang build vá»›i `VITE_API_BASE_URL`.
-- Worker cÃ³ log cháº¡y vÃ  khÃ´ng restart liÃªn tá»¥c.
-- Frontend Lighthouse/Network khÃ´ng táº£i áº£nh quÃ¡ lá»›n.
+```bash
+cd ..
+docker compose -f deploy/docker-compose.prod.yml build api worker
+docker compose -f deploy/docker-compose.prod.yml up -d api worker caddy
+```
 
+Sau deploy:
+
+```bash
+docker compose -f deploy/docker-compose.prod.yml ps
+docker compose -f deploy/docker-compose.prod.yml logs --tail=120 api
+docker compose -f deploy/docker-compose.prod.yml logs --tail=120 worker
+curl -fsS https://api.dubaonongsan.com/api/v1/health/scrape
+curl -I https://dubaonongsan.com/
+```
+
+Nếu cần rollback:
+
+```bash
+git log --oneline -5
+git checkout <commit-truoc-do>
+cd frontend && npm run build
+cd ..
+docker compose -f deploy/docker-compose.prod.yml build api worker
+docker compose -f deploy/docker-compose.prod.yml up -d api worker caddy
+```
+
+## 7. Checklist Trước Khi Mở Public
+
+- Đã đổi toàn bộ secret trong `backend/.env.production`.
+- `MARKETAI_AUTH_TOKEN_SECRET` dài ít nhất 32 ký tự và không dùng giá trị mặc định.
+- Khi xoay JWT secret, đưa secret cũ vào `MARKETAI_AUTH_PREVIOUS_TOKEN_SECRETS` trong một thời gian chuyển tiếp rồi xóa sau.
+- `MARKETAI_CORS_ORIGINS` chỉ chứa domain thật, HTTPS.
+- Production không dùng SQLite.
+- Redis đang chạy để rate limit không dùng memory local.
+- VPS firewall chỉ mở `22`, `80`, `443`.
+- `https://api.dubaonongsan.com/api/v1/health/scrape` trả `status=ok`.
+- `https://dubaonongsan.com/` trả HTTP 200 và asset JS mới.
+- Worker không restart liên tục.
+- Backup PostgreSQL có file mới trong `deploy/postgres-backup`.
+- Log Caddy/API/worker có rotation, không để file log phình vô hạn.

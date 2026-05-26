@@ -14,7 +14,7 @@ import {
   type SellingTimeResponse
 } from "../lib/api";
 import { useLanguage, type AppLanguage } from "../contexts/LanguageContext";
-import { cropLabel } from "../lib/displayLabels";
+import { cropLabel, displayProvince } from "../lib/displayLabels";
 
 export type AdvisoryTool = "fertilizer" | "sellingTime" | "arbitrage" | "crossCrop";
 
@@ -94,7 +94,7 @@ function formatVnd(value: number, language: AppLanguage = "vi") {
 }
 
 function regionLabel(region: Region) {
-  return region.province ?? region.region_name;
+  return displayProvince(region.province, region.region_name);
 }
 
 export function AdvisoryHub({

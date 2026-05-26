@@ -21,6 +21,7 @@ bearer_scheme = HTTPBearer(auto_error=False)
 JWT_ALGORITHM = "HS256"
 JWT_ISSUER = "marketai"
 JWT_AUDIENCE = "marketai-web"
+INVALID_TOKEN_DETAIL = "Token không hợp lệ"
 
 
 def _legacy_hash_password(password: str, salt: str) -> str:
@@ -65,35 +66,51 @@ def create_access_token(user: AppUser) -> str:
     return jwt.encode(payload, settings.auth_token_secret, algorithm=JWT_ALGORITHM)
 
 
-def decode_access_token(token: str, db: Session | None = None, verify_revoked: bool = True) -> dict:
-    settings = get_settings()
+def _candidate_token_secrets(settings) -> list[str]:
+    previous_secrets = [
+        secret.strip()
+        for secret in str(getattr(settings, "auth_previous_token_secrets", "")).split(",")
+        if secret.strip()
+    ]
+    return list(dict.fromkeys([settings.auth_token_secret, *previous_secrets]))
+
+
+def _decode_with_secret(token: str, secret: str) -> dict:
     try:
-        payload = jwt.decode(
+        return jwt.decode(
             token,
-            settings.auth_token_secret,
+            secret,
             algorithms=[JWT_ALGORITHM],
             issuer=JWT_ISSUER,
             audience=JWT_AUDIENCE,
         )
     except jwt.MissingRequiredClaimError as exc:
         if str(getattr(exc, "claim", "")) != "aud":
-            raise HTTPException(status_code=401, detail="Token không hợp lệ") from exc
+            raise
+        return jwt.decode(
+            token,
+            secret,
+            algorithms=[JWT_ALGORITHM],
+            issuer=JWT_ISSUER,
+            options={"verify_aud": False},
+        )
+
+
+def decode_access_token(token: str, db: Session | None = None, verify_revoked: bool = True) -> dict:
+    settings = get_settings()
+    last_error: jwt.PyJWTError | None = None
+    for secret in _candidate_token_secrets(settings):
         try:
-            payload = jwt.decode(
-                token,
-                settings.auth_token_secret,
-                algorithms=[JWT_ALGORITHM],
-                issuer=JWT_ISSUER,
-                options={"verify_aud": False},
-            )
-        except jwt.PyJWTError as legacy_exc:
-            raise HTTPException(status_code=401, detail="Token không hợp lệ") from legacy_exc
-    except jwt.PyJWTError as exc:
-        raise HTTPException(status_code=401, detail="Token không hợp lệ") from exc
+            payload = _decode_with_secret(token, secret)
+            break
+        except jwt.PyJWTError as exc:
+            last_error = exc
+    else:
+        raise HTTPException(status_code=401, detail=INVALID_TOKEN_DETAIL) from last_error
     if db is not None and verify_revoked:
         jti = payload.get("jti")
         if jti and db.get(RevokedToken, str(jti)) is not None:
-            raise HTTPException(status_code=401, detail="Token da duoc dang xuat")
+            raise HTTPException(status_code=401, detail="Token đã được đăng xuất")
     return payload
 
 

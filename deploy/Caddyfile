@@ -33,6 +33,7 @@
 		output file /var/log/caddy/frontend.log {
 			roll_size 100MB
 			roll_keep 7
+			roll_keep_for 720h
 		}
 		format json
 		level INFO
@@ -241,6 +242,7 @@ EOF
 		output file /var/log/caddy/api.log {
 			roll_size 100MB
 			roll_keep 7
+			roll_keep_for 720h
 		}
 		format json
 		level INFO

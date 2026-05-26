@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
 import type { PricePoint } from "../lib/api";
+import { displayProvince } from "../lib/displayLabels";
 
 type Props = {
   points: PricePoint[];
@@ -58,9 +59,9 @@ function DataGridComponent({ points }: Props) {
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={`${row.timestamp}-${row.quality_grade}-${row.variety}-${row.province ?? row.region}`}>
+              <tr key={`${row.timestamp}-${row.quality_grade}-${row.variety}-${displayProvince(row.province, row.region)}`}>
                 <td className="num">{new Date(row.timestamp).toLocaleDateString(locale)}</td>
-                <td>{row.province ?? row.region}</td>
+                <td>{displayProvince(row.province, row.region)}</td>
                 <td>{row.variety}</td>
                 <td>{row.quality_grade}</td>
                 <td className="num">{row.min_price_vnd?.toLocaleString(locale)}</td>
@@ -73,7 +74,7 @@ function DataGridComponent({ points }: Props) {
       </div>
       <div className="mobile-price-cards" aria-label={copy.cardsLabel}>
         {rows.map((row) => (
-          <article key={`mobile-${row.timestamp}-${row.quality_grade}-${row.variety}-${row.province ?? row.region}`}>
+          <article key={`mobile-${row.timestamp}-${row.quality_grade}-${row.variety}-${displayProvince(row.province, row.region)}`}>
             <div>
               <strong>{row.variety}</strong>
               <span className="num">{new Date(row.timestamp).toLocaleDateString(locale)}</span>
@@ -81,7 +82,7 @@ function DataGridComponent({ points }: Props) {
             <dl>
               <div>
                 <dt>{copy.region}</dt>
-                <dd>{row.province ?? row.region}</dd>
+                <dd>{displayProvince(row.province, row.region)}</dd>
               </div>
               <div>
                 <dt>{copy.grade}</dt>

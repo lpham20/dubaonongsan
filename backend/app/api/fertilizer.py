@@ -198,6 +198,5 @@ def fertilizer_version() -> dict:
 
 
 @router.get("/fertilizer/healthz")
-@router.get("/healthz", include_in_schema=False)
 def fertilizer_healthz() -> dict:
     return {"status": "ok"}
