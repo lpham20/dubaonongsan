@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from calendar import monthrange
 from collections import defaultdict
 from datetime import UTC, datetime, timedelta
 import hashlib
@@ -440,7 +441,8 @@ def _daily_log_return_volatility(points: list[tuple[datetime, float, float, floa
 
 
 def _seasonal_multiplier(value: datetime) -> float:
-    month = value.month + (value.day - 1) / 31
+    days_in_month = monthrange(value.year, value.month)[1]
+    month = value.month + (value.day - 1) / days_in_month
     spring_summer_peak = _cyclic_peak(month, 5, width=1.55)
     winter_spring_peak = _cyclic_peak(month, 11, width=1.65)
     august_trough = _cyclic_peak(month, 8, width=1.9)

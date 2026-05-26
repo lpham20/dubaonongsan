@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import Any
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, JSON, Numeric, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Index, Integer, JSON, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -121,6 +121,7 @@ class WorldCommodityPrice(Base):
     __tablename__ = "world_commodity_prices"
     __table_args__ = (
         UniqueConstraint("commodity_slug", "source", "quote_type", "observed_at", name="uq_world_price"),
+        Index("ix_world_prices_commodity_observed_desc", "commodity_slug", "observed_at"),
     )
 
     price_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -130,7 +131,7 @@ class WorldCommodityPrice(Base):
     source_url: Mapped[str | None] = mapped_column(String(800))
     observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     price_usd_per_tonne: Mapped[float] = mapped_column(Numeric(12, 2))
-    currency: Mapped[str] = mapped_column(String(10), default="USD")
+    currency: Mapped[str] = mapped_column(String(10), default="USD", server_default="USD")
     confidence_score: Mapped[float] = mapped_column(Numeric(4, 3), default=0.75)
     raw_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
@@ -267,6 +268,7 @@ class WatchlistItem(Base):
     __tablename__ = "watchlist_items"
     __table_args__ = (
         UniqueConstraint("user_id", "crop_type", "region_id", "variety_id", name="uq_watchlist_market"),
+        Index("ix_watchlist_user_created", "user_id", "created_at"),
     )
 
     item_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

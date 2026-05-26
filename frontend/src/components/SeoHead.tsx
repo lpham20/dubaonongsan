@@ -14,25 +14,7 @@ type Props = {
   schemaJsonLd?: object | object[];
 };
 
-const managedMetaSelectors = [
-  "meta[name='description']",
-  "meta[property='og:title']",
-  "meta[property='og:description']",
-  "meta[property='og:type']",
-  "meta[property='og:url']",
-  "meta[property='og:image']",
-  "meta[property='og:image:type']",
-  "meta[property='og:image:width']",
-  "meta[property='og:image:height']",
-  "meta[property='og:locale']",
-  "meta[name='twitter:title']",
-  "meta[name='twitter:description']",
-  "meta[name='twitter:image']",
-  "meta[property='article:published_time']",
-  "link[rel='canonical']",
-  "link[rel='alternate'][hreflang]"
-];
-const JSON_LD_NONCE = "dubaonongsan-jsonld";
+const SEO_MANAGED_ATTR = "data-marketai-seo";
 
 export function SeoHead({
   title,
@@ -53,9 +35,6 @@ export function SeoHead({
 
   useInsertionEffect(() => {
     document.title = fullTitle;
-    managedMetaSelectors.forEach((selector) => {
-      document.head.querySelectorAll(selector).forEach((element) => element.remove());
-    });
     upsertMeta("name", "description", fullDescription);
     upsertMeta("property", "og:title", fullTitle);
     upsertMeta("property", "og:description", fullDescription);
@@ -69,11 +48,14 @@ export function SeoHead({
     upsertMeta("name", "twitter:title", fullTitle);
     upsertMeta("name", "twitter:description", fullDescription);
     upsertMeta("name", "twitter:image", image);
-    if (publishedAt) upsertMeta("property", "article:published_time", publishedAt);
-    const canonicalTag = document.createElement("link");
+    if (publishedAt) {
+      upsertMeta("property", "article:published_time", publishedAt);
+    } else {
+      removeManaged("meta[property='article:published_time']");
+    }
+    const canonicalTag = upsertManagedLink("link[rel='canonical']");
     canonicalTag.rel = "canonical";
     canonicalTag.href = fullCanonical;
-    document.head.appendChild(canonicalTag);
     upsertAlternate("vi", alternateVi);
     upsertAlternate("en", alternateEn);
     upsertAlternate("x-default", alternateVi);
@@ -87,7 +69,6 @@ export function SeoHead({
         <script
           key={index}
           type="application/ld+json"
-          nonce={JSON_LD_NONCE}
           dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
         />
       ))}
@@ -96,16 +77,44 @@ export function SeoHead({
 }
 
 function upsertMeta(attribute: "name" | "property", key: string, content: string) {
-  const meta = document.createElement("meta");
+  const selector = `meta[${attribute}='${cssEscape(key)}']`;
+  const meta = upsertManagedElement<HTMLMetaElement>(selector, () => document.createElement("meta"));
   meta.setAttribute(attribute, key);
   meta.content = content;
-  document.head.appendChild(meta);
 }
 
 function upsertAlternate(hreflang: string, href: string) {
-  const link = document.createElement("link");
+  const selector = `link[rel='alternate'][hreflang='${cssEscape(hreflang)}']`;
+  const link = upsertManagedLink(selector);
   link.rel = "alternate";
   link.hreflang = hreflang;
   link.href = href;
-  document.head.appendChild(link);
+}
+
+function upsertManagedLink(selector: string) {
+  return upsertManagedElement<HTMLLinkElement>(selector, () => document.createElement("link"));
+}
+
+function upsertManagedElement<T extends HTMLElement>(selector: string, createElement: () => T): T {
+  const managedSelector = `${selector}[${SEO_MANAGED_ATTR}='true']`;
+  const existing = document.head.querySelector<T>(managedSelector) ?? document.head.querySelector<T>(selector);
+  if (existing) {
+    existing.setAttribute(SEO_MANAGED_ATTR, "true");
+    return existing;
+  }
+  const element = createElement();
+  element.setAttribute(SEO_MANAGED_ATTR, "true");
+  document.head.appendChild(element);
+  return element;
+}
+
+function removeManaged(selector: string) {
+  document.head.querySelectorAll(`${selector}[${SEO_MANAGED_ATTR}='true']`).forEach((element) => element.remove());
+}
+
+function cssEscape(value: string) {
+  if (typeof CSS !== "undefined" && typeof CSS.escape === "function") {
+    return CSS.escape(value);
+  }
+  return value.replace(/['"\\]/g, "\\$&");
 }

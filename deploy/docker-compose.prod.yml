@@ -162,12 +162,17 @@ services:
     mem_limit: 128m
     entrypoint: |
       sh -c '
-      while true; do
+      cat > /usr/local/bin/marketai-postgres-backup <<'"'"'EOF'"'"'
+      #!/bin/sh
+      set -eu
         DATE=$$(date +%Y%m%d-%H%M%S)
         pg_dump -h postgres -U ${POSTGRES_USER:-marketai} -d ${POSTGRES_DB:-marketai} -Fc -f /backups/backup-$$DATE.dump
         find /backups -name "backup-*.dump" -mtime +7 -delete
-        sleep 86400
-      done'
+      EOF
+      chmod +x /usr/local/bin/marketai-postgres-backup
+      /usr/local/bin/marketai-postgres-backup || true
+      echo "0 3 * * * /usr/local/bin/marketai-postgres-backup >> /proc/1/fd/1 2>> /proc/1/fd/2" > /etc/crontabs/root
+      exec crond -f -l 8'
 
 volumes:
   postgres_data:

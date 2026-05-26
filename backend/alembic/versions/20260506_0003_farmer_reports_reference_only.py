@@ -16,11 +16,19 @@ branch_labels = None
 depends_on = None
 
 
+def _has_column(table_name: str, column_name: str) -> bool:
+    inspector = sa.inspect(op.get_bind())
+    if table_name not in set(inspector.get_table_names()):
+        return False
+    return column_name in {column["name"] for column in inspector.get_columns(table_name)}
+
+
 def upgrade() -> None:
-    op.add_column(
-        "user_price_reports",
-        sa.Column("approved_for_training", sa.Boolean(), nullable=False, server_default=sa.false()),
-    )
+    if not _has_column("user_price_reports", "approved_for_training"):
+        op.add_column(
+            "user_price_reports",
+            sa.Column("approved_for_training", sa.Boolean(), nullable=False, server_default=sa.false()),
+        )
     op.execute(
         """
         INSERT INTO user_price_reports (
@@ -62,4 +70,5 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_column("user_price_reports", "approved_for_training")
+    if _has_column("user_price_reports", "approved_for_training"):
+        op.drop_column("user_price_reports", "approved_for_training")

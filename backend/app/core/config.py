@@ -82,6 +82,22 @@ class Settings(BaseSettings):
                     raise ValueError(f"Production CORS origin must use HTTPS: {origin}")
         return origins
 
+    @field_validator("database_url")
+    @classmethod
+    def validate_database_url(cls, value: str, info) -> str:
+        environment = info.data.get("environment", "development")
+        if environment == "production" and value.startswith("sqlite"):
+            raise ValueError("MARKETAI_DATABASE_URL cannot use SQLite in production")
+        return value
+
+    @field_validator("rate_limit_storage_uri")
+    @classmethod
+    def validate_rate_limit_storage_uri(cls, value: str, info) -> str:
+        environment = info.data.get("environment", "development")
+        if environment == "production" and value == "memory://":
+            raise ValueError("MARKETAI_RATE_LIMIT_STORAGE_URI must use shared storage in production")
+        return value
+
 
 @lru_cache
 def get_settings() -> Settings:

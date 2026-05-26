@@ -9,6 +9,7 @@ import time
 
 import requests
 from sqlalchemy import and_, desc, func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.cache import invalidate_cache
@@ -32,6 +33,8 @@ DAILY_SIGNAL_SOURCES = {
     "investing_urea_current",
 }
 DAILY_SIGNAL_MIN_POINTS = 14
+DAILY_SIGNAL_STALE_AFTER_DAYS = 45
+MONTHLY_ANCHOR_STALE_AFTER_DAYS = 90
 
 COMMODITIES = {
     "urea": {
@@ -145,7 +148,7 @@ class WorldFertilizerIngestionService:
             invalidate_cache("llm-input-prices")
         return summaries
 
-    def store(self, result: WorldFertilizerScrapeResult) -> tuple[int, int]:
+    def store(self, result: WorldFertilizerScrapeResult, *, _retry_on_integrity: bool = True) -> tuple[int, int]:
         inserted = 0
         updated = 0
         pending: dict[tuple[str, str, str, datetime], WorldCommodityPrice] = {}
@@ -191,7 +194,14 @@ class WorldFertilizerIngestionService:
             self.db.add(row)
             pending[key] = row
             inserted += 1
-        self.db.commit()
+        try:
+            self.db.commit()
+        except IntegrityError:
+            self.db.rollback()
+            if not _retry_on_integrity:
+                raise
+            logger.info("World fertilizer scrape raced an existing insert; retrying store once with fresh DB state.")
+            return self.store(result, _retry_on_integrity=False)
         return inserted, updated
 
     def _summary(self, run: ScrapeRun, observations: list[WorldFertilizerObservation]) -> dict:
@@ -306,7 +316,26 @@ class WorldFertilizerForecastService:
             daily_trend = monthly_trend / 30
             daily_volatility = min(max(raw_volatility / math.sqrt(30), 0.0012), 0.012)
         today = datetime.now(UTC).date()
-        lstm_prediction = predict_world_fertilizer_lstm(commodity_slug, points, horizon_days=horizon) if source_mode == "daily_signal" else None
+        staleness_days = _staleness_days(base_observed_at)
+        stale_after_days = DAILY_SIGNAL_STALE_AFTER_DAYS if source_mode == "daily_signal" else MONTHLY_ANCHOR_STALE_AFTER_DAYS
+        is_stale = staleness_days > stale_after_days
+        quality["staleness_days"] = staleness_days
+        quality["stale_after_days"] = stale_after_days
+        quality["is_stale"] = is_stale
+        if is_stale:
+            logger.warning(
+                "World fertilizer forecast anchor is stale commodity=%s source_mode=%s observed_at=%s staleness_days=%s",
+                commodity_slug,
+                source_mode,
+                base_observed_at,
+                staleness_days,
+            )
+
+        lstm_prediction = (
+            predict_world_fertilizer_lstm(commodity_slug, points, horizon_days=horizon)
+            if source_mode == "daily_signal" and not is_stale
+            else None
+        )
         if lstm_prediction is not None:
             forecast_daily = _forecast_daily_from_prices(
                 predicted_prices=lstm_prediction.prices,
@@ -486,6 +515,10 @@ def _has_recent_daily_signal(rows: list[WorldCommodityPrice]) -> bool:
 
 def _aware_utc(value: datetime) -> datetime:
     return value if value.tzinfo is not None else value.replace(tzinfo=UTC)
+
+
+def _staleness_days(value: datetime) -> int:
+    return max(0, (datetime.now(UTC) - _aware_utc(value)).days)
 
 
 def _data_quality(rows: list[WorldCommodityPrice], points: list[tuple[datetime, float, str]], source_mode: str) -> dict:

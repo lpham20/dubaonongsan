@@ -7,6 +7,7 @@ import time
 
 import requests
 from sqlalchemy import and_, desc, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.cache import invalidate_cache
@@ -122,7 +123,7 @@ class InputPriceIngestionService:
             invalidate_cache("llm-input-prices")
         return summaries
 
-    def store(self, result: InputPriceScrapeResult) -> tuple[int, int]:
+    def store(self, result: InputPriceScrapeResult, *, _retry_on_integrity: bool = True) -> tuple[int, int]:
         inserted = 0
         updated = 0
         pending: dict[tuple, AgriInputPriceObservation] = {}
@@ -188,7 +189,14 @@ class InputPriceIngestionService:
             self.db.add(row)
             pending[key] = row
             inserted += 1
-        self.db.commit()
+        try:
+            self.db.commit()
+        except IntegrityError:
+            self.db.rollback()
+            if not _retry_on_integrity:
+                raise
+            logger.info("Input-price scrape raced an existing insert; retrying store once with fresh DB state.")
+            return self.store(result, _retry_on_integrity=False)
         return inserted, updated
 
     def latest_runs(self, limit: int = 20) -> list[dict]:

@@ -60,6 +60,26 @@ export function MobileNavDrawer({
   }, [authOpen, drawerOpen]);
 
   useEffect(() => {
+    if (!drawerOpen || !headerRef.current?.parentElement) return;
+    const parent = headerRef.current.parentElement;
+    const hiddenSiblings: Array<{ element: HTMLElement; previous: string | null }> = [];
+    Array.from(parent.children).forEach((child) => {
+      if (child === headerRef.current || !(child instanceof HTMLElement)) return;
+      hiddenSiblings.push({ element: child, previous: child.getAttribute("aria-hidden") });
+      child.setAttribute("aria-hidden", "true");
+    });
+    return () => {
+      hiddenSiblings.forEach(({ element, previous }) => {
+        if (previous === null) {
+          element.removeAttribute("aria-hidden");
+        } else {
+          element.setAttribute("aria-hidden", previous);
+        }
+      });
+    };
+  }, [drawerOpen]);
+
+  useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         closeMenus();

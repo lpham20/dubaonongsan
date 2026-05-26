@@ -19,6 +19,7 @@ REGION_NAME = "Đồng bằng sông Cửu Long"
 PROVINCE = "Miền Tây"
 PACKAGE_SIZE_KG = 50.0
 MAX_BACKFILL_DATES = 24
+MAX_BRAND_LENGTH = 120
 
 PRICE_RANGE_RE = re.compile(
     r"(?P<low>\d{1,3}(?:[.,]\d{3})+)\s*(?:-|–|—|đến|to)\s*(?P<high>\d{1,3}(?:[.,]\d{3})+)",
@@ -251,7 +252,7 @@ def _normalize_brand_alias(value: str | None) -> str | None:
     for key, label in aliases.items():
         if key in folded:
             return label
-    return value
+    return value[:MAX_BRAND_LENGTH].rstrip()
 
 
 def _parse_price_range_midpoint(value: str) -> float | None:

@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 import logging
 import requests
 from sqlalchemy import and_, desc, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.admin_units import normalize_location
@@ -100,7 +101,7 @@ class PriceIngestionService:
                         summaries.append(self._summary(run, observations))
         return summaries
 
-    def store(self, result: ScrapeResult) -> tuple[int, int]:
+    def store(self, result: ScrapeResult, *, _retry_on_integrity: bool = True) -> tuple[int, int]:
         inserted = 0
         updated = 0
         pending: dict[tuple, DailyMarketPrice] = {}
@@ -155,7 +156,14 @@ class PriceIngestionService:
                 self.db.add(price)
                 pending[key] = price
                 inserted += 1
-        self.db.commit()
+        try:
+            self.db.commit()
+        except IntegrityError:
+            self.db.rollback()
+            if not _retry_on_integrity:
+                raise
+            logger.info("Price scrape raced an existing insert; retrying store once with fresh DB state.")
+            return self.store(result, _retry_on_integrity=False)
         return inserted, updated
 
     def latest_runs(self, limit: int = 20) -> list[dict]:

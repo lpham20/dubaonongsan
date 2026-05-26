@@ -15,7 +15,12 @@ function readInitialLanguage(): AppLanguage {
   if (typeof window === "undefined") return "vi";
   const pathLanguage = splitLanguagePath(window.location.pathname).language;
   if (pathLanguage) return pathLanguage;
-  const stored = window.localStorage.getItem("marketai.language");
+  let stored: string | null = null;
+  try {
+    stored = window.localStorage.getItem("marketai.language");
+  } catch {
+    stored = null;
+  }
   return stored === "en" ? "en" : "vi";
 }
 
@@ -24,7 +29,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.lang = language === "en" ? "en" : "vi";
-    window.localStorage.setItem("marketai.language", language);
+    try {
+      window.localStorage.setItem("marketai.language", language);
+    } catch {
+      // Private browsing modes can reject localStorage writes; URL language still drives rendering.
+    }
   }, [language]);
 
   const value = useMemo<LanguageContextValue>(
