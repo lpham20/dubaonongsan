@@ -292,6 +292,38 @@ class ModelTrainingRunOut(BaseModel):
     note: str | None = None
 
 
+class MlModelVersionOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    version_id: int
+    model_key: str
+    model_kind: str
+    crop_type: str | None = None
+    commodity_slug: str | None = None
+    artifact_path: str
+    artifact_sha256: str
+    metadata_json: dict | None = None
+    metrics_json: dict | None = None
+    is_active: bool
+    created_at: datetime
+    activated_at: datetime | None = None
+
+
+class FeatureFlagIn(BaseModel):
+    enabled: bool
+    description: str | None = Field(default=None, max_length=1000)
+
+
+class FeatureFlagOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    flag_key: str
+    enabled: bool
+    description: str | None = None
+    updated_at: datetime
+    updated_by: int | None = None
+
+
 class NewsArticleOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

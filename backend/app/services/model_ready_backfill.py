@@ -8,7 +8,7 @@ from sqlalchemy import and_, func, select
 from sqlalchemy.orm import Session
 
 from app.core.admin_units import is_crop_province
-from app.models import DailyMarketPrice, DurianVariety, ProductionRegion
+from app.models import DailyMarketPrice, DurianVariety, ModelReadyBackfillCheckpoint, ProductionRegion
 
 
 BACKFILL_SOURCE = "Nội suy từ giá vùng"
@@ -81,13 +81,14 @@ class BackfillSummary:
     records_found: int
     records_inserted: int
     records_updated: int
+    checkpoint_skipped: int
     model_ready_pairs: int
 
 
 class ModelReadyBackfillService:
     def __init__(self, db: Session, days: int = MODEL_READY_DAYS, crop_type: str = "sau_rieng") -> None:
         self.db = db
-        self.days = days
+        self.days = max(1, days)
         self.crop_type = crop_type
 
     def backfill(self) -> dict:
@@ -98,11 +99,17 @@ class ModelReadyBackfillService:
             .order_by(DurianVariety.variety_id)
         ).all()
         dates = self._date_window()
+        window_start = dates[0]
+        window_end = dates[-1]
         inserted = 0
         updated = 0
+        checkpoint_skipped = 0
 
         for region in regions:
             for variety in varieties:
+                if self._checkpoint_complete(region, variety, window_start=window_start, window_end=window_end):
+                    checkpoint_skipped += 1
+                    continue
                 anchors = self._anchor_prices(region, variety)
                 existing_dates = set(
                     self.db.scalars(
@@ -112,10 +119,14 @@ class ModelReadyBackfillService:
                                 DailyMarketPrice.variety_id == variety.variety_id,
                                 DailyMarketPrice.crop_type == self.crop_type,
                                 DailyMarketPrice.quality_grade == MODEL_READY_GRADE,
+                                DailyMarketPrice.record_timestamp >= window_start,
+                                DailyMarketPrice.record_timestamp <= window_end,
                             )
                         )
                     ).all()
                 )
+                pair_inserted = 0
+                pair_updated = 0
                 for idx, day in enumerate(dates):
                     if day in existing_dates:
                         continue
@@ -142,6 +153,7 @@ class ModelReadyBackfillService:
                         existing.max_price_vnd = max_price
                         existing.volume_traded_tons = volume
                         updated += 1
+                        pair_updated += 1
                     else:
                         self.db.add(
                             DailyMarketPrice(
@@ -157,7 +169,16 @@ class ModelReadyBackfillService:
                             )
                         )
                         inserted += 1
-        self.db.commit()
+                        pair_inserted += 1
+                self._mark_checkpoint(
+                    region,
+                    variety,
+                    window_start=window_start,
+                    window_end=window_end,
+                    records_inserted=pair_inserted,
+                    records_updated=pair_updated,
+                )
+                self.db.commit()
         total_pairs = len(regions) * len(varieties)
         return BackfillSummary(
             source=BACKFILL_SOURCE,
@@ -165,8 +186,68 @@ class ModelReadyBackfillService:
             records_found=total_pairs * len(dates),
             records_inserted=inserted,
             records_updated=updated,
+            checkpoint_skipped=checkpoint_skipped,
             model_ready_pairs=total_pairs,
         ).__dict__
+
+    def _checkpoint_complete(
+        self,
+        region: ProductionRegion,
+        variety: DurianVariety,
+        *,
+        window_start: datetime,
+        window_end: datetime,
+    ) -> bool:
+        checkpoint = self.db.scalar(
+            select(ModelReadyBackfillCheckpoint).where(
+                and_(
+                    ModelReadyBackfillCheckpoint.crop_type == self.crop_type,
+                    ModelReadyBackfillCheckpoint.region_id == region.region_id,
+                    ModelReadyBackfillCheckpoint.variety_id == variety.variety_id,
+                    ModelReadyBackfillCheckpoint.source == BACKFILL_SOURCE,
+                )
+            )
+        )
+        return bool(
+            checkpoint
+            and _day_key(checkpoint.window_start) == _day_key(window_start)
+            and _day_key(checkpoint.window_end) == _day_key(window_end)
+            and checkpoint.completed_at is not None
+        )
+
+    def _mark_checkpoint(
+        self,
+        region: ProductionRegion,
+        variety: DurianVariety,
+        *,
+        window_start: datetime,
+        window_end: datetime,
+        records_inserted: int,
+        records_updated: int,
+    ) -> None:
+        checkpoint = self.db.scalar(
+            select(ModelReadyBackfillCheckpoint).where(
+                and_(
+                    ModelReadyBackfillCheckpoint.crop_type == self.crop_type,
+                    ModelReadyBackfillCheckpoint.region_id == region.region_id,
+                    ModelReadyBackfillCheckpoint.variety_id == variety.variety_id,
+                    ModelReadyBackfillCheckpoint.source == BACKFILL_SOURCE,
+                )
+            )
+        )
+        if checkpoint is None:
+            checkpoint = ModelReadyBackfillCheckpoint(
+                crop_type=self.crop_type,
+                region_id=region.region_id,
+                variety_id=variety.variety_id,
+                source=BACKFILL_SOURCE,
+            )
+        checkpoint.window_start = window_start
+        checkpoint.window_end = window_end
+        checkpoint.completed_at = datetime.now(UTC)
+        checkpoint.records_inserted = records_inserted
+        checkpoint.records_updated = records_updated
+        self.db.add(checkpoint)
 
     def _production_regions(self) -> list[ProductionRegion]:
         rows = self.db.scalars(select(ProductionRegion).order_by(ProductionRegion.region_id)).all()
@@ -185,7 +266,9 @@ class ModelReadyBackfillService:
         ]
 
     def _date_window(self) -> list[datetime]:
-        latest = self.db.scalar(select(func.max(DailyMarketPrice.record_timestamp)))
+        latest = self.db.scalar(
+            select(func.max(DailyMarketPrice.record_timestamp)).where(DailyMarketPrice.crop_type == self.crop_type)
+        )
         if latest is None:
             latest = datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
         latest = latest.replace(tzinfo=None, hour=0, minute=0, second=0, microsecond=0)
@@ -275,3 +358,7 @@ class ModelReadyBackfillService:
     @staticmethod
     def _variety_base(variety_name: str) -> float:
         return VARIETY_BASE_PRICE.get(variety_name, 74000.0)
+
+
+def _day_key(value: datetime) -> datetime:
+    return value.replace(tzinfo=None, hour=0, minute=0, second=0, microsecond=0)

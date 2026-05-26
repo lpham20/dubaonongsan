@@ -7,8 +7,19 @@ from app.db import get_db
 from app.ingestion.input_price_service import InputPriceIngestionService
 from app.ingestion.service import PriceIngestionService
 from app.models import AppUser, IotSensorTelemetry
-from app.schemas import ModelTrainingRunOut, PlatformJobRunOut, ScrapeRunOut, SensorTelemetryIn, SensorTelemetryOut
+from app.schemas import (
+    FeatureFlagIn,
+    FeatureFlagOut,
+    MlModelVersionOut,
+    ModelTrainingRunOut,
+    PlatformJobRunOut,
+    ScrapeRunOut,
+    SensorTelemetryIn,
+    SensorTelemetryOut,
+)
 from app.services.auth import require_admin
+from app.services.feature_flags import list_feature_flags, set_feature_flag
+from app.services.ml_model_versions import list_model_versions
 from app.services.model_ready_backfill import ModelReadyBackfillService
 from app.services.platform_jobs import PlatformJobService
 
@@ -38,6 +49,42 @@ def platform_model_runs(
     db: Session = Depends(get_db),
 ) -> list:
     return PlatformJobService(db).latest_training_runs(limit=limit)
+
+
+@router.get("/platform/model-versions", response_model=list[MlModelVersionOut])
+def platform_model_versions(
+    _: AppUser = Depends(require_admin),
+    limit: int = Query(default=50, ge=1, le=200),
+    db: Session = Depends(get_db),
+) -> list:
+    return list_model_versions(db, limit=limit)
+
+
+@router.get("/platform/feature-flags", response_model=list[FeatureFlagOut])
+def platform_feature_flags(
+    _: AppUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> list:
+    return list_feature_flags(db)
+
+
+@router.put("/platform/feature-flags/{flag_key}", response_model=FeatureFlagOut)
+def platform_set_feature_flag(
+    flag_key: str,
+    payload: FeatureFlagIn,
+    user: AppUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    try:
+        return set_feature_flag(
+            db,
+            flag_key=flag_key,
+            enabled=payload.enabled,
+            description=payload.description,
+            user=user,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.post("/platform/jobs/scrape")
@@ -119,6 +166,22 @@ def run_revoked_token_cleanup_job(
     db: Session = Depends(get_db),
 ) -> dict:
     return PlatformJobService(db).run_revoked_token_cleanup()
+
+
+@router.post("/platform/jobs/privacy-cleanup")
+def run_privacy_cleanup_job(
+    _: AppUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> dict:
+    return PlatformJobService(db).run_privacy_cleanup()
+
+
+@router.post("/platform/jobs/model-registry-sync")
+def run_model_registry_sync_job(
+    _: AppUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> dict:
+    return PlatformJobService(db).run_model_registry_sync()
 
 
 @router.post(

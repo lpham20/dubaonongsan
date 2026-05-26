@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import Any
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Index, Integer, JSON, Numeric, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, CheckConstraint, Date, DateTime, ForeignKey, Index, Integer, JSON, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from app.db import Base
@@ -35,6 +35,7 @@ class ProductionRegion(Base):
 class DailyMarketPrice(Base):
     __tablename__ = "daily_market_prices"
     __table_args__ = (
+        CheckConstraint("crop_type IN ('sau_rieng', 'ca_phe', 'ho_tieu', 'lua')", name="ck_daily_market_prices_crop_type"),
         UniqueConstraint(
             "record_timestamp",
             "variety_id",
@@ -108,7 +109,7 @@ class AgriInputPriceObservation(Base):
     normalized_price_vnd: Mapped[float] = mapped_column(Numeric(14, 2))
     normalized_unit: Mapped[str] = mapped_column(String(30), default="kg")
     package_size_kg: Mapped[float | None] = mapped_column(Numeric(8, 2))
-    confidence_score: Mapped[float] = mapped_column(Numeric(4, 2), default=0.55)
+    confidence_score: Mapped[float] = mapped_column(Numeric(4, 3), default=0.55)
     data_kind: Mapped[str] = mapped_column(String(40), default="reference", index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
 
@@ -198,6 +199,9 @@ class RoiScenario(Base):
 
 class UserPriceReport(Base):
     __tablename__ = "user_price_reports"
+    __table_args__ = (
+        CheckConstraint("crop_type IN ('sau_rieng', 'ca_phe', 'ho_tieu', 'lua')", name="ck_user_price_reports_crop_type"),
+    )
 
     report_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     crop_type: Mapped[str] = mapped_column(String(30), index=True)
@@ -286,6 +290,7 @@ class RevokedToken(Base):
 class WatchlistItem(Base):
     __tablename__ = "watchlist_items"
     __table_args__ = (
+        CheckConstraint("crop_type IN ('sau_rieng', 'ca_phe', 'ho_tieu', 'lua')", name="ck_watchlist_items_crop_type"),
         UniqueConstraint("user_id", "crop_type", "region_id", "variety_id", name="uq_watchlist_market"),
         Index("ix_watchlist_user_created", "user_id", "created_at"),
     )
@@ -319,7 +324,7 @@ class RecommendationSession(Base):
     annual_p2o5_kg_ha: Mapped[float | None] = mapped_column(Numeric(8, 2))
     annual_k2o_kg_ha: Mapped[float | None] = mapped_column(Numeric(8, 2))
     confidence_tier: Mapped[str | None] = mapped_column(String(20), index=True)
-    confidence_score: Mapped[float | None] = mapped_column(Numeric(4, 2))
+    confidence_score: Mapped[float | None] = mapped_column(Numeric(4, 3))
     engine_version: Mapped[str | None] = mapped_column(String(40))
     knowledge_base_version: Mapped[str | None] = mapped_column(String(100))
     request_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
@@ -386,6 +391,31 @@ class PlatformJobRun(Base):
     error_message: Mapped[str | None] = mapped_column(Text)
 
 
+class ModelReadyBackfillCheckpoint(Base):
+    __tablename__ = "model_ready_backfill_checkpoints"
+    __table_args__ = (
+        UniqueConstraint(
+            "crop_type",
+            "region_id",
+            "variety_id",
+            "source",
+            name="uq_model_ready_checkpoint_pair",
+        ),
+        Index("ix_model_ready_checkpoint_crop_window", "crop_type", "window_end"),
+    )
+
+    checkpoint_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    crop_type: Mapped[str] = mapped_column(String(30), index=True, nullable=False)
+    region_id: Mapped[int] = mapped_column(Integer, index=True, nullable=False)
+    variety_id: Mapped[int] = mapped_column(Integer, index=True, nullable=False)
+    source: Mapped[str] = mapped_column(String(100), nullable=False)
+    window_start: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    window_end: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    completed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    records_inserted: Mapped[int] = mapped_column(Integer, default=0, nullable=False, server_default="0")
+    records_updated: Mapped[int] = mapped_column(Integer, default=0, nullable=False, server_default="0")
+
+
 class ModelTrainingRun(Base):
     __tablename__ = "model_training_runs"
 
@@ -399,6 +429,37 @@ class ModelTrainingRun(Base):
     backtest_samples: Mapped[int] = mapped_column(Integer, default=0)
     evaluated_series: Mapped[int] = mapped_column(Integer, default=0)
     note: Mapped[str | None] = mapped_column(Text)
+
+
+class MlModelVersion(Base):
+    __tablename__ = "ml_model_versions"
+    __table_args__ = (
+        UniqueConstraint("model_key", "artifact_sha256", name="uq_ml_model_version_artifact"),
+        Index("ix_ml_model_versions_model_active", "model_key", "is_active"),
+    )
+
+    version_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    model_key: Mapped[str] = mapped_column(String(80), index=True, nullable=False)
+    model_kind: Mapped[str] = mapped_column(String(100), nullable=False)
+    crop_type: Mapped[str | None] = mapped_column(String(30), index=True)
+    commodity_slug: Mapped[str | None] = mapped_column(String(40), index=True)
+    artifact_path: Mapped[str] = mapped_column(String(500), nullable=False)
+    artifact_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    metadata_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    metrics_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False, server_default="1", index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    activated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True)
+
+
+class FeatureFlag(Base):
+    __tablename__ = "feature_flags"
+
+    flag_key: Mapped[str] = mapped_column(String(120), primary_key=True)
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0", index=True)
+    description: Mapped[str | None] = mapped_column(Text)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    updated_by: Mapped[int | None] = mapped_column(ForeignKey("app_users.user_id", ondelete="SET NULL"), index=True)
 
 
 class NewsArticle(Base):

@@ -12,7 +12,7 @@ from zoneinfo import ZoneInfo
 
 from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.schedulers.background import BackgroundScheduler as APBackgroundScheduler
-from sqlalchemy import desc, select
+from sqlalchemy import desc, select, update
 from sqlalchemy.orm import Session
 
 from app.core.cache import invalidate_cache
@@ -36,6 +36,7 @@ from app.services.content_portal import ContentPortalService
 from app.services.crop_catalog import CROP_TYPES, ensure_crop_catalog
 from app.services.auth import cleanup_expired_revoked_tokens
 from app.services.market_intelligence import MarketIntelligenceService
+from app.services.ml_model_versions import record_crop_model_version, record_world_fertilizer_model_version
 from app.services.model_ready_backfill import ModelReadyBackfillService
 from app.services.public_price_calibration import PublicPriceCalibrationService
 
@@ -217,6 +218,7 @@ class PlatformJobService:
                     )
                     self.db.add(run)
                     results.append({"crop": crop, **metrics})
+                    record_crop_model_version(self.db, crop, metrics=metrics)
                 self.db.commit()
                 summary = {"models": results}
                 invalidate_cache()
@@ -260,6 +262,59 @@ class PlatformJobService:
             try:
                 deleted = cleanup_expired_revoked_tokens(self.db)
                 summary = {"deleted": deleted}
+                self._finish_job(job, STATUS_SUCCESS, summary)
+                return summary
+            except Exception as exc:
+                self.db.rollback()
+                job = self.db.get(PlatformJobRun, job.job_id) or job
+                self._finish_job(job, STATUS_FAILED, None, str(exc))
+                raise
+
+    def run_privacy_cleanup(self) -> dict:
+        with job_lock("privacy_cleanup"):
+            job = self._start_job("privacy_cleanup")
+            try:
+                cutoff = datetime.now(UTC) - timedelta(days=7)
+                result = self.db.execute(
+                    update(RecommendationSession)
+                    .where(RecommendationSession.created_at <= cutoff)
+                    .where(RecommendationSession.ip_address.is_not(None))
+                    .values(ip_address=None)
+                )
+                self.db.commit()
+                summary = {
+                    "recommendation_session_ips_cleared": int(result.rowcount or 0),
+                    "retention_days": 7,
+                }
+                self._finish_job(job, STATUS_SUCCESS, summary)
+                return summary
+            except Exception as exc:
+                self.db.rollback()
+                job = self.db.get(PlatformJobRun, job.job_id) or job
+                self._finish_job(job, STATUS_FAILED, None, str(exc))
+                raise
+
+    def run_model_registry_sync(self) -> dict:
+        with job_lock("model_registry_sync"):
+            job = self._start_job("model_registry_sync")
+            try:
+                from app.services.world_fertilizer import COMMODITIES
+
+                registered: list[str] = []
+                missing: list[str] = []
+                for crop in CROP_TYPES:
+                    row = record_crop_model_version(self.db, crop)
+                    if row is None:
+                        missing.append(f"crop:{crop}")
+                    else:
+                        registered.append(row.model_key)
+                for commodity in COMMODITIES:
+                    row = record_world_fertilizer_model_version(self.db, commodity)
+                    if row is None:
+                        missing.append(f"world-fertilizer:{commodity}")
+                    else:
+                        registered.append(row.model_key)
+                summary = {"registered": registered, "missing": missing}
                 self._finish_job(job, STATUS_SUCCESS, summary)
                 return summary
             except Exception as exc:
@@ -534,6 +589,24 @@ class JobScheduler:
             id="revoked_token_cleanup_daily",
             replace_existing=True,
         )
+        cls._scheduler.add_job(
+            cls._run_with_session,
+            "cron",
+            hour=3,
+            minute=35,
+            args=["privacy_cleanup"],
+            id="privacy_cleanup_daily",
+            replace_existing=True,
+        )
+        cls._scheduler.add_job(
+            cls._run_with_session,
+            "cron",
+            hour=3,
+            minute=45,
+            args=["model_registry_sync"],
+            id="model_registry_sync_daily",
+            replace_existing=True,
+        )
         cls._scheduler.start()
 
     @classmethod
@@ -569,6 +642,10 @@ class JobScheduler:
                     service.run_yield_feedback_reminder()
                 elif job == "revoked_token_cleanup":
                     service.run_revoked_token_cleanup()
+                elif job == "privacy_cleanup":
+                    service.run_privacy_cleanup()
+                elif job == "model_registry_sync":
+                    service.run_model_registry_sync()
             except Exception:
                 logger.exception("Scheduled job %s failed", job)
 

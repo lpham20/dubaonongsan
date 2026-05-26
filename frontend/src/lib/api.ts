@@ -553,6 +553,7 @@ const DEFAULT_API_BASE_URL = import.meta.env.PROD ? "https://api.dubaonongsan.co
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? DEFAULT_API_BASE_URL).replace(/\/$/, "");
 const jsonHeaders = { Accept: "application/json", "Content-Type": "application/json" };
 const GET_RETRY_DELAY_MS = 450;
+const AUTH_EXPIRED_EVENT = "marketai:auth-expired";
 const inFlightGetRequests = new Map<string, Promise<unknown>>();
 
 function apiUrl(path: string) {
@@ -590,6 +591,17 @@ function mergedJsonHeaders(headers?: HeadersInit) {
 
 function isAbortError(error: unknown) {
   return error instanceof DOMException && error.name === "AbortError";
+}
+
+export function onAuthExpired(handler: () => void) {
+  if (typeof window === "undefined") return () => undefined;
+  window.addEventListener(AUTH_EXPIRED_EVENT, handler);
+  return () => window.removeEventListener(AUTH_EXPIRED_EVENT, handler);
+}
+
+function notifyAuthExpired() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(AUTH_EXPIRED_EVENT));
 }
 
 function errorMessageFromPayload(payload: unknown, fallback: string) {
@@ -694,7 +706,14 @@ async function getJsonWithBody<T>(url: string, payload: unknown, signal?: AbortS
 }
 
 async function authJson<T>(url: string, token: string, init?: RequestInit): Promise<T> {
-  return requestJson<T>(url, { ...init, headers: authHeaders(token) });
+  try {
+    return await requestJson<T>(url, { ...init, headers: authHeaders(token) });
+  } catch (error) {
+    if (error instanceof ApiRequestError && error.status === 401) {
+      notifyAuthExpired();
+    }
+    throw error;
+  }
 }
 
 export function fetchHistorical(

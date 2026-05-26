@@ -4,6 +4,7 @@ import html
 import json
 import re
 import threading
+from collections import OrderedDict
 from functools import lru_cache
 from pathlib import Path
 
@@ -11,7 +12,8 @@ import requests
 
 
 GOOGLE_TRANSLATE_URL = "https://translate.googleapis.com/translate_a/single"
-_MACHINE_CACHE: dict[str, str] = {}
+MAX_MACHINE_TRANSLATION_CACHE_ITEMS = 512
+_MACHINE_CACHE: OrderedDict[str, str] = OrderedDict()
 _MACHINE_LOCK = threading.Lock()
 
 
@@ -50,6 +52,7 @@ def machine_translate_many_en(texts: list[str | None]) -> list[str]:
                 continue
             cached = _MACHINE_CACHE.get(text)
             if cached is not None:
+                _MACHINE_CACHE.move_to_end(text)
                 output[index] = cached
             else:
                 missing.append((index, text))
@@ -84,6 +87,9 @@ def _translate_batch(batch: list[tuple[int, str]], output: list[str]) -> None:
         for pos, (original_index, source) in enumerate(batch):
             value = found[pos]
             _MACHINE_CACHE[source] = value
+            _MACHINE_CACHE.move_to_end(source)
+            while len(_MACHINE_CACHE) > MAX_MACHINE_TRANSLATION_CACHE_ITEMS:
+                _MACHINE_CACHE.popitem(last=False)
             output[original_index] = value
 
 

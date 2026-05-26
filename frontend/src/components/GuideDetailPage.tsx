@@ -9,7 +9,22 @@ import { compactText, DEFAULT_OG_IMAGE, guidePath } from "../lib/seo";
 import { useLanguage } from "../contexts/LanguageContext";
 import { withLanguagePrefix } from "../lib/localizedRoutes";
 
-const HOWTO_HEADINGS = ["Mục tiêu", "Khi nào áp dụng", "Cách làm tại vườn", "Theo dõi sau khi làm", "Lỗi cần tránh"];
+const HOWTO_HEADINGS = [
+  "Mục tiêu",
+  "Khi nào áp dụng",
+  "Cách làm tại vườn",
+  "Theo dõi sau khi làm",
+  "Lỗi cần tránh",
+  "Goal",
+  "Objective",
+  "When to apply",
+  "How to do it in the orchard",
+  "Field steps",
+  "Follow-up after application",
+  "Common mistakes to avoid"
+];
+const HOWTO_HEADING_SET = new Set(HOWTO_HEADINGS.map((heading) => heading.toLowerCase()));
+const SOURCE_LINE_PREFIXES = ["nguồn", "source", "references", "reference"];
 
 type GuideBlock = {
   heading: string;
@@ -249,7 +264,7 @@ function parseGuideBlocks(content: string): GuideBlock[] {
     .replace(/\r\n/g, "\n")
     .split("\n")
     .map((line) => line.trim())
-    .filter((line) => !line.toLowerCase().startsWith("nguồn"));
+    .filter((line) => !SOURCE_LINE_PREFIXES.some((prefix) => line.toLowerCase().startsWith(prefix)));
 
   for (const line of lines) {
     if (!line) {
@@ -353,7 +368,7 @@ function parseGuideBlocks(content: string): GuideBlock[] {
 }
 
 function normalizeGuideHeading(line: string) {
-  if (HOWTO_HEADINGS.includes(line)) return { text: line, level: 2 as const };
+  if (HOWTO_HEADING_SET.has(line.toLowerCase())) return { text: line, level: 2 as const };
   const match = line.match(/^(#{1,6})\s+(.+)$/);
   if (!match) return null;
   const level = Math.min(Math.max(match[1].length, 2), 4) as 2 | 3 | 4;
