@@ -32,10 +32,16 @@ def backtest(crop_type: str, snapshot_path: Path, artifacts_dir: Path, min_impro
             actual_rows = series[start + scaler.lookback_window : start + scaler.lookback_window + scaler.horizon_days]
             last_price = float(window[-1].get("max_price_vnd") or 0.0)
             if last_price <= 0:
-                continue
+                raise ValueError(
+                    f"Invalid last_price={last_price} for crop={crop_type} "
+                    f"region_id={region_id} variety_id={variety_id} start={start}"
+                )
             actual_values = [float(row.get("max_price_vnd") or 0.0) for row in actual_rows]
             if any(value <= 0 for value in actual_values):
-                continue
+                raise ValueError(
+                    f"Invalid actual price in backtest for crop={crop_type} "
+                    f"region_id={region_id} variety_id={variety_id} start={start}"
+                )
             actual = np.asarray(actual_values, dtype=np.float32)
             pred = _predict(interpreter, input_details, output_details, scaler, window, region_id, variety_id)
             baseline = np.repeat(last_price, len(actual))

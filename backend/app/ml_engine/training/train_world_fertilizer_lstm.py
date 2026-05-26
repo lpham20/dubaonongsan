@@ -56,8 +56,8 @@ def train(
         base_prices.append(base_price)
     x_all = np.stack(windows)
     y_raw = np.stack(targets)
-    target_mean = 0.0
-    target_std = max(float(np.sqrt(np.mean(np.square(y_raw)))), 1e-6)
+    target_mean = float(np.mean(y_raw))
+    target_std = max(float(np.std(y_raw)), 1e-6)
     y_all = ((y_raw - target_mean) / target_std).astype(np.float32)
     base_all = np.asarray(base_prices, dtype=np.float32)
 
