@@ -11,9 +11,10 @@ os.environ["MARKETAI_START_SCHEDULER_IN_API"] = "false"
 from fastapi.testclient import TestClient
 import pytest
 
+from app.core.job_status import STATUS_SUCCESS
 from app.db import SessionLocal
 from app.main import app
-from app.models import AppUser, RevokedToken
+from app.models import AppUser, RevokedToken, ScrapeRun
 from app.services.auth import create_access_token, hash_password
 
 
@@ -698,6 +699,28 @@ def test_public_api_requires_key(client):
     )
     assert response.status_code == 200
     assert len(response.json()) == 2
+
+
+def test_scrape_health_accepts_ascii_success_status(client):
+    now = datetime.now(UTC)
+    with SessionLocal() as db:
+        db.add(
+            ScrapeRun(
+                source="unit-test-scrape",
+                source_url="https://example.com/prices",
+                started_at=now - timedelta(seconds=5),
+                finished_at=now,
+                status=STATUS_SUCCESS,
+                records_found=1,
+                records_inserted=1,
+                records_updated=0,
+            )
+        )
+        db.commit()
+
+    response = client.get("/api/v1/health/scrape")
+    assert response.status_code == 200
+    assert response.json()["status"] == "ok"
 
 
 def test_admin_endpoints_reject_anonymous_and_non_admin_users(client, test_password):

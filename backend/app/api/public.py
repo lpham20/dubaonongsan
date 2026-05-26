@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.api.analytics import forecast_30_days
 from app.core.config import get_settings
+from app.core.job_status import STATUS_EMPTY, SUCCESS_STATUSES
 from app.db import get_db
 from app.models import ScrapeRun
 from app.schemas import ForecastPoint, HistoricalPricePoint
@@ -31,6 +32,8 @@ def scrape_health(db: Session = Depends(get_db)) -> dict:
     HTTP 200. Per-source freshness remains available at /analytics/source-health.
     """
     healthy_statuses = [
+        *SUCCESS_STATUSES,
+        STATUS_EMPTY,
         "thành công",
         "trùng lặp",
         "trống",
