@@ -132,6 +132,10 @@
 }
 
 @media (max-width: 860px) {
+  body.mobile-drawer-locked .live-price-ticker {
+    display: none !important;
+  }
+
   .live-price-ticker {
     top: var(--header-height-mobile);
     height: 52px;
