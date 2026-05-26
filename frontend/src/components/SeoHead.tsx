@@ -15,6 +15,7 @@ type Props = {
 };
 
 const SEO_MANAGED_ATTR = "data-marketai-seo";
+const JSON_LD_NONCE_FALLBACK = "dubaonongsan-jsonld";
 
 export function SeoHead({
   title,
@@ -69,6 +70,7 @@ export function SeoHead({
         <script
           key={index}
           type="application/ld+json"
+          nonce={jsonLdNonce()}
           dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
         />
       ))}
@@ -117,4 +119,12 @@ function cssEscape(value: string) {
     return CSS.escape(value);
   }
   return value.replace(/['"\\]/g, "\\$&");
+}
+
+function jsonLdNonce() {
+  if (typeof document !== "undefined") {
+    const configured = document.querySelector<HTMLMetaElement>("meta[name='csp-nonce']")?.content;
+    if (configured) return configured;
+  }
+  return JSON_LD_NONCE_FALLBACK;
 }
