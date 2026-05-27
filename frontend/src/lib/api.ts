@@ -708,10 +708,6 @@ async function getJson<T>(url: string, signal?: AbortSignal): Promise<T> {
   return requestJson<T>(url, { signal });
 }
 
-async function getJsonWithBody<T>(url: string, payload: unknown, signal?: AbortSignal): Promise<T> {
-  return requestJson<T>(url, { method: "POST", signal, body: JSON.stringify(payload) });
-}
-
 async function authJson<T>(url: string, token: string, init?: RequestInit): Promise<T> {
   try {
     return await requestJson<T>(url, { ...init, headers: authHeaders(token) });

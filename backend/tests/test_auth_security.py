@@ -5,9 +5,12 @@ os.environ["MARKETAI_DATABASE_URL"] = "sqlite:///:memory:"
 os.environ["MARKETAI_START_SCHEDULER_IN_API"] = "false"
 
 import jwt
+import pytest
+from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
+from app.api import auth as auth_api
 from app.core.client_ip import get_client_ip
 from app.db import SessionLocal
 from app.main import app
@@ -136,3 +139,26 @@ def test_decode_accepts_previous_jwt_secret_during_rotation(monkeypatch):
     payload = auth_service.decode_access_token(token, verify_revoked=False)
 
     assert payload["sub"] == "42"
+
+
+def test_register_requires_turnstile_when_configured(monkeypatch):
+    class Settings:
+        turnstile_secret_key = "turnstile-secret"
+        require_turnstile_on_register = True
+
+    class Headers(dict):
+        def get(self, key, default=None):
+            return super().get(key.lower(), default)
+
+    class Request:
+        client = type("Client", (), {"host": "127.0.0.1"})()
+        headers = Headers({})
+
+    monkeypatch.setattr(auth_api, "get_settings", lambda: Settings())
+
+    with pytest.raises(HTTPException) as missing:
+        auth_api._verify_register_challenge(Request(), None)
+    assert missing.value.status_code == 400
+
+    monkeypatch.setattr(auth_api, "verify_turnstile_token", lambda token, remote_ip=None: token == "ok-token")
+    auth_api._verify_register_challenge(Request(), "ok-token")

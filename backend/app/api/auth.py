@@ -6,6 +6,7 @@ from sqlalchemy import desc, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.client_ip import get_client_ip
 from app.core.config import get_settings
 from app.core.rate_limit import limiter
 from app.db import get_db
@@ -33,6 +34,7 @@ from app.services.auth import (
     rotate_refresh_token,
     verify_password,
 )
+from app.services.turnstile import verify_turnstile_token
 
 
 settings = get_settings()
@@ -66,9 +68,22 @@ def _as_aware_utc(value: datetime) -> datetime:
     return value.replace(tzinfo=UTC) if value.tzinfo is None else value.astimezone(UTC)
 
 
+def _verify_register_challenge(request: Request, token: str | None) -> None:
+    current_settings = get_settings()
+    if not current_settings.turnstile_secret_key and not current_settings.require_turnstile_on_register:
+        return
+    if not current_settings.turnstile_secret_key:
+        raise HTTPException(status_code=503, detail="Registration challenge is not configured")
+    if not token:
+        raise HTTPException(status_code=400, detail="Registration challenge is required")
+    if not verify_turnstile_token(token, remote_ip=get_client_ip(request)):
+        raise HTTPException(status_code=400, detail="Registration challenge failed")
+
+
 @router.post("/auth/register", response_model=AuthTokenOut, status_code=201)
 @limiter.limit("5/minute")
 def register(request: Request, payload: AuthRegisterCredentials, db: Session = Depends(get_db)) -> AuthTokenOut:
+    _verify_register_challenge(request, payload.turnstile_token)
     email = payload.email.strip().lower()
     user = AppUser(
         email=email,

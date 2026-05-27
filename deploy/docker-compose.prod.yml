@@ -157,6 +157,8 @@ services:
         condition: service_healthy
     environment:
       PGPASSWORD: ${POSTGRES_PASSWORD}
+      BACKUP_RCLONE_REMOTE: ${BACKUP_RCLONE_REMOTE:-}
+      BACKUP_RCLONE_CONFIG_B64: ${BACKUP_RCLONE_CONFIG_B64:-}
     volumes:
       - ./postgres-backup:/backups
     mem_limit: 128m
@@ -166,7 +168,16 @@ services:
       #!/bin/sh
       set -eu
         DATE=$$(date +%Y%m%d-%H%M%S)
-        pg_dump -h postgres -U ${POSTGRES_USER:-marketai} -d ${POSTGRES_DB:-marketai} -Fc -f /backups/backup-$$DATE.dump
+        BACKUP_FILE=/backups/backup-$$DATE.dump
+        pg_dump -h postgres -U ${POSTGRES_USER:-marketai} -d ${POSTGRES_DB:-marketai} -Fc -f "$$BACKUP_FILE"
+        if [ -n "$${BACKUP_RCLONE_REMOTE:-}" ]; then
+          if [ -n "$${BACKUP_RCLONE_CONFIG_B64:-}" ]; then
+            mkdir -p /root/.config/rclone
+            printf "%s" "$$BACKUP_RCLONE_CONFIG_B64" | base64 -d > /root/.config/rclone/rclone.conf
+          fi
+          command -v rclone >/dev/null 2>&1 || apk add --no-cache rclone >/dev/null
+          rclone copy "$$BACKUP_FILE" "$$BACKUP_RCLONE_REMOTE" --retries 3 --low-level-retries 5
+        fi
         find /backups -name "backup-*.dump" -mtime +7 -delete
       EOF
       chmod +x /usr/local/bin/marketai-postgres-backup

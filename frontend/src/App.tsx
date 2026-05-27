@@ -31,13 +31,9 @@ import {
   fetchForecast,
   fetchHeatmap,
   fetchHistorical,
-  fetchMarketComparison,
-  fetchMarketIndex,
   fetchMetrics,
-  fetchModelRuns,
   fetchGuides,
   fetchNews,
-  fetchPlatformJobs,
   fetchRegions,
   fetchSignals,
   fetchTickerPrices,
@@ -53,13 +49,8 @@ import {
   type ForecastPoint,
   type GuidePost,
   type HeatmapCell,
-  type MarketComparison,
-  type MarketIndex,
-  type ModelTrainingRun,
   type ModelMetrics,
-  type Mover,
   type NewsArticle,
-  type PlatformJobRun,
   type PricePoint,
   type Region,
   type StrategyAlert,
@@ -81,7 +72,6 @@ const ForecastMethodology = lazy(() =>
 const IntelligencePanels = lazy(() =>
   import("./components/IntelligencePanels").then(({ IntelligencePanels }) => ({ default: IntelligencePanels }))
 );
-const MarketBrain = lazy(() => import("./components/MarketBrain").then(({ MarketBrain }) => ({ default: MarketBrain })));
 const MasterChart = lazy(() => import("./components/MasterChart").then(({ MasterChart }) => ({ default: MasterChart })));
 const MetricsDashboard = lazy(() =>
   import("./components/MetricsDashboard").then(({ MetricsDashboard }) => ({ default: MetricsDashboard }))
@@ -94,9 +84,6 @@ const GuideDetailPage = lazy(() =>
   import("./components/GuideDetailPage").then(({ GuideDetailPage }) => ({ default: GuideDetailPage }))
 );
 const AdvisoryHub = lazy(() => import("./components/AdvisoryHub").then(({ AdvisoryHub }) => ({ default: AdvisoryHub })));
-const FertilizerAdvisor = lazy(() =>
-  import("./components/FertilizerAdvisor").then(({ FertilizerAdvisor }) => ({ default: FertilizerAdvisor }))
-);
 const FertilizerMethodology = lazy(() =>
   import("./components/FertilizerMethodology").then(({ FertilizerMethodology }) => ({ default: FertilizerMethodology }))
 );
@@ -110,9 +97,6 @@ const YieldFeedbackPage = lazy(() =>
   import("./components/YieldFeedbackPage").then(({ YieldFeedbackPage }) => ({ default: YieldFeedbackPage }))
 );
 const NotFoundPage = lazy(() => import("./components/NotFoundPage").then(({ NotFoundPage }) => ({ default: NotFoundPage })));
-const ProductionPanel = lazy(() =>
-  import("./components/ProductionPanel").then(({ ProductionPanel }) => ({ default: ProductionPanel }))
-);
 const TechnicalPanel = lazy(() => import("./components/TechnicalPanel").then(({ TechnicalPanel }) => ({ default: TechnicalPanel })));
 
 const tabs: { value: CropType; label: string; Icon: typeof Leaf }[] = [
@@ -502,9 +486,7 @@ function RoutedApp() {
   const [topMovers, setTopMovers] = useState<TopMovers>({ gainers: [], losers: [] });
   const [heatmap, setHeatmap] = useState<HeatmapCell[]>([]);
   const [strategyAlerts, setStrategyAlerts] = useState<StrategyAlert[]>([]);
-  const [marketIndex, setMarketIndex] = useState<MarketIndex | null>(null);
   const [changeExplanation, setChangeExplanation] = useState<ChangeExplanation | null>(null);
-  const [marketComparison, setMarketComparison] = useState<MarketComparison | null>(null);
   const { token: authToken, user, signIn, signUp } = useAuth();
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
   const [authName, setAuthName] = useState("");
@@ -512,8 +494,6 @@ function RoutedApp() {
   const [authPassword, setAuthPassword] = useState("");
   const [authOpen, setAuthOpen] = useState(false);
   const advisoryGatePromptedRef = useRef<MainSection | null>(null);
-  const [jobs, setJobs] = useState<PlatformJobRun[]>([]);
-  const [modelRuns, setModelRuns] = useState<ModelTrainingRun[]>([]);
   const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
   const [guides, setGuides] = useState<GuidePost[]>([]);
   const [section, setSection] = useState<MainSection>(initialRoute.section);
@@ -620,9 +600,7 @@ function RoutedApp() {
         moversPayload,
         heatmapPayload,
         alertsPayload,
-        marketIndexPayload,
-        explanationPayload,
-        comparisonPayload
+        explanationPayload
       ] = await Promise.all([
         fetchHistorical(crop, nextRegionId, nextVarietyId, {
           limit: Math.max(days * HISTORICAL_FETCH_LIMIT_FACTOR, MIN_HISTORICAL_FETCH_POINTS),
@@ -635,9 +613,7 @@ function RoutedApp() {
         fetchTopMovers(crop, signal),
         fetchHeatmap(crop, signal),
         fetchStrategyAlerts(crop, nextRegionId, nextVarietyId, signal),
-        fetchMarketIndex(crop, signal),
-        fetchChangeExplanation(crop, nextRegionId, nextVarietyId, signal),
-        fetchMarketComparison(crop, nextRegionId, nextVarietyId, signal)
+        fetchChangeExplanation(crop, nextRegionId, nextVarietyId, signal)
       ]);
       if (isStale()) return;
 
@@ -649,9 +625,7 @@ function RoutedApp() {
       setTopMovers(moversPayload);
       setHeatmap(heatmapPayload);
       setStrategyAlerts(alertsPayload);
-      setMarketIndex(marketIndexPayload);
       setChangeExplanation(explanationPayload);
-      setMarketComparison(comparisonPayload);
     } catch (err) {
       if (isStale() || (err instanceof DOMException && err.name === "AbortError")) return;
       setError(err instanceof Error ? err.message : copy.loadDataError);
@@ -747,7 +721,7 @@ function RoutedApp() {
 
   useEffect(() => {
     if (!authToken || !user) return;
-    void loadAccountData(authToken, user);
+    void loadAccountData(authToken);
   }, [authToken, user]);
 
   useEffect(() => {
@@ -981,7 +955,7 @@ function RoutedApp() {
         : await signUp(email, password, displayName, controller.signal);
       if (controller.signal.aborted || authControllerRef.current !== controller) return;
       setAuthOpen(false);
-      await loadAccountData(session.access_token, session.user);
+      await loadAccountData(session.access_token);
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
       setError(err instanceof Error ? err.message : copy.authFailed);
@@ -992,12 +966,9 @@ function RoutedApp() {
     }
   }
 
-  async function loadAccountData(token = authToken, account = user) {
+  async function loadAccountData(token = authToken) {
     if (!token) return;
     await syncWatchlist(token);
-    if (account?.is_admin) {
-      await refreshPlatform(token, account);
-    }
   }
 
   async function syncWatchlist(token = authToken) {
@@ -1007,22 +978,11 @@ function RoutedApp() {
     }
   }
 
-  async function refreshPlatform(token = authToken, account = user) {
-    if (!token || !account?.is_admin) return;
-    const [jobPayload, modelPayload] = await Promise.all([
-      fetchPlatformJobs(token),
-      fetchModelRuns(token)
-    ]);
-    setJobs(jobPayload);
-    setModelRuns(modelPayload);
-  }
-
   async function runJob(job: "scrape" | "news" | "data-quality" | "retrain") {
     if (!authToken || !user?.is_admin) return;
     setPlatformBusy(true);
     try {
       await runPlatformJob(authToken, job);
-      await refreshPlatform(authToken);
       if (section === "analytics") {
         await loadData();
       } else {

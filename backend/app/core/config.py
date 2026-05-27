@@ -34,6 +34,11 @@ class Settings(BaseSettings):
     retrain_interval_minutes: int = 60 * 24
     rate_limit_storage_uri: str = "memory://"
     sentry_dsn: str = ""
+    ops_alert_webhook_url: str = ""
+    ops_alert_timeout_seconds: float = 2.0
+    turnstile_secret_key: str = ""
+    turnstile_verify_url: str = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+    require_turnstile_on_register: bool = False
     world_fertilizer_current_retry_attempts: int = 3
     world_fertilizer_current_retry_delay_seconds: int = 60
     ml_artifacts: str = "/app/ml_artifacts"

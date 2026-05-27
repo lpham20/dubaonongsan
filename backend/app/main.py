@@ -46,7 +46,7 @@ logging.config.dictConfig(
         "disable_existing_loggers": False,
         "formatters": {
             "json": {
-                "format": '{"ts":"%(asctime)s","level":"%(levelname)s","logger":"%(name)s","msg":"%(message)s"}',
+                "()": "app.core.logging.JsonLogFormatter",
             },
             "default": {"format": "%(asctime)s %(levelname)s [%(name)s] %(message)s"},
         },
@@ -191,12 +191,14 @@ async def request_id_middleware(request: Request, call_next):
             response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload"
     safe_path = request.url.path.replace("\n", "\\n").replace("\r", "\\r")
     logger.info(
-        "request_completed method=%s path=%s status=%s duration_ms=%.2f request_id=%s",
-        request.method,
-        safe_path,
-        response.status_code,
-        duration_ms,
-        request_id,
+        "request_completed",
+        extra={
+            "method": request.method,
+            "path": safe_path,
+            "status_code": response.status_code,
+            "duration_ms": round(duration_ms, 2),
+            "request_id": request_id,
+        },
     )
     return response
 

@@ -851,12 +851,6 @@ export function WorldFertilizerForecastSection() {
     () => buildWorldChartRows(history, forecast?.forecast_daily ?? []),
     [forecast?.forecast_daily, history]
   );
-  const latestHistory = history.at(-1);
-  const firstHistory = history[0];
-  const historyChangePct =
-    firstHistory && latestHistory && firstHistory.price_usd_per_tonne
-      ? (latestHistory.price_usd_per_tonne / firstHistory.price_usd_per_tonne - 1) * 100
-      : 0;
   const historyPrices = useMemo(() => aggregateHistory(history).map((point) => point.price), [history]);
   const latestPrice = forecast?.base_price_usd_per_tonne ?? historyPrices.at(-1) ?? 0;
   const sma7 = average(historyPrices.slice(-7)) || latestPrice;

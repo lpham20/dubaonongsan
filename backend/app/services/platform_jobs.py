@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import errno
 import json
 import logging
 import os
-import errno
 import time
 from contextlib import contextmanager
 from datetime import UTC, datetime, timedelta
@@ -38,6 +38,7 @@ from app.services.auth import cleanup_expired_refresh_tokens, cleanup_expired_re
 from app.services.market_intelligence import MarketIntelligenceService
 from app.services.ml_model_versions import record_crop_model_version, record_world_fertilizer_model_version
 from app.services.model_ready_backfill import ModelReadyBackfillService
+from app.services.ops_alerts import send_ops_alert
 from app.services.public_price_calibration import PublicPriceCalibrationService
 
 
@@ -419,6 +420,7 @@ class PlatformJobService:
         self.db.add(job)
         self.db.commit()
         self.db.refresh(job)
+        logger.info("platform_job_started", extra={"job_name": job.job_name, "job_id": job.job_id})
         return job
 
     def _finish_job(
@@ -434,6 +436,32 @@ class PlatformJobService:
         job.error_message = error_message
         self.db.add(job)
         self.db.commit()
+        duration_seconds = None
+        if job.finished_at and job.started_at:
+            started_at = job.started_at if job.started_at.tzinfo else job.started_at.replace(tzinfo=UTC)
+            finished_at = job.finished_at if job.finished_at.tzinfo else job.finished_at.replace(tzinfo=UTC)
+            duration_seconds = round((finished_at - started_at).total_seconds(), 3)
+        logger.info(
+            "platform_job_finished",
+            extra={
+                "job_name": job.job_name,
+                "job_id": job.job_id,
+                "status": status,
+                "duration_seconds": duration_seconds,
+            },
+        )
+        if status == STATUS_FAILED:
+            send_ops_alert(
+                "platform_job_failed",
+                {
+                    "job_id": job.job_id,
+                    "job_name": job.job_name,
+                    "status": status,
+                    "duration_seconds": duration_seconds,
+                    "error_message": error_message,
+                    "summary": summary,
+                },
+            )
 
 
 def _world_fertilizer_scrape_succeeded(results: list[dict]) -> bool:
@@ -622,6 +650,8 @@ class JobScheduler:
 
     @staticmethod
     def _run_with_session(job: str) -> None:
+        started = time.monotonic()
+        logger.info("scheduled_job_started", extra={"job_name": job})
         with SessionLocal() as db:
             service = PlatformJobService(db)
             try:
@@ -651,8 +681,18 @@ class JobScheduler:
                     service.run_privacy_cleanup()
                 elif job == "model_registry_sync":
                     service.run_model_registry_sync()
+                else:
+                    logger.error("scheduled_job_unknown", extra={"job_name": job})
+                    send_ops_alert("scheduled_job_unknown", {"job": job})
+                logger.info(
+                    "scheduled_job_finished",
+                    extra={"job_name": job, "duration_seconds": round(time.monotonic() - started, 3)},
+                )
             except Exception:
-                logger.exception("Scheduled job %s failed", job)
+                logger.exception(
+                    "scheduled_job_failed",
+                    extra={"job_name": job, "duration_seconds": round(time.monotonic() - started, 3)},
+                )
 
 @contextmanager
 def job_lock(name: str):

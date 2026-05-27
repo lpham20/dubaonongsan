@@ -56,6 +56,8 @@ POSTGRES_USER=marketai
 POSTGRES_PASSWORD=<mat-khau-db-rat-dai>
 FRONTEND_DOMAIN=dubaonongsan.com,www.dubaonongsan.com
 API_DOMAIN=api.dubaonongsan.com
+BACKUP_RCLONE_REMOTE=
+BACKUP_RCLONE_CONFIG_B64=
 ```
 
 Ví dụ `backend/.env.production`:
@@ -136,6 +138,8 @@ docker compose -f deploy/docker-compose.prod.yml exec -T api curl -X POST \
 ## 5. Backup Và Khôi Phục
 
 Backup tự động chạy trong service `postgres-backup`, lưu file `.dump` ở `deploy/postgres-backup` và giữ 7 ngày gần nhất.
+
+Nếu cần offsite backup, cấu hình thêm `BACKUP_RCLONE_REMOTE` và `BACKUP_RCLONE_CONFIG_B64` trong `deploy/.env`. Ví dụ remote R2/S3/B2 có dạng `marketai-r2:dubaonongsan/postgres`; giá trị `BACKUP_RCLONE_CONFIG_B64` là nội dung `rclone.conf` đã base64 encode. Khi hai biến này để trống, service chỉ backup local như hiện tại.
 
 Backup thủ công:
 

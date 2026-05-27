@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import json
+import logging
 from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, sessionmaker
 
+from app.core.job_status import STATUS_FAILED
+from app.core.logging import JsonLogFormatter
 from app.db import Base
 from app.models import DailyMarketPrice, DurianVariety, FeatureFlag, MlModelVersion, ModelReadyBackfillCheckpoint, ProductionRegion, RecommendationSession
 from app.services.feature_flags import is_feature_enabled, list_feature_flags, set_feature_flag
@@ -109,3 +113,44 @@ def test_privacy_cleanup_clears_old_recommendation_session_ips(monkeypatch, tmp_
     assert summary["recommendation_session_ips_cleared"] == 1
     assert db.get(RecommendationSession, "old-session").ip_address is None
     assert db.get(RecommendationSession, "fresh-session").ip_address == "203.0.113.11"
+
+
+def test_failed_platform_job_sends_ops_alert(monkeypatch):
+    db = _session()
+    alerts: list[tuple[str, dict]] = []
+    monkeypatch.setattr("app.services.platform_jobs.send_ops_alert", lambda event, payload: alerts.append((event, payload)) or True)
+
+    service = PlatformJobService(db)
+    job = service._start_job("unit_failure")
+    service._finish_job(job, STATUS_FAILED, {"source": "unit"}, "boom")
+
+    assert len(alerts) == 1
+    event, payload = alerts[0]
+    assert event == "platform_job_failed"
+    assert payload["job_id"] == job.job_id
+    assert payload["job_name"] == "unit_failure"
+    assert payload["status"] == STATUS_FAILED
+    assert payload["error_message"] == "boom"
+    assert payload["summary"] == {"source": "unit"}
+    assert payload["duration_seconds"] >= 0
+
+
+def test_json_log_formatter_keeps_valid_json_with_extra_fields():
+    record = logging.LogRecord(
+        name="marketai.test",
+        level=logging.INFO,
+        pathname=__file__,
+        lineno=1,
+        msg='request "%s" completed',
+        args=("abc",),
+        exc_info=None,
+    )
+    record.request_id = "rid-123"
+    record.duration_ms = 12.34
+
+    payload = json.loads(JsonLogFormatter().format(record))
+
+    assert payload["msg"] == 'request "abc" completed'
+    assert payload["logger"] == "marketai.test"
+    assert payload["request_id"] == "rid-123"
+    assert payload["duration_ms"] == 12.34

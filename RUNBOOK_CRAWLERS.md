@@ -17,6 +17,23 @@ docker compose -f deploy/docker-compose.prod.yml logs --tail=120 worker
 
 Neu `api` hoac `worker` khong healthy, uu tien doc log loi Python truoc khi restart.
 
+## 1.1. Bat canh bao ngoai he thong
+
+Backend da co hook webhook tuy chon cho job fail. De nhan canh bao qua Slack, Discord, n8n, Make hoac mot endpoint noi bo, dat bien moi truong trong `backend/.env.production`:
+
+```env
+MARKETAI_OPS_ALERT_WEBHOOK_URL=https://example.com/marketai-alert
+MARKETAI_OPS_ALERT_TIMEOUT_SECONDS=2
+```
+
+Khi job nen fail, backend gui JSON dang:
+
+```json
+{"event":"platform_job_failed","payload":{"job_name":"scrape_world_fertilizer_current","status":"failed"}}
+```
+
+Neu chua cau hinh webhook, job van chay binh thuong va loi van duoc ghi vao log JSON cua `api`/`worker`.
+
 ## 2. Kiem tra suc khoe crawler
 
 ```bash
