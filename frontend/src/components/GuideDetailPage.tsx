@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { Link } from "react-router-dom";
 import { CalendarClock, Gauge, Sprout } from "./icons";
 import { Breadcrumb } from "./Breadcrumb";
@@ -8,6 +8,7 @@ import { fetchGuideDetail, type GuidePost } from "../lib/api";
 import { compactText, DEFAULT_OG_IMAGE, guidePath } from "../lib/seo";
 import { useLanguage } from "../contexts/LanguageContext";
 import { withLanguagePrefix } from "../lib/localizedRoutes";
+import { useFetchOnce } from "../hooks/useFetchOnce";
 
 const HOWTO_HEADINGS = [
   "Mục tiêu",
@@ -51,30 +52,18 @@ export function GuideDetailPage({ slug }: { slug: string }) {
   const [failed, setFailed] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => controller.abort(), 20_000);
-    setLoading(true);
-    setFailed(false);
-    setGuide(null);
-    fetchGuideDetail(slug, controller.signal, language)
-      .then(setGuide)
-      .catch((err) => {
-        if (err?.name === "AbortError") {
-          if (!controller.signal.aborted) setFailed(true);
-          return;
-        }
-        if (!controller.signal.aborted) setFailed(true);
-      })
-      .finally(() => {
-        window.clearTimeout(timeoutId);
-        if (!controller.signal.aborted) setLoading(false);
-      });
-    return () => {
-      window.clearTimeout(timeoutId);
-      controller.abort();
-    };
-  }, [language, slug, retryKey]);
+  useFetchOnce({
+    deps: [language, slug, retryKey],
+    load: (signal) => fetchGuideDetail(slug, signal, language),
+    onData: setGuide,
+    onError: () => setFailed(true),
+    onFinally: () => setLoading(false),
+    onReset: () => {
+      setLoading(true);
+      setFailed(false);
+      setGuide(null);
+    }
+  });
 
   const schema = useMemo(() => (guide ? buildHowToSchema(guide, language) : undefined), [guide, language]);
 

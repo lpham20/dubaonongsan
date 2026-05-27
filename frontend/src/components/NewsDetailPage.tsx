@@ -8,6 +8,7 @@ import { fetchNews, fetchNewsDetail, type NewsArticle } from "../lib/api";
 import { compactText, DEFAULT_OG_IMAGE, newsPath } from "../lib/seo";
 import { useLanguage } from "../contexts/LanguageContext";
 import { withLanguagePrefix } from "../lib/localizedRoutes";
+import { useFetchOnce } from "../hooks/useFetchOnce";
 
 export function NewsDetailPage({ slug }: { slug: string }) {
   const { language } = useLanguage();
@@ -17,30 +18,18 @@ export function NewsDetailPage({ slug }: { slug: string }) {
   const [failed, setFailed] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => controller.abort(), 20_000);
-    setLoading(true);
-    setFailed(false);
-    setArticle(null);
-    fetchNewsDetail(slug, controller.signal, language)
-      .then(setArticle)
-      .catch((err) => {
-        if (err?.name === "AbortError") {
-          if (!controller.signal.aborted) setFailed(true);
-          return;
-        }
-        if (!controller.signal.aborted) setFailed(true);
-      })
-      .finally(() => {
-        window.clearTimeout(timeoutId);
-        if (!controller.signal.aborted) setLoading(false);
-      });
-    return () => {
-      window.clearTimeout(timeoutId);
-      controller.abort();
-    };
-  }, [language, slug, retryKey]);
+  useFetchOnce({
+    deps: [language, slug, retryKey],
+    load: (signal) => fetchNewsDetail(slug, signal, language),
+    onData: setArticle,
+    onError: () => setFailed(true),
+    onFinally: () => setLoading(false),
+    onReset: () => {
+      setLoading(true);
+      setFailed(false);
+      setArticle(null);
+    }
+  });
 
   useEffect(() => {
     if (!article) return;
