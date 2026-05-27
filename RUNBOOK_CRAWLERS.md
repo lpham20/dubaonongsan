@@ -39,7 +39,7 @@ Neu chua cau hinh webhook, job van chay binh thuong va loi van duoc ghi vao log 
 ```bash
 curl -fsS https://api.dubaonongsan.com/api/v1/health/scrape
 curl -fsS https://api.dubaonongsan.com/api/v1/platform/input-prices/health
-curl -fsS https://api.dubaonongsan.com/api/v1/advisory/world-fertilizer/health
+curl -fsS https://api.dubaonongsan.com/api/v1/platform/world-fertilizer/health
 ```
 
 Canh bao can xu ly ngay:
