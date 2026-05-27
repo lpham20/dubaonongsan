@@ -348,6 +348,7 @@ function ArbitragePanel({ authToken }: { authToken: string }) {
 
 function CrossCropPanel({ authToken }: { authToken: string }) {
   const { language } = useLanguage();
+  const locale = language === "en" ? "en-US" : "vi-VN";
   const [regions, setRegions] = useState<Region[]>([]);
   const [regionId, setRegionId] = useState<number | "">("");
   const [area, setArea] = useState("1");
@@ -366,13 +367,13 @@ function CrossCropPanel({ authToken }: { authToken: string }) {
           const key = region.province ?? region.region_name;
           if (!byProvince.has(key)) byProvince.set(key, region);
         });
-        const items = [...byProvince.values()].sort((a, b) => regionLabel(a).localeCompare(regionLabel(b), "vi-VN"));
+        const items = [...byProvince.values()].sort((a, b) => regionLabel(a).localeCompare(regionLabel(b), locale));
         setRegions(items);
         setRegionId((current) => current || items[0]?.region_id || "");
       })
       .catch(() => setRegions([]));
     return () => controller.abort();
-  }, []);
+  }, [locale]);
 
   useEffect(() => () => submitControllerRef.current?.abort(), []);
 

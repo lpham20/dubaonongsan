@@ -14,6 +14,12 @@ logger = logging.getLogger(__name__)
 BASELINE_LOW_PRICE_FLOOR_RATIO = 0.55
 BASELINE_LOW_PRICE_ABSOLUTE_FLOOR = 1000.0
 BASELINE_HIGH_VALUE_FLOOR = 25000.0
+BASELINE_WEATHER_SHIFT_LIMIT_RATIO = {
+    "sau_rieng": 0.08,
+    "ca_phe": 0.05,
+    "ho_tieu": 0.05,
+    "lua": 0.02,
+}
 
 
 @dataclass(frozen=True)
@@ -106,7 +112,8 @@ class LSTMForecaster:
         for day in range(1, self.config.horizon_days + 1):
             seasonal = math.sin(day / 4.8) * volatility * 0.09
             weather_bias = self._weather_bias(feature_window[-min(len(feature_window), 14) :])
-            forecast = last_price + trend * day + seasonal + weather_bias * day
+            weather_component = self._weather_component(weather_bias, day, last_price)
+            forecast = last_price + trend * day + seasonal + weather_component
             forecasts.append(round(max(price_floor, forecast), 2))
         return forecasts
 
@@ -128,3 +135,12 @@ class LSTMForecaster:
             "lua": (2.0, 2.0, 3.0),
         }.get(self.crop_type, (8.0, 6.0, 10.0))
         return (temp - 31.5) * temp_coef - max(0, rain - 20) * rain_coef + max(0, maturity - 7) * maturity_coef
+
+    def _weather_component(self, daily_bias: float, day: int, last_price: float) -> float:
+        if last_price <= 0 or self.config.horizon_days <= 0:
+            return 0.0
+        raw_shift = daily_bias * day
+        max_final_shift = last_price * BASELINE_WEATHER_SHIFT_LIMIT_RATIO.get(self.crop_type, 0.05)
+        day_weight = min(1.0, max(0.0, day / self.config.horizon_days))
+        max_shift = max_final_shift * day_weight
+        return max(-max_shift, min(max_shift, raw_shift))
