@@ -5112,3 +5112,23 @@
     font-size: clamp(15px, 4vw, 18px) !important;
   }
 }
+
+@media (max-width: 860px) {
+  .app-shell.forecast-shell .chart-zoom-controls,
+  .forecast-shell .chart-zoom-controls {
+    grid-template-columns: repeat(3, minmax(44px, 1fr)) !important;
+  }
+
+  .app-shell.forecast-shell .chart-zoom-controls button,
+  .forecast-shell .chart-zoom-controls button,
+  .app-shell.forecast-shell .mobile-chart-pan-buttons button,
+  .forecast-shell .mobile-chart-pan-buttons button {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  .app-shell.forecast-shell .mobile-chart-pan-buttons,
+  .forecast-shell .mobile-chart-pan-buttons {
+    grid-template-columns: repeat(2, 44px) !important;
+  }
+}
