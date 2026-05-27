@@ -19,6 +19,7 @@ from app.ml_engine.world_fertilizer_features import (
     normalize_features,
     raw_feature_matrix,
 )
+from app.ml_engine.training.graceful_shutdown import GracefulStopCallback, GracefulTrainingShutdown
 
 
 logger = logging.getLogger("marketai.train_world_fertilizer_lstm")
@@ -32,6 +33,7 @@ def train(
     lookback_window: int,
     horizon_days: int,
     batch_size: int,
+    shutdown: GracefulTrainingShutdown | None = None,
 ) -> dict[str, Any]:
     _set_determinism()
     observations = CommodityPriceApiUreaPublicScraper().scrape().observations
@@ -77,7 +79,7 @@ def train(
         actual_val_returns = y_raw[-1:]
 
     model = _build_model(lookback_window, len(FEATURE_COLUMNS), horizon_days)
-    callbacks = [
+    callbacks: list[tf.keras.callbacks.Callback] = [
         tf.keras.callbacks.EarlyStopping(
             monitor="val_loss",
             patience=8,
@@ -85,6 +87,8 @@ def train(
             restore_best_weights=True,
         )
     ]
+    if shutdown:
+        callbacks.insert(0, GracefulStopCallback(shutdown))
     history = model.fit(
         x_train,
         y_train,
@@ -134,6 +138,8 @@ def train(
         "validation_windows": int(len(x_val)),
         "epochs_requested": epochs,
         "epochs_ran": len(history.history.get("loss", [])),
+        "graceful_stop_requested": bool(shutdown and shutdown.stop_requested),
+        "graceful_stop_signal": shutdown.signal_name if shutdown and shutdown.stop_requested else None,
         "trained_at": datetime.now(UTC).isoformat(),
         **metrics,
     }
@@ -205,6 +211,8 @@ def main() -> None:
     parser.add_argument("--batch-size", default=32, type=int)
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    shutdown = GracefulTrainingShutdown(logger)
+    shutdown.install()
     meta = train(
         commodity_slug=args.commodity,
         artifacts_dir=args.artifacts_dir,
@@ -212,6 +220,7 @@ def main() -> None:
         lookback_window=args.lookback_window,
         horizon_days=args.horizon_days,
         batch_size=args.batch_size,
+        shutdown=shutdown,
     )
     print(json.dumps(meta, ensure_ascii=False, indent=2))
 

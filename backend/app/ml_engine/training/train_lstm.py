@@ -13,6 +13,7 @@ import tensorflow as tf
 from app.ml_engine.feature_pipeline import build_training_windows, raw_feature_matrix, raw_target_values
 from app.ml_engine.normalization import FEATURE_COLUMNS, Scaler
 from app.ml_engine.training.data import group_series, load_snapshot
+from app.ml_engine.training.graceful_shutdown import GracefulStopCallback, GracefulTrainingShutdown
 
 
 logger = logging.getLogger("marketai.train_lstm")
@@ -28,6 +29,7 @@ def train(
     stride: int,
     batch_size: int,
     target_mode: str,
+    shutdown: GracefulTrainingShutdown | None = None,
 ) -> dict[str, Any]:
     _set_determinism()
     rows = load_snapshot(snapshot_path, crop_type=crop_type)
@@ -94,7 +96,7 @@ def train(
     y_train = y_train[order]
 
     model = _build_model(lookback_window, len(FEATURE_COLUMNS), horizon_days)
-    callbacks = [
+    callbacks: list[tf.keras.callbacks.Callback] = [
         tf.keras.callbacks.EarlyStopping(
             monitor="val_loss",
             patience=4,
@@ -102,6 +104,8 @@ def train(
             restore_best_weights=True,
         )
     ]
+    if shutdown:
+        callbacks.insert(0, GracefulStopCallback(shutdown))
     history = model.fit(
         x_train,
         y_train,
@@ -133,6 +137,8 @@ def train(
         "validation_windows": int(len(x_val)),
         "epochs_requested": epochs,
         "epochs_ran": len(history.history.get("loss", [])),
+        "graceful_stop_requested": bool(shutdown and shutdown.stop_requested),
+        "graceful_stop_signal": shutdown.signal_name if shutdown and shutdown.stop_requested else None,
         **metrics,
     }
     meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -223,6 +229,8 @@ def main() -> None:
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    shutdown = GracefulTrainingShutdown(logger)
+    shutdown.install()
     meta = train(
         crop_type=args.crop,
         snapshot_path=args.snapshot,
@@ -233,6 +241,7 @@ def main() -> None:
         stride=args.stride,
         batch_size=args.batch_size,
         target_mode=args.target_mode,
+        shutdown=shutdown,
     )
     print(json.dumps(meta, ensure_ascii=False, indent=2))
 
