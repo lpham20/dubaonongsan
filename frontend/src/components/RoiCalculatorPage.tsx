@@ -12,7 +12,7 @@ import { useLanguage, type AppLanguage } from "../contexts/LanguageContext";
 import { cropLabel, displayProvince } from "../lib/displayLabels";
 import { withLanguagePrefix } from "../lib/localizedRoutes";
 import { ROI_CROP_OPTIONS } from "../lib/cropOptions";
-import { numberInputValue } from "../lib/numberInput";
+import { decimalInputValue, parseDecimalInput } from "../lib/numberInput";
 
 type InputMode = "simple" | "detail";
 
@@ -111,8 +111,8 @@ export function RoiCalculatorPage({
   const [crop, setCrop] = useState<CropType>("ca_phe");
   const selectedCrop = ROI_CROP_OPTIONS.find((item) => item.value === crop) ?? ROI_CROP_OPTIONS[0];
   const [regionId, setRegionId] = useState<number | "">("");
-  const [area, setArea] = useState(2);
-  const [yieldTarget, setYieldTarget] = useState(selectedCrop.defaultYield);
+  const [area, setArea] = useState("2");
+  const [yieldTarget, setYieldTarget] = useState(String(selectedCrop.defaultYield));
   const [sellPrice, setSellPrice] = useState(selectedCrop.defaultPrice);
   const [fertilizerTotal, setFertilizerTotal] = useState(18_000_000);
   const [otherCost, setOtherCost] = useState(5_000_000);
@@ -141,7 +141,7 @@ export function RoiCalculatorPage({
 
   useEffect(() => {
     const nextCrop = ROI_CROP_OPTIONS.find((item) => item.value === crop) ?? ROI_CROP_OPTIONS[0];
-    setYieldTarget(nextCrop.defaultYield);
+    setYieldTarget(String(nextCrop.defaultYield));
     setSellPrice(nextCrop.defaultPrice);
   }, [crop]);
 
@@ -169,14 +169,14 @@ export function RoiCalculatorPage({
       onRequireAuth();
       return;
     }
-    const safeArea = Math.max(0.01, Number(area) || 0);
-    const safeYield = Math.max(0.01, Number(yieldTarget) || 0);
+    const safeArea = Math.max(0.01, parseDecimalInput(area) ?? 0);
+    const safeYield = Math.max(0.01, parseDecimalInput(yieldTarget) ?? 0);
     const safeSellPrice = Math.max(0, Number(sellPrice) || 0);
     const safeFertilizerTotal = Math.max(0, Number(fertilizerTotal) || 0);
     const safeOtherCost = Math.max(0, Number(otherCost) || 0);
     const safeLaborCost = Math.max(0, Number(laborCost) || 0);
-    setArea(safeArea);
-    setYieldTarget(safeYield);
+    setArea(String(safeArea));
+    setYieldTarget(String(safeYield));
     setSellPrice(safeSellPrice);
     setFertilizerTotal(safeFertilizerTotal);
     setOtherCost(safeOtherCost);
@@ -275,11 +275,11 @@ export function RoiCalculatorPage({
             </label>
             <label>
               {language === "en" ? "Area (ha)" : "Diện tích (ha)"}
-              <input type="number" min="0.01" step="0.1" value={area} onChange={(event) => setArea(numberInputValue(event.target.value, 0.01, area))} />
+              <input inputMode="decimal" value={area} onChange={(event) => setArea(decimalInputValue(event.target.value))} />
             </label>
             <label>
               {language === "en" ? "Expected yield (tonnes/ha)" : "Năng suất kỳ vọng (tấn/ha)"}
-              <input type="number" min="0.1" step="0.1" value={yieldTarget} onChange={(event) => setYieldTarget(numberInputValue(event.target.value, 0.1, yieldTarget))} />
+              <input inputMode="decimal" value={yieldTarget} onChange={(event) => setYieldTarget(decimalInputValue(event.target.value))} />
             </label>
             <label>
               {language === "en" ? "Expected selling price (VND/kg)" : "Giá bán kỳ vọng (VND/kg)"}
@@ -323,11 +323,9 @@ export function RoiCalculatorPage({
                   <input aria-label={language === "en" ? "Fertilizer name" : "Tên phân bón"} value={line.name} onChange={(event) => updateLine(index, { name: event.target.value })} />
                   <input
                     aria-label={language === "en" ? "kg per ha" : "kg mỗi ha"}
-                    type="number"
-                    min="0"
-                    step="10"
                     value={line.kg_per_ha}
-                    onChange={(event) => updateLine(index, { kg_per_ha: event.target.value })}
+                    inputMode="decimal"
+                    onChange={(event) => updateLine(index, { kg_per_ha: decimalInputValue(event.target.value) })}
                   />
                   <MoneyTextInput
                     ariaLabel={language === "en" ? "price per kg" : "giá mỗi kg"}

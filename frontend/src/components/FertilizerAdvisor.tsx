@@ -4,6 +4,7 @@ import { SeoHead } from "./SeoHead";
 import { recommendFertilizer, type FertilizerCrop, type FertilizerKSource, type FertilizerRecommendation, type FertilizerRequest, type FertilizerStage, type SoilTexture } from "../lib/api";
 import { useLanguage } from "../contexts/LanguageContext";
 import { withLanguagePrefix } from "../lib/localizedRoutes";
+import { decimalInputValue, parseDecimalInput } from "../lib/numberInput";
 import {
   confidenceLabel as localizedConfidenceLabel,
   fertilizerCropLabel,
@@ -283,7 +284,7 @@ export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdviso
         tree_density_per_ha: numberOrNull(form.tree_density_per_ha),
         soil: {
           texture: form.texture,
-          ph_kcl: Number(form.ph_kcl),
+          ph_kcl: numberOrNull(form.ph_kcl) ?? Number(initialForm.ph_kcl),
           organic_carbon_pct: numberOrNull(form.organic_carbon_pct),
           total_n_pct: numberOrNull(form.total_n_pct),
           available_p_method: "bray_ii",
@@ -374,11 +375,11 @@ export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdviso
             <div className="fertilizer-two">
               <label>
                 {copy.targetYield}
-                <input value={form.yield_target_t_ha} onChange={(event) => update("yield_target_t_ha", event.target.value)} inputMode="decimal" />
+                <input value={form.yield_target_t_ha} onChange={(event) => update("yield_target_t_ha", decimalInputValue(event.target.value))} inputMode="decimal" />
               </label>
               <label>
                 {copy.density}
-                <input value={form.tree_density_per_ha} onChange={(event) => update("tree_density_per_ha", event.target.value)} inputMode="numeric" />
+                <input value={form.tree_density_per_ha} onChange={(event) => update("tree_density_per_ha", decimalInputValue(event.target.value))} inputMode="numeric" />
               </label>
             </div>
             <label>
@@ -396,21 +397,21 @@ export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdviso
               </select>
             </label>
             <div className="fertilizer-two">
-              <label>pH KCl<input value={form.ph_kcl} onChange={(event) => update("ph_kcl", event.target.value)} inputMode="decimal" /></label>
-              <label>{copy.organicCarbon}<input value={form.organic_carbon_pct} onChange={(event) => update("organic_carbon_pct", event.target.value)} inputMode="decimal" /></label>
-              <label>{copy.totalNitrogen}<input value={form.total_n_pct} onChange={(event) => update("total_n_pct", event.target.value)} inputMode="decimal" /></label>
-              <label>{copy.availableP}<input value={form.available_p_mg_per_100g} onChange={(event) => update("available_p_mg_per_100g", event.target.value)} inputMode="decimal" /></label>
-              <label>{copy.exchangeableK}<input value={form.exchangeable_k2o_mg_per_100g} onChange={(event) => update("exchangeable_k2o_mg_per_100g", event.target.value)} inputMode="decimal" /></label>
-              <label>CEC (cmolc/kg)<input value={form.cec_cmolc_per_kg} onChange={(event) => update("cec_cmolc_per_kg", event.target.value)} inputMode="decimal" /></label>
+              <label>pH KCl<input value={form.ph_kcl} onChange={(event) => update("ph_kcl", decimalInputValue(event.target.value))} inputMode="decimal" /></label>
+              <label>{copy.organicCarbon}<input value={form.organic_carbon_pct} onChange={(event) => update("organic_carbon_pct", decimalInputValue(event.target.value))} inputMode="decimal" /></label>
+              <label>{copy.totalNitrogen}<input value={form.total_n_pct} onChange={(event) => update("total_n_pct", decimalInputValue(event.target.value))} inputMode="decimal" /></label>
+              <label>{copy.availableP}<input value={form.available_p_mg_per_100g} onChange={(event) => update("available_p_mg_per_100g", decimalInputValue(event.target.value))} inputMode="decimal" /></label>
+              <label>{copy.exchangeableK}<input value={form.exchangeable_k2o_mg_per_100g} onChange={(event) => update("exchangeable_k2o_mg_per_100g", decimalInputValue(event.target.value))} inputMode="decimal" /></label>
+              <label>CEC (cmolc/kg)<input value={form.cec_cmolc_per_kg} onChange={(event) => update("cec_cmolc_per_kg", decimalInputValue(event.target.value))} inputMode="decimal" /></label>
             </div>
           </section>
 
           <section className="fertilizer-form-section">
             <SectionTitle step="3" Icon={Gauge} title={copy.adjustment} note={copy.adjustmentNote} />
             <div className="fertilizer-two">
-              <label>{copy.rainfall}<input value={form.annual_rainfall_mm} onChange={(event) => update("annual_rainfall_mm", event.target.value)} inputMode="numeric" /></label>
-              <label>{copy.slope}<input value={form.slope_pct} onChange={(event) => update("slope_pct", event.target.value)} inputMode="decimal" /></label>
-              <label>{copy.orchardAge}<input value={form.years_under_current_crop} onChange={(event) => update("years_under_current_crop", event.target.value)} inputMode="numeric" /></label>
+              <label>{copy.rainfall}<input value={form.annual_rainfall_mm} onChange={(event) => update("annual_rainfall_mm", decimalInputValue(event.target.value))} inputMode="numeric" /></label>
+              <label>{copy.slope}<input value={form.slope_pct} onChange={(event) => update("slope_pct", decimalInputValue(event.target.value))} inputMode="decimal" /></label>
+              <label>{copy.orchardAge}<input value={form.years_under_current_crop} onChange={(event) => update("years_under_current_crop", decimalInputValue(event.target.value))} inputMode="numeric" /></label>
               <label className="fertilizer-check"><input type="checkbox" checked={form.irrigation_available} onChange={(event) => update("irrigation_available", event.target.checked)} /> {copy.irrigation}</label>
             </div>
           </section>
@@ -601,8 +602,5 @@ function kSourceToBrand(value: FertilizerKSource) {
 }
 
 function numberOrNull(value: string): number | null {
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-  const parsed = Number(trimmed.replace(",", "."));
-  return Number.isFinite(parsed) ? parsed : null;
+  return parseDecimalInput(value);
 }

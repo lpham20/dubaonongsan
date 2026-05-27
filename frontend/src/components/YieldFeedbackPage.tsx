@@ -5,6 +5,7 @@ import { SeoHead } from "./SeoHead";
 import { useAuth } from "../contexts/AuthContext";
 import { useLanguage } from "../contexts/LanguageContext";
 import { submitYieldFeedback, type YieldFeedbackResponse } from "../lib/api";
+import { decimalInputValue, parseDecimalInput } from "../lib/numberInput";
 
 type FormState = {
   session_code: string;
@@ -120,10 +121,10 @@ export function YieldFeedbackPage() {
               </div>
             </div>
             <div className="fertilizer-two">
-              <label>{isEnglish ? "Actual yield (tonnes/ha)" : "Năng suất thực tế (tấn/ha)"}<input value={form.actual_yield_t_ha} onChange={(event) => update("actual_yield_t_ha", event.target.value)} inputMode="decimal" /></label>
+              <label>{isEnglish ? "Actual yield (tonnes/ha)" : "Năng suất thực tế (tấn/ha)"}<input value={form.actual_yield_t_ha} onChange={(event) => update("actual_yield_t_ha", decimalInputValue(event.target.value))} inputMode="decimal" /></label>
               <label>{isEnglish ? "Harvest date" : "Ngày thu hoạch"}<input type="date" value={form.harvest_date} onChange={(event) => update("harvest_date", event.target.value)} /></label>
-              <label>{isEnglish ? "Recommendation followed (%)" : "Mức làm theo khuyến nghị (%)"}<input value={form.fertilizer_followed_pct} onChange={(event) => update("fertilizer_followed_pct", event.target.value)} inputMode="decimal" /></label>
-              <label>{isEnglish ? "Rating 1-5" : "Đánh giá 1-5"}<input value={form.rating} onChange={(event) => update("rating", event.target.value)} inputMode="numeric" /></label>
+              <label>{isEnglish ? "Recommendation followed (%)" : "Mức làm theo khuyến nghị (%)"}<input value={form.fertilizer_followed_pct} onChange={(event) => update("fertilizer_followed_pct", decimalInputValue(event.target.value))} inputMode="decimal" /></label>
+              <label>{isEnglish ? "Rating 1-5" : "Đánh giá 1-5"}<input value={form.rating} onChange={(event) => update("rating", decimalInputValue(event.target.value))} inputMode="numeric" /></label>
             </div>
             <label>{isEnglish ? "Contact phone" : "Số điện thoại liên hệ"}<input value={form.contact_phone} onChange={(event) => update("contact_phone", event.target.value)} inputMode="tel" /></label>
             <label>{isEnglish ? "Notes" : "Ghi chú"}<textarea value={form.note} onChange={(event) => update("note", event.target.value)} rows={5} /></label>
@@ -155,8 +156,5 @@ export function YieldFeedbackPage() {
 }
 
 function numberOrNull(value: string): number | null {
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-  const parsed = Number(trimmed.replace(",", "."));
-  return Number.isFinite(parsed) ? parsed : null;
+  return parseDecimalInput(value);
 }

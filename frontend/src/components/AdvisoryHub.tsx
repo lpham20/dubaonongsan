@@ -16,7 +16,7 @@ import {
 import { useLanguage, type AppLanguage } from "../contexts/LanguageContext";
 import { cropLabel, displayProvince } from "../lib/displayLabels";
 import { MARKET_CROP_OPTIONS } from "../lib/cropOptions";
-import { numberInputValue } from "../lib/numberInput";
+import { decimalInputValue, parseDecimalInput } from "../lib/numberInput";
 
 const toolMeta: Record<AppLanguage, Record<AdvisoryTool, { kicker: string; title: string; description: string; canonical: string; Icon: typeof Calculator }>> = {
   vi: {
@@ -166,8 +166,8 @@ function SellingTimePanel({ authToken }: { authToken: string }) {
   const [crop, setCrop] = useState<CropType>("sau_rieng");
   const [regions, setRegions] = useState<Region[]>([]);
   const [regionId, setRegionId] = useState<number | "">("");
-  const [quantity, setQuantity] = useState(1000);
-  const [storageCost, setStorageCost] = useState(0);
+  const [quantity, setQuantity] = useState("1000");
+  const [storageCost, setStorageCost] = useState("0");
   const [result, setResult] = useState<SellingTimeResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -187,10 +187,10 @@ function SellingTimePanel({ authToken }: { authToken: string }) {
   useEffect(() => () => submitControllerRef.current?.abort(), []);
 
   function submit() {
-    const safeQuantity = Math.max(1, Number(quantity) || 0);
-    const safeStorageCost = Math.max(0, Number(storageCost) || 0);
-    setQuantity(safeQuantity);
-    setStorageCost(safeStorageCost);
+    const safeQuantity = Math.max(1, parseDecimalInput(quantity) ?? 0);
+    const safeStorageCost = Math.max(0, parseDecimalInput(storageCost) ?? 0);
+    setQuantity(String(safeQuantity));
+    setStorageCost(String(safeStorageCost));
     submitControllerRef.current?.abort();
     const controller = new AbortController();
     submitControllerRef.current = controller;
@@ -236,11 +236,11 @@ function SellingTimePanel({ authToken }: { authToken: string }) {
         </label>
         <label>
           {language === "en" ? "Quantity (kg)" : "Số lượng (kg)"}
-          <input type="number" min="1" value={quantity} onChange={(event) => setQuantity(numberInputValue(event.target.value, 1))} />
+          <input inputMode="numeric" value={quantity} onChange={(event) => setQuantity(decimalInputValue(event.target.value))} />
         </label>
         <label>
           {language === "en" ? "Storage cost VND/kg/day" : "Lưu kho đ/kg/ngày"}
-          <input type="number" min="0" value={storageCost} onChange={(event) => setStorageCost(numberInputValue(event.target.value, 0))} />
+          <input inputMode="numeric" value={storageCost} onChange={(event) => setStorageCost(decimalInputValue(event.target.value))} />
         </label>
         <button type="button" className="roi-primary-button" onClick={submit} disabled={loading}>
           <RefreshCw size={16} />
@@ -349,7 +349,7 @@ function CrossCropPanel({ authToken }: { authToken: string }) {
   const { language } = useLanguage();
   const [regions, setRegions] = useState<Region[]>([]);
   const [regionId, setRegionId] = useState<number | "">("");
-  const [area, setArea] = useState(1);
+  const [area, setArea] = useState("1");
   const [result, setResult] = useState<CrossCommodityResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -377,8 +377,8 @@ function CrossCropPanel({ authToken }: { authToken: string }) {
 
   function submit() {
     if (!regionId) return;
-    const safeArea = Math.max(0.1, Number(area) || 0);
-    setArea(safeArea);
+    const safeArea = Math.max(0.1, parseDecimalInput(area) ?? 0);
+    setArea(String(safeArea));
     submitControllerRef.current?.abort();
     const controller = new AbortController();
     submitControllerRef.current = controller;
@@ -416,7 +416,7 @@ function CrossCropPanel({ authToken }: { authToken: string }) {
         </label>
         <label>
           {language === "en" ? "Area (ha)" : "Diện tích (ha)"}
-          <input type="number" min="0.1" step="0.1" value={area} onChange={(event) => setArea(numberInputValue(event.target.value, 0.1))} />
+          <input inputMode="decimal" value={area} onChange={(event) => setArea(decimalInputValue(event.target.value))} />
         </label>
         <button type="button" className="roi-primary-button" onClick={submit} disabled={loading}>
           {loading ? (language === "en" ? "Comparing" : "Đang so sánh") : (language === "en" ? "Compare" : "So sánh")}

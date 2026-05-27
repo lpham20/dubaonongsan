@@ -15,6 +15,7 @@ import { memo, useEffect, useMemo, useState, type CSSProperties, type PointerEve
 import { TriangleAlert } from "./icons";
 import type { ForecastPoint, PricePoint, TradingSignal } from "../lib/api";
 import { useLanguage, type AppLanguage } from "../contexts/LanguageContext";
+import { CHART_ZOOM_IN_FACTOR, CHART_ZOOM_OUT_FACTOR, useChartViewport, useCoarseChartPointer } from "../lib/chartViewport";
 
 type Props = {
   historical: PricePoint[];
@@ -81,26 +82,6 @@ function useDarkChart(): boolean {
   return isDark;
 }
 
-function useCoarsePointer(): boolean {
-  const getInitialValue = () =>
-    typeof window === "undefined" ? true : window.matchMedia("(pointer: coarse), (max-width: 1180px)").matches;
-  const [isCoarse, setIsCoarse] = useState(getInitialValue);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(pointer: coarse), (max-width: 1180px)");
-    const update = () => setIsCoarse(mediaQuery.matches);
-    update();
-    if (typeof mediaQuery.addEventListener === "function") {
-      mediaQuery.addEventListener("change", update);
-      return () => mediaQuery.removeEventListener("change", update);
-    }
-    mediaQuery.addListener(update);
-    return () => mediaQuery.removeListener(update);
-  }, []);
-
-  return isCoarse;
-}
-
 function pickDailyPoint(points: PricePoint[]) {
   return (
     points.find((point) => point.quality_grade?.toUpperCase().includes("A") && !point.is_synthetic) ??
@@ -113,8 +94,7 @@ function pickDailyPoint(points: PricePoint[]) {
 function MasterChartComponent({ historical, forecast, signals, showPrice, showForecast, showRain, showSignals }: Props) {
   const { language } = useLanguage();
   const isDark = useDarkChart();
-  const isCoarsePointer = useCoarsePointer();
-  const [zoomRange, setZoomRange] = useState<{ startIndex: number; endIndex: number } | null>(null);
+  const isCoarsePointer = useCoarseChartPointer();
 
   const colors = isDark
     ? {
@@ -180,58 +160,9 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
   const maxRain = Math.max(0, ...rows.map((row) => row.rain ?? 0));
   const rainDomain: [number, number] = [0, Math.max(50, Math.ceil(maxRain * 1.4))];
   const hasRainData = rows.some((row) => typeof row.rain === "number" && row.rain > 0);
-  const fullEndIndex = Math.max(rows.length - 1, 0);
-  const defaultVisiblePoints = isCoarsePointer ? 48 : 120;
-  const defaultZoomRange = { startIndex: Math.max(0, fullEndIndex - defaultVisiblePoints + 1), endIndex: fullEndIndex };
-  const activeZoomRange = clampZoomRange(zoomRange ?? defaultZoomRange, fullEndIndex);
-  const canZoom = rows.length > 14;
-  const showBrush = canZoom && !isCoarsePointer;
+  const chartViewport = useChartViewport(rows.length, isCoarsePointer);
+  const { activeZoomRange, canZoom, maxWindowStart, panWindowStep, showBrush } = chartViewport;
   const chartRows = showBrush || !canZoom ? rows : rows.slice(activeZoomRange.startIndex, activeZoomRange.endIndex + 1);
-  const activeWindowLength = activeZoomRange.endIndex - activeZoomRange.startIndex + 1;
-  const maxWindowStart = Math.max(0, rows.length - activeWindowLength);
-
-  useEffect(() => {
-    setZoomRange(null);
-  }, [isCoarsePointer, rows.length]);
-
-  function updateZoom(nextRange: { startIndex: number; endIndex: number }) {
-    const clamped = clampZoomRange(nextRange, fullEndIndex);
-    setZoomRange((current) => {
-      const previous = clampZoomRange(current ?? defaultZoomRange, fullEndIndex);
-      if (previous.startIndex === clamped.startIndex && previous.endIndex === clamped.endIndex) {
-        return current;
-      }
-      return clamped;
-    });
-  }
-
-  function zoomBy(factor: number) {
-    if (!canZoom) return;
-    const currentLength = activeZoomRange.endIndex - activeZoomRange.startIndex + 1;
-    const minVisiblePoints = isCoarsePointer ? 10 : 14;
-    const nextLength = Math.min(rows.length, Math.max(minVisiblePoints, Math.round(currentLength * factor)));
-    if (nextLength >= rows.length) {
-      updateZoom({ startIndex: 0, endIndex: fullEndIndex });
-      return;
-    }
-    const center = (activeZoomRange.startIndex + activeZoomRange.endIndex) / 2;
-    const startIndex = Math.round(center - nextLength / 2);
-    updateZoom({ startIndex, endIndex: startIndex + nextLength - 1 });
-  }
-
-  function panBy(steps: number) {
-    if (!canZoom) return;
-    updateZoom({ startIndex: activeZoomRange.startIndex + steps, endIndex: activeZoomRange.endIndex + steps });
-  }
-
-  function setWindowStart(startIndex: number) {
-    if (!canZoom) return;
-    updateZoom({ startIndex, endIndex: startIndex + activeWindowLength - 1 });
-  }
-
-  function resetZoom() {
-    setZoomRange({ startIndex: 0, endIndex: fullEndIndex });
-  }
 
   return (
     <section className="chart-section">
@@ -258,13 +189,13 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
           </div>
           {canZoom ? (
             <div className="chart-zoom-controls" aria-label={language === "en" ? "Chart zoom controls" : "Điều khiển thu phóng biểu đồ"}>
-              <button type="button" onClick={() => zoomBy(0.58)} aria-label={language === "en" ? "Zoom in chart" : "Phóng to biểu đồ"}>
+              <button type="button" onClick={() => chartViewport.zoomBy(CHART_ZOOM_IN_FACTOR)} aria-label={language === "en" ? "Zoom in chart" : "Phóng to biểu đồ"}>
                 +
               </button>
-              <button type="button" onClick={() => zoomBy(1.72)} aria-label={language === "en" ? "Zoom out chart" : "Thu nhỏ biểu đồ"}>
+              <button type="button" onClick={() => chartViewport.zoomBy(CHART_ZOOM_OUT_FACTOR)} aria-label={language === "en" ? "Zoom out chart" : "Thu nhỏ biểu đồ"}>
                 -
               </button>
-              <button type="button" onClick={resetZoom}>
+              <button type="button" onClick={chartViewport.resetZoom}>
                 {language === "en" ? "All" : "Tất cả"}
               </button>
             </div>
@@ -277,14 +208,14 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
               <div className="mobile-chart-pan-buttons">
                 <button
                   type="button"
-                  onClick={() => panBy(-Math.max(1, Math.round(activeWindowLength * 0.45)))}
+                  onClick={() => chartViewport.panBy(-panWindowStep)}
                   aria-label={language === "en" ? "Move to previous time window" : "Lùi về khoảng thời gian trước"}
                 >
                   {"<"}
                 </button>
                 <button
                   type="button"
-                  onClick={() => panBy(Math.max(1, Math.round(activeWindowLength * 0.45)))}
+                  onClick={() => chartViewport.panBy(panWindowStep)}
                   aria-label={language === "en" ? "Move to next time window" : "Tiến tới khoảng thời gian sau"}
                 >
                   {">"}
@@ -301,8 +232,8 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
                   max={maxWindowStart}
                   step={1}
                   value={Math.min(activeZoomRange.startIndex, maxWindowStart)}
-                  onInput={(event) => setWindowStart(Number(event.currentTarget.value))}
-                  onChange={(event) => setWindowStart(Number(event.currentTarget.value))}
+                  onInput={(event) => chartViewport.setWindowStart(Number(event.currentTarget.value))}
+                  onChange={(event) => chartViewport.setWindowStart(Number(event.currentTarget.value))}
                   aria-label={language === "en" ? "Select visible time window on chart" : "Chọn khoảng thời gian hiển thị trên biểu đồ"}
                 />
               </label>
@@ -447,7 +378,7 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
                 gap={8}
                 onChange={(nextRange) => {
                   if (typeof nextRange?.startIndex === "number" && typeof nextRange.endIndex === "number") {
-                    updateZoom({ startIndex: nextRange.startIndex, endIndex: nextRange.endIndex });
+                    chartViewport.updateZoom({ startIndex: nextRange.startIndex, endIndex: nextRange.endIndex });
                   }
                 }}
               />
@@ -682,13 +613,6 @@ function MobileSvgChart({
       </svg>
     </div>
   );
-}
-
-function clampZoomRange(range: { startIndex: number; endIndex: number }, fullEndIndex: number) {
-  const endLimit = Math.max(0, fullEndIndex);
-  const startIndex = Math.min(Math.max(0, range.startIndex), endLimit);
-  const endIndex = Math.min(Math.max(startIndex, range.endIndex), endLimit);
-  return { startIndex, endIndex };
 }
 
 export const MasterChart = memo(MasterChartComponent);
