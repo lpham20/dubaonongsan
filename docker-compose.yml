@@ -9,6 +9,11 @@ services:
       - "5432:5432"
     volumes:
       - marketai_timescale:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U marketai -d marketai"]
+      interval: 10s
+      timeout: 5s
+      retries: 8
 
 volumes:
   marketai_timescale:
