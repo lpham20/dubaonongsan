@@ -4,6 +4,7 @@ import { CalendarDays, ExternalLink, Newspaper } from "./icons";
 import { Breadcrumb } from "./Breadcrumb";
 import { RelatedForecastWidget } from "./RelatedForecastWidget";
 import { SeoHead } from "./SeoHead";
+import { LoadingSkeleton } from "./LoadingSkeleton";
 import { fetchNews, fetchNewsDetail, type NewsArticle } from "../lib/api";
 import { compactText, DEFAULT_OG_IMAGE, newsPath } from "../lib/seo";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -88,7 +89,7 @@ export function NewsDetailPage({ slug }: { slug: string }) {
     return (
       <section className="content-page detail-page">
         <Breadcrumb items={[{ label: copy.home, href: "/" }, { label: copy.news, href: "/tin-tuc" }]} />
-        <div className="loading">{copy.loading}</div>
+        <LoadingSkeleton variant="article" label={copy.loading} rows={5} />
       </section>
     );
   }

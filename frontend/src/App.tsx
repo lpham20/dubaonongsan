@@ -20,6 +20,7 @@ import { TickerTape } from "./components/TickerTape";
 import { SiteFooter } from "./components/SiteFooter";
 import { SeoHead } from "./components/SeoHead";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { LoadingSkeleton } from "./components/LoadingSkeleton";
 import { useAuth } from "./contexts/AuthContext";
 import { LanguageProvider, useLanguage, type AppLanguage } from "./contexts/LanguageContext";
 import {
@@ -1185,9 +1186,9 @@ function RoutedApp() {
           {canRetryError(error) ? <button type="button" onClick={retryAfterError}>{copy.retry}</button> : null}
         </div>
       ) : null}
-      {loading && section === "analytics" ? <div className="loading">{copy.loadingMarket}</div> : null}
+      {loading && section === "analytics" ? <LoadingSkeleton variant="chart" label={copy.loadingMarket} rows={5} /> : null}
 
-      <Suspense fallback={<div className="section-fallback">{copy.loadingUi}</div>}>
+      <Suspense fallback={<div className="section-fallback"><LoadingSkeleton label={copy.loadingUi} rows={4} /></div>}>
       <ErrorBoundary
         resetKey={sectionBoundaryKey}
         fallback={(_error, reset) => (

@@ -11,6 +11,7 @@ import {
   YAxis
 } from "recharts";
 import { Activity, BarChart3, Gauge, LineChart, RefreshCw, TrendingDown, TrendingUp } from "./icons";
+import { LoadingSkeleton } from "./LoadingSkeleton";
 import { useLanguage, type AppLanguage } from "../contexts/LanguageContext";
 import { CHART_ZOOM_IN_FACTOR, CHART_ZOOM_OUT_FACTOR, useChartViewport, useCoarseChartPointer } from "../lib/chartViewport";
 import {
@@ -847,6 +848,7 @@ export function WorldFertilizerForecastSection() {
       </div>
 
       {error ? <div className="input-price-error">{error}</div> : null}
+      {loading && !forecast ? <LoadingSkeleton variant="chart" label={copy.loading} rows={5} /> : null}
 
       <div className="world-summary-grid">
         <div className="world-summary-main">

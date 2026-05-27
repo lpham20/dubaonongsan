@@ -4,6 +4,7 @@ import { CalendarClock, Gauge, Sprout } from "./icons";
 import { Breadcrumb } from "./Breadcrumb";
 import { RelatedForecastWidget } from "./RelatedForecastWidget";
 import { SeoHead } from "./SeoHead";
+import { LoadingSkeleton } from "./LoadingSkeleton";
 import { fetchGuideDetail, type GuidePost } from "../lib/api";
 import { compactText, DEFAULT_OG_IMAGE, guidePath } from "../lib/seo";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -72,7 +73,7 @@ export function GuideDetailPage({ slug }: { slug: string }) {
     return (
       <section className="content-page detail-page">
         <Breadcrumb items={[{ label: copy.home, href: "/" }, { label: copy.guides, href: "/huong-dan" }]} />
-        <div className="loading">{copy.loading}</div>
+        <LoadingSkeleton variant="article" label={copy.loading} rows={5} />
       </section>
     );
   }

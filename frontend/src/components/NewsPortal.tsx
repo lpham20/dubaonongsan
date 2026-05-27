@@ -30,6 +30,7 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { withLanguagePrefix } from "../lib/localizedRoutes";
 import { cropLabel } from "../lib/displayLabels";
 import { LivePriceTicker } from "./LivePriceTicker";
+import { LoadingSkeleton } from "./LoadingSkeleton";
 import { messageFromError } from "../lib/errorMessages";
 
 type Props = {
@@ -601,7 +602,11 @@ function PriceBoardSection({
       <PriceReportNotice onOpen={() => setReportOpen(true)} />
 
       {loading ? (
-        <div className="news-price-empty">{language === "en" ? "Loading the latest price board..." : "Đang tải bảng giá mới nhất..."}</div>
+        <LoadingSkeleton
+          variant="table"
+          label={language === "en" ? "Loading the latest price board..." : "Đang tải bảng giá mới nhất..."}
+          rows={6}
+        />
       ) : displayRows.length ? (
         <>
           <div className="news-price-table-wrap">
