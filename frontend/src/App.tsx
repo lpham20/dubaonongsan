@@ -62,6 +62,7 @@ import {
 import { cropSeoLabels, forecastPath, publicGuideSlug } from "./lib/seo";
 import { displayProvince } from "./lib/displayLabels";
 import { splitLanguagePath, withLanguagePrefix } from "./lib/localizedRoutes";
+import { messageFromError, safeErrorMessage } from "./lib/errorMessages";
 
 const DataGrid = lazy(() => import("./components/DataGrid").then(({ DataGrid }) => ({ default: DataGrid })));
 const AnalysisBrief = lazy(() => import("./components/AnalysisBrief").then(({ AnalysisBrief }) => ({ default: AnalysisBrief })));
@@ -441,7 +442,6 @@ function routeToUrl(route: InitialRoute, language: AppLanguage = "vi") {
   return withLanguagePrefix(unprefixed, language);
 }
 
-const TECHNICAL_ERROR_PATTERN = /api|json|unexpected token|doctype|failed to fetch|networkerror|syntaxerror|html|stack|trace|chunkload/i;
 const USER_ACTION_ERROR_PATTERN = /^(email|password|please|full name|mật khẩu|mat khau|vui lòng|vui long)/i;
 
 function safeErrorCopy(message: string | null, language: AppLanguage) {
@@ -449,8 +449,7 @@ function safeErrorCopy(message: string | null, language: AppLanguage) {
   const fallback = appCopy[language].errorFallback;
   if (!clean) return fallback;
   if (USER_ACTION_ERROR_PATTERN.test(clean) || clean.toLowerCase().includes("chưa có dữ liệu")) return clean;
-  if (TECHNICAL_ERROR_PATTERN.test(clean)) return fallback;
-  return clean.length > 150 ? fallback : clean;
+  return safeErrorMessage(clean, fallback);
 }
 
 function safeErrorTitle(message: string | null, language: AppLanguage) {
@@ -629,7 +628,7 @@ function RoutedApp() {
       setChangeExplanation(explanationPayload);
     } catch (err) {
       if (isStale() || (err instanceof DOMException && err.name === "AbortError")) return;
-      setError(err instanceof Error ? err.message : copy.loadDataError);
+      setError(messageFromError(err, copy.loadDataError));
     } finally {
       if (!isStale()) setLoading(false);
     }
@@ -639,7 +638,7 @@ function RoutedApp() {
     const controller = new AbortController();
     void loadContent(controller.signal).catch((err) => {
       if (err instanceof DOMException && err.name === "AbortError") return;
-      setError(err instanceof Error ? err.message : copy.loadContentError);
+      setError(messageFromError(err, copy.loadContentError));
     });
     const newsRefreshTimer = window.setInterval(() => {
       void fetchNews(undefined, language)
@@ -707,7 +706,7 @@ function RoutedApp() {
       .then(setGuides)
       .catch((err) => {
         if (err instanceof DOMException && err.name === "AbortError") return;
-        setError(err instanceof Error ? err.message : copy.loadGuidesError);
+        setError(messageFromError(err, copy.loadGuidesError));
       });
     return () => controller.abort();
   }, [language, section, guides.length]);
@@ -822,7 +821,7 @@ function RoutedApp() {
       });
       await syncWatchlist(authToken);
     } catch (err) {
-      setError(err instanceof Error ? err.message : copy.saveWatchlistError);
+      setError(messageFromError(err, copy.saveWatchlistError));
     }
   }
 
@@ -959,7 +958,7 @@ function RoutedApp() {
       await loadAccountData(session.access_token);
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
-      setError(err instanceof Error ? err.message : copy.authFailed);
+      setError(messageFromError(err, copy.authFailed));
     } finally {
       if (authControllerRef.current === controller) {
         authControllerRef.current = null;
@@ -990,7 +989,7 @@ function RoutedApp() {
         await loadContent();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : copy.platformJobError);
+      setError(messageFromError(err, copy.platformJobError));
     } finally {
       setPlatformBusy(false);
     }
@@ -1005,7 +1004,7 @@ function RoutedApp() {
       }
       setNewsArticles(await fetchNews(undefined, language));
     } catch (err) {
-    setError(err instanceof Error ? err.message : copy.newsUpdateError);
+      setError(messageFromError(err, copy.newsUpdateError));
     } finally {
       setContentBusy(false);
     }

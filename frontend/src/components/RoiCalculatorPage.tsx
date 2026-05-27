@@ -13,6 +13,7 @@ import { cropLabel, displayProvince } from "../lib/displayLabels";
 import { withLanguagePrefix } from "../lib/localizedRoutes";
 import { ROI_CROP_OPTIONS } from "../lib/cropOptions";
 import { decimalInputValue, parseDecimalInput } from "../lib/numberInput";
+import { messageFromError } from "../lib/errorMessages";
 
 type InputMode = "simple" | "detail";
 
@@ -215,7 +216,7 @@ export function RoiCalculatorPage({
         if (err instanceof DOMException && err.name === "AbortError") return;
         throw err;
       })
-      .catch((err) => setError(err instanceof Error ? err.message : language === "en" ? "Could not calculate profit." : "Không tính được lợi nhuận."))
+      .catch((err) => setError(messageFromError(err, language === "en" ? "Could not calculate profit." : "Không tính được lợi nhuận.")))
       .finally(() => {
         if (submitControllerRef.current === controller) {
           submitControllerRef.current = null;

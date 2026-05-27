@@ -30,6 +30,7 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { withLanguagePrefix } from "../lib/localizedRoutes";
 import { cropLabel } from "../lib/displayLabels";
 import { LivePriceTicker } from "./LivePriceTicker";
+import { messageFromError } from "../lib/errorMessages";
 
 type Props = {
   articles: NewsArticle[];
@@ -803,7 +804,7 @@ function PriceReportModal({
       });
       await onSaved();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : language === "en" ? "Could not save this price report." : "Không lưu được giá vừa báo.");
+      setMessage(messageFromError(error, language === "en" ? "Could not save this price report." : "Không lưu được giá vừa báo."));
     } finally {
       setBusy(false);
     }

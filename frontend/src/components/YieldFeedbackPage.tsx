@@ -6,6 +6,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useLanguage } from "../contexts/LanguageContext";
 import { submitYieldFeedback, type YieldFeedbackResponse } from "../lib/api";
 import { decimalInputValue, parseDecimalInput } from "../lib/numberInput";
+import { messageFromError } from "../lib/errorMessages";
 
 type FormState = {
   session_code: string;
@@ -76,7 +77,7 @@ export function YieldFeedbackPage() {
       };
       setResult(await submitYieldFeedback(sessionCode, payload, token));
     } catch (err) {
-      setError(err instanceof Error ? err.message : isEnglish ? "Could not send the yield report right now." : "Không gửi được báo cáo năng suất lúc này.");
+      setError(messageFromError(err, isEnglish ? "Could not send the yield report right now." : "Không gửi được báo cáo năng suất lúc này."));
     } finally {
       setBusy(false);
     }

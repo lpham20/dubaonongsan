@@ -17,6 +17,7 @@ import { useLanguage, type AppLanguage } from "../contexts/LanguageContext";
 import { cropLabel, displayProvince } from "../lib/displayLabels";
 import { MARKET_CROP_OPTIONS } from "../lib/cropOptions";
 import { decimalInputValue, parseDecimalInput } from "../lib/numberInput";
+import { messageFromError } from "../lib/errorMessages";
 
 const toolMeta: Record<AppLanguage, Record<AdvisoryTool, { kicker: string; title: string; description: string; canonical: string; Icon: typeof Calculator }>> = {
   vi: {
@@ -201,7 +202,7 @@ function SellingTimePanel({ authToken }: { authToken: string }) {
         if (err instanceof DOMException && err.name === "AbortError") return;
         throw err;
       })
-      .catch((err) => setError(err instanceof Error ? err.message : language === "en" ? "Could not calculate the selling window." : "Không tính được thời điểm bán."))
+      .catch((err) => setError(messageFromError(err, language === "en" ? "Could not calculate the selling window." : "Không tính được thời điểm bán.")))
       .finally(() => {
         if (submitControllerRef.current === controller) {
           submitControllerRef.current = null;
@@ -389,7 +390,7 @@ function CrossCropPanel({ authToken }: { authToken: string }) {
         if (err instanceof DOMException && err.name === "AbortError") return;
         throw err;
       })
-      .catch((err) => setError(err instanceof Error ? err.message : language === "en" ? "Could not compare crops." : "Không so sánh được cây trồng."))
+      .catch((err) => setError(messageFromError(err, language === "en" ? "Could not compare crops." : "Không so sánh được cây trồng.")))
       .finally(() => {
         if (submitControllerRef.current === controller) {
           submitControllerRef.current = null;
