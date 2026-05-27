@@ -211,6 +211,17 @@ class ScrapeRunOut(BaseModel):
 
 
 class AuthCredentials(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "email": "farmer@example.com",
+                    "password": "StrongPass123",
+                }
+            ]
+        }
+    )
+
     email: EmailStr
     password: str = Field(min_length=1, max_length=128)
     display_name: str | None = Field(default=None, max_length=120)
@@ -223,6 +234,19 @@ class AuthCredentials(BaseModel):
 
 
 class AuthRegisterCredentials(AuthCredentials):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "email": "farmer@example.com",
+                    "password": "StrongPass123",
+                    "display_name": "Nguyen Van A",
+                    "turnstile_token": "optional-turnstile-token",
+                }
+            ]
+        }
+    )
+
     password: str = Field(min_length=10, max_length=128)
 
     @field_validator("password")
@@ -255,6 +279,16 @@ class AuthTokenOut(BaseModel):
 
 
 class AuthRefreshRequest(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "refresh_token": "refresh-token-from-login-or-register",
+                }
+            ]
+        }
+    )
+
     refresh_token: str = Field(min_length=32, max_length=512)
 
 

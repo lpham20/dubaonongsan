@@ -13,6 +13,7 @@ from typing import Any
 import numpy as np
 
 from app.core.config import get_settings
+from app.ml_engine.world_fertilizer_features import build_inference_tensor, normalize_commodity_slug
 from app.ml_engine.model_registry import _load_tflite_module
 
 
@@ -62,7 +63,7 @@ def predict_world_fertilizer_lstm(
     if len(prices) != lookback_window:
         return None
 
-    features = _build_feature_tensor(window, artifact.scaler)
+    features = build_inference_tensor(window, artifact.scaler)
     with artifact.lock:
         artifact.interpreter.set_tensor(artifact.input_details[0]["index"], features.astype(np.float32))
         artifact.interpreter.invoke()
@@ -83,7 +84,7 @@ def predict_world_fertilizer_lstm(
 
 def load_world_fertilizer_lstm_artifact(commodity_slug: str) -> WorldFertilizerLSTMArtifact | None:
     settings = get_settings()
-    key = _normalize(commodity_slug)
+    key = normalize_commodity_slug(commodity_slug)
     with _CACHE_LOCK:
         cached = _CACHE.get(key)
         if cached is not None:
@@ -132,16 +133,7 @@ def invalidate_world_fertilizer_lstm_cache(commodity_slug: str | None = None) ->
         if commodity_slug is None:
             _CACHE.clear()
         else:
-            _CACHE.pop(_normalize(commodity_slug), None)
-
-
-def _build_feature_tensor(points: list[tuple[datetime, float, str]], scaler: dict[str, Any]) -> np.ndarray:
-    raw = _raw_features(points)
-    mean = np.asarray(scaler["feature_mean"], dtype=np.float32)
-    std = np.asarray(scaler["feature_std"], dtype=np.float32)
-    std = np.where(std < 1e-6, 1.0, std)
-    normalized = (raw - mean) / std
-    return normalized[None, :, :]
+            _CACHE.pop(normalize_commodity_slug(commodity_slug), None)
 
 
 def _validate_scaler(scaler: dict[str, Any], *, commodity_slug: str) -> None:
@@ -163,29 +155,3 @@ def _validate_scaler(scaler: dict[str, Any], *, commodity_slug: str) -> None:
     feature_count = len(scaler.get("feature_columns") or [])
     if len(scaler.get("feature_mean") or []) != feature_count or len(scaler.get("feature_std") or []) != feature_count:
         raise ValueError("World fertilizer scaler feature dimensions are inconsistent")
-
-
-def _raw_features(points: list[tuple[datetime, float, str]]) -> np.ndarray:
-    prices = np.asarray([float(price) for _, price, _ in points], dtype=np.float32)
-    log_prices = np.log(np.maximum(prices, 1e-6))
-    returns = np.zeros_like(log_prices)
-    returns[1:] = np.diff(log_prices)
-    seasonal_sin = []
-    seasonal_cos = []
-    for observed_at, _, _ in points:
-        day_of_year = max(1, int(observed_at.timetuple().tm_yday))
-        angle = 2 * math.pi * day_of_year / 365.25
-        seasonal_sin.append(math.sin(angle))
-        seasonal_cos.append(math.cos(angle))
-    return np.column_stack(
-        [
-            log_prices,
-            returns,
-            np.asarray(seasonal_sin, dtype=np.float32),
-            np.asarray(seasonal_cos, dtype=np.float32),
-        ]
-    ).astype(np.float32)
-
-
-def _normalize(value: str) -> str:
-    return value.strip().lower().replace("-", "_")

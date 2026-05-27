@@ -12,10 +12,16 @@ import numpy as np
 import tensorflow as tf
 
 from app.ingestion.sources.world_fertilizer_commoditypriceapi import CommodityPriceApiUreaPublicScraper
+from app.ml_engine.world_fertilizer_features import (
+    FEATURE_COLUMNS,
+    feature_scaler,
+    normalize_commodity_slug,
+    normalize_features,
+    raw_feature_matrix,
+)
 
 
 logger = logging.getLogger("marketai.train_world_fertilizer_lstm")
-FEATURE_COLUMNS = ["log_price", "log_return", "seasonal_sin", "seasonal_cos"]
 
 
 def train(
@@ -35,10 +41,8 @@ def train(
         raise RuntimeError(f"Not enough {commodity_slug} observations for LSTM training: {len(observations)}")
 
     points = [(row.observed_at, float(row.price_usd_per_tonne), row.quote_type) for row in observations]
-    raw_features = _raw_features(points)
-    feature_mean = raw_features.mean(axis=0)
-    feature_std = raw_features.std(axis=0)
-    feature_std = np.where(feature_std < 1e-6, 1.0, feature_std)
+    raw_features = raw_feature_matrix(points)
+    feature_mean, feature_std = feature_scaler(raw_features)
 
     windows: list[np.ndarray] = []
     targets: list[np.ndarray] = []
@@ -47,7 +51,7 @@ def train(
     for start in range(max_start):
         end = start + lookback_window
         future_end = end + horizon_days
-        window = (raw_features[start:end] - feature_mean) / feature_std
+        window = normalize_features(raw_features[start:end], feature_mean, feature_std)
         base_price = float(points[end - 1][1])
         future_prices = np.asarray([price for _, price, _ in points[end:future_end]], dtype=np.float32)
         target = np.log(np.maximum(future_prices, 1e-6) / max(base_price, 1e-6))
@@ -93,7 +97,7 @@ def train(
     metrics = _validation_metrics(model, x_val, actual_val_returns, base_val, target_mean, target_std)
 
     artifacts_dir.mkdir(parents=True, exist_ok=True)
-    key = commodity_slug.strip().lower().replace("-", "_")
+    key = normalize_commodity_slug(commodity_slug)
     keras_path = artifacts_dir / f"world_lstm_{key}.keras"
     tflite_path = artifacts_dir / f"world_lstm_{key}.tflite"
     scaler_path = artifacts_dir / f"world_lstm_{key}.scaler.json"
@@ -183,28 +187,6 @@ def _validation_metrics(
         "validation_naive_mae_usd_per_tonne": round(naive_mae, 4),
         "validation_rmse_improvement_pct": round(improvement, 2),
     }
-
-
-def _raw_features(points: list[tuple[datetime, float, str]]) -> np.ndarray:
-    prices = np.asarray([float(price) for _, price, _ in points], dtype=np.float32)
-    log_prices = np.log(np.maximum(prices, 1e-6))
-    returns = np.zeros_like(log_prices)
-    returns[1:] = np.diff(log_prices)
-    seasonal_sin = []
-    seasonal_cos = []
-    for observed_at, _, _ in points:
-        day_of_year = max(1, int(observed_at.timetuple().tm_yday))
-        angle = 2 * np.pi * day_of_year / 365.25
-        seasonal_sin.append(np.sin(angle))
-        seasonal_cos.append(np.cos(angle))
-    return np.column_stack(
-        [
-            log_prices,
-            returns,
-            np.asarray(seasonal_sin, dtype=np.float32),
-            np.asarray(seasonal_cos, dtype=np.float32),
-        ]
-    ).astype(np.float32)
 
 
 def _set_determinism() -> None:

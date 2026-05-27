@@ -5,7 +5,7 @@ from statistics import median
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from sqlalchemy import desc, select
 from sqlalchemy.orm import Session
 
@@ -37,6 +37,25 @@ class FertilizerLine(BaseModel):
 
 
 class RoiCalculateRequest(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "crop": "ca_phe",
+                    "crop_area_ha": 2,
+                    "expected_yield_t_ha": 3.5,
+                    "expected_sell_price_vnd_per_kg": 95000,
+                    "region_id": 1,
+                    "variety_id": 1,
+                    "fertilizer_total_cost_vnd_per_ha": 18000000,
+                    "other_input_cost_vnd_per_ha": 5000000,
+                    "labor_cost_vnd_per_ha": 8000000,
+                    "save": False,
+                }
+            ]
+        }
+    )
+
     crop: Literal["sau_rieng", "ca_phe", "ho_tieu", "lua"]
     crop_area_ha: float = Field(..., ge=0.01, le=1000)
     expected_yield_t_ha: float = Field(..., ge=0.1, le=80)

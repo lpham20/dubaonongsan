@@ -4,7 +4,7 @@ from datetime import date
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
@@ -83,6 +83,36 @@ class Preferences(BaseModel):
 
 
 class RecommendRequest(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "crop": "robusta_coffee",
+                    "growth_stage": "mature_kinh_doanh",
+                    "yield_target_t_ha": 3.5,
+                    "tree_density_per_ha": 1100,
+                    "soil": {
+                        "texture": "basaltic_red",
+                        "ph_kcl": 4.3,
+                        "organic_carbon_pct": 2.8,
+                        "total_n_pct": 0.18,
+                        "available_p_method": "bray_ii",
+                        "available_p_mg_per_100g": 4.5,
+                        "exchangeable_k_method": "nh4oac",
+                        "exchangeable_k2o_mg_per_100g": 12,
+                        "cec_cmolc_per_kg": 8,
+                        "sample_depth_cm": 30,
+                        "sample_date": "2026-05-21",
+                    },
+                    "location": {"province": "Dak Lak"},
+                    "climate": {"annual_rainfall_mm": 1900, "irrigation_available": True},
+                    "field": {"slope_pct": 5, "years_under_current_crop": 10},
+                    "preferences": {"language": "vi", "include_product_mix": True},
+                }
+            ]
+        }
+    )
+
     crop: Crop
     variety: str | None = Field(default=None, max_length=80)
     growth_stage: GrowthStage = "mature_kinh_doanh"

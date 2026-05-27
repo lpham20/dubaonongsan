@@ -2,7 +2,8 @@ import { Component, type ErrorInfo, type ReactNode } from "react";
 
 type Props = {
   children: ReactNode;
-  fallback?: (error: Error) => ReactNode;
+  fallback?: (error: Error, reset: () => void) => ReactNode;
+  resetKey?: string;
 };
 
 type State = {
@@ -60,10 +61,20 @@ export class ErrorBoundary extends Component<Props, State> {
     }
   }
 
+  componentDidUpdate(previousProps: Props) {
+    if (this.state.error && previousProps.resetKey !== this.props.resetKey) {
+      this.setState({ error: null });
+    }
+  }
+
+  reset = () => {
+    this.setState({ error: null });
+  };
+
   render() {
     if (this.state.error) {
       return (
-        this.props.fallback?.(this.state.error) ?? (
+        this.props.fallback?.(this.state.error, this.reset) ?? (
           <div className="error-boundary" role="alert">
             <h3>Đã có lỗi xảy ra</h3>
             <p>Vui lòng tải lại trang. Nếu lỗi vẫn còn, hãy báo cho quản trị viên.</p>
@@ -75,7 +86,7 @@ export class ErrorBoundary extends Component<Props, State> {
                   hardReloadForNewBundle();
                   return;
                 }
-                this.setState({ error: null });
+                this.reset();
               }}
             >
               Tải lại

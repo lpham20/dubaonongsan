@@ -19,6 +19,7 @@ import { LivePriceTicker } from "./components/LivePriceTicker";
 import { TickerTape } from "./components/TickerTape";
 import { SiteFooter } from "./components/SiteFooter";
 import { SeoHead } from "./components/SeoHead";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { useAuth } from "./contexts/AuthContext";
 import { LanguageProvider, useLanguage, type AppLanguage } from "./contexts/LanguageContext";
 import {
@@ -1029,6 +1030,7 @@ function RoutedApp() {
         ? "app-shell forecast-shell input-prices-shell"
       : "app-shell";
   const appShellClassName = `${baseAppShellClassName}${section === "news" || section === "inputPrices" ? " live-ticker-shell" : ""}`;
+  const sectionBoundaryKey = [section, crop, analyticsTab, newsView, newsSlug ?? "", guideSlug ?? "", notFound ? "not-found" : "ok"].join(":");
 
   return (
     <main className={appShellClassName}>
@@ -1187,6 +1189,24 @@ function RoutedApp() {
       {loading && section === "analytics" ? <div className="loading">{copy.loadingMarket}</div> : null}
 
       <Suspense fallback={<div className="section-fallback">{copy.loadingUi}</div>}>
+      <ErrorBoundary
+        resetKey={sectionBoundaryKey}
+        fallback={(_error, reset) => (
+          <div className="section-error" role="alert">
+            <strong>{copy.errorTitleData}</strong>
+            <p>{copy.errorFallback}</p>
+            <button
+              type="button"
+              onClick={() => {
+                reset();
+                retryAfterError();
+              }}
+            >
+              {copy.retry}
+            </button>
+          </div>
+        )}
+      >
       {notFound ? <NotFoundPage /> : null}
       {!notFound && section === "home" ? (
         <HomePage
@@ -1338,6 +1358,7 @@ function RoutedApp() {
       {!notFound && section === "fertilizerMethodology" ? <FertilizerMethodology /> : null}
       {!notFound && section === "yieldFeedback" ? <YieldFeedbackPage /> : null}
       {!notFound && section === "methodology" ? <ForecastMethodology /> : null}
+      </ErrorBoundary>
       </Suspense>
       <SiteFooter
         onOpenNews={() => openNews("latest")}

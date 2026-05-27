@@ -16,6 +16,7 @@ from app.services.feature_flags import is_feature_enabled, list_feature_flags, s
 from app.services.ml_model_versions import record_crop_model_version
 from app.services.model_ready_backfill import MODEL_READY_GRADE, ModelReadyBackfillService
 from app.services.platform_jobs import PlatformJobService
+from app.services.world_fertilizer import WorldFertilizerIngestionService
 
 
 def _session() -> Session:
@@ -133,6 +134,36 @@ def test_failed_platform_job_sends_ops_alert(monkeypatch):
     assert payload["error_message"] == "boom"
     assert payload["summary"] == {"source": "unit"}
     assert payload["duration_seconds"] >= 0
+
+
+def test_world_fertilizer_scraper_failure_sends_source_alert(monkeypatch):
+    import app.services.world_fertilizer as world_fertilizer
+
+    db = _session()
+    alerts: list[tuple[str, dict]] = []
+
+    class BrokenScraper:
+        source = "commoditypriceapi_urea_public_1y"
+        source_url = "https://commoditypriceapi.example.test/tools/urea/prices"
+
+        @staticmethod
+        def scrape():
+            raise ValueError("Next action id changed")
+
+    monkeypatch.setattr(world_fertilizer, "WORLD_FERTILIZER_SCRAPE_ATTEMPTS", 1)
+    monkeypatch.setattr(world_fertilizer, "WORLD_FERTILIZER_RETRY_DELAY_SECONDS", 0)
+    monkeypatch.setattr(world_fertilizer, "build_world_fertilizer_scrapers", lambda source=None: [BrokenScraper()])
+    monkeypatch.setattr(world_fertilizer, "send_ops_alert", lambda event, payload: alerts.append((event, payload)) or True)
+
+    result = WorldFertilizerIngestionService(db).scrape_and_store(source="commoditypriceapi_urea_public_1y")
+
+    assert result[0]["status"] == STATUS_FAILED
+    assert len(alerts) == 1
+    event, payload = alerts[0]
+    assert event == "world_fertilizer_scrape_failed"
+    assert payload["source"] == "commoditypriceapi_urea_public_1y"
+    assert payload["status"] == STATUS_FAILED
+    assert "Next action id changed" in payload["error_message"]
 
 
 def test_json_log_formatter_keeps_valid_json_with_extra_fields():

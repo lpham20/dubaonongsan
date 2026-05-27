@@ -50,9 +50,9 @@ h5 {
 .news-price-table td:nth-child(5),
 .news-price-table td:nth-child(6),
 .table-wrap td:nth-child(1),
-.table-wrap td:nth-child(5),
 .table-wrap td:nth-child(6),
 .table-wrap td:nth-child(7),
+.table-wrap td:nth-child(8),
 .market-data-card strong,
 .market-card-meta em,
 .quality-score,
@@ -1103,9 +1103,9 @@ h5 {
 }
 
 .table-wrap td:nth-child(1),
-.table-wrap td:nth-child(5),
 .table-wrap td:nth-child(6),
 .table-wrap td:nth-child(7),
+.table-wrap td:nth-child(8),
 .news-price-table td:nth-child(4),
 .news-price-table td:nth-child(5),
 .news-price-table td:nth-child(6) {

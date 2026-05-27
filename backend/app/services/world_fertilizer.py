@@ -25,6 +25,7 @@ from app.ingestion.world_fertilizer_records import WorldFertilizerObservation, W
 from app.ingestion.world_fertilizer_registry import build_world_fertilizer_scrapers
 from app.ml_engine.world_fertilizer_lstm import predict_world_fertilizer_lstm
 from app.models import ScrapeRun, WorldCommodityPrice
+from app.services.ops_alerts import send_ops_alert
 
 
 logger = logging.getLogger(__name__)
@@ -150,7 +151,21 @@ class WorldFertilizerIngestionService:
                     run.finished_at = datetime.now(UTC)
                     self.db.add(run)
                     self.db.commit()
-                    summaries.append(failed_summary or self._summary(run, observations))
+                    summary = failed_summary or self._summary(run, observations)
+                    summaries.append(summary)
+                    if failed_summary:
+                        send_ops_alert(
+                            "world_fertilizer_scrape_failed",
+                            {
+                                "run_id": run.id,
+                                "source": scraper.source,
+                                "source_url": scraper.source_url,
+                                "status": run.status,
+                                "error_message": run.error_message,
+                                "started_at": run.started_at.isoformat() if run.started_at else None,
+                                "finished_at": run.finished_at.isoformat() if run.finished_at else None,
+                            },
+                        )
         if summaries:
             invalidate_cache("world-fertilizer")
             invalidate_cache("llm-input-prices")
