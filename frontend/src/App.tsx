@@ -675,9 +675,10 @@ function RoutedApp() {
       (route.section === "fertilizer" && location.search)
         ? `${canonicalUrl}${location.search}`
         : canonicalUrl;
-    const currentUrl = `${location.pathname}${location.search}`;
-    if (!route.notFound && canonicalWithSearch !== currentUrl) {
-      navigate(canonicalWithSearch, { replace: true });
+    const canonicalWithHash = `${canonicalWithSearch}${location.hash}`;
+    const currentUrl = `${location.pathname}${location.search}${location.hash}`;
+    if (!route.notFound && canonicalWithHash !== currentUrl) {
+      navigate(canonicalWithHash, { replace: true });
       return;
     }
     setSection(route.section);
@@ -686,7 +687,7 @@ function RoutedApp() {
     setNewsSlug(route.newsSlug);
     setGuideSlug(route.guideSlug);
     setNotFound(route.notFound);
-  }, [language, location.pathname, location.search, navigate, setLanguage]);
+  }, [language, location.hash, location.pathname, location.search, navigate, setLanguage]);
 
   useEffect(() => {
     const onInternalLinkClick = (event: MouseEvent) => {

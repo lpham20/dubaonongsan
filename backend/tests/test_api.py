@@ -805,6 +805,8 @@ def test_sitemap_includes_static_seo_routes(client):
     assert "https://dubaonongsan.com/khuyen-nghi-bon-phan/logic" in body
     assert "https://dubaonongsan.com/bao-cao-nang-suat" in body
     assert "https://dubaonongsan.com/roi-uoc-tinh" in body
+    assert "https://dubaonongsan.com/en/khuyen-nghi-bon-phan" in body
+    assert "https://dubaonongsan.com/vn/" not in body
 
 
 def test_news_filter_rejects_offtopic_finance_and_electricity():

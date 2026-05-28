@@ -298,13 +298,12 @@ def sitemap(db: Session = Depends(get_db)) -> Response:
         lastmod = published.date().isoformat() if published else None
         urls.append((f"{SITE_BASE}/tin-tuc/{_news_slug(article)}", "0.6", "weekly", lastmod))
 
-    localized_urls: list[tuple[str, str, str, str | None]] = []
+    en_urls: list[tuple[str, str, str, str | None]] = []
     for loc, priority, changefreq, lastmod in urls:
         path = loc.removeprefix(SITE_BASE)
-        for prefix in ("vn", "en"):
-            localized_path = f"/{prefix}" if path == "/" else f"/{prefix}{path}"
-            localized_urls.append((f"{SITE_BASE}{localized_path}", priority, changefreq, lastmod))
-    urls.extend(localized_urls)
+        en_path = "/en" if path == "/" else f"/en{path}"
+        en_urls.append((f"{SITE_BASE}{en_path}", priority, changefreq, lastmod))
+    urls.extend(en_urls)
 
     body = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for loc, priority, changefreq, lastmod in urls:

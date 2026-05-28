@@ -32,6 +32,9 @@ export function withLanguagePrefix(pathInput: string, language: AppLanguage) {
   const [rawPath, search = ""] = rawPathAndSearch.split("?", 2);
   const normalizedPath = rawPath.startsWith("/") ? rawPath : `/${rawPath}`;
   const stripped = splitLanguagePath(normalizedPath).pathname;
+  if (language === "vi") {
+    return `${stripped}${search ? `?${search}` : ""}${hash ? `#${hash}` : ""}`;
+  }
   const prefix = `/${languagePrefixes[language]}`;
   const path = stripped === "/" ? prefix : `${prefix}${stripped}`;
   return `${path}${search ? `?${search}` : ""}${hash ? `#${hash}` : ""}`;

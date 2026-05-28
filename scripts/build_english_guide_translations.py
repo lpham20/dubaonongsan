@@ -2,7 +2,7 @@
 
 The output is bundled into the backend image and used by /content/guides?lang=en.
 This script intentionally keeps route slugs unchanged so /en/huong-dan/<slug>
-and /vn/huong-dan/<slug> stay paired for hreflang.
+and /huong-dan/<slug> stay paired for hreflang.
 """
 
 from __future__ import annotations

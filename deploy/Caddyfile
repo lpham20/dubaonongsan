@@ -19,6 +19,12 @@
 	@wwwHost host www.dubaonongsan.com
 	redir @wwwHost https://dubaonongsan.com{uri} permanent
 
+	@vnPrefix path_regexp vnPrefix ^/vn/(.*)$
+	redir @vnPrefix /{re.vnPrefix.1} permanent
+
+	@vnRoot path /vn /vn/
+	redir @vnRoot / permanent
+
 	header {
 		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
 		X-Content-Type-Options "nosniff"
