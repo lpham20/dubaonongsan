@@ -526,8 +526,13 @@ function RoutedApp() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [loadedAnalyticsKey, setLoadedAnalyticsKey] = useState("");
   const loadDataRequestRef = useRef(0);
   const authControllerRef = useRef<AbortController | null>(null);
+
+  function analyticsKeyFor(nextRegionId: number | string, nextVarietyId: number | string) {
+    return `${crop}|${nextRegionId}|${nextVarietyId}|${days}|${language}`;
+  }
 
   async function loadContent(signal?: AbortSignal) {
     const [newsPayload, guidePayload] = await Promise.all([
@@ -563,6 +568,7 @@ function RoutedApp() {
         setSignals([]);
         setMetrics(null);
         setError(copy.noProductData);
+        setLoadedAnalyticsKey(analyticsKeyFor("none", "none"));
         return;
       }
 
@@ -582,6 +588,7 @@ function RoutedApp() {
         setSignals([]);
         setMetrics(null);
         setError(copy.noRegionData);
+        setLoadedAnalyticsKey(analyticsKeyFor(nextRegionId, "none"));
         return;
       }
 
@@ -627,9 +634,11 @@ function RoutedApp() {
       setHeatmap(heatmapPayload);
       setStrategyAlerts(alertsPayload);
       setChangeExplanation(explanationPayload);
+      setLoadedAnalyticsKey(analyticsKeyFor(nextRegionId, nextVarietyId));
     } catch (err) {
       if (isStale() || (err instanceof DOMException && err.name === "AbortError")) return;
       setError(messageFromError(err, copy.loadDataError));
+      setLoadedAnalyticsKey(analyticsKeyFor(regionId, varietyId));
     } finally {
       if (!isStale()) setLoading(false);
     }
@@ -1031,9 +1040,12 @@ function RoutedApp() {
       : "app-shell";
   const appShellClassName = `${baseAppShellClassName}${section === "news" || section === "inputPrices" ? " live-ticker-shell" : ""}`;
   const sectionBoundaryKey = [section, crop, analyticsTab, newsView, newsSlug ?? "", guideSlug ?? "", notFound ? "not-found" : "ok"].join(":");
+  const currentAnalyticsKey = analyticsKeyFor(regionId, varietyId);
+  const showAnalyticsLoadingSkeleton = section === "analytics" && loading && loadedAnalyticsKey !== currentAnalyticsKey;
+  const showAnalyticsSurface = section === "analytics" && !showAnalyticsLoadingSkeleton;
 
   return (
-    <main className={appShellClassName}>
+    <main className={appShellClassName} aria-busy={showAnalyticsLoadingSkeleton ? true : undefined}>
       <AppHeader
         section={section}
         crop={crop}
@@ -1066,7 +1078,7 @@ function RoutedApp() {
       {section === "analytics" ? <TickerTape points={tickerPoints} /> : null}
       {section === "inputPrices" ? <LivePriceTicker /> : null}
 
-      {section === "analytics" ? (
+      {showAnalyticsSurface ? (
         <>
           <header className="market-quote-header">
             <div className="quote-main">
@@ -1186,7 +1198,7 @@ function RoutedApp() {
           {canRetryError(error) ? <button type="button" onClick={retryAfterError}>{copy.retry}</button> : null}
         </div>
       ) : null}
-      {loading && section === "analytics" ? <LoadingSkeleton variant="chart" label={copy.loadingMarket} rows={5} /> : null}
+      {showAnalyticsLoadingSkeleton ? <LoadingSkeleton variant="chart" label={copy.loadingMarket} rows={5} /> : null}
 
       <Suspense fallback={<div className="section-fallback"><LoadingSkeleton label={copy.loadingUi} rows={4} /></div>}>
       <ErrorBoundary
@@ -1217,7 +1229,7 @@ function RoutedApp() {
           onOpenGuides={() => changeSection("guides")}
         />
       ) : null}
-      {!notFound && section === "analytics" ? (
+      {!notFound && showAnalyticsSurface ? (
         <>
           <SeoHead
             title={copy.forecastTitle(language === "en" ? cropLabelsEn[crop] : cropSeoLabels[crop])}
