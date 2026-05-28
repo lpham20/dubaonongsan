@@ -20,10 +20,10 @@
 	redir @wwwHost https://dubaonongsan.com{uri} permanent
 
 	@vnPrefix path_regexp vnPrefix ^/vn/(.*)$
-	redir @vnPrefix /{re.vnPrefix.1} permanent
+	redir @vnPrefix /{re.vnPrefix.1}?{query} permanent
 
 	@vnRoot path /vn /vn/
-	redir @vnRoot / permanent
+	redir @vnRoot /?{query} permanent
 
 	header {
 		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
