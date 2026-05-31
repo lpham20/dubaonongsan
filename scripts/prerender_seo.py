@@ -320,6 +320,12 @@ def _guide_markdown_to_html(content: str) -> str:
     return "\n".join(output)
 
 
+def _english_alternate_url(canonical: str) -> str:
+    parsed = urlparse(canonical)
+    path = parsed.path or "/"
+    return f"{SITE_BASE}/en" if path == "/" else f"{SITE_BASE}/en{path}"
+
+
 def _page(
     title: str,
     description: str,
@@ -341,6 +347,7 @@ def _page(
         keyword_meta = f'<meta name="news_keywords" content="{html.escape(news_keywords[:240])}" />'
     asset_tags = _asset_tags()
     fallback_script = '<script src="/inline-seo-fallback.js" defer></script>'
+    alternate_en = _english_alternate_url(canonical)
 
     return f"""<!doctype html>
 <html lang="vi">
@@ -353,6 +360,9 @@ def _page(
   <meta name="robots" content="index, follow, max-image-preview:large" />
   {keyword_meta}
   <link rel="canonical" href="{canonical}" />
+  <link rel="alternate" hreflang="vi" href="{canonical}" />
+  <link rel="alternate" hreflang="en" href="{alternate_en}" />
+  <link rel="alternate" hreflang="x-default" href="{canonical}" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <meta property="og:type" content="{html.escape(og_type)}" />
