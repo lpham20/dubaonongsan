@@ -173,6 +173,20 @@ def _asset_tags() -> str:
     return "\n  ".join(dict.fromkeys(tags))
 
 
+def _analytics_tags() -> str:
+    index_html_path = DIST / "index.html"
+    if not index_html_path.exists():
+        return ""
+    index_html = index_html_path.read_text(encoding="utf-8")
+    tags = re.findall(r"<script\b[^>]*>.*?</script>", index_html, flags=re.DOTALL)
+    selected = [
+        tag.strip()
+        for tag in tags
+        if "DUBAONONGSAN_GA_ID" in tag or 'src="/inline-ga.js"' in tag
+    ]
+    return "\n  ".join(dict.fromkeys(selected))
+
+
 def _breadcrumb(items: list[tuple[str, str]]) -> dict:
     return {
         "@context": "https://schema.org",
@@ -346,6 +360,7 @@ def _page(
     if news_keywords:
         keyword_meta = f'<meta name="news_keywords" content="{html.escape(news_keywords[:240])}" />'
     asset_tags = _asset_tags()
+    analytics_tags = _analytics_tags()
     fallback_script = '<script src="/inline-seo-fallback.js" defer></script>'
     alternate_en = _english_alternate_url(canonical)
 
@@ -382,6 +397,7 @@ def _page(
   <meta name="twitter:card" content="summary_large_image" />
   {article_meta}
   {schema_markup}
+  {analytics_tags}
   {fallback_script}
   {asset_tags}
 </head>
