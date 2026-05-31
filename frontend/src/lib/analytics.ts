@@ -90,10 +90,13 @@ export function trackEvent(name: AnalyticsEventName, params: AnalyticsEventParam
 export function trackPageView(path: string, title: string): void {
   const browser = analyticsWindow();
   if (!browser?.gtag || !browser.DUBAONONGSAN_GA_ID || !hasAnalyticsConsent()) return;
+  const pagePath = path.slice(0, 300);
   try {
-    browser.gtag("config", browser.DUBAONONGSAN_GA_ID, {
-      page_path: path.slice(0, 300),
-      page_title: title.slice(0, 100)
+    browser.gtag("event", "page_view", {
+      page_path: pagePath,
+      page_location: `${window.location.origin}${pagePath}`.slice(0, 500),
+      page_title: title.slice(0, 100),
+      send_to: browser.DUBAONONGSAN_GA_ID
     });
   } catch {
     // Analytics must never break navigation.
