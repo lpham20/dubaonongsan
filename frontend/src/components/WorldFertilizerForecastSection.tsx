@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import {
   Area,
   Brush,
@@ -24,6 +24,7 @@ import {
   type WorldFertilizerForecastPoint,
   type WorldFertilizerHistoryPoint
 } from "../lib/api";
+import { trackEvent } from "../lib/analytics";
 
 const HISTORY_DAYS = 365;
 
@@ -735,6 +736,13 @@ export function WorldFertilizerForecastSection() {
   const [refreshNonce, setRefreshNonce] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const trackedCommodityRef = useRef<WorldFertilizerCommodity | null>(null);
+
+  useEffect(() => {
+    if (trackedCommodityRef.current === selected) return;
+    trackedCommodityRef.current = selected;
+    trackEvent("world_fertilizer_viewed", { commodity: selected });
+  }, [selected]);
 
   useEffect(() => {
     const controller = new AbortController();

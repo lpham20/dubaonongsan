@@ -10,7 +10,7 @@ import {
   TrendingDown,
   TrendingUp
 } from "./icons";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FreshnessBanner } from "./FreshnessBanner";
 import { SeoHead } from "./SeoHead";
@@ -32,6 +32,7 @@ import { cropLabel } from "../lib/displayLabels";
 import { LivePriceTicker } from "./LivePriceTicker";
 import { LoadingSkeleton } from "./LoadingSkeleton";
 import { messageFromError } from "../lib/errorMessages";
+import { trackEvent } from "../lib/analytics";
 
 type Props = {
   articles: NewsArticle[];
@@ -237,6 +238,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
     ho_tieu: []
   });
   const [priceBoardLoading, setPriceBoardLoading] = useState(false);
+  const trackedSearchRef = useRef("");
   const activePriceCrop = activeView === "latest" ? null : activeView;
 
   const rankedArticles = useMemo(() => {
@@ -310,8 +312,13 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
       const url = new URL(window.location.href);
       if (next) {
         url.searchParams.set("q", next);
+        if (trackedSearchRef.current !== next) {
+          trackedSearchRef.current = next;
+          trackEvent("search_query_submitted", { query_length: next.length });
+        }
       } else {
         url.searchParams.delete("q");
+        trackedSearchRef.current = "";
       }
       window.history.replaceState({}, "", url.toString());
     }, 500);

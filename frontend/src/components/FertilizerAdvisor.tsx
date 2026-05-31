@@ -13,6 +13,7 @@ import {
   translateFertilizerProduct,
   translateFertilizerSplit
 } from "../lib/displayLabels";
+import { trackEvent } from "../lib/analytics";
 
 const cropOptions: { value: FertilizerCrop; label: string; defaultDensity: number; defaultYield: number; texture: SoilTexture }[] = [
   { value: "robusta_coffee", label: "Cà phê Robusta", defaultDensity: 1100, defaultYield: 3.5, texture: "basaltic_red" },
@@ -305,7 +306,16 @@ export function FertilizerAdvisor({ authToken, onRequireAuth }: FertilizerAdviso
           preferred_k_source: form.preferred_k_source
         }
       };
-      setResult(await recommendFertilizer(payload, authToken));
+      trackEvent("fertilizer_recommend_requested", {
+        crop: payload.crop,
+        province: payload.location?.province || "unknown"
+      });
+      const response = await recommendFertilizer(payload, authToken);
+      setResult(response);
+      trackEvent("fertilizer_recommend_received", {
+        crop: payload.crop,
+        confidence_tier: response.confidence.overall
+      });
     } catch {
       setError(copy.errorBody);
     } finally {

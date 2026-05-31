@@ -9,6 +9,7 @@ import {
   type AuthSession,
   type AuthUser
 } from "../lib/api";
+import { trackEvent } from "../lib/analytics";
 
 type AuthContextValue = {
   token: string;
@@ -122,6 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const session = await apiLogin(email, password, signal);
     if (signal?.aborted) throw new DOMException("Authentication request was cancelled.", "AbortError");
     persist(session);
+    trackEvent("login_completed", { method: "email" });
     return session;
   }
 
@@ -129,6 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const session = await apiRegister(email, password, displayName, signal);
     if (signal?.aborted) throw new DOMException("Authentication request was cancelled.", "AbortError");
     persist(session);
+    trackEvent("signup_completed", { method: "email" });
     return session;
   }
 
@@ -139,6 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await apiLogout(currentToken, currentRefreshToken).catch(() => undefined);
     }
     clearSession();
+    trackEvent("logout");
   }
 
   const value = useMemo(() => ({ token, user, signIn, signUp, signOut }), [token, user]);

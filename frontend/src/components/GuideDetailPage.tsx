@@ -1,4 +1,4 @@
-import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { Link } from "react-router-dom";
 import { CalendarClock, Gauge, Sprout } from "./icons";
 import { Breadcrumb } from "./Breadcrumb";
@@ -10,6 +10,7 @@ import { compactText, DEFAULT_OG_IMAGE, guidePath } from "../lib/seo";
 import { useLanguage } from "../contexts/LanguageContext";
 import { withLanguagePrefix } from "../lib/localizedRoutes";
 import { useFetchOnce } from "../hooks/useFetchOnce";
+import { trackEvent } from "../lib/analytics";
 
 const HOWTO_HEADINGS = [
   "Mục tiêu",
@@ -67,6 +68,14 @@ export function GuideDetailPage({ slug }: { slug: string }) {
   });
 
   const schema = useMemo(() => (guide ? buildHowToSchema(guide, language) : undefined), [guide, language]);
+
+  useEffect(() => {
+    if (!guide?.post_id) return;
+    trackEvent("guide_post_viewed", {
+      post_id: guide.post_id,
+      category: guide.category
+    });
+  }, [guide?.category, guide?.post_id]);
 
   if (loading) {
     const copy = guideDetailCopy[language];

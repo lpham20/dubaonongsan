@@ -10,6 +10,7 @@ import { compactText, DEFAULT_OG_IMAGE, newsPath } from "../lib/seo";
 import { useLanguage } from "../contexts/LanguageContext";
 import { withLanguagePrefix } from "../lib/localizedRoutes";
 import { useFetchOnce } from "../hooks/useFetchOnce";
+import { trackEvent } from "../lib/analytics";
 
 export function NewsDetailPage({ slug }: { slug: string }) {
   const { language } = useLanguage();
@@ -56,6 +57,14 @@ export function NewsDetailPage({ slug }: { slug: string }) {
       });
     return () => controller.abort();
   }, [article, language]);
+
+  useEffect(() => {
+    if (!article?.article_id) return;
+    trackEvent("news_article_viewed", {
+      article_id: article.article_id,
+      category: article.category
+    });
+  }, [article?.article_id, article?.category]);
 
   const articleSchema = useMemo(() => {
     if (!article) return undefined;

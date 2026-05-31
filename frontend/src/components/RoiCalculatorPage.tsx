@@ -14,6 +14,7 @@ import { withLanguagePrefix } from "../lib/localizedRoutes";
 import { ROI_CROP_OPTIONS } from "../lib/cropOptions";
 import { decimalInputValue, parseDecimalInput } from "../lib/numberInput";
 import { messageFromError } from "../lib/errorMessages";
+import { trackEvent } from "../lib/analytics";
 
 type InputMode = "simple" | "detail";
 
@@ -187,32 +188,39 @@ export function RoiCalculatorPage({
     submitControllerRef.current = controller;
     setLoading(true);
     setError(null);
-    calculateRoi(
-      authToken,
-      {
-        crop,
-        crop_area_ha: safeArea,
-        expected_yield_t_ha: safeYield,
-        expected_sell_price_vnd_per_kg: safeSellPrice,
-        region_id: typeof regionId === "number" ? regionId : null,
-        fertilizer_total_cost_vnd_per_ha: mode === "simple" ? safeFertilizerTotal : null,
-        fertilizer_lines:
-          mode === "detail"
-            ? fertilizerLines
-                .filter((line) => line.name.trim() && positiveNumber(line.kg_per_ha) > 0 && positiveMoneyNumber(line.price_vnd_per_kg) > 0)
-                .map((line) => ({
-                  name: line.name.trim(),
-                  kg_per_ha: positiveNumber(line.kg_per_ha),
-                  price_vnd_per_kg: positiveMoneyNumber(line.price_vnd_per_kg)
-                }))
-            : [],
-        other_input_cost_vnd_per_ha: safeOtherCost,
-        labor_cost_vnd_per_ha: safeLaborCost,
-        save
-      },
-      controller.signal
-    )
-      .then(setResult, (err) => {
+    const request = {
+      crop,
+      crop_area_ha: safeArea,
+      expected_yield_t_ha: safeYield,
+      expected_sell_price_vnd_per_kg: safeSellPrice,
+      region_id: typeof regionId === "number" ? regionId : null,
+      fertilizer_total_cost_vnd_per_ha: mode === "simple" ? safeFertilizerTotal : null,
+      fertilizer_lines:
+        mode === "detail"
+          ? fertilizerLines
+              .filter((line) => line.name.trim() && positiveNumber(line.kg_per_ha) > 0 && positiveMoneyNumber(line.price_vnd_per_kg) > 0)
+              .map((line) => ({
+                name: line.name.trim(),
+                kg_per_ha: positiveNumber(line.kg_per_ha),
+                price_vnd_per_kg: positiveMoneyNumber(line.price_vnd_per_kg)
+              }))
+          : [],
+      other_input_cost_vnd_per_ha: safeOtherCost,
+      labor_cost_vnd_per_ha: safeLaborCost,
+      save
+    };
+    trackEvent("roi_calculate_submitted", {
+      crop: request.crop,
+      area_ha: request.crop_area_ha
+    });
+    calculateRoi(authToken, request, controller.signal)
+      .then((response) => {
+        setResult(response);
+        trackEvent("roi_calculate_received", {
+          crop: request.crop,
+          roi_pct: Math.round(response.roi_pct)
+        });
+      }, (err) => {
         if (err instanceof DOMException && err.name === "AbortError") return;
         throw err;
       })

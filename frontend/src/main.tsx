@@ -5,6 +5,7 @@ import { registerSW } from "virtual:pwa-register";
 import { App } from "./App";
 import { ErrorBoundary, isRecoverableChunkError, reloadOnceForNewBundle } from "./components/ErrorBoundary";
 import { AuthProvider } from "./contexts/AuthContext";
+import { trackEvent } from "./lib/analytics";
 import "./styles/tokens.css";
 import "./styles/fertilizer.css";
 import "./styles/base.css";
@@ -26,6 +27,7 @@ import "./styles/input-prices.css";
 import "./styles/advisory.css";
 import "./styles/navigation-hierarchy.css";
 import "./styles/live-ticker.css";
+import "./styles/cookie-consent.css";
 
 const SERVICE_WORKER_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
 const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
@@ -51,6 +53,10 @@ if (sentryDsn) {
       if (/AbortError|Network request failed|ChunkLoadError|Loading chunk|Failed to fetch dynamically imported module/i.test(message)) {
         return null;
       }
+      trackEvent("exception", {
+        description: "frontend_error",
+        fatal: event.level === "fatal"
+      });
       return event;
     }
   });

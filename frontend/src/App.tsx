@@ -21,6 +21,7 @@ import { SiteFooter } from "./components/SiteFooter";
 import { SeoHead } from "./components/SeoHead";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { LoadingSkeleton } from "./components/LoadingSkeleton";
+import { CookieConsentBanner } from "./components/CookieConsentBanner";
 import { useAuth } from "./contexts/AuthContext";
 import { LanguageProvider, useLanguage, type AppLanguage } from "./contexts/LanguageContext";
 import {
@@ -64,6 +65,7 @@ import { cropSeoLabels, forecastPath, publicGuideSlug } from "./lib/seo";
 import { displayProvince } from "./lib/displayLabels";
 import { splitLanguagePath, withLanguagePrefix } from "./lib/localizedRoutes";
 import { messageFromError, safeErrorMessage } from "./lib/errorMessages";
+import { trackEvent, trackPageView } from "./lib/analytics";
 
 const DataGrid = lazy(() => import("./components/DataGrid").then(({ DataGrid }) => ({ default: DataGrid })));
 const AnalysisBrief = lazy(() => import("./components/AnalysisBrief").then(({ AnalysisBrief }) => ({ default: AnalysisBrief })));
@@ -529,6 +531,7 @@ function RoutedApp() {
   const [loadedAnalyticsKey, setLoadedAnalyticsKey] = useState("");
   const loadDataRequestRef = useRef(0);
   const authControllerRef = useRef<AbortController | null>(null);
+  const trackedChartRef = useRef("");
 
   function analyticsKeyFor(nextRegionId: number | string, nextVarietyId: number | string) {
     return `${crop}|${nextRegionId}|${nextVarietyId}|${days}|${language}`;
@@ -704,6 +707,13 @@ function RoutedApp() {
   }, [language, navigate]);
 
   useEffect(() => {
+    const timer = window.setTimeout(() => {
+      trackPageView(`${location.pathname}${location.search}`, document.title);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [language, location.pathname, location.search]);
+
+  useEffect(() => {
     if (section !== "analytics") return;
     const controller = new AbortController();
     void loadData(controller.signal);
@@ -789,6 +799,17 @@ function RoutedApp() {
     if (!first || !last) return 0;
     return ((last - first) / first) * 100;
   }, [visibleHistorical]);
+
+  useEffect(() => {
+    if (section !== "analytics" || analyticsTab !== "chart" || !visibleHistorical.length) return;
+    const chartKey = `${crop}|${regionId}|${varietyId}`;
+    if (trackedChartRef.current === chartKey) return;
+    trackedChartRef.current = chartKey;
+    trackEvent("forecast_chart_viewed", {
+      crop,
+      region_id: regionId
+    });
+  }, [analyticsTab, crop, regionId, section, varietyId, visibleHistorical.length]);
   const hasRainData = useMemo(
     () => visibleHistorical.some((point) => typeof point.precipitation_mm === "number" && point.precipitation_mm > 0),
     [visibleHistorical]
@@ -821,6 +842,9 @@ function RoutedApp() {
   }
 
   async function addWatchlist() {
+    if (!watchlist.includes(watchKey)) {
+      trackEvent("watchlist_item_added", { crop_type: crop });
+    }
     setWatchlist((current) => (current.includes(watchKey) ? current : [watchKey, ...current].slice(0, MAX_WATCHLIST_ITEMS)));
     if (!authToken || !selectedRegion || !selectedVariety) return;
     try {
@@ -1382,6 +1406,7 @@ function RoutedApp() {
         }}
         onOpenInputPrices={() => changeSection("inputPrices")}
       />
+      <CookieConsentBanner />
     </main>
   );
 }

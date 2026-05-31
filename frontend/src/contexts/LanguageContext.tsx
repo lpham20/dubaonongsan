@@ -1,5 +1,6 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { splitLanguagePath } from "../lib/localizedRoutes";
+import { trackEvent } from "../lib/analytics";
 
 export type AppLanguage = "vi" | "en";
 
@@ -25,7 +26,24 @@ function readInitialLanguage(): AppLanguage {
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<AppLanguage>(readInitialLanguage);
+  const [language, setLanguageState] = useState<AppLanguage>(readInitialLanguage);
+
+  const setLanguage = useCallback((nextLanguage: AppLanguage) => {
+    setLanguageState((currentLanguage) => {
+      if (currentLanguage !== nextLanguage) {
+        trackEvent("language_changed", { from: currentLanguage, to: nextLanguage });
+      }
+      return nextLanguage;
+    });
+  }, []);
+
+  const toggleLanguage = useCallback(() => {
+    setLanguageState((currentLanguage) => {
+      const nextLanguage = currentLanguage === "vi" ? "en" : "vi";
+      trackEvent("language_changed", { from: currentLanguage, to: nextLanguage });
+      return nextLanguage;
+    });
+  }, []);
 
   useEffect(() => {
     document.documentElement.lang = language === "en" ? "en" : "vi";
@@ -40,9 +58,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     () => ({
       language,
       setLanguage,
-      toggleLanguage: () => setLanguage((current) => (current === "vi" ? "en" : "vi"))
+      toggleLanguage
     }),
-    [language]
+    [language, setLanguage, toggleLanguage]
   );
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;

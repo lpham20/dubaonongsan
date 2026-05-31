@@ -1,0 +1,71 @@
+.cookie-consent-banner {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 9999;
+  padding: 12px 24px;
+  color: #f4f7f5;
+  background: #111815;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.cookie-consent-content {
+  display: flex;
+  max-width: 1200px;
+  margin: 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cookie-consent-content p {
+  flex: 1 1 300px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.cookie-consent-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.cookie-consent-accept,
+.cookie-consent-decline {
+  min-height: 44px;
+  padding: 8px 16px;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+}
+
+.cookie-consent-accept {
+  color: #fff;
+  background: #087a5b;
+  border-color: #087a5b;
+}
+
+.cookie-consent-decline:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 640px) {
+  .cookie-consent-banner {
+    padding: 12px 16px;
+  }
+
+  .cookie-consent-actions {
+    width: 100%;
+  }
+
+  .cookie-consent-actions button {
+    flex: 1;
+  }
+}

@@ -79,6 +79,27 @@
         }
       }
     </script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = window.gtag || function gtag() {
+        window.dataLayer.push(arguments);
+      };
+      window.gtag("consent", "default", {
+        analytics_storage: "denied",
+        ad_storage: "denied",
+        ad_user_data: "denied",
+        ad_personalization: "denied",
+        wait_for_update: 500
+      });
+      window.DUBAONONGSAN_GA_ID = "%VITE_GA_MEASUREMENT_ID%";
+      if (
+        window.DUBAONONGSAN_GA_ID === "%VITE_GA_MEASUREMENT_ID%" ||
+        typeof window.DUBAONONGSAN_GA_ID !== "string" ||
+        !window.DUBAONONGSAN_GA_ID.startsWith("G-")
+      ) {
+        delete window.DUBAONONGSAN_GA_ID;
+      }
+    </script>
     <script src="/inline-ga.js" defer></script>
     <script src="/inline-seo-fallback.js" defer></script>
   </head>
