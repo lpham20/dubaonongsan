@@ -188,9 +188,10 @@ services:
             printf "%s\n" "secret_access_key = $${R2_SECRET_ACCESS_KEY}"
             printf "%s\n" "endpoint = $${R2_ENDPOINT}"
             printf "%s\n" "region = auto"
+            printf "%s\n" "no_check_bucket = true"
           } > /tmp/rclone.conf
           command -v rclone >/dev/null 2>&1 || apk add --no-cache rclone >/dev/null
-          rclone copy "$$BACKUP_FILE" "r2:$${R2_BUCKET_NAME:-dubaonongsan-backups}/daily/" --config /tmp/rclone.conf --transfers 1 --retries 3 --low-level-retries 5
+          rclone copy "$$BACKUP_FILE" "r2:$${R2_BUCKET_NAME:-dubaonongsan-backups}/daily/" --config /tmp/rclone.conf --s3-no-check-bucket --transfers 1 --retries 3 --low-level-retries 5
         elif [ -n "$${MARKETAI_BACKUP_REMOTE:-$${BACKUP_RCLONE_REMOTE:-}}" ]; then
           if [ -n "$${BACKUP_RCLONE_CONFIG_B64:-}" ]; then
             mkdir -p /root/.config/rclone
