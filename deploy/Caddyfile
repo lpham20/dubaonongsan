@@ -19,11 +19,23 @@
 	@wwwHost host www.dubaonongsan.com
 	redir @wwwHost https://dubaonongsan.com{uri} permanent
 
+	@vnPrefixWithQuery {
+		path_regexp vnPrefixWithQuery ^/vn/(.*)$
+		expression {query} != ""
+	}
+	redir @vnPrefixWithQuery /{re.vnPrefixWithQuery.1}?{query} permanent
+
 	@vnPrefix path_regexp vnPrefix ^/vn/(.*)$
-	redir @vnPrefix /{re.vnPrefix.1}?{query} permanent
+	redir @vnPrefix /{re.vnPrefix.1} permanent
+
+	@vnRootWithQuery {
+		path /vn /vn/
+		expression {query} != ""
+	}
+	redir @vnRootWithQuery /?{query} permanent
 
 	@vnRoot path /vn /vn/
-	redir @vnRoot /?{query} permanent
+	redir @vnRoot / permanent
 
 	header {
 		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
