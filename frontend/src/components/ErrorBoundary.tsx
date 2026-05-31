@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import * as Sentry from "@sentry/react";
 
 type Props = {
   children: ReactNode;
@@ -56,6 +57,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, _info: ErrorInfo) {
+    Sentry.captureException(error);
     if (isRecoverableChunkError(error)) {
       reloadOnceForNewBundle();
     }

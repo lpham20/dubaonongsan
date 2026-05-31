@@ -34,8 +34,14 @@ class Settings(BaseSettings):
     retrain_interval_minutes: int = 60 * 24
     rate_limit_storage_uri: str = "memory://"
     sentry_dsn: str = ""
+    sentry_traces_sample_rate: float = 0.1
+    sentry_profiles_sample_rate: float = 0.1
+    release: str = ""
     ops_alert_webhook_url: str = ""
     ops_alert_timeout_seconds: float = 2.0
+    telegram_bot_token: str = ""
+    telegram_chat_id: str = ""
+    telegram_min_severity: str = "info"
     turnstile_secret_key: str = ""
     turnstile_verify_url: str = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
     require_turnstile_on_register: bool = False

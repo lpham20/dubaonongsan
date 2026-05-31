@@ -58,6 +58,13 @@ FRONTEND_DOMAIN=dubaonongsan.com,www.dubaonongsan.com
 API_DOMAIN=api.dubaonongsan.com
 BACKUP_RCLONE_REMOTE=
 BACKUP_RCLONE_CONFIG_B64=
+R2_ACCESS_KEY_ID=
+R2_SECRET_ACCESS_KEY=
+R2_ENDPOINT=
+R2_BUCKET_NAME=dubaonongsan-backups
+MARKETAI_BACKUP_REMOTE=
+SENTRY_DSN_BACKEND=
+MARKETAI_RELEASE=
 ```
 
 Ví dụ `backend/.env.production`:
@@ -75,6 +82,13 @@ MARKETAI_NEWS_SCRAPE_INTERVAL_MINUTES=180
 MARKETAI_SCRAPE_INTERVAL_MINUTES=120
 MARKETAI_DATA_QUALITY_INTERVAL_MINUTES=1440
 MARKETAI_RETRAIN_INTERVAL_MINUTES=1440
+MARKETAI_SENTRY_DSN=
+MARKETAI_SENTRY_TRACES_SAMPLE_RATE=0.1
+MARKETAI_SENTRY_PROFILES_SAMPLE_RATE=0.1
+MARKETAI_RELEASE=
+MARKETAI_TELEGRAM_BOT_TOKEN=
+MARKETAI_TELEGRAM_CHAT_ID=
+MARKETAI_TELEGRAM_MIN_SEVERITY=info
 ```
 
 Build frontend trước:
@@ -82,6 +96,7 @@ Build frontend trước:
 ```bash
 cd frontend
 npm ci
+export VITE_MARKETAI_RELEASE=$(git rev-parse --short HEAD)
 npm run build
 cd ..
 ```
@@ -139,7 +154,18 @@ docker compose -f deploy/docker-compose.prod.yml exec -T api curl -X POST \
 
 Backup tự động chạy trong service `postgres-backup`, lưu file `.dump` ở `deploy/postgres-backup` và giữ 7 ngày gần nhất.
 
-Nếu cần offsite backup, cấu hình thêm `BACKUP_RCLONE_REMOTE` và `BACKUP_RCLONE_CONFIG_B64` trong `deploy/.env`. Ví dụ remote R2/S3/B2 có dạng `marketai-r2:dubaonongsan/postgres`; giá trị `BACKUP_RCLONE_CONFIG_B64` là nội dung `rclone.conf` đã base64 encode. Khi hai biến này để trống, service chỉ backup local như hiện tại.
+Offsite backup uu tien Cloudflare R2 qua cac bien trong `deploy/.env`:
+
+```env
+R2_ACCESS_KEY_ID=<bucket-scoped-access-key>
+R2_SECRET_ACCESS_KEY=<bucket-scoped-secret>
+R2_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
+R2_BUCKET_NAME=dubaonongsan-backups
+```
+
+Khi cac bien R2 co day du, backup se upload vao `r2:<bucket>/daily/`. Nen tao lifecycle rule trong Cloudflare R2: prefix `daily/`, xoa object cu hon 30 ngay.
+
+Neu can dung remote rclone khac, cau hinh `BACKUP_RCLONE_REMOTE` va `BACKUP_RCLONE_CONFIG_B64` trong `deploy/.env`. Khi tat ca bien offsite de trong, service chi backup local nhu hien tai.
 
 Backup thủ công:
 
@@ -147,6 +173,13 @@ Backup thủ công:
 docker compose -f deploy/docker-compose.prod.yml exec -T postgres \
   pg_dump -U marketai -d marketai -Fc -f /tmp/backup-manual.dump
 docker compose -f deploy/docker-compose.prod.yml cp postgres:/tmp/backup-manual.dump ./backup-manual.dump
+```
+
+Backup thu cong qua service backup:
+
+```bash
+docker compose -f deploy/docker-compose.prod.yml exec -T postgres-backup /usr/local/bin/marketai-postgres-backup
+docker compose -f deploy/docker-compose.prod.yml logs --tail=120 postgres-backup
 ```
 
 Khôi phục vào database mới cần dừng API/worker trước, restore xong mới bật lại:

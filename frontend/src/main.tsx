@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import * as Sentry from "@sentry/react";
 import { registerSW } from "virtual:pwa-register";
 import { App } from "./App";
 import { ErrorBoundary, isRecoverableChunkError, reloadOnceForNewBundle } from "./components/ErrorBoundary";
@@ -27,6 +28,33 @@ import "./styles/navigation-hierarchy.css";
 import "./styles/live-ticker.css";
 
 const SERVICE_WORKER_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
+const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
+
+if (sentryDsn) {
+  Sentry.init({
+    dsn: sentryDsn,
+    environment: import.meta.env.MODE || "production",
+    release: import.meta.env.VITE_MARKETAI_RELEASE || "unknown",
+    tracesSampleRate: 0.1,
+    replaysSessionSampleRate: 0,
+    replaysOnErrorSampleRate: 1.0,
+    integrations: [
+      Sentry.browserTracingIntegration(),
+      Sentry.replayIntegration({
+        maskAllText: true,
+        blockAllMedia: true
+      })
+    ],
+    beforeSend(event, hint) {
+      const error = hint.originalException;
+      const message = error instanceof Error ? error.message : String(error ?? "");
+      if (/AbortError|Network request failed|ChunkLoadError|Loading chunk|Failed to fetch dynamically imported module/i.test(message)) {
+        return null;
+      }
+      return event;
+    }
+  });
+}
 
 if (typeof window !== "undefined") {
   window.addEventListener("error", (event) => {

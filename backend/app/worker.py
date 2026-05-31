@@ -11,6 +11,7 @@ from sqlalchemy import desc, select
 
 from app.core.job_status import STATUS_EMPTY, SUCCESS_STATUSES
 from app.core.config import get_settings
+from app.core.sentry_init import init_sentry
 from app.db import SessionLocal, init_db
 from app.models import ScrapeRun
 from app.seed import normalize_vietnamese_labels, seed_database
@@ -20,6 +21,7 @@ from app.services.input_prices import seed_input_prices
 from app.services.platform_jobs import JobScheduler
 
 
+init_sentry()
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s [%(name)s] %(message)s",

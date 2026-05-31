@@ -54,6 +54,8 @@ services:
       MARKETAI_ML_ARTIFACTS: /app/ml_artifacts
       MARKETAI_ML_MAX_MODELS: "1"
       MARKETAI_RATE_LIMIT_STORAGE_URI: redis://redis:6379/0
+      MARKETAI_RELEASE: ${MARKETAI_RELEASE:-unknown}
+      SENTRY_DSN_BACKEND: ${SENTRY_DSN_BACKEND:-}
     depends_on:
       postgres:
         condition: service_healthy
@@ -98,6 +100,8 @@ services:
       MARKETAI_ML_ARTIFACTS: /app/ml_artifacts
       MARKETAI_ML_MAX_MODELS: "1"
       MARKETAI_RATE_LIMIT_STORAGE_URI: redis://redis:6379/0
+      MARKETAI_RELEASE: ${MARKETAI_RELEASE:-unknown}
+      SENTRY_DSN_BACKEND: ${SENTRY_DSN_BACKEND:-}
     volumes:
       - job_locks:/app/.job_locks
       - ml_artifacts:/app/ml_artifacts
@@ -159,6 +163,11 @@ services:
       PGPASSWORD: ${POSTGRES_PASSWORD}
       BACKUP_RCLONE_REMOTE: ${BACKUP_RCLONE_REMOTE:-}
       BACKUP_RCLONE_CONFIG_B64: ${BACKUP_RCLONE_CONFIG_B64:-}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:-}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:-}
+      R2_ENDPOINT: ${R2_ENDPOINT:-}
+      R2_BUCKET_NAME: ${R2_BUCKET_NAME:-dubaonongsan-backups}
+      MARKETAI_BACKUP_REMOTE: ${MARKETAI_BACKUP_REMOTE:-}
     volumes:
       - ./postgres-backup:/backups
     mem_limit: 128m
@@ -168,17 +177,29 @@ services:
       #!/bin/sh
       set -eu
         DATE=$$(date +%Y%m%d-%H%M%S)
-        BACKUP_FILE=/backups/backup-$$DATE.dump
+        BACKUP_FILE=/backups/dubaonongsan-$$DATE.dump
         pg_dump -h postgres -U ${POSTGRES_USER:-marketai} -d ${POSTGRES_DB:-marketai} -Fc -f "$$BACKUP_FILE"
-        if [ -n "$${BACKUP_RCLONE_REMOTE:-}" ]; then
+        if [ -n "$${R2_ACCESS_KEY_ID:-}" ] && [ -n "$${R2_SECRET_ACCESS_KEY:-}" ] && [ -n "$${R2_ENDPOINT:-}" ]; then
+          cat > /tmp/rclone.conf <<RCLONE
+[r2]
+type = s3
+provider = Cloudflare
+access_key_id = $${R2_ACCESS_KEY_ID}
+secret_access_key = $${R2_SECRET_ACCESS_KEY}
+endpoint = $${R2_ENDPOINT}
+region = auto
+RCLONE
+          command -v rclone >/dev/null 2>&1 || apk add --no-cache rclone >/dev/null
+          rclone copy "$$BACKUP_FILE" "r2:$${R2_BUCKET_NAME:-dubaonongsan-backups}/daily/" --config /tmp/rclone.conf --transfers 1 --retries 3 --low-level-retries 5
+        elif [ -n "$${MARKETAI_BACKUP_REMOTE:-$${BACKUP_RCLONE_REMOTE:-}}" ]; then
           if [ -n "$${BACKUP_RCLONE_CONFIG_B64:-}" ]; then
             mkdir -p /root/.config/rclone
             printf "%s" "$$BACKUP_RCLONE_CONFIG_B64" | base64 -d > /root/.config/rclone/rclone.conf
           fi
           command -v rclone >/dev/null 2>&1 || apk add --no-cache rclone >/dev/null
-          rclone copy "$$BACKUP_FILE" "$$BACKUP_RCLONE_REMOTE" --retries 3 --low-level-retries 5
+          rclone copy "$$BACKUP_FILE" "$${MARKETAI_BACKUP_REMOTE:-$${BACKUP_RCLONE_REMOTE}}" --retries 3 --low-level-retries 5
         fi
-        find /backups -name "backup-*.dump" -mtime +7 -delete
+        find /backups \( -name "backup-*.dump" -o -name "dubaonongsan-*.dump" \) -type f -mtime +7 -delete
       EOF
       chmod +x /usr/local/bin/marketai-postgres-backup
       /usr/local/bin/marketai-postgres-backup || true

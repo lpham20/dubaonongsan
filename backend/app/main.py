@@ -29,6 +29,7 @@ from app.api.security import router as security_router
 from app.api.world_fertilizer import router as world_fertilizer_router
 from app.core.config import get_settings
 from app.core.rate_limit import limiter
+from app.core.sentry_init import init_sentry
 from app.db import init_db
 from app.models import AppUser
 from app.seed import normalize_vietnamese_labels, seed_database
@@ -39,6 +40,7 @@ from app.services.input_prices import seed_input_prices
 from app.services.platform_jobs import JobScheduler
 
 
+init_sentry()
 settings = get_settings()
 logging.config.dictConfig(
     {
@@ -85,17 +87,6 @@ OPENAPI_TAGS = [
     {"name": "llm-content", "description": "Markdown endpoints exposed for AI crawlers and search assistants."},
     {"name": "security", "description": "Security reporting endpoints such as CSP violation reports."},
 ]
-
-if settings.sentry_dsn:
-    import sentry_sdk
-
-    sentry_sdk.init(
-        dsn=settings.sentry_dsn,
-        environment=settings.environment,
-        traces_sample_rate=0.05 if settings.environment == "production" else 0.0,
-        send_default_pii=False,
-    )
-
 
 def _ensure_demo_user(db: Session) -> None:
     if not settings.create_demo_user:

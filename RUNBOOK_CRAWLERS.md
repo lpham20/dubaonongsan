@@ -19,20 +19,42 @@ Neu `api` hoac `worker` khong healthy, uu tien doc log loi Python truoc khi rest
 
 ## 1.1. Bat canh bao ngoai he thong
 
-Backend da co hook webhook tuy chon cho job fail. De nhan canh bao qua Slack, Discord, n8n, Make hoac mot endpoint noi bo, dat bien moi truong trong `backend/.env.production`:
+Backend co hook alert cho job fail. Uu tien Telegram neu co token/chat id; neu khong co Telegram thi fallback sang webhook Slack/Discord/n8n/Make.
 
 ```env
+MARKETAI_TELEGRAM_BOT_TOKEN=
+MARKETAI_TELEGRAM_CHAT_ID=
+MARKETAI_TELEGRAM_MIN_SEVERITY=info
 MARKETAI_OPS_ALERT_WEBHOOK_URL=https://example.com/marketai-alert
 MARKETAI_OPS_ALERT_TIMEOUT_SECONDS=2
 ```
 
-Khi job nen fail, backend gui JSON dang:
+Khi job nen fail, backend gui Telegram message gom severity, event va context. Neu dung webhook fallback, backend gui JSON dang:
 
 ```json
-{"event":"platform_job_failed","payload":{"job_name":"scrape_world_fertilizer_current","status":"failed"}}
+{"event":"platform_job_failed","text":"[ERROR] platform job failed","context":{"job_name":"scrape_world_fertilizer_current","status":"failed"}}
 ```
 
-Neu chua cau hinh webhook, job van chay binh thuong va loi van duoc ghi vao log JSON cua `api`/`worker`.
+Test nhanh trong container API:
+
+```bash
+docker compose -f deploy/docker-compose.prod.yml exec -T api python -c "from app.services.ops_alerts import send_ops_alert; send_ops_alert('ops_alert_test', {'source':'manual'}, severity='info')"
+```
+
+Neu chua cau hinh Telegram/webhook, job van chay binh thuong va loi van duoc ghi vao log JSON cua `api`/`worker`.
+
+## 1.2. Sentry
+
+Sentry duoc bat bang bien moi truong trong `backend/.env.production` va `frontend/.env.production`:
+
+```env
+MARKETAI_SENTRY_DSN=
+MARKETAI_RELEASE=
+VITE_SENTRY_DSN=
+VITE_MARKETAI_RELEASE=
+```
+
+Backend sample performance/profiling toi da 10% de tranh ton quota. Sentry khong gui PII mac dinh va bo qua HTTP 4xx expected.
 
 ## 2. Kiem tra suc khoe crawler
 

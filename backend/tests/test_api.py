@@ -18,6 +18,10 @@ from app.models import AppUser, RevokedToken, ScrapeRun
 from app.services.auth import create_access_token, hash_password
 
 
+def recent_sensor_timestamp() -> str:
+    return (datetime.now(UTC) - timedelta(minutes=5)).isoformat().replace("+00:00", "Z")
+
+
 @pytest.fixture()
 def client():
     with TestClient(app) as test_client:
@@ -400,7 +404,7 @@ def test_sensor_webhook_persists_payload(client):
             "region_id": 1,
             "maturity_index": 8.2,
             "status": "Sẵn sàng thu hoạch",
-            "timestamp": "2026-04-28T09:10:00Z",
+            "timestamp": recent_sensor_timestamp(),
         },
     )
     assert response.status_code == 201
@@ -764,7 +768,7 @@ def test_sensor_webhook_requires_iot_key(client):
             "device_id": "T-Abyss-002",
             "region_id": 1,
             "maturity_index": 7.4,
-            "timestamp": "2026-04-28T09:10:00Z",
+            "timestamp": recent_sensor_timestamp(),
         },
     )
     assert response.status_code == 401
