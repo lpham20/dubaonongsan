@@ -3,6 +3,7 @@ from datetime import UTC, datetime, timedelta
 import math
 import random
 from statistics import mean
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import and_, func, select
 from sqlalchemy.orm import Session
@@ -15,6 +16,7 @@ BACKFILL_SOURCE = "Nội suy từ giá vùng"
 MODEL_READY_DAYS = 240
 MODEL_READY_GRADE = "Loại A"
 ANCHOR_LOOKBACK_DAYS = 365
+MARKET_TZ = ZoneInfo("Asia/Ho_Chi_Minh")
 
 NON_PRODUCTION_REGIONS = {"Thị trường Việt Nam", "Chợ đầu mối TP.HCM"}
 
@@ -269,10 +271,11 @@ class ModelReadyBackfillService:
         latest = self.db.scalar(
             select(func.max(DailyMarketPrice.record_timestamp)).where(DailyMarketPrice.crop_type == self.crop_type)
         )
-        if latest is None:
-            latest = datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
-        latest = latest.replace(tzinfo=None, hour=0, minute=0, second=0, microsecond=0)
-        start = latest - timedelta(days=self.days - 1)
+        window_end = market_day_start()
+        if latest is not None:
+            latest_day = latest.replace(tzinfo=None, hour=0, minute=0, second=0, microsecond=0)
+            window_end = max(window_end, latest_day)
+        start = window_end - timedelta(days=self.days - 1)
         return [start + timedelta(days=offset) for offset in range(self.days)]
 
     def _anchor_prices(self, region: ProductionRegion, variety: DurianVariety) -> list[float]:
@@ -362,3 +365,7 @@ class ModelReadyBackfillService:
 
 def _day_key(value: datetime) -> datetime:
     return value.replace(tzinfo=None, hour=0, minute=0, second=0, microsecond=0)
+
+
+def market_day_start() -> datetime:
+    return datetime.now(MARKET_TZ).replace(tzinfo=None, hour=0, minute=0, second=0, microsecond=0)

@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.core.admin_units import is_crop_province
 from app.models import DailyMarketPrice, DurianVariety, ProductionRegion
-from app.services.model_ready_backfill import BACKFILL_SOURCE, NON_PRODUCTION_REGIONS
+from app.services.model_ready_backfill import BACKFILL_SOURCE, NON_PRODUCTION_REGIONS, market_day_start
 
 
 CALIBRATION_GRADE = "Loại A"
@@ -205,10 +205,11 @@ class PublicPriceCalibrationService:
         latest = self.db.scalar(
             select(func.max(DailyMarketPrice.record_timestamp)).where(DailyMarketPrice.crop_type == self.crop_type)
         )
-        if latest is None:
-            latest = datetime.now(UTC)
-        latest = latest.replace(tzinfo=None, hour=0, minute=0, second=0, microsecond=0)
-        start = latest - timedelta(days=self.days - 1)
+        window_end = market_day_start()
+        if latest is not None:
+            latest_day = latest.replace(tzinfo=None, hour=0, minute=0, second=0, microsecond=0)
+            window_end = max(window_end, latest_day)
+        start = window_end - timedelta(days=self.days - 1)
         return [start + timedelta(days=offset) for offset in range(self.days)]
 
     def _synthetic_row(self, day: datetime, region_id: int, variety_id: int) -> DailyMarketPrice | None:

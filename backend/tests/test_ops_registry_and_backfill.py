@@ -14,8 +14,9 @@ from app.db import Base
 from app.models import DailyMarketPrice, DurianVariety, FeatureFlag, MlModelVersion, ModelReadyBackfillCheckpoint, ProductionRegion, RecommendationSession
 from app.services.feature_flags import is_feature_enabled, list_feature_flags, set_feature_flag
 from app.services.ml_model_versions import record_crop_model_version
-from app.services.model_ready_backfill import MODEL_READY_GRADE, ModelReadyBackfillService
+from app.services.model_ready_backfill import MODEL_READY_GRADE, ModelReadyBackfillService, market_day_start
 from app.services.platform_jobs import PlatformJobService
+from app.services.public_price_calibration import PublicPriceCalibrationService
 from app.services.world_fertilizer import WorldFertilizerIngestionService
 
 
@@ -33,7 +34,7 @@ def test_model_ready_backfill_uses_checkpoint_on_second_run():
     db.flush()
     db.add(
         DailyMarketPrice(
-            record_timestamp=datetime(2026, 5, 24),
+            record_timestamp=market_day_start() - timedelta(days=5),
             variety_id=variety.variety_id,
             crop_type="sau_rieng",
             quality_grade=MODEL_READY_GRADE,
@@ -49,11 +50,39 @@ def test_model_ready_backfill_uses_checkpoint_on_second_run():
     first = ModelReadyBackfillService(db, days=3, crop_type="sau_rieng").backfill()
     second = ModelReadyBackfillService(db, days=3, crop_type="sau_rieng").backfill()
 
-    assert first["records_inserted"] == 2
+    assert first["records_inserted"] == 3
     assert first["checkpoint_skipped"] == 0
     assert second["records_inserted"] == 0
     assert second["checkpoint_skipped"] == 1
+    latest = db.scalar(select(DailyMarketPrice.record_timestamp).order_by(DailyMarketPrice.record_timestamp.desc()).limit(1))
+    assert latest == market_day_start()
     assert db.scalar(select(ModelReadyBackfillCheckpoint).where(ModelReadyBackfillCheckpoint.crop_type == "sau_rieng")) is not None
+
+
+def test_public_price_calibration_window_advances_past_stale_crop_rows():
+    db = _session()
+    region = ProductionRegion(region_name="tay nguyen", province="dak lak")
+    variety = DurianVariety(name="Cà phê tổng hợp", crop_type="ca_phe")
+    db.add_all([region, variety])
+    db.flush()
+    db.add(
+        DailyMarketPrice(
+            record_timestamp=market_day_start() - timedelta(days=5),
+            variety_id=variety.variety_id,
+            crop_type="ca_phe",
+            quality_grade=MODEL_READY_GRADE,
+            region_id=region.region_id,
+            exchange_source="manual",
+            min_price_vnd=95000,
+            max_price_vnd=96000,
+            volume_traded_tons=10,
+        )
+    )
+    db.commit()
+
+    dates = PublicPriceCalibrationService(db, crop_type="ca_phe", days=3)._date_window()
+
+    assert dates[-1] == market_day_start()
 
 
 def test_feature_flags_default_set_and_list():
