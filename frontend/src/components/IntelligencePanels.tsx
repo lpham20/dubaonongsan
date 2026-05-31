@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { AlertTriangle, ArrowDownRight, ArrowUpRight, BadgeCheck, Download, MapPinned, Pin } from "./icons";
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, BadgeCheck, Download, MapPinned, Pin, X } from "./icons";
 import type { DataQuality, HeatmapCell, Mover, StrategyAlert } from "../lib/api";
 import { useLanguage, type AppLanguage } from "../contexts/LanguageContext";
 import { displayProvince } from "../lib/displayLabels";
@@ -12,6 +12,7 @@ type Props = {
   alerts: StrategyAlert[];
   watchlist: string[];
   onSelectWatch: (key: string) => void;
+  onRemoveWatch: (key: string) => void;
   exportUrl: string;
   exportXlsxUrl: string;
   exportPdfUrl: string;
@@ -27,6 +28,7 @@ function IntelligencePanelsComponent({
   alerts,
   watchlist,
   onSelectWatch,
+  onRemoveWatch,
   exportUrl,
   exportXlsxUrl,
   exportPdfUrl
@@ -78,9 +80,20 @@ function IntelligencePanelsComponent({
             {watchlist.map((item) => {
               const label = item.split("|")[3] ?? item;
               return (
-                <button type="button" key={item} onClick={() => onSelectWatch(item)}>
-                  {label}
-                </button>
+                <span className="watchlist-item" key={item}>
+                  <button type="button" onClick={() => onSelectWatch(item)}>
+                    {label}
+                  </button>
+                  <button
+                    type="button"
+                    className="watchlist-remove-button"
+                    onClick={() => onRemoveWatch(item)}
+                    aria-label={language === "en" ? `Remove ${label} from watchlist` : `Xóa ${label} khỏi danh sách ghim`}
+                    title={language === "en" ? "Remove pinned market" : "Xóa mục ghim"}
+                  >
+                    <X size={13} />
+                  </button>
+                </span>
               );
             })}
           </div>

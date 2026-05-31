@@ -43,6 +43,7 @@ import {
   fetchTopMovers,
   fetchStrategyAlerts,
   fetchWatchlist,
+  deleteWatchlistItem,
   runPlatformJob,
   scrapeNews,
   saveWatchlistItem,
@@ -872,6 +873,21 @@ function RoutedApp() {
     navigate(withLanguagePrefix(forecastPath(nextCrop as CropType), language));
   }
 
+  async function removeWatchlist(key: string) {
+    const [removedCrop, , , , rawItemId] = key.split("|");
+    setWatchlist((current) => current.filter((item) => item !== key));
+    trackEvent("watchlist_item_removed", { crop_type: removedCrop });
+    const itemId = Number(rawItemId);
+    if (!authToken || !Number.isInteger(itemId) || itemId <= 0) return;
+    try {
+      await deleteWatchlistItem(authToken, itemId);
+      await syncWatchlist(authToken);
+    } catch (err) {
+      setError(messageFromError(err, copy.saveWatchlistError));
+      await syncWatchlist(authToken).catch(() => undefined);
+    }
+  }
+
   function openAnalytics(nextCrop: CropType) {
     setNotFound(false);
     setNewsSlug("");
@@ -1009,7 +1025,7 @@ function RoutedApp() {
   async function syncWatchlist(token = authToken) {
     const items = await fetchWatchlist(token);
     if (items.length) {
-      setWatchlist(items.map((item) => `${item.crop_type}|${item.region_id}|${item.variety_id}|${item.label}`));
+      setWatchlist(items.map((item) => `${item.crop_type}|${item.region_id}|${item.variety_id}|${item.label}|${item.item_id}`));
     }
   }
 
@@ -1325,6 +1341,7 @@ function RoutedApp() {
                 alerts={strategyAlerts}
                 watchlist={watchlist}
                 onSelectWatch={selectWatchlist}
+                onRemoveWatch={(key) => void removeWatchlist(key)}
                 exportUrl={exportCsvUrl(crop, regionId, varietyId)}
                 exportXlsxUrl={exportXlsxUrl(crop, regionId, varietyId)}
                 exportPdfUrl={exportPdfUrl(crop, regionId, varietyId)}

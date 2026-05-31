@@ -21,7 +21,7 @@
 | `roi_calculate_submitted` | Profit calculation request starts | `crop`, `area_ha` |
 | `roi_calculate_received` | Profit calculation response received | `crop`, rounded `roi_pct` |
 | `watchlist_item_added` | A market is pinned | `crop_type` |
-| `watchlist_item_removed` | Reserved for the future remove-pin UI/API | `crop_type` |
+| `watchlist_item_removed` | A pinned market is removed | `crop_type` |
 | `news_article_viewed` | News detail loads | `article_id`, `category` |
 | `guide_post_viewed` | Guide detail loads | `post_id`, `category` |
 | `forecast_chart_viewed` | Crop forecast chart loads for a selected market | `crop`, `region_id` |

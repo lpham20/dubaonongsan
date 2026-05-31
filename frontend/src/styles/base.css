@@ -569,6 +569,18 @@ h1 {
   cursor: pointer;
 }
 
+.watchlist-item {
+  display: inline-flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.watchlist .watchlist-remove-button {
+  width: 28px;
+  padding: 0;
+  justify-content: center;
+}
+
 .export-link {
   display: inline-flex;
   align-items: center;

@@ -1022,6 +1022,12 @@ export function saveWatchlistItem(token: string, item: Omit<WatchlistItem, "item
   });
 }
 
+export function deleteWatchlistItem(token: string, itemId: number) {
+  return authJson<void>(`/api/v1/watchlist/${itemId}`, token, {
+    method: "DELETE"
+  });
+}
+
 export function fetchPlatformJobs(token: string) {
   return authJson<PlatformJobRun[]>("/api/v1/platform/jobs", token);
 }
