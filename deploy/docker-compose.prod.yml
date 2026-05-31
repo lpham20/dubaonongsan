@@ -180,15 +180,15 @@ services:
         BACKUP_FILE=/backups/dubaonongsan-$$DATE.dump
         pg_dump -h postgres -U ${POSTGRES_USER:-marketai} -d ${POSTGRES_DB:-marketai} -Fc -f "$$BACKUP_FILE"
         if [ -n "$${R2_ACCESS_KEY_ID:-}" ] && [ -n "$${R2_SECRET_ACCESS_KEY:-}" ] && [ -n "$${R2_ENDPOINT:-}" ]; then
-          cat > /tmp/rclone.conf <<RCLONE
-[r2]
-type = s3
-provider = Cloudflare
-access_key_id = $${R2_ACCESS_KEY_ID}
-secret_access_key = $${R2_SECRET_ACCESS_KEY}
-endpoint = $${R2_ENDPOINT}
-region = auto
-RCLONE
+          {
+            printf "%s\n" "[r2]"
+            printf "%s\n" "type = s3"
+            printf "%s\n" "provider = Cloudflare"
+            printf "%s\n" "access_key_id = $${R2_ACCESS_KEY_ID}"
+            printf "%s\n" "secret_access_key = $${R2_SECRET_ACCESS_KEY}"
+            printf "%s\n" "endpoint = $${R2_ENDPOINT}"
+            printf "%s\n" "region = auto"
+          } > /tmp/rclone.conf
           command -v rclone >/dev/null 2>&1 || apk add --no-cache rclone >/dev/null
           rclone copy "$$BACKUP_FILE" "r2:$${R2_BUCKET_NAME:-dubaonongsan-backups}/daily/" --config /tmp/rclone.conf --transfers 1 --retries 3 --low-level-retries 5
         elif [ -n "$${MARKETAI_BACKUP_REMOTE:-$${BACKUP_RCLONE_REMOTE:-}}" ]; then
