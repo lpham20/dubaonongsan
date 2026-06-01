@@ -38,6 +38,36 @@ def test_banggianongsan_parser_extracts_varieties_provinces_and_markets():
     assert any(item.province == "Thủ Đức" and item.variety_name == "Sầu Thái Monthong" for item in result.observations)
 
 
+def test_banggianongsan_homepage_parser_extracts_daily_domestic_rows_only():
+    html = """
+    <html><body>
+    <h1>Bảng giá nông sản hôm nay - Ngày 01/06/2026</h1>
+    <table>
+      <tr><th>Mặt hàng</th><th>Đơn vị</th><th>Giá hôm nay</th></tr>
+      <tr><td>Hồ Tiêu Gia Lai</td><td>đ/kg</td><td>137.000 đ/kg</td></tr>
+      <tr><td>Cà phê Đắk Lắk</td><td>đ/kg</td><td>87.300 đ/kg</td></tr>
+      <tr><td>Sầu riêng Thái loại A (Đồng Nai, đồng/kg)</td><td>đ/kg</td><td>74.000 – 78.000 đ/kg</td></tr>
+      <tr><td>Robusta London</td><td>USD/tấn</td><td>4.000 USD/tấn</td></tr>
+    </table>
+    </body></html>
+    """
+    result = BangGiaNongSanScraper().parse(html)
+
+    assert len(result.observations) == 3
+    assert {item.crop_type for item in result.observations} == {"ho_tieu", "ca_phe", "sau_rieng"}
+    assert all(item.observed_at.date().isoformat() == "2026-06-01" for item in result.observations)
+    assert any(item.province == "Gia Lai" and item.max_price_vnd == 137000 for item in result.observations)
+    assert any(item.province == "Đắk Lắk" and item.max_price_vnd == 87300 for item in result.observations)
+    assert any(
+        item.province == "Đồng Nai"
+        and item.variety_name == "Sầu Thái Dona"
+        and item.quality_grade == "Loại A"
+        and item.min_price_vnd == 74000
+        and item.max_price_vnd == 78000
+        for item in result.observations
+    )
+
+
 def test_baonghean_parser_extracts_region_variety_matrix():
     html = """
     <html><body>
