@@ -5132,3 +5132,54 @@
     grid-template-columns: repeat(2, 44px) !important;
   }
 }
+
+/* Guide detail mobile overflow guard.
+   Keep the reading column inside the viewport while tables scroll internally. */
+@media (max-width: 860px) {
+  .guide-detail-page.detail-page,
+  .guide-detail-page .detail-article,
+  .guide-detail-page .detail-article header,
+  .guide-detail-page .detail-guide-meta,
+  .guide-detail-page .detail-body,
+  .guide-detail-page .detail-body section,
+  .guide-detail-page .related-forecast,
+  .guide-detail-page > .breadcrumb {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .guide-detail-page.detail-page,
+  .guide-detail-page .detail-article {
+    overflow-x: hidden !important;
+  }
+
+  .guide-detail-page .detail-article h1,
+  .guide-detail-page .detail-article header > p,
+  .guide-detail-page .detail-body h2,
+  .guide-detail-page .detail-body h3,
+  .guide-detail-page .detail-body h4,
+  .guide-detail-page .detail-body p,
+  .guide-detail-page .detail-body li,
+  .guide-detail-page > .breadcrumb li {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+    white-space: normal !important;
+  }
+
+  .guide-detail-page .detail-guide-meta {
+    flex-wrap: wrap !important;
+    overflow-x: hidden !important;
+  }
+
+  .guide-detail-page .guide-markdown-table {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+}
