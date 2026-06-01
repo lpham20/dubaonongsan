@@ -58,7 +58,7 @@
 	}
 
 	@seoHtml {
-		path / /tin-tuc /huong-dan /khuyen-nghi-bon-phan /bao-cao-nang-suat /thuat-toan-du-bao /khuyen-nghi-bon-phan/logic /tin-tuc/* /huong-dan/* /du-bao-gia/*
+		path / /tin-tuc /huong-dan /khuyen-nghi-bon-phan /bao-cao-nang-suat /thuat-toan-du-bao /khuyen-nghi-bon-phan/logic /tin-tuc/* /huong-dan/* /en/huong-dan/* /du-bao-gia/*
 	}
 	header @seoHtml Cache-Control "public, max-age=300, stale-while-revalidate=60"
 
@@ -151,6 +151,9 @@
 
 		@seoGuides path_regexp seoGuides ^/huong-dan/([^/]+)$
 		rewrite @seoGuides /seo/guides/{re.seoGuides.1}.html
+
+		@seoEnGuides path_regexp seoEnGuides ^/en/huong-dan/([^/]+)$
+		rewrite @seoEnGuides /seo/en/guides/{re.seoEnGuides.1}.html
 
 		@seoForecast path_regexp seoForecast ^/du-bao-gia/([^/]+)$
 		rewrite @seoForecast /seo/forecast/{re.seoForecast.1}.html

@@ -85,7 +85,8 @@ def _write(path: Path, body: str) -> None:
 
 def _json(path: str, limit: int) -> list[dict]:
     try:
-        url = f"{API_BASE}{path}?{urlencode({'limit': limit})}"
+        separator = "&" if "?" in path else "?"
+        url = f"{API_BASE}{path}{separator}{urlencode({'limit': limit})}"
         request = Request(
             url,
             headers={
@@ -353,6 +354,19 @@ def _english_alternate_url(canonical: str) -> str:
     return f"{SITE_BASE}/en" if path == "/" else f"{SITE_BASE}/en{path}"
 
 
+def _alternate_urls(canonical: str, language: str) -> tuple[str, str]:
+    if language != "en":
+        return canonical, _english_alternate_url(canonical)
+    path = urlparse(canonical).path or "/"
+    if path == "/en":
+        vi_path = "/"
+    elif path.startswith("/en/"):
+        vi_path = path[3:]
+    else:
+        vi_path = path
+    return f"{SITE_BASE}{vi_path}", canonical
+
+
 def _page(
     title: str,
     description: str,
@@ -362,6 +376,7 @@ def _page(
     published_at: str | None = None,
     news_keywords: str | None = None,
     og_type: str = "article",
+    language: str = "vi",
 ) -> str:
     escaped_title = html.escape(title)
     escaped_description = html.escape(description[:180])
@@ -375,10 +390,11 @@ def _page(
     asset_tags = _asset_tags()
     analytics_tags = _analytics_tags()
     fallback_script = '<script src="/inline-seo-fallback.js" defer></script>'
-    alternate_en = _english_alternate_url(canonical)
+    alternate_vi, alternate_en = _alternate_urls(canonical, language)
+    og_locale = "en_US" if language == "en" else "vi_VN"
 
     return f"""<!doctype html>
-<html lang="vi">
+<html lang="{language}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -388,13 +404,13 @@ def _page(
   <meta name="robots" content="index, follow, max-image-preview:large" />
   {keyword_meta}
   <link rel="canonical" href="{canonical}" />
-  <link rel="alternate" hreflang="vi" href="{canonical}" />
+  <link rel="alternate" hreflang="vi" href="{alternate_vi}" />
   <link rel="alternate" hreflang="en" href="{alternate_en}" />
-  <link rel="alternate" hreflang="x-default" href="{canonical}" />
+  <link rel="alternate" hreflang="x-default" href="{alternate_vi}" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <meta property="og:type" content="{html.escape(og_type)}" />
-  <meta property="og:locale" content="vi_VN" />
+  <meta property="og:locale" content="{og_locale}" />
   <meta property="og:site_name" content="{SITE_NAME}" />
   <meta property="og:title" content="{escaped_title}" />
   <meta property="og:description" content="{escaped_description}" />
@@ -493,49 +509,54 @@ def render_news() -> list[tuple[str, str | None]]:
     return urls
 
 
+def _render_guide(guide: dict, language: str) -> tuple[str, str | None]:
+    slug = _public_guide_slug(guide.get("slug") or _slug_text(guide.get("title", "huong-dan")))
+    prefix = "/en" if language == "en" else ""
+    canonical = f"{SITE_BASE}{prefix}/huong-dan/{slug}"
+    fallback_title = "Technical guide" if language == "en" else "Hướng dẫn kỹ thuật"
+    title = guide.get("title") or fallback_title
+    summary = guide.get("summary") or title
+    content = _guide_markdown_to_html(guide.get("content") or "")
+    published_at = guide.get("published_at") or guide.get("updated_at")
+    keywords = guide.get("tags") or ""
+    body = f"<article><h1>{html.escape(title)}</h1><p>{html.escape(summary)}</p>{content}</article>"
+    guide_schema = {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": title,
+        "description": summary,
+        "url": canonical,
+        "mainEntityOfPage": {"@type": "WebPage", "@id": canonical},
+        "datePublished": published_at,
+        "dateModified": published_at,
+        "keywords": keywords,
+        "image": {"@type": "ImageObject", "url": f"{SITE_BASE}/og-cover.jpg", "width": 1200, "height": 630},
+        "publisher": {
+            "@type": "Organization",
+            "name": SITE_NAME,
+            "url": SITE_BASE,
+            "logo": {"@type": "ImageObject", "url": f"{SITE_BASE}/og-cover.jpg", "width": 1200, "height": 630},
+        },
+        "inLanguage": language,
+    }
+    breadcrumb_schema = _breadcrumb(
+        [
+            ("Home" if language == "en" else "Trang chủ", f"{SITE_BASE}{prefix}/"),
+            ("Guides" if language == "en" else "Hướng dẫn", f"{SITE_BASE}{prefix}/huong-dan"),
+            (title[:60], canonical),
+        ]
+    )
+    directory = OUTPUT / "en" / "guides" if language == "en" else OUTPUT / "guides"
+    _write(
+        directory / f"{slug}.html",
+        _page(title, summary, canonical, body, [guide_schema, breadcrumb_schema], published_at, language=language),
+    )
+    return canonical, _lastmod(published_at)
+
+
 def render_guides() -> list[tuple[str, str | None]]:
-    guides = _json("/api/v1/content/guides", 500)
-    urls: list[tuple[str, str | None]] = []
-    for guide in guides:
-        slug = _public_guide_slug(guide.get("slug") or _slug_text(guide.get("title", "huong-dan")))
-        canonical = f"{SITE_BASE}/huong-dan/{slug}"
-        title = guide.get("title") or "Hướng dẫn kỹ thuật"
-        summary = guide.get("summary") or title
-        content = _guide_markdown_to_html(guide.get("content") or "")
-        published_at = guide.get("published_at") or guide.get("updated_at")
-        keywords = guide.get("tags") or ""
-        body = f"<article><h1>{html.escape(title)}</h1><p>{html.escape(summary)}</p>{content}</article>"
-        guide_schema = {
-            "@context": "https://schema.org",
-            "@type": "HowTo",
-            "name": title,
-            "description": summary,
-            "url": canonical,
-            "mainEntityOfPage": {"@type": "WebPage", "@id": canonical},
-            "datePublished": published_at,
-            "dateModified": published_at,
-            "keywords": keywords,
-            "image": {"@type": "ImageObject", "url": f"{SITE_BASE}/og-cover.jpg", "width": 1200, "height": 630},
-            "publisher": {
-                "@type": "Organization",
-                "name": SITE_NAME,
-                "url": SITE_BASE,
-                "logo": {"@type": "ImageObject", "url": f"{SITE_BASE}/og-cover.jpg", "width": 1200, "height": 630},
-            },
-            "inLanguage": "vi",
-        }
-        breadcrumb_schema = _breadcrumb(
-            [
-                ("Trang chủ", f"{SITE_BASE}/"),
-                ("Hướng dẫn", f"{SITE_BASE}/huong-dan"),
-                (title[:60], canonical),
-            ]
-        )
-        _write(
-            OUTPUT / "guides" / f"{slug}.html",
-            _page(title, summary, canonical, body, [guide_schema, breadcrumb_schema], published_at),
-        )
-        urls.append((canonical, _lastmod(published_at)))
+    urls = [_render_guide(guide, "vi") for guide in _json("/api/v1/content/guides", 500)]
+    urls.extend(_render_guide(guide, "en") for guide in _json("/api/v1/content/guides?lang=en", 500))
     return urls
 
 
