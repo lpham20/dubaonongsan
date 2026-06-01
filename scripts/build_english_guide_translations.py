@@ -312,6 +312,8 @@ def polish_guide_translation(
 
     for source, target in replacements.items():
         body = body.replace(source, target)
+    if post_id == 132:
+        body = format_authored_body_for_web(body)
     return title, summary, category, body
 
 
