@@ -1,5 +1,6 @@
-from datetime import datetime, timezone
+from datetime import datetime, time, timedelta, timezone
 import hmac
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from sqlalchemy import desc, select
@@ -16,6 +17,51 @@ from app.services.data_loader import DataLoader
 
 settings = get_settings()
 router = APIRouter(prefix=settings.api_prefix, tags=["public"])
+PRICE_SCRAPE_TIMEZONE = ZoneInfo("Asia/Ho_Chi_Minh")
+PRICE_SCRAPE_START_HOUR = 6
+PRICE_SCRAPE_END_HOUR = 22
+PRICE_SCRAPE_EXPECTED_INTERVAL_MINUTES = 60
+PRICE_SCRAPE_STALE_AFTER_ACTIVE_MINUTES = 180
+PRICE_SCRAPE_DEAD_AFTER_ACTIVE_MINUTES = 240
+
+
+def _price_scrape_active_minutes_between(start: datetime, end: datetime) -> float:
+    """Count elapsed minutes only while the scheduled price scraper is active."""
+    if end <= start:
+        return 0.0
+
+    start_local = start.astimezone(PRICE_SCRAPE_TIMEZONE)
+    end_local = end.astimezone(PRICE_SCRAPE_TIMEZONE)
+    current_day = start_local.date()
+    final_day = end_local.date()
+    active_minutes = 0.0
+
+    while current_day <= final_day:
+        window_start = datetime.combine(
+            current_day,
+            time(hour=PRICE_SCRAPE_START_HOUR),
+            tzinfo=PRICE_SCRAPE_TIMEZONE,
+        )
+        window_end = datetime.combine(
+            current_day,
+            time(hour=PRICE_SCRAPE_END_HOUR),
+            tzinfo=PRICE_SCRAPE_TIMEZONE,
+        )
+        overlap_start = max(start_local, window_start)
+        overlap_end = min(end_local, window_end)
+        if overlap_end > overlap_start:
+            active_minutes += (overlap_end - overlap_start).total_seconds() / 60
+        current_day += timedelta(days=1)
+
+    return active_minutes
+
+
+def _price_scrape_health_status(active_age_minutes: float) -> str:
+    if active_age_minutes > PRICE_SCRAPE_DEAD_AFTER_ACTIVE_MINUTES:
+        return "worker_dead"
+    if active_age_minutes > PRICE_SCRAPE_STALE_AFTER_ACTIVE_MINUTES:
+        return "stale"
+    return "ok"
 
 
 def require_public_api_key(x_api_key: str | None = Header(default=None)) -> None:
@@ -62,17 +108,20 @@ def scrape_health(db: Session = Depends(get_db)) -> dict:
 
     last_success_utc = last_success if last_success.tzinfo else last_success.replace(tzinfo=timezone.utc)
     age_minutes = (now - last_success_utc).total_seconds() / 60
+    active_age_minutes = _price_scrape_active_minutes_between(last_success_utc, now)
+    status = _price_scrape_health_status(active_age_minutes)
     body = {
-        "status": "ok",
+        "status": status,
         "last_success_at": last_success_utc.isoformat(),
         "age_minutes": round(age_minutes, 1),
-        "expected_interval_minutes": 120,
+        "active_age_minutes": round(active_age_minutes, 1),
+        "expected_interval_minutes": PRICE_SCRAPE_EXPECTED_INTERVAL_MINUTES,
+        "schedule_timezone": str(PRICE_SCRAPE_TIMEZONE),
+        "schedule_window_local": f"{PRICE_SCRAPE_START_HOUR:02d}:00-{PRICE_SCRAPE_END_HOUR:02d}:00",
     }
 
-    if age_minutes > 240:
-        raise HTTPException(status_code=503, detail={**body, "status": "worker_dead"})
-    if age_minutes > 180:
-        return {**body, "status": "stale"}
+    if status == "worker_dead":
+        raise HTTPException(status_code=503, detail=body)
     return body
 
 

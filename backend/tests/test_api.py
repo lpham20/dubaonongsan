@@ -11,6 +11,7 @@ os.environ["MARKETAI_START_SCHEDULER_IN_API"] = "false"
 from fastapi.testclient import TestClient
 import pytest
 
+from app.api.public import _price_scrape_active_minutes_between, _price_scrape_health_status
 from app.core.job_status import STATUS_SUCCESS
 from app.db import SessionLocal
 from app.main import app
@@ -725,6 +726,30 @@ def test_scrape_health_accepts_ascii_success_status(client):
     response = client.get("/api/v1/health/scrape")
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
+
+
+def test_scrape_health_ignores_elapsed_time_outside_business_hours():
+    last_success = datetime(2026, 5, 31, 15, 0, tzinfo=UTC)  # 22:00 Asia/Ho_Chi_Minh
+    overnight_check = datetime(2026, 5, 31, 19, 30, tzinfo=UTC)  # 02:30 next day
+
+    active_minutes = _price_scrape_active_minutes_between(last_success, overnight_check)
+
+    assert active_minutes == 0
+    assert _price_scrape_health_status(active_minutes) == "ok"
+
+
+def test_scrape_health_counts_elapsed_business_hours_after_overnight_pause():
+    last_success = datetime(2026, 5, 31, 15, 0, tzinfo=UTC)  # 22:00 Asia/Ho_Chi_Minh
+    stale_check = datetime(2026, 6, 1, 2, 1, tzinfo=UTC)  # 09:01 next day
+    dead_check = datetime(2026, 6, 1, 3, 1, tzinfo=UTC)  # 10:01 next day
+
+    stale_minutes = _price_scrape_active_minutes_between(last_success, stale_check)
+    dead_minutes = _price_scrape_active_minutes_between(last_success, dead_check)
+
+    assert stale_minutes == 181
+    assert _price_scrape_health_status(stale_minutes) == "stale"
+    assert dead_minutes == 241
+    assert _price_scrape_health_status(dead_minutes) == "worker_dead"
 
 
 def test_admin_endpoints_reject_anonymous_and_non_admin_users(client, test_password):
