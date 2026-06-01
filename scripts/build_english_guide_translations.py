@@ -267,31 +267,49 @@ def polish_guide_translation(
     category: str,
     body: str,
 ) -> tuple[str, str, str, str]:
-    if post_id != 130:
+    if post_id == 130:
+        title = "Vietnamese durian and cadmium: why it happens and what growers can do"
+        summary = (
+            "Cadmium in durian is linked to acidic soil and phosphate fertilizers. "
+            "This guide explains the causes, soil tests and a seasonal risk-reduction plan."
+        )
+        category = "Durian care"
+        replacements = {
+            '"The Chinese side just returned 30 containers."': '"China just returned 30 containers."',
+            "orcharders": "growers",
+            "plants cannot reach it": "plants cannot absorb it",
+            "Indian canola plant": "Indian mustard",
+            "mint, pennywort, pennywort, and mustard greens": "mint, water mimosa, pennywort and Chinese broccoli",
+            "This is a long-distance flag, not an immediate salvation.": "This is a long-term strategy, not an immediate fix.",
+            "the final blow before the fruit ripens": "a final measure before the fruit ripens",
+            "fruit zones": "durian flesh",
+            "This is the data base to know where your orchard is.": "This is the baseline data needed to understand the orchard.",
+            "certified low Cd variety": "certified low-Cd fertilizer",
+            "Take fruit samples at least 7 days before breaking.": "Take fruit samples at least 7 days before harvest.",
+            "Inject AMF or Bacillus preparations": "Apply AMF or Bacillus products",
+            "who tests stool?": "who tests fertilizer?",
+            "Cd survey in Punjab feces and soil": "Cd survey of fertilizers and soil in Punjab",
+        }
+    elif post_id == 132:
+        title = "Paclobutrazol in durian: export residue risks and a transition roadmap"
+        summary = (
+            "A practical guide to paclobutrazol residue risks in export durian, MRL thresholds, "
+            "safer alternatives and pre-harvest orchard testing before export."
+        )
+        category = "Durian handbook"
+        replacements = {
+            "equivalent to the set limit quantity": "equivalent to the limit of quantification",
+            "safe quarantine periods": "safe pre-harvest intervals",
+            "## 7. Safe quarantine period and residue management": "## 7. Safe pre-harvest intervals and residue management",
+            '"quarantine time"': '"pre-harvest interval"',
+            "resistance in soil and prolonged endogenous absorption": "persistence in soil and prolonged systemic uptake",
+            "especially in the West": "especially in the Mekong Delta",
+            'natural "watering"': 'natural "water withholding"',
+            "treat off-season flowering of durian": "induce off-season flowering in durian",
+        }
+    else:
         return title, summary, category, body
 
-    title = "Vietnamese durian and cadmium: why it happens and what growers can do"
-    summary = (
-        "Cadmium in durian is linked to acidic soil and phosphate fertilizers. "
-        "This guide explains the causes, soil tests and a seasonal risk-reduction plan."
-    )
-    category = "Durian care"
-    replacements = {
-        '"The Chinese side just returned 30 containers."': '"China just returned 30 containers."',
-        "orcharders": "growers",
-        "plants cannot reach it": "plants cannot absorb it",
-        "Indian canola plant": "Indian mustard",
-        "mint, pennywort, pennywort, and mustard greens": "mint, water mimosa, pennywort and Chinese broccoli",
-        "This is a long-distance flag, not an immediate salvation.": "This is a long-term strategy, not an immediate fix.",
-        "the final blow before the fruit ripens": "a final measure before the fruit ripens",
-        "fruit zones": "durian flesh",
-        "This is the data base to know where your orchard is.": "This is the baseline data needed to understand the orchard.",
-        "certified low Cd variety": "certified low-Cd fertilizer",
-        "Take fruit samples at least 7 days before breaking.": "Take fruit samples at least 7 days before harvest.",
-        "Inject AMF or Bacillus preparations": "Apply AMF or Bacillus products",
-        "who tests stool?": "who tests fertilizer?",
-        "Cd survey in Punjab feces and soil": "Cd survey of fertilizers and soil in Punjab",
-    }
     for source, target in replacements.items():
         body = body.replace(source, target)
     return title, summary, category, body
