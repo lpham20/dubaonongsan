@@ -58,7 +58,7 @@
 	}
 
 	@seoHtml {
-		path / /tin-tuc /huong-dan /khuyen-nghi-bon-phan /bao-cao-nang-suat /thuat-toan-du-bao /khuyen-nghi-bon-phan/logic /tin-tuc/* /huong-dan/* /en/huong-dan/* /du-bao-gia/*
+		path / /tin-tuc /huong-dan /khuyen-nghi-bon-phan /roi-uoc-tinh /thoi-diem-ban /chenh-lech-vung /so-sanh-cay-trong /bao-cao-nang-suat /thuat-toan-du-bao /khuyen-nghi-bon-phan/logic /tin-tuc/* /huong-dan/* /en/huong-dan/* /du-bao-gia/*
 	}
 	header @seoHtml Cache-Control "public, max-age=300, stale-while-revalidate=60"
 
@@ -71,10 +71,8 @@
 	}
 
 	handle /sitemap.xml {
-		rewrite * /api/v1/sitemap.xml
-		reverse_proxy api:8010 {
-			header_up X-Real-IP {remote_host}
-		}
+		root * /var/www/frontend
+		file_server
 		header Cache-Control "public, max-age=300, must-revalidate"
 		header X-Robots-Tag "index, follow"
 	}
@@ -137,6 +135,26 @@
 			path /khuyen-nghi-bon-phan
 		}
 		rewrite @seoFertilizer /seo/fertilizer.html
+
+		@seoRoi {
+			path /roi-uoc-tinh
+		}
+		rewrite @seoRoi /seo/roi.html
+
+		@seoSellingTime {
+			path /thoi-diem-ban
+		}
+		rewrite @seoSellingTime /seo/selling-time.html
+
+		@seoRegionalArbitrage {
+			path /chenh-lech-vung
+		}
+		rewrite @seoRegionalArbitrage /seo/regional-arbitrage.html
+
+		@seoCrossCrop {
+			path /so-sanh-cay-trong
+		}
+		rewrite @seoCrossCrop /seo/cross-crop.html
 
 		@seoYieldFeedback {
 			path /bao-cao-nang-suat
