@@ -5155,6 +5155,11 @@
     overflow-x: hidden !important;
   }
 
+  .guide-detail-page.detail-page {
+    width: calc(100vw - var(--mobile-page-pad, 16px) - var(--mobile-page-pad-r, 16px)) !important;
+    max-width: calc(100vw - var(--mobile-page-pad, 16px) - var(--mobile-page-pad-r, 16px)) !important;
+  }
+
   .guide-detail-page .detail-article h1,
   .guide-detail-page .detail-article header > p,
   .guide-detail-page .detail-body h2,
@@ -5168,6 +5173,12 @@
     overflow-wrap: anywhere !important;
     word-break: normal !important;
     white-space: normal !important;
+  }
+
+  .guide-detail-page .detail-article header > p,
+  .guide-detail-page .detail-body p,
+  .guide-detail-page .detail-body li {
+    width: 100% !important;
   }
 
   .guide-detail-page .detail-guide-meta {
