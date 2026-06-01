@@ -44,6 +44,24 @@ class DataLoader:
         ).mappings()
         return list(reversed([self._row_to_point(row) for row in rows]))
 
+    def daily_price_series(
+        self,
+        crop_type: str = "sau_rieng",
+        region_id: int | None = None,
+        variety_id: int | None = None,
+        quality_grade: str | None = "Loại A",
+        limit: int = 240,
+    ) -> list[dict]:
+        raw_limit = min(max(limit * 6, limit), 5000)
+        points = self.historical_prices(
+            region_id=region_id,
+            variety_id=variety_id,
+            crop_type=crop_type,
+            quality_grade=quality_grade,
+            limit=raw_limit,
+        )
+        return self._daily_series(points)[-limit:]
+
     def latest_feature_window(
         self,
         crop_type: str = "sau_rieng",
@@ -51,7 +69,7 @@ class DataLoader:
         variety_id: int | None = None,
         lookback_days: int = 60,
     ) -> list[dict]:
-        points = self.historical_prices(
+        points = self.daily_price_series(
             region_id=region_id,
             variety_id=variety_id,
             crop_type=crop_type,
@@ -59,7 +77,7 @@ class DataLoader:
             limit=lookback_days,
         )
         if not points:
-            points = self.historical_prices(
+            points = self.daily_price_series(
                 region_id=region_id,
                 variety_id=variety_id,
                 crop_type=crop_type,
@@ -137,6 +155,45 @@ class DataLoader:
         point["is_synthetic"] = is_interpolated or is_calibrated
         point["data_kind"] = "Nội suy" if is_interpolated else ("Hiệu chỉnh" if is_calibrated else "Quan sát")
         return point
+
+    @staticmethod
+    def _daily_series(points: list[dict]) -> list[dict]:
+        grouped: dict[str, list[dict]] = {}
+        order: list[str] = []
+        for point in points:
+            key = DataLoader._date_key(point.get("timestamp"))
+            if key not in grouped:
+                grouped[key] = []
+                order.append(key)
+            grouped[key].append(point)
+
+        result: list[dict] = []
+        for key in order:
+            rows = grouped[key]
+            usable = [row for row in rows if not row.get("is_synthetic")] or rows
+            base = dict(usable[-1])
+            for numeric_key in (
+                "min_price_vnd",
+                "max_price_vnd",
+                "volume_traded_tons",
+                "temp_max_celsius",
+                "precipitation_mm",
+                "maturity_index",
+            ):
+                values = [float(row[numeric_key]) for row in usable if row.get(numeric_key) is not None]
+                if values:
+                    digits = 1 if numeric_key in {"temp_max_celsius", "precipitation_mm", "maturity_index"} else 2
+                    base[numeric_key] = round(sum(values) / len(values), digits)
+            base["timestamp"] = rows[-1].get("timestamp")
+            base["is_synthetic"] = all(bool(row.get("is_synthetic")) for row in usable)
+            result.append(base)
+        return result
+
+    @staticmethod
+    def _date_key(value) -> str:
+        if hasattr(value, "date"):
+            return value.date().isoformat()
+        return str(value)[:10]
 
     @staticmethod
     def _interpolate(points: list[dict]) -> list[dict]:

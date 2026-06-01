@@ -60,7 +60,17 @@ const formatDate = (value: string, language: AppLanguage = "vi") =>
     new Date(`${value}T00:00:00`)
   );
 
-const formatMoney = (value?: number, language: AppLanguage = "vi") => (value ? `${Math.round(value).toLocaleString(language === "en" ? "en-US" : "vi-VN")} VND` : "-");
+const formatMoney = (value?: number, language: AppLanguage = "vi") =>
+  typeof value === "number" && Number.isFinite(value)
+    ? `${Math.round(value).toLocaleString(language === "en" ? "en-US" : "vi-VN")} VND`
+    : "-";
+
+const formatRain = (value?: number, language: AppLanguage = "vi") =>
+  typeof value === "number" && Number.isFinite(value)
+    ? `${new Intl.NumberFormat(language === "en" ? "en-US" : "vi-VN", { maximumFractionDigits: 1 }).format(value)} mm`
+    : "-";
+
+const roundOne = (value: number) => Math.round(value * 10) / 10;
 
 const average = (values: number[]) =>
   values.length ? values.reduce((total, value) => total + value, 0) / values.length : undefined;
@@ -146,7 +156,7 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
           return {
             dateKey,
             price: point.max_price_vnd ?? undefined,
-            rain,
+            rain: typeof rain === "number" ? roundOne(rain) : undefined,
             signalPrice: signalByDate.get(dateKey)
           };
         }),
@@ -163,6 +173,10 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
   const chartViewport = useChartViewport(rows.length, isCoarsePointer);
   const { activeZoomRange, canZoom, maxWindowStart, panWindowStep, showBrush } = chartViewport;
   const chartRows = showBrush || !canZoom ? rows : rows.slice(activeZoomRange.startIndex, activeZoomRange.endIndex + 1);
+  const visibleSignalRows = chartRows.filter((row) => typeof row.signalPrice === "number");
+  const labeledSignalDates = new Set(
+    (visibleSignalRows.length <= 2 ? visibleSignalRows : visibleSignalRows.slice(-1)).map((row) => row.dateKey)
+  );
 
   return (
     <section className="chart-section">
@@ -294,8 +308,9 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
               labelStyle={{ color: colors.tooltipText, fontWeight: 700, marginBottom: 4 }}
               itemStyle={{ color: colors.tooltipText }}
               formatter={(value, name) => {
-                if (name === (language === "en" ? "Rain (mm)" : "Mưa (mm)")) return [`${value} mm`, language === "en" ? "Rain" : "Mưa"];
-                return [formatMoney(Number(value), language), name === (language === "en" ? "Forecast" : "Dự báo") ? (language === "en" ? "Forecast" : "Dự báo") : (language === "en" ? "Price" : "Giá")];
+                const numericValue = Number(value);
+                if (name === (language === "en" ? "Rain (mm)" : "Mưa (mm)")) return [formatRain(numericValue, language), language === "en" ? "Rain" : "Mưa"];
+                return [formatMoney(numericValue, language), name === (language === "en" ? "Forecast" : "Dự báo") ? (language === "en" ? "Forecast" : "Dự báo") : (language === "en" ? "Price" : "Giá")];
               }}
             />
             {showRain ? (
@@ -354,13 +369,15 @@ function MasterChartComponent({ historical, forecast, signals, showPrice, showFo
                       label={
                         isCoarsePointer
                           ? undefined
-                          : {
+                          : labeledSignalDates.has(row.dateKey)
+                            ? {
                               value: language === "en" ? "Sell" : "Bán",
                               position: "top",
                               fill: colors.signalText,
                               fontSize: 11,
                               fontWeight: 700
                             }
+                            : undefined
                       }
                     />
                   ))

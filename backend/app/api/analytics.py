@@ -130,7 +130,7 @@ def historical_prices(
     limit: int = Query(default=180, ge=1, le=1000),
     db: Session = Depends(get_db),
 ) -> list[dict]:
-    return DataLoader(db).historical_prices(
+    return DataLoader(db).daily_price_series(
         region_id=region_id,
         variety_id=variety_id or variety,
         crop_type=crop,
@@ -179,7 +179,7 @@ def trading_signals(
     variety: int | None = Query(default=1),
     db: Session = Depends(get_db),
 ) -> list[dict]:
-    points = DataLoader(db).historical_prices(
+    points = DataLoader(db).daily_price_series(
         crop_type=crop, region_id=region_id, variety_id=variety_id or variety, limit=180
     )
     return detect_optimal_sell_points(points)
