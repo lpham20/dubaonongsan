@@ -4,6 +4,7 @@ import html
 import json
 import os
 import re
+import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlencode, urlparse
@@ -237,6 +238,16 @@ def _inline_markdown(value: str) -> str:
     return "".join(rendered)
 
 
+def _guide_heading_id(value: str) -> str:
+    characters: list[str] = []
+    for character in value.lower():
+        if character.isspace():
+            characters.append("-")
+        elif character == "-" or character.isalnum() or unicodedata.category(character).startswith("M"):
+            characters.append(character)
+    return "".join(characters).strip("-")
+
+
 def _table_row(line: str) -> list[str]:
     return [cell.strip() for cell in line.split("|") if cell.strip()]
 
@@ -294,8 +305,10 @@ def _guide_markdown_to_html(content: str) -> str:
         if heading:
             close_all()
             level = min(max(len(heading.group(1)), 2), 4)
-            text = re.sub(r"^\d+(?:\.\d+)?\.\s*", "", heading.group(2)).strip()
-            output.append(f"<h{level}>{_inline_markdown(text)}</h{level}>")
+            raw_heading = heading.group(2).strip()
+            text = re.sub(r"^\d+(?:\.\d+)?\.\s*", "", raw_heading).strip()
+            anchor = html.escape(_guide_heading_id(raw_heading), quote=True)
+            output.append(f'<h{level} id="{anchor}">{_inline_markdown(text)}</h{level}>')
             continue
         if line.startswith("|"):
             cells = _table_row(line)

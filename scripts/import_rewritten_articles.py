@@ -135,7 +135,11 @@ def _format_body_for_web(body: str) -> str:
         if stripped.startswith(">"):
             quote = stripped.lstrip(">").strip()
             if quote:
-                formatted_lines.append(f"{leading_space}- {_strip_emphasis_markers(quote)}")
+                normalized_quote = _strip_emphasis_markers(quote)
+                if re.match(r"^#{1,6}\s+", normalized_quote):
+                    formatted_lines.append(normalized_quote)
+                else:
+                    formatted_lines.append(f"{leading_space}- {normalized_quote}")
             continue
         if re.match(r"^\*\s+", stripped):
             formatted_lines.append(f"{leading_space}- {_strip_emphasis_markers(stripped[2:])}")

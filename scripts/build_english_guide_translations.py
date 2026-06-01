@@ -18,6 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_DIR = ROOT / "content" / "rewritten"
+AUTHORED_EN_DIR = ROOT / "content" / "authored_en"
 OUTPUT_PATH = ROOT / "backend" / "app" / "content_i18n" / "en_guides.json"
 CACHE_PATH = ROOT / "artifacts" / "translation-cache" / "google_vi_en.json"
 GOOGLE_TRANSLATE_URL = "https://translate.googleapis.com/translate_a/single"
@@ -36,6 +37,45 @@ def parse_frontmatter(text: str) -> tuple[dict[str, str], str]:
         key, value = raw_line.split(":", 1)
         meta[key.strip()] = value.strip().strip('"')
     return meta, match.group(2).strip()
+
+
+def format_authored_body_for_web(body: str) -> str:
+    """Apply the public guide formatting rules without changing authored wording."""
+
+    formatted_lines: list[str] = []
+    for raw_line in body.replace("\r\n", "\n").splitlines():
+        line = raw_line.rstrip()
+        stripped = line.lstrip()
+        leading_space = line[: len(line) - len(stripped)]
+        if stripped.startswith(">"):
+            quote = stripped.lstrip(">").strip().replace("*", "").strip()
+            if quote:
+                if re.match(r"^#{1,6}\s+", quote):
+                    formatted_lines.append(quote)
+                else:
+                    formatted_lines.append(f"{leading_space}- {quote}")
+            continue
+        if re.match(r"^\*\s+", stripped):
+            formatted_lines.append(f"{leading_space}- {stripped[2:].replace('*', '').strip()}")
+            continue
+        formatted_lines.append(line.replace("*", "").strip())
+    return "\n".join(formatted_lines).strip()
+
+
+def authored_english_override(post_id: int, slug: str) -> dict[str, str | int] | None:
+    path = AUTHORED_EN_DIR / f"{post_id}-{slug}.md"
+    if not path.exists():
+        return None
+    meta, body = parse_frontmatter(path.read_text(encoding="utf-8"))
+    return {
+        "post_id": post_id,
+        "slug": slug,
+        "title": meta["title"],
+        "summary": meta["summary"],
+        "category": meta["category"],
+        "content": format_authored_body_for_web(body),
+        "author": "Agri Price Forecast technical desk",
+    }
 
 
 def load_cache() -> dict[str, str]:
@@ -265,14 +305,19 @@ def build() -> None:
         print(f"translating {offset}/{len(files)} {path.relative_to(ROOT)}", flush=True)
         text = path.read_text(encoding="utf-8")
         meta, body = parse_frontmatter(text)
+        post_id = int(meta["post_id"])
+        slug = meta["slug"]
+        override = authored_english_override(post_id, slug)
+        if override:
+            guides[str(post_id)] = override
+            print(f"using authored English override for guide {post_id}", flush=True)
+            continue
         units, plan = translatable_units(body)
         title, summary, category = translate_many(
             [meta.get("title", ""), meta.get("summary", ""), meta.get("category", "")],
             cache,
         )
         translated_body = rebuild_body(plan, translate_many(units, cache))
-        post_id = int(meta["post_id"])
-        slug = meta["slug"]
         title, summary, category, translated_body = polish_guide_translation(
             post_id,
             title,

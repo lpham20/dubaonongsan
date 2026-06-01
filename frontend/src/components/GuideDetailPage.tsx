@@ -11,6 +11,7 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { withLanguagePrefix } from "../lib/localizedRoutes";
 import { useFetchOnce } from "../hooks/useFetchOnce";
 import { trackEvent } from "../lib/analytics";
+import { guideHeadingId } from "../lib/guideMarkdown";
 
 const HOWTO_HEADINGS = [
   "Mục tiêu",
@@ -31,6 +32,7 @@ const SOURCE_LINE_PREFIXES = ["nguồn", "source", "references", "reference"];
 
 type GuideBlock = {
   heading: string;
+  id?: string;
   items: GuideContentItem[];
   body: string[];
   bullets: string[];
@@ -39,7 +41,7 @@ type GuideBlock = {
 };
 
 type GuideContentItem =
-  | { type: "subheading"; text: string; level: 3 | 4 }
+  | { type: "subheading"; text: string; id: string; level: 3 | 4 }
   | { type: "paragraph"; text: string }
   | { type: "blockquote"; lines: string[] }
   | { type: "bullets"; items: string[] }
@@ -153,7 +155,7 @@ function GuideArticleContent({ guide, language }: { guide: GuidePost; language: 
     <div className="detail-body guide-detail-body">
       {blocks.map((block) => (
         <section key={block.heading}>
-          <h2>{block.heading}</h2>
+          <h2 id={block.id}>{block.heading}</h2>
           {block.items.map((item, index) => renderGuideItem(item, index, guide, block.heading, failedImages, setFailedImages, language))}
         </section>
       ))}
@@ -172,7 +174,7 @@ function renderGuideItem(
 ) {
   if (item.type === "subheading") {
     const HeadingTag = item.level === 4 ? "h4" : "h3";
-    return <HeadingTag key={index}>{renderInlineMarkdown(item.text, language)}</HeadingTag>;
+    return <HeadingTag id={item.id} key={index}>{renderInlineMarkdown(item.text, language)}</HeadingTag>;
   }
   if (item.type === "paragraph") return <p key={index}>{renderInlineMarkdown(item.text, language)}</p>;
   if (item.type === "blockquote") {
@@ -278,11 +280,11 @@ function parseGuideBlocks(content: string): GuideBlock[] {
     const heading = normalizeGuideHeading(line);
     if (heading) {
       if (heading.level <= 2 || !current) {
-        current = { heading: heading.text, items: [], body: [], bullets: [], tables: [], images: [] };
+        current = { heading: heading.text, id: heading.id, items: [], body: [], bullets: [], tables: [], images: [] };
         blocks.push(current);
       } else {
         const subheadingLevel = heading.level >= 4 ? 4 : 3;
-        current.items.push({ type: "subheading", text: heading.text, level: subheadingLevel });
+        current.items.push({ type: "subheading", text: heading.text, id: heading.id, level: subheadingLevel });
         current.body.push(heading.text);
       }
       activeTable = null;
@@ -369,14 +371,15 @@ function parseGuideBlocks(content: string): GuideBlock[] {
 }
 
 function normalizeGuideHeading(line: string) {
-  if (HOWTO_HEADING_SET.has(line.toLowerCase())) return { text: line, level: 2 as const };
+  if (HOWTO_HEADING_SET.has(line.toLowerCase())) return { text: line, id: guideHeadingId(line), level: 2 as const };
   const match = line.match(/^(#{1,6})\s+(.+)$/);
   if (!match) return null;
   const level = Math.min(Math.max(match[1].length, 2), 4) as 2 | 3 | 4;
-  const text = match[2]
+  const rawText = match[2].trim();
+  const text = rawText
     .replace(/^\d+(?:\.\d+)?\.\s*/, "")
     .trim();
-  return text ? { text, level } : null;
+  return text ? { text, id: guideHeadingId(rawText), level } : null;
 }
 
 function parseTableRow(line: string) {
@@ -414,7 +417,9 @@ function renderInlineMarkdown(text: string, language: "vi" | "en" = "vi") {
     const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
     if (link) {
       const [, label, href] = link;
-      return href.startsWith("/") ? (
+      return href.startsWith("#") ? (
+        <a href={href} key={`${part}-${index}`}>{label}</a>
+      ) : href.startsWith("/") ? (
         <Link to={withLanguagePrefix(href, language)} key={`${part}-${index}`}>{label}</Link>
       ) : (
         <a href={href} key={`${part}-${index}`} target="_blank" rel="noreferrer">{label}</a>

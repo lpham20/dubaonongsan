@@ -18,6 +18,7 @@ import type { GuidePost } from "../lib/api";
 import { guidePath } from "../lib/seo";
 import { useLanguage } from "../contexts/LanguageContext";
 import { withLanguagePrefix } from "../lib/localizedRoutes";
+import { guideHeadingId } from "../lib/guideMarkdown";
 
 type Props = {
   guides: GuidePost[];
@@ -31,6 +32,7 @@ type GuideView = GuidePost & {
 
 type GuideBlock = {
   heading: string;
+  headingId?: string;
   body: string[];
   bullets: string[];
   tables: string[][][];
@@ -362,7 +364,7 @@ function GuideContent({ content, postId }: { content: string; postId: number }) 
   for (const line of lines) {
     const heading = normalizeGuideHeading(line);
     if (heading) {
-      current = { heading, body: [], bullets: [], tables: [], images: [] };
+      current = { heading: heading.text, headingId: heading.id, body: [], bullets: [], tables: [], images: [] };
       blocks.push(current);
       activeTable = null;
       continue;
@@ -398,7 +400,7 @@ function GuideContent({ content, postId }: { content: string; postId: number }) 
     <div className="guide-body structured-guide-body">
       {blocks.map((block) => (
         <section key={block.heading}>
-          <h3>{block.heading || (language === "en" ? "Field notes" : "Ghi chú kỹ thuật")}</h3>
+          <h3 id={block.headingId}>{block.heading || (language === "en" ? "Field notes" : "Ghi chú kỹ thuật")}</h3>
           {block.body.map((line) => (
             <p key={line}>{renderInlineMarkdown(line, language)}</p>
           ))}
@@ -582,13 +584,15 @@ function guideImageUrl(postId: number, imageIndex: number) {
 }
 
 function normalizeGuideHeading(line: string) {
-  if (isGuideHeading(line)) return line;
+  if (isGuideHeading(line)) return { text: line, id: guideHeadingId(line) };
   if (!line.startsWith("#")) return null;
-  const heading = line
-    .replace(/^#{2,3}\s+/, "")
+  const rawHeading = line
+    .replace(/^#{1,6}\s+/, "")
+    .trim();
+  const heading = rawHeading
     .replace(/^\d+(?:\.\d+)?\.\s*/, "")
     .trim();
-  return heading || null;
+  return heading ? { text: heading, id: guideHeadingId(rawHeading) } : null;
 }
 
 function isGuideHeading(line: string) {
@@ -637,7 +641,9 @@ function renderInlineMarkdown(text: string, language: "vi" | "en" = "vi") {
     const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
     if (link) {
       const [, label, href] = link;
-      return href.startsWith("/") ? (
+      return href.startsWith("#") ? (
+        <a href={href} key={`${part}-${index}`}>{label}</a>
+      ) : href.startsWith("/") ? (
         <Link to={withLanguagePrefix(href, language)} key={`${part}-${index}`}>{label}</Link>
       ) : (
         <a href={href} key={`${part}-${index}`} target="_blank" rel="noreferrer">{label}</a>
