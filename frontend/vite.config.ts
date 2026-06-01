@@ -25,9 +25,10 @@ export default defineConfig({
           },
           {
             urlPattern: /^https:\/\/api\.dubaonongsan\.com\/api\/v1\/content\//,
-            handler: "StaleWhileRevalidate",
+            handler: "NetworkFirst",
             options: {
               cacheName: "content-api-v2",
+              networkTimeoutSeconds: 5,
               expiration: { maxEntries: 100, maxAgeSeconds: 60 * 30 },
               cacheableResponse: { statuses: [0, 200] }
             }
