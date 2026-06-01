@@ -490,6 +490,7 @@ def render_guides() -> list[tuple[str, str | None]]:
         summary = guide.get("summary") or title
         content = _guide_markdown_to_html(guide.get("content") or "")
         published_at = guide.get("published_at") or guide.get("updated_at")
+        keywords = guide.get("tags") or ""
         body = f"<article><h1>{html.escape(title)}</h1><p>{html.escape(summary)}</p>{content}</article>"
         guide_schema = {
             "@context": "https://schema.org",
@@ -500,6 +501,7 @@ def render_guides() -> list[tuple[str, str | None]]:
             "mainEntityOfPage": {"@type": "WebPage", "@id": canonical},
             "datePublished": published_at,
             "dateModified": published_at,
+            "keywords": keywords,
             "image": {"@type": "ImageObject", "url": f"{SITE_BASE}/og-cover.jpg", "width": 1200, "height": 630},
             "publisher": {
                 "@type": "Organization",

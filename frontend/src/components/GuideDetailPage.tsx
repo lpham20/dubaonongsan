@@ -235,6 +235,8 @@ function buildHowToSchema(guide: GuidePost, language: "vi" | "en" = "vi") {
     description: guide.summary,
     image: DEFAULT_OG_IMAGE,
     datePublished: guide.published_at,
+    dateModified: guide.published_at,
+    keywords: guide.tags,
     totalTime: `PT${estimateReadingMinutes(guide.content)}M`,
     supply: relatedSupplies(guide).map((name) => ({ "@type": "HowToSupply", name })),
     step: steps

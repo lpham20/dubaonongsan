@@ -220,6 +220,43 @@ def polish(text: str) -> str:
     return text.strip()
 
 
+def polish_guide_translation(
+    post_id: int,
+    title: str,
+    summary: str,
+    category: str,
+    body: str,
+) -> tuple[str, str, str, str]:
+    if post_id != 130:
+        return title, summary, category, body
+
+    title = "Vietnamese durian and cadmium: why it happens and what growers can do"
+    summary = (
+        "Cadmium in durian is linked to acidic soil and phosphate fertilizers. "
+        "This guide explains the causes, soil tests and a seasonal risk-reduction plan."
+    )
+    category = "Durian care"
+    replacements = {
+        '"The Chinese side just returned 30 containers."': '"China just returned 30 containers."',
+        "orcharders": "growers",
+        "plants cannot reach it": "plants cannot absorb it",
+        "Indian canola plant": "Indian mustard",
+        "mint, pennywort, pennywort, and mustard greens": "mint, water mimosa, pennywort and Chinese broccoli",
+        "This is a long-distance flag, not an immediate salvation.": "This is a long-term strategy, not an immediate fix.",
+        "the final blow before the fruit ripens": "a final measure before the fruit ripens",
+        "fruit zones": "durian flesh",
+        "This is the data base to know where your orchard is.": "This is the baseline data needed to understand the orchard.",
+        "certified low Cd variety": "certified low-Cd fertilizer",
+        "Take fruit samples at least 7 days before breaking.": "Take fruit samples at least 7 days before harvest.",
+        "Inject AMF or Bacillus preparations": "Apply AMF or Bacillus products",
+        "who tests stool?": "who tests fertilizer?",
+        "Cd survey in Punjab feces and soil": "Cd survey of fertilizers and soil in Punjab",
+    }
+    for source, target in replacements.items():
+        body = body.replace(source, target)
+    return title, summary, category, body
+
+
 def build() -> None:
     cache = load_cache()
     guides: dict[str, dict[str, str | int | None]] = {}
@@ -236,6 +273,13 @@ def build() -> None:
         translated_body = rebuild_body(plan, translate_many(units, cache))
         post_id = int(meta["post_id"])
         slug = meta["slug"]
+        title, summary, category, translated_body = polish_guide_translation(
+            post_id,
+            title,
+            summary,
+            category,
+            translated_body,
+        )
         guides[str(post_id)] = {
             "post_id": post_id,
             "slug": slug,

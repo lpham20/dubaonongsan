@@ -395,6 +395,7 @@ export type GuidePost = {
   title: string;
   crop_type: string | null;
   category: string;
+  tags: string | null;
   summary: string;
   content: string;
   author: string;

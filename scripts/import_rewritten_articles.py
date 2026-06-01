@@ -41,7 +41,7 @@ if str(BACKEND) not in sys.path:
 from app.core.cache import invalidate_cache  # noqa: E402
 from app.db import SessionLocal  # noqa: E402
 from app.models import GuidePost  # noqa: E402
-from sqlalchemy import select  # noqa: E402
+from sqlalchemy import select, text  # noqa: E402
 
 
 REQUIRED_FIELDS = {"post_id", "slug", "title", "summary", "crop_type", "category", "tags"}
@@ -148,6 +148,31 @@ def _public_guide_slug(slug: str) -> str:
     return re.sub(r"^(hainong|hai-nong|hai_nong)-+", "", slug or "", flags=re.IGNORECASE)
 
 
+def _invalidate_guide_caches(slug: str) -> None:
+    invalidate_cache("guides")
+    invalidate_cache(f"guide:{slug}")
+    invalidate_cache("guide-detail")
+    invalidate_cache("llm-guides-index")
+    invalidate_cache("llm-guide-detail")
+    invalidate_cache("sitemap-xml")
+
+
+def _sync_postgres_guide_sequence(db) -> None:
+    if db.bind is None or db.bind.dialect.name != "postgresql":
+        return
+    db.execute(
+        text(
+            """
+            SELECT setval(
+                pg_get_serial_sequence('guide_posts', 'post_id'),
+                (SELECT MAX(post_id) FROM guide_posts),
+                true
+            )
+            """
+        )
+    )
+
+
 def import_one(path: Path, dry_run: bool) -> str:
     meta, body = parse_frontmatter(path)
     missing = REQUIRED_FIELDS - meta.keys()
@@ -161,8 +186,18 @@ def import_one(path: Path, dry_run: bool) -> str:
     post_id = int(meta["post_id"])
     with SessionLocal() as db:
         guide = db.scalar(select(GuidePost).where(GuidePost.post_id == post_id))
+        create_if_missing = meta.get("create_if_missing") is True
         if guide is None:
-            raise ValueError(f"{path}: guide post #{post_id} not found")
+            if not create_if_missing:
+                raise ValueError(f"{path}: guide post #{post_id} not found")
+            existing_slug = db.scalar(select(GuidePost).where(GuidePost.slug == meta["slug"]))
+            if existing_slug is not None:
+                raise ValueError(f"{path}: slug already belongs to guide post #{existing_slug.post_id}")
+            guide = GuidePost(post_id=post_id, slug=str(meta["slug"]).strip())
+            db.add(guide)
+            action = "Created"
+        else:
+            action = "Imported"
         if guide.slug != meta["slug"]:
             raise ValueError(f"{path}: slug mismatch, refuses to change existing slug")
 
@@ -174,17 +209,15 @@ def import_one(path: Path, dry_run: bool) -> str:
         guide.tags = _tags_to_db(meta["tags"])
         guide.public_slug = _public_guide_slug(guide.slug)
         guide.published_at = datetime.now(UTC)
+        db.flush()
         if dry_run:
             db.rollback()
-            return f"DRY-RUN ok: #{post_id} {guide.slug}"
+            return f"DRY-RUN {action.lower()} ok: #{post_id} {guide.slug}"
+        if action == "Created":
+            _sync_postgres_guide_sequence(db)
         db.commit()
-        invalidate_cache("guides")
-        invalidate_cache(f"guide:{guide.slug}")
-        invalidate_cache("guide-detail")
-        invalidate_cache("llm-guides-index")
-        invalidate_cache("llm-guide-detail")
-        invalidate_cache("sitemap-xml")
-        return f"Imported: #{post_id} {guide.slug}"
+        _invalidate_guide_caches(guide.slug)
+        return f"{action}: #{post_id} {guide.slug}"
 
 
 def main() -> int:
