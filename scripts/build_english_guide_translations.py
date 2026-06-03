@@ -307,12 +307,30 @@ def polish_guide_translation(
             'natural "watering"': 'natural "water withholding"',
             "treat off-season flowering of durian": "induce off-season flowering in durian",
         }
+    elif post_id == 133:
+        title = "Aflatoxin in coffee: EU 2025 standards and ochratoxin A control"
+        summary = (
+            "A practical guide to aflatoxin and ochratoxin A risks in coffee exports to the EU, "
+            "covering 2025 standards, safe moisture, drying and correct testing."
+        )
+        category = "Coffee handbook"
+        replacements = {
+            "coffee exported to EU": "coffee exports to the EU",
+            "coffee export to EU": "coffee exports to the EU",
+            "European Coffee Federation": "European Coffee Federation",
+            "fast testing": "rapid testing",
+            "moisture meter": "moisture meter",
+            "legal evidence": "legal proof of compliance",
+            "wrong substance": "wrong analyte",
+            "mold toxic": "mycotoxin",
+            "mold toxins": "mycotoxins",
+        }
     else:
         return title, summary, category, body
 
     for source, target in replacements.items():
         body = body.replace(source, target)
-    if post_id == 132:
+    if post_id in (132, 133):
         body = format_authored_body_for_web(body)
     return title, summary, category, body
 
