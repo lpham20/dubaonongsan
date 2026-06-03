@@ -164,14 +164,20 @@ def _asset_tags() -> str:
     if not index_html_path.exists():
         return ""
     index_html = index_html_path.read_text(encoding="utf-8")
-    tags = [
-        line.strip()
-        for line in index_html.splitlines()
+    tags: list[str] = []
+    for tag in re.findall(r"<link\b[^>]*>", index_html, flags=re.DOTALL | re.IGNORECASE):
+        compact = re.sub(r"\s+", " ", tag.strip())
         if (
-            ("<script" in line or "<link" in line)
-            and ("/assets/" in line or 'rel="modulepreload"' in line)
-        )
-    ]
+            "/assets/" in compact
+            or 'rel="modulepreload"' in compact
+            or "fonts.googleapis.com" in compact
+            or "fonts.gstatic.com" in compact
+        ):
+            tags.append(compact)
+    for tag in re.findall(r"<script\b[^>]*>.*?</script>", index_html, flags=re.DOTALL | re.IGNORECASE):
+        compact = re.sub(r"\s+", " ", tag.strip())
+        if "/assets/" in compact:
+            tags.append(compact)
     return "\n  ".join(dict.fromkeys(tags))
 
 
