@@ -31,7 +31,7 @@ create_if_missing: true
 
 ---
 
-## 1\. Bối cảnh và tính cấp bách
+## 1. Bối cảnh và tính cấp bách
 
 Cà phê là mặt hàng nông sản xuất khẩu chủ lực của Việt Nam, và châu Âu là điểm đến lớn nhất. Niên vụ 2024–2025, riêng 27 nước EU chiếm khoảng 40% sản lượng xuất khẩu; tính cả châu Âu, tỷ trọng lên tới khoảng 47% sản lượng và trên 4 tỷ USD kim ngạch (số liệu VICOFA), với Đức, Ý và Tây Ban Nha dẫn đầu. Mức độ tập trung này vừa là lợi thế vừa là điểm dễ tổn thương: thị trường càng lớn thì mỗi lần siết ngưỡng kỹ thuật của EU càng tác động sâu.
 
@@ -39,7 +39,7 @@ Cà phê là mặt hàng nông sản xuất khẩu chủ lực của Việt Nam,
 
 Trên cà phê có hai độc tố nấm mốc cùng nhóm nguy cơ. Ochratoxin A là chất bị EU đặt giới hạn pháp lý bắt buộc và là nguyên nhân thực tế khiến cà phê Việt Nam từng bị cảnh báo tại thị trường này. Aflatoxin độc hơn và bị kiểm soát rất gắt trên nhiều nông sản khác (lạc, hạt cây, ngũ cốc, gia vị, quả khô), nhưng EU không đặt giới hạn riêng cho cà phê. Cả hai sinh ra trong cùng điều kiện và được phòng ngừa bằng cùng một bộ biện pháp — đây là tin tốt về mặt vận hành, vì doanh nghiệp chỉ cần quản lý một biến số chung là độ ẩm và thời gian hạt còn ẩm.
 
-## 2\. Aflatoxin là gì — bản chất khoa học
+## 2. Aflatoxin là gì — bản chất khoa học
 
 Aflatoxin là nhóm độc tố thứ cấp do hai loài nấm Aspergillus flavus và Aspergillus parasiticus sinh ra, trong đó aflatoxin B1 phổ biến và độc nhất. Cơ chế sinh độc tố phụ thuộc chặt vào hai biến: nhiệt độ và hoạt độ nước (a\_w) của hạt. Nấm sinh độc tố mạnh nhất ở khoảng 28–37 °C khi a\_w từ 0,90 trở lên; ngược lại, khi nhiệt độ xuống dưới 20 °C hoặc hạt được làm khô tới a\_w dưới 0,85 thì nấm gần như ngừng phát triển.
 
@@ -47,7 +47,7 @@ Hệ quả thực hành của cơ chế này rất rõ: toàn bộ cuộc chơi 
 
 Ochratoxin A — chất bị EU quản lý trên cà phê — do các loài Aspergillus (A. ochraceus, A. carbonarius, A. westerdijkiae) và Penicillium sinh ra, hình thành chủ yếu trong quá trình phơi nắng và bảo quản. Vì cùng điều kiện phát sinh, việc kiểm soát độ ẩm để ngăn aflatoxin cũng đồng thời ngăn ochratoxin A; doanh nghiệp không cần hai quy trình tách biệt.
 
-## 3\. Tác hại sức khỏe
+## 3. Tác hại sức khỏe
 
 Aflatoxin B1 được Cơ quan Nghiên cứu Ung thư Quốc tế (IARC) xếp Nhóm 1 — chất gây ung thư cho người với mức bằng chứng cao nhất. Cơ quan đích là gan: sau khi vào cơ thể, aflatoxin B1 bị chuyển hóa thành dạng epoxide gắn vào DNA, gây đột biến và dẫn tới ung thư biểu mô tế bào gan.
 
@@ -55,7 +55,7 @@ Với Việt Nam, điểm đáng lưu ý nhất là sự cộng hưởng với v
 
 Ochratoxin A được IARC xếp Nhóm 2B (có thể gây ung thư cho người), độc chủ yếu trên thận, kèm độc gan và ức chế miễn dịch. Đánh giá lại của Cơ quan An toàn Thực phẩm châu Âu (EFSA) năm 2020 cảnh báo nguy cơ sức khỏe tiềm ẩn đối với một số nhóm người tiêu dùng — đây chính là cơ sở khoa học để EU hạ giới hạn ochratoxin A vào năm 2022, và là lý do nên dự đoán xu hướng siết tiếp trong tương lai.
 
-## 4\. Khung pháp lý EU hiện hành đối với cà phê
+## 4. Khung pháp lý EU hiện hành đối với cà phê
 
 EU đã hợp nhất toàn bộ giới hạn chất ô nhiễm trong thực phẩm vào Quy định (EU) 2023/915, hiệu lực từ 25/4/2023, thay cho Quy định (EC) 1881/2006. Với cà phê, giới hạn pháp lý bắt buộc là cho ochratoxin A; mức giới hạn đã được hạ theo Quy định (EU) 2022/1370 (áp dụng từ 01/01/2023) rồi gộp vào văn bản khung này.
 
@@ -74,7 +74,7 @@ Bốn điểm có ý nghĩa thực tiễn khi vận dụng khung này:
 
 Một lưu ý về thuật ngữ để tránh sai sót tốn kém: con số "giới hạn aflatoxin B1 hạ từ 5 xuống 2 µg/kg" thường được nhắc đến thực chất là giới hạn aflatoxin cho ngũ cốc, không phải cho cà phê. EU không đặt giới hạn aflatoxin riêng cho cà phê; chỉ tiêu pháp lý cần bám là ochratoxin A như bảng trên. Nhầm lẫn này dẫn thẳng đến việc kiểm nghiệm sai chỉ tiêu và hồ sơ không hợp lệ.
 
-## 5\. Ba giai đoạn rủi ro nhiễm độc tố
+## 5. Ba giai đoạn rủi ro nhiễm độc tố
 
 Nguy cơ tích tụ theo trình tự thu hoạch ướt → phơi → bảo quản. Bảng dưới đây tóm tắt cơ chế phát sinh và điểm kiểm soát tới hạn của từng giai đoạn (dựa trên TCVN 9703:2013, tương đương CAC/RCP 69-2009).
 
@@ -86,7 +86,7 @@ Nguy cơ tích tụ theo trình tự thu hoạch ướt → phơi → bảo qu�
 
 Trọng tâm chiến lược nằm ở giai đoạn phơi sấy, vì đó là lúc hạt buộc phải đi qua toàn bộ "vùng nguy hiểm" về độ ẩm. Hai giai đoạn còn lại mang tính phòng ngừa ở hai đầu: thu hoạch quyết định chất lượng nguyên liệu đầu vào, còn bảo quản quyết định việc giữ được thành quả đã phơi. Một mẻ cà phê phơi đạt chuẩn vẫn có thể hỏng ở khâu kho nếu để tái ẩm.
 
-## 6\. Phương pháp giảm rủi ro
+## 6. Phương pháp giảm rủi ro
 
 Toàn bộ giải pháp quy về hai biến số kiểm soát được: độ ẩm hạt và độ ẩm môi trường bảo quản.
 
@@ -96,7 +96,7 @@ Về kỹ thuật phơi, nên phơi trên sân xi măng sạch hoặc giàn lư�
 
 Về bảo quản, kho cần khô, thoáng, trần cao, thông gió tốt, giữ độ ẩm tương đối dưới khoảng 70% (ở mức này hạt cân bằng quanh 12,5%). Không phơi bao cà phê trực tiếp dưới nắng hay đặt sát nguồn nhiệt vì chênh lệch nhiệt gây ngưng tụ ẩm; kho nhỏ có thể dùng máy hút ẩm. Trong vận chuyển container đường dài, chênh lệch nhiệt độ ngày đêm có thể tạo ngưng tụ cục bộ ngay cả với hạt đã đạt chuẩn, nên cần chọn đơn vị vận chuyển có kinh nghiệm và che chắn kín. Dấu hiệu cảnh báo sớm thường là mùi đất hoặc mùi mốc — khi xuất hiện phải kiểm tra ngay thay vì chờ kết quả phòng thí nghiệm.
 
-## 7\. Kiểm nghiệm và chi phí
+## 7. Kiểm nghiệm và chi phí
 
 Có ba cấp độ kiểm nghiệm, phục vụ ba mục đích khác nhau trong chuỗi.
 
