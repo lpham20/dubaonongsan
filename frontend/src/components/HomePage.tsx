@@ -205,7 +205,7 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
         newGuides: (count: number) => (count ? `${count} new guides` : "Production guide library"),
         commodityProfiles: "Commodity profiles",
         commodityList: "Coffee, durian, pepper, rice",
-        livePrices: "Live prices"
+        livePrices: "Today prices"
       }
     : {
         seoTitle: "Dự báo giá nông sản & hướng dẫn kỹ thuật Việt Nam",
@@ -242,7 +242,7 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
         newGuides: (count: number) => (count ? `${count} hướng dẫn mới` : "Cẩm nang canh tác"),
         commodityProfiles: "Hồ sơ hàng hóa",
         commodityList: "Cà phê, sầu riêng, hồ tiêu, lúa",
-        livePrices: "Giá trực tuyến"
+        livePrices: "Giá hôm nay"
       };
   const navigate = useNavigate();
   const [liveTicker, setLiveTicker] = useState<HomeTickerState>({ coffee: [], durian: [], pepper: [], rice: [] });
@@ -501,20 +501,18 @@ function PriceTicker({ items }: { items: TickerItem[] }) {
   const repeated = [...items, ...items];
 
   return (
-    <div className="home-price-ticker" aria-label={language === "en" ? "Agricultural price ticker" : "Dải băng giá nông sản"}>
-      <div className="home-price-ticker-label">
-        {language === "en" ? "Live prices" : "Giá trực tuyến"}
-      </div>
-      <div className="home-price-track">
-        <div className="home-price-content">
-          {repeated.map((item, index) => (
-            <span key={`${item.label}-${index}`}>
-              <strong>{item.label}</strong>
-              <b>{item.value}</b>
-              <em className={item.tone}>{item.change}</em>
+    <div className="p-strip paper" aria-label={language === "en" ? "Today agricultural price ticker" : "Dải băng giá nông sản hôm nay"}>
+      <div className="lab">{language === "en" ? "Today prices" : "Giá hôm nay"}</div>
+      <div className="items">
+        {repeated.map((item, index) => (
+          <div className="it" key={`${item.label}-${index}`}>
+            <span className="s">{item.label}</span>
+            <span className="pr">
+              <b className="num">{item.value}</b>
+              <em className={item.tone === "up" ? "pos" : "neg"}>{item.change}</em>
             </span>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );

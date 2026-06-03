@@ -239,18 +239,18 @@
 
 @media (min-width: 861px) {
   body:has(.app-shell.paper-frame-shell) {
-    background: #e6e9e6;
+    background: var(--bg, #ffffff);
   }
 
   .app-shell.paper-frame-shell {
     --app-shell-pad: 0px;
-    width: min(1380px, calc(100% - 60px)) !important;
-    max-width: 1380px !important;
-    margin: 40px auto 100px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
     padding: 0 !important;
     background: #fff !important;
-    border: 1px solid #c9d0c9;
-    overflow: hidden;
+    border: 0;
+    overflow-x: hidden;
   }
 
   .app-shell:has(> .paper-mast) {
@@ -509,4 +509,42 @@
     border-radius: 0;
     box-shadow: 0 8px 22px rgba(20, 24, 26, 0.12);
   }
+}
+
+.guide-detail-page .detail-article,
+.guide-detail-page .detail-body {
+  color: var(--ink, #14181a);
+  font-family: var(--sans);
+}
+
+.guide-detail-page .detail-article h1,
+.guide-detail-page .detail-body h1,
+.guide-detail-page .detail-body h2,
+.guide-detail-page .detail-body h3,
+.guide-detail-page .detail-body h4 {
+  font-family: var(--serif) !important;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.guide-detail-page .detail-article h1 {
+  font-size: clamp(38px, 5vw, 56px);
+  line-height: 1.04;
+}
+
+.guide-detail-page .detail-body h2 {
+  font-size: 30px;
+  line-height: 1.12;
+}
+
+.guide-detail-page .detail-body h3 {
+  font-size: 23px;
+  line-height: 1.18;
+}
+
+.guide-detail-page .detail-body p,
+.guide-detail-page .detail-body li {
+  font-family: var(--sans);
+  font-size: 16.5px;
+  line-height: 1.7;
 }

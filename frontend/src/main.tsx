@@ -19,6 +19,7 @@ import "./styles/news.css";
 import "./styles/guides.css";
 import "./styles/forecast.css";
 import "./styles/header.css";
+import "./styles/site-header.css";
 import "./styles/production.css";
 import "./styles/responsive.css";
 import "./styles/finance-terminal.css";

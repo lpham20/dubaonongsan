@@ -79,6 +79,75 @@
   line-height: 1.5;
 }
 
+.p-strip {
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--line);
+}
+
+.p-strip .lab {
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  border-right: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.p-strip .items {
+  display: flex;
+  flex: 1;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+.p-strip .it {
+  display: flex;
+  min-width: 198px;
+  min-height: 58px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 9px 20px;
+  border-right: 1px solid var(--line);
+}
+
+.p-strip .it .s {
+  color: var(--ink-mute);
+  font-size: 10.5px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.p-strip .it .pr {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.p-strip .it .pr b {
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.p-strip .it .pr em {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+}
+
 @media (max-width: 768px) {
   .p-wrap {
     padding: 0 16px;

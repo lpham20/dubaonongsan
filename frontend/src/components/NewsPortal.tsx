@@ -949,52 +949,54 @@ function NewsImage({ article, variant = "row" }: { article: NewsArticle; variant
     setLogoFailed(false);
   }, [logoUrl]);
 
-  return (
-    <div className={`news-thumb ${hasDisplayImage ? "" : "source-logo-mode"}`}>
-      {hasDisplayImage ? (
-        <img
-          className={variant === "feature" ? "ft-img" : undefined}
-          src={displayImageUrl}
-          alt={language === "en" ? `Illustration: ${article.title}` : `Ảnh minh họa: ${article.title}`}
-          loading={variant === "feature" ? "eager" : "lazy"}
-          decoding="async"
-          width={variant === "feature" ? "860" : "320"}
-          height={variant === "feature" ? "484" : "200"}
-          onLoad={(event) => {
-            if (displayImageUrl === fallbackImageUrl) return;
-            const image = event.currentTarget;
-            if (image.naturalWidth < 640 || image.naturalHeight < 320) {
-              setImageLowQuality(true);
-            }
-          }}
-          onError={() => {
-            if (displayImageUrl === fallbackImageUrl) {
-              setImageFailed(true);
-              return;
-            }
+  if (hasDisplayImage) {
+    return (
+      <img
+        className={variant === "feature" ? "ft-img" : "thumb"}
+        src={displayImageUrl}
+        alt={language === "en" ? `Illustration: ${article.title}` : `Ảnh minh họa: ${article.title}`}
+        loading={variant === "feature" ? "eager" : "lazy"}
+        decoding="async"
+        width={variant === "feature" ? "860" : "320"}
+        height={variant === "feature" ? "484" : "200"}
+        onLoad={(event) => {
+          if (displayImageUrl === fallbackImageUrl) return;
+          const image = event.currentTarget;
+          if (image.naturalWidth < 640 || image.naturalHeight < 320) {
+            setImageLowQuality(true);
+          }
+        }}
+        onError={() => {
+          if (displayImageUrl === fallbackImageUrl) {
             setImageFailed(true);
-          }}
-        />
-      ) : (
-        <div className="source-logo-card">
-          <span className="source-logo-mark">
-            {logoUrl && !logoFailed ? (
-              <img
-                src={logoUrl}
-                alt={`${article.source_name} logo`}
-                loading="lazy"
-                decoding="async"
-                width="64"
-                height="64"
-                onError={() => setLogoFailed(true)}
-              />
-            ) : (
-              <strong>{sourceInitials(article.source_name)}</strong>
-            )}
-          </span>
-          <small>{article.source_name}</small>
-        </div>
-      )}
+            return;
+          }
+          setImageFailed(true);
+        }}
+      />
+    );
+  }
+
+  return (
+    <div className={`${variant === "feature" ? "ft-img" : "thumb"} source-logo-mode`}>
+      <div className="source-logo-card">
+        <span className="source-logo-mark">
+          {logoUrl && !logoFailed ? (
+            <img
+              src={logoUrl}
+              alt={`${article.source_name} logo`}
+              loading="lazy"
+              decoding="async"
+              width="64"
+              height="64"
+              onError={() => setLogoFailed(true)}
+            />
+          ) : (
+            <strong>{sourceInitials(article.source_name)}</strong>
+          )}
+        </span>
+        <small>{article.source_name}</small>
+      </div>
     </div>
   );
 }

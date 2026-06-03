@@ -990,7 +990,11 @@ function RoutedApp() {
       setError(copy.invalidEmail);
       return;
     }
-    if (!isValidAuthPassword(password)) {
+    if (mode === "login" && password.length === 0) {
+      setError(copy.invalidPassword);
+      return;
+    }
+    if (mode === "register" && !isValidAuthPassword(password)) {
       setError(copy.invalidPassword);
       return;
     }

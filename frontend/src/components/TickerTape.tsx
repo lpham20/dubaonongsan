@@ -20,17 +20,15 @@ function TickerTapeComponent({ points }: Props) {
   const repeated = [...items, ...items];
 
   return (
-    <div className="home-price-ticker forecast-price-ticker" aria-label={isEnglish ? "Live agricultural price ticker" : "Dải băng giá nông sản"}>
-      <div className="home-price-ticker-label">
-        {isEnglish ? "Live prices" : "Giá trực tuyến"}
-      </div>
-      <div className="home-price-track">
-        <div className="home-price-content">
+    <div className="t-ticker term" aria-label={isEnglish ? "Live agricultural price ticker" : "Dải băng giá nông sản"}>
+      <div className="tk-label">{isEnglish ? "Live" : "Live"}</div>
+      <div className="tk-track">
+        <div className="tk-row">
           {repeated.map((item, index) => (
-            <span key={`${item.label}-${index}`}>
-              <strong>{item.label}</strong>
-              <b className="num">{item.value}</b>
-              <em className={item.tone}>{item.change}</em>
+            <span className="tk-item" key={`${item.label}-${index}`}>
+              <span className="sym">{item.label}</span>
+              <span className="px num">{item.value}</span>
+              <span className={`ch ${item.tone === "up" ? "pos" : "neg"}`}>{item.change}</span>
             </span>
           ))}
         </div>
