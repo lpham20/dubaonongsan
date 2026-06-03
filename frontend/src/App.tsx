@@ -304,6 +304,7 @@ const validCrops: CropType[] = ["sau_rieng", "ca_phe", "ho_tieu", "lua"];
 const validNewsViews: NewsView[] = ["latest", "sau_rieng", "ca_phe", "ho_tieu"];
 const gatedAnalyticsTabs: AnalyticsTab[] = ["analysis", "technical", "data"];
 const gatedAdvisorySections: MainSection[] = ["fertilizer", "sellingTime", "arbitrage", "crossCrop"];
+const paperFrameSections = new Set<MainSection>(["home", "news", "guides", "roi"]);
 const AUTH_GATE_MESSAGES = new Set([
   appCopy.vi.analyticsAuthMessage,
   appCopy.vi.fertilizerAuthMessage,
@@ -1079,7 +1080,11 @@ function RoutedApp() {
       : section === "inputPrices"
         ? "app-shell forecast-shell input-prices-shell"
       : "app-shell";
-  const appShellClassName = `${baseAppShellClassName}${section === "news" || section === "inputPrices" ? " live-ticker-shell" : ""}`;
+  const appShellClassName = [
+    baseAppShellClassName,
+    section === "news" || section === "inputPrices" ? "live-ticker-shell" : "",
+    paperFrameSections.has(section) ? "paper-frame-shell" : ""
+  ].filter(Boolean).join(" ");
   const sectionBoundaryKey = [section, crop, analyticsTab, newsView, newsSlug ?? "", guideSlug ?? "", notFound ? "not-found" : "ok"].join(":");
   const currentAnalyticsKey = analyticsKeyFor(regionId, varietyId);
   const showAnalyticsLoadingSkeleton = section === "analytics" && loading && loadedAnalyticsKey !== currentAnalyticsKey;

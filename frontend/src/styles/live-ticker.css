@@ -32,6 +32,191 @@
   font-weight: var(--fw-bold);
 }
 
+@media (min-width: 861px) {
+  .app-shell:has(> .paper-mast) .live-price-ticker {
+    position: relative;
+    top: auto;
+    z-index: 20;
+  }
+
+  .app-shell.paper-frame-shell .live-price-ticker {
+    align-items: stretch;
+    height: auto;
+    min-height: 58px;
+    color: var(--ink, #14181a);
+    background: var(--bg-1, #faf9f6);
+    border-bottom: 1px solid var(--line, #e3e1d9);
+    font-family: var(--sans);
+    font-size: 13px;
+  }
+
+  .app-shell.paper-frame-shell .live-price-ticker-label {
+    min-height: 58px;
+    padding: 0 18px;
+    color: var(--ink, #14181a);
+    background: transparent;
+    border-right: 1px solid var(--line, #e3e1d9);
+    font-size: 11px;
+    font-weight: var(--fw-bold);
+  }
+
+  .app-shell.paper-frame-shell .live-price-ticker-track {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+
+  .app-shell.paper-frame-shell .live-price-ticker-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .app-shell.paper-frame-shell .live-price-ticker-track::after {
+    display: none;
+    content: none;
+  }
+
+  .app-shell.paper-frame-shell .live-price-ticker-content {
+    gap: 0;
+    height: auto;
+    padding: 0;
+    animation: none;
+  }
+
+  .app-shell.paper-frame-shell .live-price-ticker-content > span {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 2px 8px;
+    align-content: center;
+    align-items: baseline;
+    min-width: 148px;
+    min-height: 58px;
+    padding: 9px 20px;
+    color: var(--ink, #14181a);
+    border-right: 1px solid var(--line, #e3e1d9);
+    font-family: var(--sans);
+  }
+
+  .app-shell.paper-frame-shell .live-price-ticker-content strong {
+    grid-column: 1 / -1;
+    color: var(--ink-mute, #767c7e);
+    font-size: 10.5px;
+  }
+
+  .app-shell.paper-frame-shell .live-price-ticker-content b {
+    color: var(--ink, #14181a);
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .app-shell.paper-frame-shell .live-price-ticker-content em {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .app-shell.paper-frame-shell .live-price-ticker-content em.up {
+    color: var(--up-light, #0a7d4e);
+  }
+
+  .app-shell.paper-frame-shell .live-price-ticker-content em.down {
+    color: var(--down-light, #c5303a);
+  }
+
+  .app-shell.paper-frame-shell .home-price-ticker {
+    position: relative;
+    top: auto;
+    z-index: 20;
+    align-items: stretch;
+    width: 100%;
+    height: auto;
+    min-height: 58px;
+    margin: 0;
+    padding: 0;
+    color: var(--ink, #14181a);
+    background: var(--bg-1, #faf9f6);
+    border-bottom: 1px solid var(--line, #e3e1d9);
+    font-family: var(--sans);
+    font-size: 13px;
+  }
+
+  .app-shell.paper-frame-shell .home-price-ticker-label {
+    min-height: 58px;
+    margin-left: 0;
+    padding: 0 18px;
+    color: var(--ink, #14181a);
+    background: transparent;
+    border-right: 1px solid var(--line, #e3e1d9);
+    font-size: 11px;
+    font-weight: var(--fw-bold);
+  }
+
+  .app-shell.paper-frame-shell .home-price-track {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+
+  .app-shell.paper-frame-shell .home-price-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .app-shell.paper-frame-shell .home-price-track::after {
+    display: none;
+    content: none;
+  }
+
+  .app-shell.paper-frame-shell .home-price-content {
+    gap: 0;
+    height: auto;
+    padding: 0;
+    animation: none;
+  }
+
+  .app-shell.paper-frame-shell .home-price-content > span {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 2px 8px;
+    align-content: center;
+    align-items: baseline;
+    min-width: 168px;
+    min-height: 58px;
+    padding: 9px 20px;
+    color: var(--ink, #14181a);
+    border-right: 1px solid var(--line, #e3e1d9);
+    font-family: var(--sans);
+  }
+
+  .app-shell.paper-frame-shell .home-price-content strong {
+    grid-column: 1 / -1;
+    color: var(--ink-mute, #767c7e);
+    font-size: 10.5px;
+  }
+
+  .app-shell.paper-frame-shell .home-price-content b {
+    color: var(--ink, #14181a);
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .app-shell.paper-frame-shell .home-price-content em {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .app-shell.paper-frame-shell .home-price-content em.up {
+    color: var(--up-light, #0a7d4e);
+  }
+
+  .app-shell.paper-frame-shell .home-price-content em.down {
+    color: var(--down-light, #c5303a);
+  }
+}
+
 .live-price-ticker-label {
   display: inline-flex;
   flex: 0 0 auto;

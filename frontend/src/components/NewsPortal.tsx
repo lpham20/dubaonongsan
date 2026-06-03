@@ -485,7 +485,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
         <div className="n-list">
           {pagedRest.map(({ article, topic, impact, relation }) => (
             <article className="n-row" key={article.article_id}>
-              <NewsImage article={article} />
+              <NewsImage article={article} variant="row" />
               <div className="body">
                 <div className="n-meta">
                   <span className="n-cat">{topicLabel(topic, language)}</span>
@@ -906,7 +906,7 @@ function LeadNewsCard({ item }: { item: RankedArticle }) {
   const { language } = useLanguage();
   return (
     <article className="n-feature">
-      <NewsImage article={item.article} />
+      <NewsImage article={item.article} variant="feature" />
       <div>
         <div className="n-meta">
           <span className="n-cat">{topicLabel(item.topic, language)}</span>
@@ -929,33 +929,51 @@ function LeadNewsCard({ item }: { item: RankedArticle }) {
   );
 }
 
-function NewsImage({ article }: { article: NewsArticle }) {
+function NewsImage({ article, variant = "row" }: { article: NewsArticle; variant?: "feature" | "row" }) {
   const { language } = useLanguage();
   const imageUrl = normalizeNewsImageUrl(article.image_url);
+  const fallbackImageUrl = editorialFallbackImage(article);
   const logoUrl = sourceLogoUrl(article.source_url);
   const [imageFailed, setImageFailed] = useState(false);
+  const [imageLowQuality, setImageLowQuality] = useState(false);
   const [logoFailed, setLogoFailed] = useState(false);
-  const hasOriginalImage = Boolean(imageUrl && !imageFailed);
+  const displayImageUrl = imageUrl && !imageFailed && !imageLowQuality ? imageUrl : fallbackImageUrl;
+  const hasDisplayImage = Boolean(displayImageUrl);
 
   useEffect(() => {
     setImageFailed(false);
-  }, [imageUrl]);
+    setImageLowQuality(false);
+  }, [imageUrl, fallbackImageUrl]);
 
   useEffect(() => {
     setLogoFailed(false);
   }, [logoUrl]);
 
   return (
-    <div className={`news-thumb ${hasOriginalImage ? "" : "source-logo-mode"}`}>
-      {hasOriginalImage ? (
+    <div className={`news-thumb ${hasDisplayImage ? "" : "source-logo-mode"}`}>
+      {hasDisplayImage ? (
         <img
-          src={imageUrl}
+          className={variant === "feature" ? "ft-img" : undefined}
+          src={displayImageUrl}
           alt={language === "en" ? `Illustration: ${article.title}` : `Ảnh minh họa: ${article.title}`}
-          loading="lazy"
+          loading={variant === "feature" ? "eager" : "lazy"}
           decoding="async"
-          width="320"
-          height="180"
-          onError={() => setImageFailed(true)}
+          width={variant === "feature" ? "860" : "320"}
+          height={variant === "feature" ? "484" : "200"}
+          onLoad={(event) => {
+            if (displayImageUrl === fallbackImageUrl) return;
+            const image = event.currentTarget;
+            if (image.naturalWidth < 640 || image.naturalHeight < 320) {
+              setImageLowQuality(true);
+            }
+          }}
+          onError={() => {
+            if (displayImageUrl === fallbackImageUrl) {
+              setImageFailed(true);
+              return;
+            }
+            setImageFailed(true);
+          }}
         />
       ) : (
         <div className="source-logo-card">
@@ -979,6 +997,13 @@ function NewsImage({ article }: { article: NewsArticle }) {
       )}
     </div>
   );
+}
+
+function editorialFallbackImage(article: NewsArticle) {
+  const text = normalize(`${article.title} ${article.summary} ${article.category}`);
+  if (hasAny(text, ["ca phe", "robusta", "arabica", "coffee"])) return "/coffee-hero-photo.jpg";
+  if (hasAny(text, ["sau rieng", "durian", "dona", "ri6"])) return "/durian-hero-photo.jpg";
+  return "/guide-fruit-optimized.jpg";
 }
 
 function ImpactBadge({ impact }: { impact: string }) {

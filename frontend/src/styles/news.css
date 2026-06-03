@@ -52,6 +52,7 @@
 .n-feature .ft-img,
 .n-feature .news-thumb { width: 100%; aspect-ratio: 16/9; display: block; margin-bottom: 16px; background: var(--bg-2); overflow: hidden; }
 .n-feature .ft-img { object-fit: cover; }
+.n-feature .news-thumb .ft-img { margin-bottom: 0; }
 .n-feature .news-thumb img { width: 100%; height: 100%; display: block; object-fit: cover; }
 .n-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .n-cat { font-size: 10.5px; font-weight: var(--fw-bold); letter-spacing: 0.08em; text-transform: uppercase; color: var(--brand); }
