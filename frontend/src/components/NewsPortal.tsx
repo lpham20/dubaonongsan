@@ -1,15 +1,4 @@
-import {
-  Activity,
-  BarChart3,
-  CalendarDays,
-  ExternalLink,
-  Newspaper,
-  RefreshCw,
-  Search,
-  Tags,
-  TrendingDown,
-  TrendingUp
-} from "./icons";
+import { BarChart3, ExternalLink, RefreshCw, Search, Tags } from "./icons";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FreshnessBanner } from "./FreshnessBanner";
@@ -287,6 +276,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
   );
   const secondaryArticles = filteredArticles.filter((item) => !featuredIds.has(item.article.article_id));
   const quickReads = secondaryArticles.slice(0, 4);
+  const railReads = [newestFeaturedArticles[1], ...quickReads].filter((item): item is RankedArticle => Boolean(item)).slice(0, 4);
   const rest = secondaryArticles.slice(4);
   const pageCount = Math.max(1, Math.ceil(rest.length / NEWS_PAGE_SIZE));
   const activePage = Math.min(newsPage, pageCount);
@@ -350,19 +340,20 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
   }, [activePriceCrop]);
 
   return (
-    <section className="content-page news-page finance-news-page">
+    <section className="content-page news-page finance-news-page paper">
       <SeoHead
         title={seo.title}
         description={seo.description}
         canonical={seo.canonical}
       />
       <LivePriceTicker />
+      <div className="p-wrap">
 
       {activeView === "latest" ? (
-        <div className="content-hero news-hero">
+        <div className="n-titlebar">
           <div>
-            <span>
-              <Newspaper size={18} />
+            <span className="p-kicker">
+              <span className="bar" />
               {pageCopy.heroKicker}
             </span>
             <h1>{pageCopy.heroTitle}</h1>
@@ -386,8 +377,8 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
         />
       ) : (
       <>
-      <div className="news-toolbar">
-        <div className="news-topic-tabs" aria-label={language === "en" ? "Filter news by topic" : "Lọc tin theo chủ đề"}>
+      <div className="n-toolbar">
+        <div className="n-tabs" aria-label={language === "en" ? "Filter news by topic" : "Lọc tin theo chủ đề"}>
           {TOPICS.map((topic) => (
             <button
               type="button"
@@ -400,8 +391,8 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
             </button>
           ))}
         </div>
-        <div className="news-tools">
-          <label className="news-search">
+        <div className="n-tools">
+          <label className="n-search">
             <Search size={16} />
             <input
               value={query}
@@ -409,7 +400,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
               placeholder={language === "en" ? "Search by crop, price, exports..." : "Tìm theo cây trồng, giá, xuất khẩu..."}
             />
           </label>
-          <div className="news-sort" aria-label={language === "en" ? "Sort news" : "Sắp xếp tin tức"}>
+          <div className="n-sort" aria-label={language === "en" ? "Sort news" : "Sắp xếp tin tức"}>
             {SORT_OPTIONS.map((option) => (
               <button
                 type="button"
@@ -425,10 +416,10 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
       </div>
 
       {digest.length ? (
-        <section className="news-digest-panel">
-          <div>
-            <BarChart3 size={18} />
-            <h2>{language === "en" ? "Today at a glance" : "Tóm tắt nhanh hôm nay"}</h2>
+        <section className="n-digest">
+          <div className="lab">
+            <BarChart3 size={15} />
+            {language === "en" ? "Today at a glance" : "Tóm tắt nhanh"}
           </div>
           <ul>
             {digest.slice(0, 2).map((line) => (
@@ -439,37 +430,30 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
       ) : null}
 
       {hero ? (
-        <div className="news-market-layout">
-          <div className="news-lead-stack">
-            {newestFeaturedArticles.map((item) => (
-              <LeadNewsCard item={item} key={item.article.article_id} />
-            ))}
-          </div>
+        <div className="n-grid">
+          <LeadNewsCard item={hero} />
 
-          <aside className="news-side-stack">
-            <section className="news-brief-panel">
-              <div>
-                <TrendingUp size={17} />
-                <h3>{language === "en" ? "Price-moving news" : "Tin ảnh hưởng giá"}</h3>
-              </div>
-              {quickReads.slice(0, 4).map(({ article, topic, impact }) => (
-                <Link to={withLanguagePrefix(newsPath(article), language)} key={article.article_id}>
-                  <span>{topicLabel(topic, language)}</span>
-                  <div className="news-alert-title">
-                    <strong>{displayTitle(article.title, 76)}</strong>
+          <aside className="n-rail">
+            <section>
+              <div className="blk-h">{language === "en" ? "Price-moving news" : "Tin ảnh hưởng giá"}</div>
+              {railReads.map(({ article, topic, impact }) => (
+                <Link className="n-pm" to={withLanguagePrefix(newsPath(article), language)} key={article.article_id}>
+                  <div className="top">
+                    <span className="cat">{topicLabel(topic, language)}</span>
                     <TrendSparkline topic={topic} impact={impact} />
                   </div>
-                  <small>
+                  <h4>{displayTitle(article.title, 76)}</h4>
+                  <span className="sub">
                     {impact} · {formatDate(article.published_at ?? article.scraped_at, language)}
-                  </small>
+                  </span>
                 </Link>
               ))}
             </section>
 
-            <section className="market-watch-panel">
-              <div>
-                <Tags size={17} />
-                <h3>{language === "en" ? "Market watch" : "Theo dõi thị trường"}</h3>
+            <section className="n-watch">
+              <div className="blk-h">
+                <Tags size={14} />
+                {language === "en" ? "Market watch" : "Theo dõi thị trường"}
               </div>
               {marketWatch.map((item) => (
                 <button
@@ -478,9 +462,9 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
                   key={item.topic}
                   onClick={() => setActiveTopic(item.topic)}
                 >
-                  <span>{topicLabel(item.topic, language)}</span>
-                  <strong>{item.count}</strong>
-                  <small>{item.note}</small>
+                  <span className="wt">{topicLabel(item.topic, language)}</span>
+                  <strong className="wc">{item.count}</strong>
+                  <small className="wn">{item.note}</small>
                 </button>
               ))}
             </section>
@@ -492,28 +476,28 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
 
       {rest.length ? (
         <>
-        <div className="news-archive-heading">
+        <div className="n-archive-head">
           <h2>{language === "en" ? "Market news archive" : "Kho tin thị trường"}</h2>
-          <span>
+          <span className="count">
             {language === "en" ? "Showing" : "Hiển thị"} {(activePage - 1) * NEWS_PAGE_SIZE + 1}-{Math.min(activePage * NEWS_PAGE_SIZE, rest.length)} / {rest.length} {language === "en" ? "stories" : "tin"}
           </span>
         </div>
-        <div className="news-list">
+        <div className="n-list">
           {pagedRest.map(({ article, topic, impact, relation }) => (
-            <article className="news-row-card" key={article.article_id}>
+            <article className="n-row" key={article.article_id}>
               <NewsImage article={article} />
-              <div>
-                <div className="news-meta-line">
-                  <span>{topicLabel(topic, language)}</span>
+              <div className="body">
+                <div className="n-meta">
+                  <span className="n-cat">{topicLabel(topic, language)}</span>
                   <ImpactBadge impact={impact} />
                 </div>
-                <h3>{displayTitle(article.title, 92)}</h3>
+                <h3><Link to={withLanguagePrefix(newsPath(article), language)}>{displayTitle(article.title, 92)}</Link></h3>
                 <p>{article.summary}</p>
                 <RelatedTag relation={relation} />
-                <div className="news-source-row">
-                  <small>{article.source_name}</small>
+                <div className="foot">
+                  <span className="src">{article.source_name}</span>
                   <small className="num">{formatDate(article.published_at ?? article.scraped_at, language)}</small>
-                  <Link to={withLanguagePrefix(newsPath(article), language)}>
+                  <Link className="read" to={withLanguagePrefix(newsPath(article), language)}>
                     {language === "en" ? "Read details" : "Xem chi tiết"}
                     <ExternalLink size={14} />
                   </Link>
@@ -523,7 +507,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
           ))}
         </div>
         {pageCount > 1 ? (
-          <nav className="news-pagination" aria-label={language === "en" ? "News pagination" : "Phân trang tin tức"}>
+          <nav className="n-page" aria-label={language === "en" ? "News pagination" : "Phân trang tin tức"}>
             {paginationItems(activePage, pageCount).map((item, index) =>
               item === "..." ? (
                 <span key={`gap-${index}`}>...</span>
@@ -544,6 +528,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
       ) : null}
       </>
       )}
+      </div>
     </section>
   );
 }
@@ -920,27 +905,25 @@ function topicFromPath(): NewsTopic {
 function LeadNewsCard({ item }: { item: RankedArticle }) {
   const { language } = useLanguage();
   return (
-    <article className="news-lead">
+    <article className="n-feature">
       <NewsImage article={item.article} />
-      <div className="news-lead-copy">
-        <div className="news-meta-line">
-          <span>{topicLabel(item.topic, language)}</span>
+      <div>
+        <div className="n-meta">
+          <span className="n-cat">{topicLabel(item.topic, language)}</span>
           <ImpactBadge impact={item.impact} />
         </div>
-        <h2>{displayTitle(item.article.title, 86)}</h2>
-        <p>{displayTitle(item.article.summary, 150)}</p>
+        <h2><Link to={withLanguagePrefix(newsPath(item.article), language)}>{displayTitle(item.article.title, 86)}</Link></h2>
+        <p className="dek">{displayTitle(item.article.summary, 150)}</p>
         <RelatedTag relation={item.relation} />
-        <div className="news-source-row">
-          <small>{item.article.source_name}</small>
-          <small>
-            <CalendarDays size={14} />
-            {formatDate(item.article.published_at ?? item.article.scraped_at, language)}
-          </small>
+        <div className="n-src">
+          <b>{item.article.source_name}</b>
+          <span className="dot" />
+          <span className="num">{formatDate(item.article.published_at ?? item.article.scraped_at, language)}</span>
+          <span className="dot" />
+          <Link className="read" to={withLanguagePrefix(newsPath(item.article), language)}>
+            {language === "en" ? "Read story" : "Đọc bản tin"}
+          </Link>
         </div>
-        <Link to={withLanguagePrefix(newsPath(item.article), language)}>
-          {language === "en" ? "Read story" : "Đọc bản tin"}
-          <ExternalLink size={16} />
-        </Link>
       </div>
     </article>
   );
@@ -1000,17 +983,19 @@ function NewsImage({ article }: { article: NewsArticle }) {
 
 function ImpactBadge({ impact }: { impact: string }) {
   const { language } = useLanguage();
+  const high = impact === "Tác động giá cao";
+  const watch = impact === "Theo dõi";
   return (
-    <em className={`impact-badge ${impact === "Tác động giá cao" ? "high" : ""}`}>
-      <Activity size={12} />
-      {language === "en" ? (impact === "Tác động giá cao" ? "High price impact" : "Market note") : impact}
+    <em className={`n-impact ${high ? "up" : watch ? "down" : ""}`}>
+      {high ? "▲" : watch ? "▼" : "•"}
+      {language === "en" ? (high ? "High price impact" : watch ? "Watch" : "Market note") : impact}
     </em>
   );
 }
 
 function RelatedTag({ relation }: { relation: string }) {
   const { language } = useLanguage();
-  return <small className="related-tag">{language === "en" ? "Related" : "Liên quan"}: {language === "en" ? relationLabel(relation) : relation}</small>;
+  return <small className="rel">{language === "en" ? "Related" : "Liên quan"}: {language === "en" ? relationLabel(relation) : relation}</small>;
 }
 
 function topicCount(items: { topic: NewsTopic }[], topic: NewsTopic) {
@@ -1098,9 +1083,8 @@ function TrendSparkline({ topic, impact }: { topic: NewsTopic; impact: string })
     .join(" ");
 
   return (
-    <svg className={`news-mini-sparkline ${tone}`} viewBox="0 0 72 30" aria-hidden="true">
+    <svg className={`n-spark ${tone}`} viewBox="0 0 72 30" aria-hidden="true">
       <polyline points={coords} />
-      {tone === "up" ? <TrendingUp size={12} x={56} y={2} /> : <TrendingDown size={12} x={56} y={14} />}
     </svg>
   );
 }

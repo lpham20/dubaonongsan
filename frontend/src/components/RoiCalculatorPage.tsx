@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowRight, Calculator, Database, RefreshCw, X } from "./icons";
+import { ArrowRight, RefreshCw, X } from "./icons";
 import { SeoHead } from "./SeoHead";
 import {
   calculateRoi,
@@ -70,7 +70,7 @@ function MoneyInput({
   return (
     <input
       aria-label={ariaLabel}
-      className="roi-money-input"
+      className="roi-money-input num"
       inputMode="numeric"
       value={formatMoneyInput(value)}
       onChange={(event) => onValueChange(parseMoneyInput(event.target.value))}
@@ -90,7 +90,7 @@ function MoneyTextInput({
   return (
     <input
       aria-label={ariaLabel}
-      className="roi-money-input"
+      className="roi-money-input num"
       inputMode="numeric"
       value={formatMoneyInput(value)}
       onChange={(event) => onValueChange(formatMoneyInput(event.target.value))}
@@ -234,7 +234,7 @@ export function RoiCalculatorPage({
   }
 
   return (
-    <section className={embedded ? "roi-page roi-standard-page advisory-embedded-roi" : "roi-page fertilizer-page roi-standard-page"}>
+    <section className={embedded ? "roi-page roi-standard-page advisory-embedded-roi paper" : "roi-page roi-standard-page paper"}>
       {!embedded ? (
         <SeoHead
           title={language === "en" ? "Farm profit calculator" : "Ước tính lợi nhuận nông vụ"}
@@ -243,10 +243,11 @@ export function RoiCalculatorPage({
         />
       ) : null}
 
-      <header className="fertilizer-hero roi-hero">
-        <div className="roi-hero-copy">
-          <span className="input-price-kicker">
-            <Calculator size={18} />
+      <div className="p-wrap">
+      <header className="tool-titlebar">
+        <div>
+          <span className="p-kicker">
+            <span className="bar" />
             {language === "en" ? "Farm profit" : "Lợi nhuận nông vụ"}
           </span>
           <h1>{language === "en" ? "Estimate farm profit" : "Ước tính lợi nhuận nông vụ"}</h1>
@@ -255,15 +256,15 @@ export function RoiCalculatorPage({
 
       {error ? <div className="input-price-error">{error}</div> : null}
 
-      <section className="fertilizer-layout roi-grid">
-        <div className="input-price-panel roi-panel">
-          <div className="input-section-heading compact roi-section-heading">
+      <section className="roi-grid">
+        <div className="roi-panel">
+          <div className="roi-phead">
             <h2>{language === "en" ? "Farm season inputs" : "Thông số nông vụ"}</h2>
             <p>{language === "en" ? "Costs are entered per hectare" : "Chi phí theo mỗi hecta"}</p>
           </div>
-          <div className="roi-form">
-            <label>
-              {language === "en" ? "Crop" : "Cây trồng"}
+          <div className="roi-form two">
+            <div className="roi-field">
+              <label>{language === "en" ? "Crop" : "Cây trồng"}</label>
               <select value={crop} onChange={(event) => setCrop(event.target.value as CropType)}>
                 {ROI_CROP_OPTIONS.map((item) => (
                   <option key={item.value} value={item.value}>
@@ -271,9 +272,9 @@ export function RoiCalculatorPage({
                   </option>
                 ))}
               </select>
-            </label>
-            <label>
-              {language === "en" ? "Production area" : "Vùng sản xuất"}
+            </div>
+            <div className="roi-field">
+              <label>{language === "en" ? "Production area" : "Vùng sản xuất"}</label>
               <select value={regionId} onChange={(event) => setRegionId(Number(event.target.value) || "")}>
                 {regions.map((region) => (
                   <option key={region.region_id} value={region.region_id}>
@@ -281,35 +282,35 @@ export function RoiCalculatorPage({
                   </option>
                 ))}
               </select>
-            </label>
-            <label>
-              {language === "en" ? "Area (ha)" : "Diện tích (ha)"}
-              <input inputMode="decimal" value={area} onChange={(event) => setArea(decimalInputValue(event.target.value))} />
-            </label>
-            <label>
-              {language === "en" ? "Expected yield (tonnes/ha)" : "Năng suất kỳ vọng (tấn/ha)"}
-              <input inputMode="decimal" value={yieldTarget} onChange={(event) => setYieldTarget(decimalInputValue(event.target.value))} />
-            </label>
-            <label>
-              {language === "en" ? "Expected selling price (VND/kg)" : "Giá bán kỳ vọng (VND/kg)"}
+            </div>
+            <div className="roi-field">
+              <label>{language === "en" ? "Area (ha)" : "Diện tích (ha)"}</label>
+              <input className="num" inputMode="decimal" value={area} onChange={(event) => setArea(decimalInputValue(event.target.value))} />
+            </div>
+            <div className="roi-field">
+              <label>{language === "en" ? "Expected yield (tonnes/ha)" : "Năng suất kỳ vọng (tấn/ha)"}</label>
+              <input className="num" inputMode="decimal" value={yieldTarget} onChange={(event) => setYieldTarget(decimalInputValue(event.target.value))} />
+            </div>
+            <div className="roi-field">
+              <label>{language === "en" ? "Expected selling price (VND/kg)" : "Giá bán kỳ vọng (VND/kg)"}</label>
               <MoneyInput value={sellPrice} onValueChange={setSellPrice} />
-            </label>
-            <label>
-              {language === "en" ? "Other input cost/ha" : "Chi phí vật tư khác/ha"}
+            </div>
+            <div className="roi-field">
+              <label>{language === "en" ? "Other input cost/ha" : "Chi phí vật tư khác/ha"}</label>
               <MoneyInput value={otherCost} onValueChange={setOtherCost} />
-            </label>
-            <label>
-              {language === "en" ? "Labour cost/ha" : "Chi phí nhân công/ha"}
+            </div>
+            <div className="roi-field">
+              <label>{language === "en" ? "Labour cost/ha" : "Chi phí nhân công/ha"}</label>
               <MoneyInput value={laborCost} onValueChange={setLaborCost} />
-            </label>
+            </div>
           </div>
         </div>
 
-        <div className="input-price-panel roi-panel">
-          <div className="input-section-heading compact roi-section-heading roi-fertilizer-heading">
+        <div className="roi-panel">
+          <div className="roi-phead roi-fertilizer-heading">
             <h2>{language === "en" ? "Fertilizer cost" : "Chi phí phân bón"}</h2>
           </div>
-          <div className="roi-mode-toggle" role="tablist" aria-label={language === "en" ? "Choose fertilizer cost input mode" : "Chọn cách nhập chi phí phân bón"}>
+          <div className="roi-toggle" role="tablist" aria-label={language === "en" ? "Choose fertilizer cost input mode" : "Chọn cách nhập chi phí phân bón"}>
             <button type="button" className={mode === "simple" ? "active" : ""} onClick={() => setMode("simple")}>
               {language === "en" ? "Total/ha" : "Tổng tiền/ha"}
             </button>
@@ -319,11 +320,11 @@ export function RoiCalculatorPage({
           </div>
 
           {mode === "simple" ? (
-            <div className="roi-form single">
-              <label>
-                {language === "en" ? "Total fertilizer cost spent/planned per ha" : "Tổng tiền phân bón đã/sẽ chi mỗi ha"}
+            <div className="roi-form">
+              <div className="roi-field">
+                <label>{language === "en" ? "Total fertilizer cost spent/planned per ha" : "Tổng tiền phân bón đã/sẽ chi mỗi ha"}</label>
                 <MoneyInput value={fertilizerTotal} onValueChange={setFertilizerTotal} />
-              </label>
+              </div>
             </div>
           ) : (
             <div className="roi-lines detail">
@@ -331,6 +332,7 @@ export function RoiCalculatorPage({
                 <div className="roi-line detail" key={line.id}>
                   <input aria-label={language === "en" ? "Fertilizer name" : "Tên phân bón"} value={line.name} onChange={(event) => updateLine(index, { name: event.target.value })} />
                   <input
+                    className="num"
                     aria-label={language === "en" ? "kg per ha" : "kg mỗi ha"}
                     value={line.kg_per_ha}
                     inputMode="decimal"
@@ -357,70 +359,69 @@ export function RoiCalculatorPage({
             {language === "en" ? "View world Urea/DAP/Potash trend" : "Xem xu hướng Urê/DAP/Kali thế giới"}
             <ArrowRight size={16} />
           </a>
-          <label className="roi-save-option">
-            <input type="checkbox" checked={save} onChange={(event) => setSave(event.target.checked)} />
-            {language === "en" ? "Save scenario to account" : "Lưu kịch bản vào tài khoản"}
-          </label>
-          <button type="button" className="roi-primary-button" onClick={submit} disabled={loading}>
-            <RefreshCw size={16} />
-            {loading ? (language === "en" ? "Calculating" : "Đang tính") : (language === "en" ? "Calculate profit" : "Tính lợi nhuận")}
-          </button>
+          <div className="roi-cta">
+            <label className="roi-save">
+              <input type="checkbox" checked={save} onChange={(event) => setSave(event.target.checked)} />
+              {language === "en" ? "Save scenario to account" : "Lưu kịch bản vào tài khoản"}
+            </label>
+            <button type="button" className="roi-btn" onClick={submit} disabled={loading}>
+              <RefreshCw size={16} />
+              {loading ? (language === "en" ? "Calculating" : "Đang tính") : (language === "en" ? "Calculate profit" : "Tính lợi nhuận")}
+            </button>
+          </div>
         </div>
       </section>
 
       {result ? (
         <>
-          <section className="input-stat-grid roi-result-grid">
-            <div className="input-stat">
-              <Database size={18} />
-              <span>{language === "en" ? "Fertilizer cost/ha" : "Chi phí phân/ha"}</span>
-              <strong>{formatVnd(result.fertilizer_cost_vnd_per_ha, language)}</strong>
-              <small>{result.fertilizer_input_mode === "simple" ? (language === "en" ? "Your total input" : "Tổng tiền anh nhập") : `${result.breakdown.length} ${language === "en" ? "fertilizer lines" : "dòng phân"}`}</small>
+          <section className="roi-stats">
+            <div className="roi-stat">
+              <span className="k">{language === "en" ? "Fertilizer cost/ha" : "Chi phí phân/ha"}</span>
+              <strong className="v">{formatVnd(result.fertilizer_cost_vnd_per_ha, language)}</strong>
+              <small className="s">{result.fertilizer_input_mode === "simple" ? (language === "en" ? "Your total input" : "Tổng tiền anh nhập") : `${result.breakdown.length} ${language === "en" ? "fertilizer lines" : "dòng phân"}`}</small>
             </div>
-            <div className="input-stat">
-              <Calculator size={18} />
-              <span>{language === "en" ? "Expected profit" : "Lợi nhuận kỳ vọng"}</span>
-              <strong>{formatVnd(result.net_profit_vnd, language)}</strong>
-              <small>{result.forecast_model_kind}</small>
+            <div className="roi-stat accent">
+              <span className="k">{language === "en" ? "Expected profit" : "Lợi nhuận kỳ vọng"}</span>
+              <strong className={`v ${result.net_profit_vnd >= 0 ? "pos" : "neg"}`}>{formatVnd(result.net_profit_vnd, language)}</strong>
+              <small className="s">{result.forecast_model_kind}</small>
             </div>
-            <div className="input-stat">
-              <Calculator size={18} />
-              <span>{language === "en" ? "Profit ratio" : "Tỷ suất lợi nhuận"}</span>
-              <strong className={result.roi_pct >= 0 ? "positive" : "negative"}>{result.roi_pct.toFixed(1)}%</strong>
-              <small>{language === "en" ? "Confidence" : "Độ tin cậy"} {Math.round(result.confidence_score * 100)}%</small>
+            <div className="roi-stat">
+              <span className="k">{language === "en" ? "Profit ratio" : "Tỷ suất lợi nhuận"}</span>
+              <strong className={`v ${result.roi_pct >= 0 ? "pos" : "neg"}`}>{result.roi_pct.toFixed(1)}%</strong>
+              <small className="s">{language === "en" ? "Confidence" : "Độ tin cậy"} {Math.round(result.confidence_score * 100)}%</small>
             </div>
           </section>
 
-          <section className="roi-scenario-grid" aria-label={language === "en" ? "Base profit scenarios" : "Kịch bản lợi nhuận cơ sở"}>
+          <section className="roi-scen" aria-label={language === "en" ? "Base profit scenarios" : "Kịch bản lợi nhuận cơ sở"}>
             {result.scenarios.map((scenario) => (
-              <article key={scenario.scenario} className={`roi-scenario-card ${scenario.scenario}`}>
-                <span>{language === "en" ? scenarioLabel(scenario.scenario) : scenario.label_vi}</span>
-                <strong className={scenario.roi_pct >= 0 ? "positive" : "negative"}>{scenario.roi_pct.toFixed(1)}%</strong>
-                <small>{formatVnd(scenario.net_profit_vnd, language)}</small>
+              <article key={scenario.scenario} className="c">
+                <span className="lab">{language === "en" ? scenarioLabel(scenario.scenario) : scenario.label_vi}</span>
+                <strong className={`pct ${scenario.roi_pct >= 0 ? "pos" : "neg"}`}>{scenario.roi_pct.toFixed(1)}%</strong>
+                <small className="np">{formatVnd(scenario.net_profit_vnd, language)}</small>
                 <p>{language === "en" ? "Scenario based on expected yield, selling price and input-cost assumptions." : scenario.rationale_vi}</p>
               </article>
             ))}
           </section>
 
-          <section className="input-price-panel input-price-data">
-            <div className="input-section-heading compact">
+          <section className="roi-block">
+            <div className="head">
               <h2>{language === "en" ? "Recommendation" : "Khuyến nghị"}</h2>
               <p>{language === "en" ? "Based on fertilizer cost, crop price forecast and the profit safety margin" : "Rút ra từ chi phí phân bón, dự báo giá nông sản và biên an toàn lợi nhuận"}</p>
             </div>
-            <div className="roi-recommendations">
+            <div className="roi-recs">
               {language === "vi"
                 ? result.recommendations_vi.map((note) => <p key={note}>{note}</p>)
                 : <p>Use the result as a working estimate. Recheck real fertilizer quotes and selling prices before making a large purchase or sales decision.</p>}
             </div>
           </section>
 
-          <section className="input-price-panel input-price-data">
-            <div className="input-section-heading compact">
+          <section className="roi-block">
+            <div className="head">
               <h2>{language === "en" ? "Profit sensitivity" : "Độ nhạy lợi nhuận"}</h2>
               <p>{language === "en" ? "Selling price +/-10%, fertilizer price +/-15%" : "Giá bán ±10%, giá phân bón ±15%"}</p>
             </div>
             <div className="input-table-wrap">
-              <table aria-label={language === "en" ? "Profit sensitivity table" : "Bảng độ nhạy lợi nhuận"}>
+              <table className="roi-table" aria-label={language === "en" ? "Profit sensitivity table" : "Bảng độ nhạy lợi nhuận"}>
                 <thead>
                   <tr>
                     <th>{language === "en" ? "Selling price" : "Giá bán"}</th>
@@ -434,8 +435,8 @@ export function RoiCalculatorPage({
                     <tr key={`${row.sell_price_delta_pct}-${row.fertilizer_price_delta_pct}`}>
                       <td>{row.sell_price_delta_pct > 0 ? "+" : ""}{row.sell_price_delta_pct}%</td>
                       <td>{row.fertilizer_price_delta_pct > 0 ? "+" : ""}{row.fertilizer_price_delta_pct}%</td>
-                      <td>{row.roi_pct.toFixed(1)}%</td>
-                      <td>{formatVnd(row.net_profit_vnd, language)}</td>
+                      <td className={row.roi_pct >= 0 ? "pos" : "neg"}>{row.roi_pct.toFixed(1)}%</td>
+                      <td className={row.net_profit_vnd >= 0 ? "pos" : "neg"}>{formatVnd(row.net_profit_vnd, language)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -444,6 +445,7 @@ export function RoiCalculatorPage({
           </section>
         </>
       ) : null}
+      </div>
     </section>
   );
 }

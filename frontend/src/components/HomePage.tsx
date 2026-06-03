@@ -299,7 +299,7 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
   }
 
   return (
-    <section className="home-page finance-home">
+    <section className="home-page finance-home paper">
       <SeoHead
         title={copy.seoTitle}
         description={copy.seoDescription}

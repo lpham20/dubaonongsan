@@ -1,0 +1,90 @@
+/* Shared light editorial primitives ported from redesign/paper.css. */
+
+.paper {
+  --bg: #ffffff;
+  --bg-1: #faf9f6;
+  --bg-2: #f2f1ec;
+  --line: #e3e1d9;
+  --line-2: #cbc8bd;
+  --ink: #14181a;
+  --ink-soft: #3f464a;
+  --ink-mute: #767c7e;
+  --ink-faint: #9aa0a0;
+  --p-up: #0a7d4e;
+  --p-down: #c5303a;
+  --up-light: #0a7d4e;
+  --down-light: #c5303a;
+
+  color: var(--ink);
+  background: var(--bg);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.paper,
+.paper * {
+  min-width: 0;
+}
+
+.paper .pos {
+  color: var(--p-up);
+}
+
+.paper .neg {
+  color: var(--p-down);
+}
+
+.p-wrap {
+  width: min(100%, 1320px);
+  margin: 0 auto;
+  padding: 0 30px;
+}
+
+.p-kicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  color: var(--brand);
+  font-size: 11.5px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.p-kicker .bar {
+  width: 28px;
+  height: 2px;
+  background: var(--brand);
+}
+
+.p-headline {
+  margin: 0 0 16px;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(38px, 5vw, 50px);
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.04;
+  text-wrap: balance;
+}
+
+.p-dek {
+  max-width: 54ch;
+  margin: 0 0 20px;
+  color: var(--ink-soft);
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .p-wrap {
+    padding: 0 16px;
+  }
+
+  .p-headline {
+    font-size: 34px;
+  }
+}

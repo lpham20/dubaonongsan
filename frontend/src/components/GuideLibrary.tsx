@@ -1,11 +1,6 @@
 import {
   BookOpenCheck,
-  CalendarClock,
   ChevronRight,
-  Clock3,
-  FileText,
-  Gauge,
-  Layers3,
   PackageCheck,
   Ruler,
   Search,
@@ -130,65 +125,29 @@ export function GuideLibrary({ guides }: Props) {
   const selectedGuide = visibleGuides.find((guide) => guide.slug === selectedSlug) ?? visibleGuides[0] ?? plantGuides[0];
 
   return (
-    <section className="content-page guide-workspace">
+    <section className="content-page guide-workspace paper">
       <SeoHead
         title={copy.seoTitle}
         description={copy.seoDescription}
         canonical="/huong-dan"
       />
-      <div className="content-hero guide-hero compact-guide-hero">
+      <div className="p-wrap">
+      <div className="tool-titlebar">
         <div>
-          <span>
-            <BookOpenCheck size={18} />
+          <span className="p-kicker">
+            <span className="bar" />
             {copy.kicker}
           </span>
           <h1>{copy.title}</h1>
-          <p>{copy.description}</p>
         </div>
+        <p className="lead">{copy.description}</p>
       </div>
 
-      <div className="guide-mobile-filter-strip" aria-label={copy.mobileFilters}>
-        <div className="plant-strip">
-          {familyStats.map((item) => (
-            <button
-              type="button"
-              className={item.family === currentFamily ? "active" : ""}
-              key={item.family}
-              onClick={() => {
-                setActiveFamily(item.family);
-                setActivePlant("");
-                setSelectedSlug("");
-              }}
-            >
-              {displayFamily(item.family, language)} <small>({item.count})</small>
-            </button>
-          ))}
-        </div>
-        <div className="plant-strip plant-strip-secondary">
-          {plants.map((item) => (
-            <button
-              type="button"
-              className={item.plant === currentPlant ? "active" : ""}
-              key={item.plant}
-              onClick={() => {
-                setActivePlant(item.plant);
-                setSelectedSlug("");
-              }}
-            >
-              {displayPlant(item.plant, language)} <small>({item.count})</small>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="guide-layout">
-        <aside className="guide-sidebar">
-          <div className="quick-panel">
-            <h2>{copy.shortcut}</h2>
+          <div className="g-families" aria-label={copy.mobileFilters}>
             {familyStats.map((item) => (
               <button
                 type="button"
-                className={item.family === currentFamily ? "active" : ""}
+                className={`g-fam ${item.family === currentFamily ? "active" : ""}`}
                 key={item.family}
                 onClick={() => {
                   setActiveFamily(item.family);
@@ -196,40 +155,13 @@ export function GuideLibrary({ guides }: Props) {
                   setSelectedSlug("");
                 }}
               >
-                <Sprout size={17} />
-                <span>{displayFamily(item.family, language)}</span>
-                <small>{item.plants} {copy.plants}</small>
-              </button>
-            ))}
-          </div>
-        </aside>
-
-        <div className="guide-main">
-          <div className="tech-title">
-            <Layers3 size={18} />
-            <h2>{displayFamily(currentFamily, language)}</h2>
-          </div>
-
-          <div className="family-grid">
-            {familyStats.map((item) => (
-              <button
-                type="button"
-                className={`guide-family-card ${item.family === currentFamily ? "active" : ""}`}
-                key={item.family}
-                onClick={() => {
-                  setActiveFamily(item.family);
-                  setActivePlant("");
-                  setSelectedSlug("");
-                }}
-              >
-                <GuideFamilyArt family={item.family} />
-                <strong>{displayFamily(item.family, language)}</strong>
-                <span>{language === "en" ? `${item.count} technical guides` : `${item.count} bài kỹ thuật`}</span>
+                <span className="nm">{displayFamily(item.family, language)}</span>
+                <span className="ct">{language === "en" ? `${item.count} guides · ${item.plants} crops` : `${item.count} bài · ${item.plants} cây`}</span>
               </button>
             ))}
           </div>
 
-          <div className="plant-strip">
+          <div className="g-plants">
             {plants.map((item) => (
               <button
                 type="button"
@@ -237,18 +169,18 @@ export function GuideLibrary({ guides }: Props) {
                 key={item.plant}
                 onClick={() => {
                   setActivePlant(item.plant);
-                  setSelectedSlug("");
-                }}
-              >
-                {displayPlant(item.plant, language)}
-                <small>{item.count}</small>
-              </button>
-            ))}
+                setSelectedSlug("");
+              }}
+            >
+              {displayPlant(item.plant, language)}
+              <small>{item.count}</small>
+            </button>
+          ))}
           </div>
 
-          <div className="guide-browser">
-            <aside className="guide-list-panel">
-              <div className="guide-filter-tabs">
+          <div className="g-browser">
+            <aside className="g-list-panel">
+              <div className="g-sections">
                 {sections.map((item) => (
                   <button
                     type="button"
@@ -267,7 +199,7 @@ export function GuideLibrary({ guides }: Props) {
                 ))}
               </div>
 
-              <label className="guide-search">
+              <label className="g-search">
                 <Search size={16} />
                 <input
                   value={query}
@@ -279,22 +211,19 @@ export function GuideLibrary({ guides }: Props) {
                 />
               </label>
 
-              <div className="guide-list">
+              <div className="g-list">
                 {visibleGuides.map((guide) => (
                   <button
                     type="button"
-                    className={guide.slug === selectedGuide?.slug ? "active" : ""}
+                    className={`g-item ${guide.slug === selectedGuide?.slug ? "active" : ""}`}
                     key={guide.slug}
                     onClick={() => setSelectedSlug(guide.slug)}
                   >
-                    <FileText size={16} />
-                    <span className="guide-list-copy">
-                      <strong>{guide.title}</strong>
-                      <small>
-                        {displaySection(guide.section, language)} · {displayPlant(guide.plant, language)} · {estimateReadingMinutes(guide.content)} {copy.minutes}
-                      </small>
+                    <span className="ti">{guide.title}</span>
+                    <ChevronRight className="arr" size={15} />
+                    <span className="mt">
+                      {displaySection(guide.section, language)} · {displayPlant(guide.plant, language)} · {estimateReadingMinutes(guide.content)} {copy.minutes}
                     </span>
-                    <ChevronRight size={15} />
                   </button>
                 ))}
                 {visibleGuides.length === 0 ? (
@@ -303,36 +232,36 @@ export function GuideLibrary({ guides }: Props) {
               </div>
             </aside>
 
-            <article className="guide-detail-panel">
+            <article className="g-detail">
               {selectedGuide ? (
                 <>
-                  <header className="guide-article-header">
-                    <div className="guide-tag-row">
-                      <span>{selectedGuide.category}</span>
+                  <header>
+                    <div className="g-tagrow">
+                      <span className="brand">{selectedGuide.category}</span>
                       <span>{displayFamily(selectedGuide.family, language)}</span>
                       <span>{displayPlant(selectedGuide.plant, language)}</span>
                     </div>
                     <h2>{selectedGuide.title}</h2>
-                    <p>{selectedGuide.summary}</p>
-                    <div className="guide-meta-grid">
-                      <small>
-                        <Clock3 size={15} />
-                        {estimateReadingMinutes(selectedGuide.content)} {copy.minutes}
-                      </small>
-                      <small>
-                        <Gauge size={15} />
-                        {technicalDifficulty(selectedGuide.content, language)}
-                      </small>
-                      <small>
-                        <CalendarClock size={15} />
-                        {language === "en" ? "Updated" : "Cập nhật"} {formatGuideDate(selectedGuide.published_at, language)}
-                      </small>
+                    <p className="summary">{selectedGuide.summary}</p>
+                    <div className="g-metagrid">
+                      <div className="m">
+                        <span className="k">{language === "en" ? "Reading time" : "Thời gian đọc"}</span>
+                        <span className="v">{estimateReadingMinutes(selectedGuide.content)} {copy.minutes}</span>
+                      </div>
+                      <div className="m">
+                        <span className="k">{language === "en" ? "Difficulty" : "Độ khó"}</span>
+                        <span className="v">{technicalDifficulty(selectedGuide.content, language).replace(/^Độ khó:\s*|^Difficulty:\s*/i, "")}</span>
+                      </div>
+                      <div className="m">
+                        <span className="k">{language === "en" ? "Updated" : "Cập nhật"}</span>
+                        <span className="v">{formatGuideDate(selectedGuide.published_at, language)}</span>
+                      </div>
                     </div>
                     <Link className="guide-canonical-link" to={withLanguagePrefix(guidePath(selectedGuide.slug), language)}>
                       {copy.openGuide}
                     </Link>
                   </header>
-                  <div className="guide-article-layout">
+                  <div className="g-article">
                     <GuideContent content={selectedGuide.content} postId={selectedGuide.post_id} />
                     <GuideReferencePanel guide={selectedGuide} />
                   </div>
@@ -344,7 +273,6 @@ export function GuideLibrary({ guides }: Props) {
               )}
             </article>
           </div>
-        </div>
       </div>
     </section>
   );
@@ -397,7 +325,7 @@ function GuideContent({ content, postId }: { content: string; postId: number }) 
   }
 
   return (
-    <div className="guide-body structured-guide-body">
+    <div className="g-prose">
       {blocks.map((block) => (
         <section key={block.heading}>
           <h3 id={block.headingId}>{block.heading || (language === "en" ? "Field notes" : "Ghi chú kỹ thuật")}</h3>
@@ -442,33 +370,21 @@ function GuideReferencePanel({ guide }: { guide: GuideView }) {
   const supplies = relatedSupplies(guide, language);
 
   return (
-    <aside className="guide-reference-panel" aria-label={language === "en" ? "Quick reference" : "Thông tin tra cứu nhanh"}>
-      <section>
-        <div>
-          <Ruler size={17} />
-          <h3>{language === "en" ? "Standard checks" : "Thông số tiêu chuẩn"}</h3>
+    <aside className="g-ref" aria-label={language === "en" ? "Quick reference" : "Thông tin tra cứu nhanh"}>
+      <h4><Ruler size={14} /> {language === "en" ? "Standard checks" : "Thông số tiêu chuẩn"}</h4>
+      {specs.map((item) => (
+        <div className="row" key={item.label}>
+          <span>{item.label}</span>
+          <b>{item.value}</b>
         </div>
-        <dl>
-          {specs.map((item) => (
-            <div key={item.label}>
-              <dt>{item.label}</dt>
-              <dd>{item.value}</dd>
-            </div>
-          ))}
-        </dl>
-      </section>
-
-      <section>
-        <div>
-          <PackageCheck size={17} />
-          <h3>{language === "en" ? "Related supplies" : "Vật tư liên quan"}</h3>
+      ))}
+      <h4><PackageCheck size={14} /> {language === "en" ? "Related supplies" : "Vật tư liên quan"}</h4>
+      {supplies.map((item) => (
+        <div className="row" key={item}>
+          <span>{item}</span>
+          <b>OK</b>
         </div>
-        <ul>
-          {supplies.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-      </section>
+      ))}
     </aside>
   );
 }
@@ -656,15 +572,6 @@ function renderInlineMarkdown(text: string, language: "vi" | "en" = "vi") {
   });
 }
 
-function GuideFamilyArt({ family }: { family: string }) {
-  const image = familyImage(family);
-  return (
-    <div className={`guide-family-art ${familyClass(family)}`} aria-hidden="true">
-      {image ? <img src={image} alt={`Ảnh danh mục hướng dẫn ${family}`} loading="lazy" decoding="async" width="220" height="160" /> : null}
-    </div>
-  );
-}
-
 function toGuideView(guide: GuidePost): GuideView {
   const cropMeta = guide.crop_type ? CROP_META[guide.crop_type] : undefined;
   const category = guide.category.toLowerCase();
@@ -706,20 +613,6 @@ function capitalizeWords(value: string) {
     .filter(Boolean)
     .map((part) => part.charAt(0).toLocaleUpperCase("vi-VN") + part.slice(1))
     .join(" ");
-}
-
-function familyClass(family: string) {
-  if (family === "Cây ăn quả") return "fruit";
-  if (family === "Cây công nghiệp") return "industrial";
-  if (family === "Cây lương thực") return "food";
-  return "other";
-}
-
-function familyImage(family: string) {
-  if (family === "Cây ăn quả") return "/guide-fruit-optimized.jpg";
-  if (family === "Cây công nghiệp") return "/guide-industrial-optimized.jpg";
-  if (family === "Cây lương thực") return "/guide-food-crop-optimized.jpg";
-  return "/guide-other-optimized.jpg";
 }
 
 function sortGuides(a: GuideView, b: GuideView) {
