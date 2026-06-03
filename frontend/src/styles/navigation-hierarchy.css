@@ -315,12 +315,15 @@
     max-width: none !important;
     height: auto !important;
     padding-right: 0 !important;
+    border: 0;
     border-right: 0 !important;
+    background: transparent;
     color: var(--ink, #14181a);
+    cursor: pointer;
     font-family: var(--serif);
     font-size: 27px !important;
     font-weight: 700;
-    letter-spacing: -0.015em !important;
+    letter-spacing: 0 !important;
     text-transform: none !important;
   }
 
@@ -422,7 +425,7 @@
     font-family: var(--sans);
     font-size: 13px !important;
     font-weight: var(--fw-semi);
-    letter-spacing: 0.03em !important;
+    letter-spacing: 0 !important;
     text-transform: none !important;
   }
 
@@ -490,7 +493,7 @@
     font-family: var(--sans);
     font-size: 11.5px;
     font-weight: var(--fw-semi);
-    letter-spacing: 0.02em;
+    letter-spacing: 0;
   }
 
   .menu-bar.paper-mast .language-toggle:hover,
@@ -509,6 +512,127 @@
     border-radius: 0;
     box-shadow: 0 8px 22px rgba(20, 24, 26, 0.12);
   }
+}
+
+.home-market-hero h1,
+.home-page .p-headline,
+.finance-news-page .n-titlebar h1,
+.finance-news-page .n-feature h2,
+.finance-news-page .n-pm h4,
+.finance-news-page .n-archive-head h2,
+.finance-news-page .n-row h3,
+.guide-library-page .tool-titlebar h1,
+.guide-library-page .g-detail h2,
+.guide-library-page .g-prose h3,
+.guide-detail-page .detail-article h1,
+.guide-detail-page .detail-article h2,
+.guide-detail-page .detail-article h3,
+.app-shell.forecast-shell .market-quote-header h1,
+.app-shell.forecast-shell .quote h1,
+.site-head .sh-logo .wd {
+  letter-spacing: 0 !important;
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+}
+
+.app-shell.forecast-shell .market-quote-header {
+  margin: 0;
+  padding: 24px 26px;
+  border-top: 0;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+.app-shell.forecast-shell .quote-title-row {
+  align-items: flex-start;
+  color: var(--brand-bright);
+}
+
+.app-shell.forecast-shell .quote-title-row > svg {
+  margin-top: 6px;
+}
+
+.app-shell.forecast-shell .market-quote-header h1 {
+  font-family: var(--serif);
+  font-size: clamp(27px, 2.2vw, 34px);
+  font-weight: 600;
+  line-height: 1.08;
+}
+
+.app-shell.forecast-shell .quote-h1-line1,
+.app-shell.forecast-shell .quote-h1-line2 {
+  display: inline;
+}
+
+.app-shell.forecast-shell .quote-h1-line2 {
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: 0.46em;
+  font-weight: 700;
+  letter-spacing: 0.06em !important;
+}
+
+.app-shell.forecast-shell .quote-meta {
+  gap: 10px;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+.app-shell.forecast-shell .quote-meta span + span::before {
+  margin: 0 10px 0 0;
+}
+
+.app-shell.forecast-shell .quote-price-row {
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.app-shell.forecast-shell .quote-price-row strong {
+  font-size: clamp(38px, 3.6vw, 48px);
+  font-weight: 600;
+  letter-spacing: 0 !important;
+}
+
+.app-shell.forecast-shell .quote-price-row small {
+  color: var(--color-text-muted);
+}
+
+.app-shell.forecast-shell .quote-side {
+  grid-template-columns: auto repeat(2, minmax(108px, 1fr));
+  align-self: stretch;
+}
+
+.app-shell.forecast-shell .quote-side .quote-refresh-button,
+.app-shell.forecast-shell .quote-side .icon-button,
+.app-shell.forecast-shell .quote-side-action,
+.app-shell.forecast-shell .quote-range {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.app-shell.forecast-shell .market-subnav {
+  margin: 0;
+  padding: 0 12px;
+  border-top: 0;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+.app-shell.forecast-shell .market-subnav button {
+  min-height: 42px;
+  border-radius: 0;
+  letter-spacing: 0.06em;
+}
+
+.app-shell.forecast-shell .control-band,
+.app-shell.forecast-shell .chart-toolbar,
+.app-shell.forecast-shell .chart-section,
+.app-shell.forecast-shell .intel-grid,
+.app-shell.forecast-shell .analysis-brief,
+.app-shell.forecast-shell .technical-panel,
+.app-shell.forecast-shell .data-section {
+  margin-inline: 26px;
 }
 
 .guide-detail-page .detail-article,

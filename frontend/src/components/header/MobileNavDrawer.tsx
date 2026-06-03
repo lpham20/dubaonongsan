@@ -27,7 +27,8 @@ export function MobileNavDrawer({
   onPriceMenuOpenChange,
   onNewsMenuOpenChange,
   onFertilizerMenuOpenChange,
-  onAuthOpenChange
+  onAuthOpenChange,
+  onAuthModeChange
 }: HeaderSurfaceProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobileGroup, setMobileGroup] = useState<"news" | "fertilizer" | "price" | null>(null);
@@ -150,6 +151,7 @@ export function MobileNavDrawer({
         aria-label={userLabel ? `${copy.account} ${userLabel}` : copy.openAccount}
         onClick={() => {
           setDrawerOpen(false);
+          if (!userLabel) onAuthModeChange("login");
           onAuthOpenChange(true);
         }}
       >
@@ -256,6 +258,7 @@ export function MobileNavDrawer({
             type="button"
             onClick={() => {
               setDrawerOpen(false);
+              if (!userLabel) onAuthModeChange("login");
               onAuthOpenChange(true);
             }}
           >
