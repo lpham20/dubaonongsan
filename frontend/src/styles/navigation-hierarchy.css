@@ -672,3 +672,592 @@
   font-size: 16.5px;
   line-height: 1.7;
 }
+
+/* Unified advisory tool language.
+   Keep fertilizer, selling-time, arbitrage and cross-crop tools on the
+   same editorial/terminal system as the redesigned guide and ROI surfaces. */
+.advisory-page,
+.fertilizer-page,
+.roi-standard-page {
+  background: var(--bg, var(--color-bg));
+  color: var(--ink, var(--color-text));
+  font-family: var(--sans);
+}
+
+.advisory-page.fertilizer-page,
+.advisory-page .fertilizer-page,
+.fertilizer-page:not(.forecast-shell) {
+  width: min(100% - 60px, 1320px);
+  margin-inline: auto;
+}
+
+.advisory-page > .advisory-content,
+.advisory-standard-page .advisory-standard-content {
+  margin-top: 0;
+}
+
+.advisory-standard-page .fertilizer-hero,
+.advisory-page .fertilizer-hero,
+.fertilizer-page .fertilizer-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+  gap: 24px;
+  align-items: end;
+  margin: 26px 0 0;
+  padding: 22px 0 18px;
+  border: 0;
+  border-bottom: 2px solid var(--ink, #14181a);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.advisory-standard-page .fertilizer-hero,
+.advisory-standard-page .advisory-standard-hero {
+  grid-template-columns: 1fr;
+}
+
+.fertilizer-page .fertilizer-hero > div:first-child,
+.advisory-standard-page .roi-hero-copy {
+  display: grid;
+  gap: 10px;
+  width: min(760px, 100%);
+}
+
+.fertilizer-page .fertilizer-hero h1,
+.advisory-standard-page .fertilizer-hero h1,
+.advisory-standard-page .advisory-standard-hero h1 {
+  max-width: 16ch;
+  margin: 0;
+  color: var(--ink, #14181a);
+  font-family: var(--serif) !important;
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 600;
+  letter-spacing: 0 !important;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+.advisory-standard-page .fertilizer-hero h1,
+.advisory-standard-page .advisory-standard-hero h1 {
+  max-width: 18ch;
+  font-size: clamp(38px, 5vw, 60px);
+}
+
+.fertilizer-page .fertilizer-hero p,
+.advisory-standard-page .fertilizer-hero p,
+.advisory-standard-page .advisory-standard-hero p {
+  max-width: 58ch;
+  margin: 0;
+  color: var(--ink-soft, var(--color-text-soft));
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.fertilizer-page .input-price-kicker,
+.advisory-standard-page .input-price-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  margin: 0 0 2px;
+  padding: 0;
+  color: var(--brand, var(--accent));
+  background: transparent;
+  border: 0;
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.fertilizer-page .fertilizer-intro-card {
+  align-self: stretch;
+  padding: 18px 20px;
+  border: 1px solid var(--line, var(--color-border));
+  border-radius: 2px;
+  background: var(--bg, var(--paper));
+  box-shadow: none;
+}
+
+.fertilizer-page .fertilizer-intro-card strong,
+.fertilizer-page .fertilizer-form-head strong,
+.advisory-standard-page .advisory-tool-head h2,
+.advisory-standard-page .advisory-auth-gate h2,
+.fertilizer-page .fertilizer-form h2,
+.fertilizer-page .fertilizer-panel h3,
+.fertilizer-page .fertilizer-empty h2,
+.roi-standard-page .roi-phead h2 {
+  color: var(--ink, var(--color-text));
+  font-family: var(--serif) !important;
+  font-weight: 600;
+  letter-spacing: 0 !important;
+}
+
+.fertilizer-page .fertilizer-intro-card strong,
+.advisory-standard-page .advisory-tool-head h2,
+.advisory-standard-page .advisory-auth-gate h2,
+.fertilizer-page .fertilizer-form h2,
+.fertilizer-page .fertilizer-panel h3,
+.fertilizer-page .fertilizer-empty h2 {
+  font-size: 19px;
+  line-height: 1.15;
+}
+
+.fertilizer-page .fertilizer-form-head strong {
+  font-size: 18px;
+  line-height: 1.15;
+  text-transform: none;
+}
+
+.fertilizer-page .fertilizer-form-head span,
+.fertilizer-page .fertilizer-section-title p,
+.fertilizer-page .fertilizer-intro-card li,
+.fertilizer-page .fertilizer-panel p,
+.fertilizer-page .fertilizer-empty p,
+.fertilizer-page .fertilizer-preview-list span,
+.advisory-standard-page .advisory-tool-head p,
+.advisory-standard-page .advisory-context,
+.advisory-standard-page .advisory-disclaimer,
+.advisory-standard-page .advisory-result-grid small,
+.advisory-standard-page .cross-crop-bars small,
+.advisory-auth-gate-body p {
+  color: var(--ink-soft, var(--color-text-soft));
+  font-family: var(--sans);
+  letter-spacing: 0;
+  line-height: 1.55;
+}
+
+.fertilizer-page .fertilizer-layout {
+  display: grid;
+  grid-template-columns: minmax(380px, 0.9fr) minmax(0, 1.25fr);
+  gap: 0;
+  align-items: start;
+  border-top: 2px solid var(--ink, #14181a);
+}
+
+.fertilizer-page .fertilizer-form,
+.fertilizer-page .fertilizer-results {
+  gap: 0;
+}
+
+.fertilizer-page .fertilizer-form {
+  padding-right: 0;
+  border-right: 1px solid var(--line, var(--color-border));
+}
+
+.fertilizer-page .fertilizer-results {
+  padding-left: 0;
+}
+
+.fertilizer-page .fertilizer-form-head,
+.fertilizer-page .fertilizer-form-section,
+.fertilizer-page .fertilizer-submit-card,
+.fertilizer-page .fertilizer-panel,
+.fertilizer-page .fertilizer-summary,
+.fertilizer-page .fertilizer-empty,
+.fertilizer-page .fertilizer-kpi-grid article,
+.fertilizer-page .fertilizer-preview-list article,
+.fertilizer-page .fertilizer-splits article,
+.fertilizer-page .fertilizer-factor-grid article,
+.fertilizer-page .fertilizer-session-row,
+.advisory-standard-page .advisory-tool,
+.advisory-standard-page .advisory-auth-gate,
+.advisory-standard-page .advisory-result-grid article,
+.advisory-standard-page .cross-crop-bars article,
+.advisory-standard-page .advisory-table,
+.roi-standard-page .roi-panel,
+.roi-standard-page .input-price-panel,
+.roi-standard-page .input-stat,
+.roi-standard-page .roi-scenario-card {
+  border-color: var(--line, var(--color-border)) !important;
+  border-radius: 2px !important;
+  background: var(--bg, var(--paper)) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+.fertilizer-page .fertilizer-form-head,
+.fertilizer-page .fertilizer-form-section,
+.fertilizer-page .fertilizer-submit-card,
+.fertilizer-page .fertilizer-panel,
+.fertilizer-page .fertilizer-summary,
+.fertilizer-page .fertilizer-empty,
+.fertilizer-page .fertilizer-kpi-grid article {
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+}
+
+.fertilizer-page .fertilizer-form-head,
+.advisory-standard-page .advisory-tool-head,
+.roi-standard-page .roi-phead {
+  min-height: 58px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line, var(--color-border));
+}
+
+.fertilizer-page .fertilizer-form-section,
+.fertilizer-page .fertilizer-submit-card,
+.fertilizer-page .fertilizer-panel,
+.fertilizer-page .fertilizer-summary,
+.fertilizer-page .fertilizer-empty,
+.advisory-standard-page .advisory-form-row,
+.advisory-auth-gate-body {
+  padding: 18px 20px;
+}
+
+.fertilizer-page .fertilizer-section-title {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line, var(--color-border));
+}
+
+.fertilizer-page .fertilizer-step-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--brand-deep, var(--accent-deep));
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: var(--fw-bold);
+}
+
+.fertilizer-page .fertilizer-form label,
+.advisory-standard-page .advisory-form-row label,
+.roi-standard-page .roi-form label,
+.roi-standard-page .roi-save-option,
+.fertilizer-page .fertilizer-check {
+  color: var(--ink-soft, var(--color-text-soft));
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.fertilizer-page .fertilizer-form input,
+.fertilizer-page .fertilizer-form select,
+.fertilizer-page .fertilizer-form textarea,
+.advisory-standard-page .advisory-form-row input,
+.advisory-standard-page .advisory-form-row select,
+.roi-standard-page .roi-form input,
+.roi-standard-page .roi-form select,
+.roi-standard-page .roi-line input,
+.roi-standard-page .roi-line strong {
+  min-height: 40px;
+  border: 1px solid var(--line-2, var(--color-border-strong));
+  border-radius: 0 !important;
+  background: var(--bg, #fff);
+  color: var(--ink, var(--color-text));
+  box-shadow: none;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: var(--fw-regular);
+  letter-spacing: 0;
+}
+
+.fertilizer-page .fertilizer-form input[inputmode],
+.advisory-standard-page .advisory-form-row input[inputmode],
+.roi-standard-page .roi-form input.num,
+.roi-standard-page .roi-money-input,
+.roi-standard-page .roi-line input:not(:first-child),
+.roi-standard-page .roi-line strong,
+.fertilizer-page .fertilizer-kpi-grid strong,
+.fertilizer-page .fertilizer-product strong,
+.fertilizer-page .fertilizer-session-row strong,
+.advisory-standard-page .advisory-result-grid strong,
+.advisory-standard-page .cross-crop-bars strong {
+  font-family: var(--mono) !important;
+  font-variant-numeric: tabular-nums slashed-zero;
+  font-feature-settings: "tnum" 1, "zero" 1;
+  letter-spacing: 0 !important;
+}
+
+.fertilizer-page .fertilizer-form input:focus,
+.fertilizer-page .fertilizer-form select:focus,
+.fertilizer-page .fertilizer-form textarea:focus,
+.advisory-standard-page .advisory-form-row input:focus,
+.advisory-standard-page .advisory-form-row select:focus {
+  border-color: var(--brand-deep, var(--accent-deep));
+  box-shadow: inset 0 -2px 0 var(--brand-deep, var(--accent-deep));
+  outline: 0;
+}
+
+.fertilizer-page .fertilizer-check {
+  min-height: 40px;
+  border: 1px solid var(--line-2, var(--color-border-strong));
+  border-radius: 0 !important;
+  background: var(--bg);
+}
+
+.fertilizer-page .fertilizer-check input {
+  width: 16px;
+  min-height: 16px;
+}
+
+.fertilizer-page .fertilizer-submit,
+.advisory-standard-page .roi-primary-button,
+.advisory-auth-gate-body .roi-primary-button,
+.roi-standard-page .roi-primary-button,
+.roi-standard-page .roi-secondary-button,
+.roi-standard-page .roi-btn,
+.roi-standard-page .roi-line button {
+  min-height: 42px;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.fertilizer-page .fertilizer-submit,
+.advisory-standard-page .roi-primary-button,
+.advisory-auth-gate-body .roi-primary-button,
+.roi-standard-page .roi-primary-button,
+.roi-standard-page .roi-btn {
+  border: 1px solid var(--brand-deep, var(--accent-deep));
+  background: var(--brand-deep, var(--accent-deep));
+  color: #fff;
+}
+
+.roi-standard-page .roi-secondary-button,
+.roi-standard-page .roi-line button {
+  border: 1px solid var(--line-2, var(--color-border-strong));
+  background: var(--bg, #fff);
+  color: var(--ink, var(--color-text));
+}
+
+.fertilizer-page .fertilizer-summary {
+  grid-template-columns: minmax(0, 1fr) auto;
+  border-top: 0;
+}
+
+.fertilizer-page .fertilizer-summary span,
+.fertilizer-page .fertilizer-kpi-grid span,
+.fertilizer-page .fertilizer-product span,
+.fertilizer-page .fertilizer-preview-list strong,
+.fertilizer-page .fertilizer-splits span,
+.fertilizer-page .fertilizer-factor-grid span,
+.advisory-standard-page .advisory-result-grid span,
+.advisory-standard-page .cross-crop-bars span {
+  color: var(--ink-mute, var(--color-text-muted));
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fertilizer-page .fertilizer-summary h2 {
+  margin: 8px 0 4px;
+  color: var(--ink, var(--color-text));
+  font-family: var(--mono) !important;
+  font-size: clamp(30px, 3.2vw, 44px);
+  font-weight: 600;
+  letter-spacing: 0 !important;
+  line-height: 1.05;
+}
+
+.fertilizer-page .fertilizer-confidence {
+  border-color: var(--line, var(--color-border));
+  border-radius: 0;
+  background: var(--bg-1, var(--accent-50));
+  color: var(--ink, var(--color-text));
+  font-family: var(--sans);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.fertilizer-page .fertilizer-preview-list,
+.fertilizer-page .fertilizer-kpi-grid,
+.fertilizer-page .fertilizer-splits,
+.fertilizer-page .fertilizer-factor-grid,
+.advisory-standard-page .advisory-result-grid,
+.advisory-standard-page .cross-crop-bars {
+  gap: 1px;
+  background: var(--line, var(--color-border));
+  border: 1px solid var(--line, var(--color-border));
+}
+
+.fertilizer-page .fertilizer-preview-list article,
+.fertilizer-page .fertilizer-kpi-grid article,
+.fertilizer-page .fertilizer-splits article,
+.fertilizer-page .fertilizer-factor-grid article,
+.advisory-standard-page .advisory-result-grid article,
+.advisory-standard-page .cross-crop-bars article {
+  border: 0 !important;
+}
+
+.fertilizer-page .fertilizer-kpi-grid strong,
+.advisory-standard-page .advisory-result-grid strong,
+.advisory-standard-page .cross-crop-bars strong {
+  color: var(--ink, var(--color-text));
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.fertilizer-page .fertilizer-product {
+  border-bottom: 1px solid var(--line, var(--color-border));
+}
+
+.fertilizer-page .fertilizer-warning,
+.fertilizer-page .fertilizer-success,
+.fertilizer-page .fertilizer-error,
+.advisory-standard-page .input-price-error {
+  border-radius: 0 !important;
+  box-shadow: none;
+  font-family: var(--sans);
+}
+
+.advisory-standard-page .advisory-tool {
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.advisory-standard-page .advisory-form-row {
+  border-bottom: 1px solid var(--line, var(--color-border));
+}
+
+.advisory-standard-page .advisory-form-row.compact {
+  grid-template-columns: minmax(260px, 360px) minmax(180px, 240px) auto;
+}
+
+.advisory-standard-page .advisory-table {
+  margin: 18px 20px;
+  overflow: auto;
+}
+
+.advisory-standard-page .advisory-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.advisory-standard-page .advisory-table th {
+  color: var(--ink-mute, var(--color-text-muted));
+  background: var(--bg-1, var(--color-surface-muted));
+  font-family: var(--sans);
+  font-size: 10.5px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.advisory-standard-page .advisory-table td {
+  color: var(--ink, var(--color-text));
+  font-family: var(--mono);
+  font-size: 13.5px;
+}
+
+.advisory-standard-page .advisory-context,
+.advisory-standard-page .advisory-disclaimer,
+.advisory-standard-page .cross-crop-bars {
+  margin: 0;
+  padding: 0 20px 18px;
+}
+
+.advisory-standard-page .advisory-disclaimer p {
+  margin: 8px 0 0;
+}
+
+.advisory-standard-page .cross-crop-bars {
+  background: transparent;
+  border: 0;
+}
+
+.advisory-standard-page .cross-crop-bars article {
+  border: 1px solid var(--line, var(--color-border)) !important;
+}
+
+.advisory-standard-page .cross-crop-bars i {
+  height: 7px;
+  border-radius: 0;
+  background: var(--brand-deep, var(--accent-deep));
+}
+
+.advisory-standard-page .advisory-result-grid .advisory-highlight {
+  background: var(--bg-1, var(--accent-50)) !important;
+  box-shadow: inset 3px 0 0 var(--brand, var(--accent)) !important;
+}
+
+@media (max-width: 1279px) {
+  .fertilizer-page .fertilizer-layout,
+  .fertilizer-page .fertilizer-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .fertilizer-page .fertilizer-form {
+    border-right: 0;
+  }
+}
+
+@media (max-width: 980px) {
+  .advisory-page.fertilizer-page,
+  .advisory-page .fertilizer-page,
+  .fertilizer-page:not(.forecast-shell) {
+    width: min(100% - 28px, 1320px);
+  }
+
+  .fertilizer-page .fertilizer-hero,
+  .advisory-standard-page .fertilizer-hero,
+  .advisory-standard-page .advisory-standard-hero {
+    margin-top: 16px;
+  }
+
+  .fertilizer-page .fertilizer-hero h1,
+  .advisory-standard-page .fertilizer-hero h1,
+  .advisory-standard-page .advisory-standard-hero h1 {
+    max-width: 18ch;
+    font-size: clamp(34px, 10vw, 52px);
+  }
+
+  .fertilizer-page .fertilizer-kpi-grid,
+  .fertilizer-page .fertilizer-splits,
+  .fertilizer-page .fertilizer-factor-grid,
+  .fertilizer-page .fertilizer-preview-list,
+  .advisory-standard-page .advisory-form-row,
+  .advisory-standard-page .advisory-form-row.compact,
+  .advisory-standard-page .advisory-result-grid,
+  .advisory-standard-page .cross-crop-bars {
+    grid-template-columns: 1fr;
+  }
+
+  .advisory-standard-page .advisory-form-row .roi-primary-button,
+  .advisory-auth-gate-body .roi-primary-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .advisory-page.fertilizer-page,
+  .advisory-page .fertilizer-page,
+  .fertilizer-page:not(.forecast-shell) {
+    width: min(100% - 20px, 1320px);
+  }
+
+  .fertilizer-page .fertilizer-hero,
+  .advisory-standard-page .fertilizer-hero,
+  .advisory-standard-page .advisory-standard-hero {
+    padding-bottom: 16px;
+  }
+
+  .fertilizer-page .fertilizer-form-section,
+  .fertilizer-page .fertilizer-submit-card,
+  .fertilizer-page .fertilizer-panel,
+  .fertilizer-page .fertilizer-summary,
+  .fertilizer-page .fertilizer-empty,
+  .advisory-standard-page .advisory-form-row,
+  .advisory-auth-gate-body {
+    padding: 16px 14px;
+  }
+
+  .fertilizer-page .fertilizer-summary {
+    grid-template-columns: 1fr;
+  }
+}
