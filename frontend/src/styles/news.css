@@ -54,6 +54,13 @@
 .n-feature .ft-img { object-fit: cover; }
 .n-feature .news-thumb .ft-img { margin-bottom: 0; }
 .n-feature .news-thumb img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.finance-news-page.paper .n-feature .news-thumb,
+.finance-news-page.paper .n-feature .news-thumb img,
+.finance-news-page.paper .n-feature .ft-img,
+.finance-news-page.paper .n-row > .news-thumb,
+.finance-news-page.paper .n-row > .news-thumb img {
+  border-radius: 0 !important;
+}
 .n-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .n-cat { font-size: 10.5px; font-weight: var(--fw-bold); letter-spacing: 0.08em; text-transform: uppercase; color: var(--brand); }
 .n-impact { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 11px; font-weight: 600; padding: 2px 8px; border: 1px solid var(--line-2); letter-spacing: 0.02em; }
