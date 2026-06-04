@@ -1,4 +1,4 @@
-import { BarChart3, ExternalLink, RefreshCw, Search, Tags } from "./icons";
+import { BarChart3, ExternalLink, RefreshCw, Search } from "./icons";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FreshnessBanner } from "./FreshnessBanner";
@@ -281,7 +281,6 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
   const pageCount = Math.max(1, Math.ceil(rest.length / NEWS_PAGE_SIZE));
   const activePage = Math.min(newsPage, pageCount);
   const pagedRest = rest.slice((activePage - 1) * NEWS_PAGE_SIZE, activePage * NEWS_PAGE_SIZE);
-  const marketWatch = buildMarketWatch(rankedArticles, language);
   const digest = buildDigest(filteredArticles, language);
   const seo = language === "en"
     ? newsSeoEn(activeView, pageCopy)
@@ -435,7 +434,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
 
           <aside className="n-rail">
             <section>
-              <div className="blk-h">{language === "en" ? "Price-moving news" : "Tin ảnh hưởng giá"}</div>
+              <div className="blk-h">{language === "en" ? "Worth watching" : "Đáng chú ý"}</div>
               {railReads.map(({ article, topic, impact }) => (
                 <Link className="n-pm" to={withLanguagePrefix(newsPath(article), language)} key={article.article_id}>
                   <div className="top">
@@ -447,25 +446,6 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
                     {impact} · {formatDate(article.published_at ?? article.scraped_at, language)}
                   </span>
                 </Link>
-              ))}
-            </section>
-
-            <section className="n-watch">
-              <div className="blk-h">
-                <Tags size={14} />
-                {language === "en" ? "Market watch" : "Theo dõi thị trường"}
-              </div>
-              {marketWatch.map((item) => (
-                <button
-                  type="button"
-                  className={activeTopic === item.topic ? "active" : ""}
-                  key={item.topic}
-                  onClick={() => setActiveTopic(item.topic)}
-                >
-                  <span className="wt">{topicLabel(item.topic, language)}</span>
-                  <strong className="wc">{item.count}</strong>
-                  <small className="wn">{item.note}</small>
-                </button>
               ))}
             </section>
           </aside>
@@ -906,24 +886,24 @@ function LeadNewsCard({ item }: { item: RankedArticle }) {
   const { language } = useLanguage();
   return (
     <article className="n-feature">
+      <div className="n-meta">
+        <span className="n-cat">
+          {language === "en" ? "Feature" : "Tiêu điểm"} · {topicLabel(item.topic, language)}
+        </span>
+      </div>
+      <h2><Link to={withLanguagePrefix(newsPath(item.article), language)}>{displayTitle(item.article.title, 96)}</Link></h2>
+      <p className="dek">{displayTitle(item.article.summary, 190)}</p>
       <NewsImage article={item.article} variant="feature" />
-      <div>
-        <div className="n-meta">
-          <span className="n-cat">{topicLabel(item.topic, language)}</span>
-          <ImpactBadge impact={item.impact} />
-        </div>
-        <h2><Link to={withLanguagePrefix(newsPath(item.article), language)}>{displayTitle(item.article.title, 86)}</Link></h2>
-        <p className="dek">{displayTitle(item.article.summary, 150)}</p>
-        <RelatedTag relation={item.relation} />
-        <div className="n-src">
-          <b>{item.article.source_name}</b>
-          <span className="dot" />
-          <span className="num">{formatDate(item.article.published_at ?? item.article.scraped_at, language)}</span>
-          <span className="dot" />
-          <Link className="read" to={withLanguagePrefix(newsPath(item.article), language)}>
-            {language === "en" ? "Read story" : "Đọc bản tin"}
-          </Link>
-        </div>
+      <div className="n-src">
+        <b>{language === "en" ? "Market bulletin" : "Bản tin thị trường"}</b>
+        <span className="dot" />
+        <b>{item.article.source_name}</b>
+        <span className="dot" />
+        <span className="num">{formatDate(item.article.published_at ?? item.article.scraped_at, language)}</span>
+        <span className="dot" />
+        <Link className="read" to={withLanguagePrefix(newsPath(item.article), language)}>
+          {language === "en" ? "Read story" : "Đọc bản tin"}
+        </Link>
       </div>
     </article>
   );
@@ -1075,24 +1055,6 @@ function buildDigest(items: RankedArticle[], language: "vi" | "en") {
   }
   if (items[0]) lines.push(language === "en" ? `Start with: ${displayTitle(items[0].article.title, 95)}` : `Tin cần đọc trước: ${displayTitle(items[0].article.title, 95)}`);
   return lines.slice(0, 3);
-}
-
-function buildMarketWatch(items: RankedArticle[], language: "vi" | "en") {
-  return (TOPICS.filter((topic) => topic !== "Tất cả") as Exclude<NewsTopic, "Tất cả">[])
-    .map((topic) => {
-      const related = items.filter((item) => item.topic === topic);
-      const high = related.filter((item) => item.impact === "Tác động giá cao").length;
-      return {
-        topic,
-        count: related.length,
-        note: high
-          ? language === "en" ? `${high} high-impact stories` : `${high} tin tác động cao`
-          : language === "en" ? "No major movement yet" : "Chưa có biến động lớn"
-      };
-    })
-    .filter((item) => item.count > 0)
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 5);
 }
 
 function TrendSparkline({ topic, impact }: { topic: NewsTopic; impact: string }) {

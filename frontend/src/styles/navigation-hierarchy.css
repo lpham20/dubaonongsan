@@ -1559,3 +1559,301 @@
     border-bottom: 1px solid var(--line) !important;
   }
 }
+
+/* Final V2 editorial alignment: keep the News feature in the mock layout
+   even when older lead/card rules are loaded later in the bundle. */
+.finance-news-page.paper .n-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 360px !important;
+  gap: 0 !important;
+  border-bottom: 1px solid var(--ink, #14181a) !important;
+}
+
+.finance-news-page.paper .n-feature {
+  display: block !important;
+  min-width: 0 !important;
+  padding: 28px 32px 28px 0 !important;
+  border: 0 !important;
+  border-right: 1px solid var(--line, #e3e1d9) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.finance-news-page.paper .n-feature .n-meta {
+  margin: 0 0 14px !important;
+}
+
+.finance-news-page.paper .n-feature .n-cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--brand, #1f8f5e) !important;
+  font-family: var(--sans) !important;
+  font-size: 11px !important;
+  font-weight: var(--fw-bold) !important;
+  letter-spacing: 0.09em !important;
+  text-transform: uppercase;
+}
+
+.finance-news-page.paper .n-feature .n-cat::before {
+  content: "";
+  width: 30px;
+  height: 2px;
+  background: currentColor;
+}
+
+.finance-news-page.paper .n-feature h2 {
+  max-width: 18ch;
+  margin: 0 0 18px !important;
+  color: var(--ink, #14181a) !important;
+  font-family: var(--serif) !important;
+  font-size: clamp(42px, 4.3vw, 58px) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.04 !important;
+}
+
+.finance-news-page.paper .n-feature .dek {
+  max-width: 68ch;
+  margin: 0 0 24px !important;
+  color: var(--ink-soft, #3f464a) !important;
+  font-family: var(--sans) !important;
+  font-size: 17px !important;
+  font-weight: 400 !important;
+  line-height: 1.55 !important;
+}
+
+.finance-news-page.paper .n-feature > .news-thumb,
+.finance-news-page.paper .n-feature > .ft-img {
+  display: block !important;
+  width: 100% !important;
+  aspect-ratio: 16 / 9 !important;
+  margin: 0 0 14px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: var(--bg-2, #f4f6f3) !important;
+  overflow: hidden !important;
+}
+
+.finance-news-page.paper .n-feature > .news-thumb img,
+.finance-news-page.paper .n-feature > .ft-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  filter: none !important;
+}
+
+.finance-news-page.paper .n-feature .n-src {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 11px !important;
+  margin-top: 0 !important;
+  color: var(--ink-mute, #767c7e) !important;
+  font-family: var(--sans) !important;
+  font-size: 12.5px !important;
+}
+
+.finance-news-page.paper .n-rail {
+  padding: 28px 0 28px 28px !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.finance-news-page.paper .n-rail .blk-h {
+  margin: 0 0 10px !important;
+  padding-bottom: 10px !important;
+  border-bottom: 2px solid var(--ink, #14181a) !important;
+  color: var(--ink, #14181a) !important;
+}
+
+.finance-news-page.paper .n-pm {
+  padding: 15px 0 !important;
+  border-bottom: 1px solid var(--line, #e3e1d9) !important;
+}
+
+.finance-news-page.paper .n-pm h4 {
+  color: var(--ink, #14181a) !important;
+  font-family: var(--serif) !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+}
+
+/* The fertilizer forecast page is a forecast terminal route. Its live strip
+   must use the same dense one-line ticker rhythm as crop forecast tabs. */
+.app-shell.input-prices-shell > .p-strip.paper {
+  position: relative !important;
+  top: auto !important;
+  z-index: 20 !important;
+  display: flex !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  color: var(--ink, #eef3f0) !important;
+  background: #060908 !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--line, rgba(255, 255, 255, 0.09)) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.app-shell.input-prices-shell > .p-strip.paper .lab {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  min-height: 34px !important;
+  padding: 0 16px !important;
+  color: var(--ink, #eef3f0) !important;
+  background: var(--brand-deep, #0d4b38) !important;
+  border: 0 !important;
+  border-right: 1px solid var(--line, rgba(255, 255, 255, 0.09)) !important;
+  font-family: var(--sans) !important;
+  font-size: 10.5px !important;
+  font-weight: var(--fw-bold) !important;
+  letter-spacing: 0.12em !important;
+  line-height: 1 !important;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.app-shell.input-prices-shell > .p-strip.paper .items {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  align-items: center !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.app-shell.input-prices-shell > .p-strip.paper .it {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  flex-direction: row !important;
+  align-items: baseline !important;
+  justify-content: flex-start !important;
+  gap: 9px !important;
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 34px !important;
+  padding: 0 18px !important;
+  border: 0 !important;
+  color: var(--ink, #eef3f0) !important;
+  background: transparent !important;
+  white-space: nowrap !important;
+}
+
+.app-shell.input-prices-shell > .p-strip.paper .it .s {
+  color: var(--ink-soft, #a7b2ac) !important;
+  font-family: var(--sans) !important;
+  font-size: 11px !important;
+  font-weight: var(--fw-semi) !important;
+  letter-spacing: 0.03em !important;
+  text-transform: uppercase;
+  white-space: nowrap !important;
+}
+
+.app-shell.input-prices-shell > .p-strip.paper .it .pr {
+  display: inline-flex !important;
+  align-items: baseline !important;
+  gap: 8px !important;
+  white-space: nowrap !important;
+}
+
+.app-shell.input-prices-shell > .p-strip.paper .it .pr b {
+  color: var(--ink, #eef3f0) !important;
+  font-family: var(--mono) !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  white-space: nowrap !important;
+}
+
+.app-shell.input-prices-shell > .p-strip.paper .it .pr em {
+  font-family: var(--mono) !important;
+  font-size: 11.5px !important;
+  font-style: normal !important;
+  font-weight: 600 !important;
+}
+
+.app-shell.input-prices-shell > .p-strip.paper .it .pr em.pos {
+  color: var(--up, #34d399) !important;
+}
+
+.app-shell.input-prices-shell > .p-strip.paper .it .pr em.neg {
+  color: var(--down, #f0616d) !important;
+}
+
+.app-shell.input-prices-shell .world-fertilizer-page {
+  color: var(--ink, #eef3f0);
+  background: var(--bg, #0a0d0c);
+  font-family: var(--sans);
+}
+
+.app-shell.input-prices-shell .world-fertilizer-page .market-subnav {
+  margin: 0 !important;
+}
+
+.app-shell.input-prices-shell .world-fertilizer-section {
+  margin: 24px 26px 40px !important;
+  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.12)) !important;
+  border-radius: 0 !important;
+  background: var(--color-surface, #131918) !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 980px) {
+  .finance-news-page.paper .n-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .finance-news-page.paper .n-feature {
+    padding: 22px 0 !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--line, #e3e1d9) !important;
+  }
+
+  .finance-news-page.paper .n-feature h2 {
+    max-width: 100%;
+    font-size: clamp(34px, 8vw, 44px) !important;
+  }
+
+  .finance-news-page.paper .n-rail {
+    padding: 22px 0 !important;
+  }
+
+  .app-shell.input-prices-shell .world-fertilizer-section {
+    margin: 16px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-shell.input-prices-shell > .p-strip.paper {
+    height: 44px !important;
+    min-height: 44px !important;
+  }
+
+  .app-shell.input-prices-shell > .p-strip.paper .lab {
+    min-height: 44px !important;
+    max-width: 122px;
+    padding: 0 10px !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .app-shell.input-prices-shell > .p-strip.paper .items {
+    overflow-x: auto !important;
+    scrollbar-width: none;
+  }
+
+  .app-shell.input-prices-shell > .p-strip.paper .items::-webkit-scrollbar {
+    display: none;
+  }
+
+  .app-shell.input-prices-shell > .p-strip.paper .it:nth-child(n + 6) {
+    display: none !important;
+  }
+}
