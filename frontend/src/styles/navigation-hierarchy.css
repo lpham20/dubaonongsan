@@ -1623,8 +1623,7 @@
   line-height: 1.55 !important;
 }
 
-.finance-news-page.paper .n-feature > .news-thumb,
-.finance-news-page.paper .n-feature > .ft-img {
+.finance-news-page.paper .n-feature .n-feature-image {
   display: block !important;
   width: 100% !important;
   aspect-ratio: 16 / 9 !important;
@@ -1635,8 +1634,10 @@
   overflow: hidden !important;
 }
 
-.finance-news-page.paper .n-feature > .news-thumb img,
-.finance-news-page.paper .n-feature > .ft-img {
+.finance-news-page.paper .n-feature .n-feature-image > .news-thumb,
+.finance-news-page.paper .n-feature .n-feature-image > .ft-img,
+.finance-news-page.paper .n-feature .n-feature-image > .news-thumb img {
+  display: block !important;
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
