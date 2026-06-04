@@ -1261,3 +1261,301 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Final paper typography corrections.
+   These rules intentionally sit after legacy terminal styles, because older
+   table/news/fertilizer selectors still target the same components. */
+.paper h1,
+.paper h2,
+.paper h3,
+.finance-news-page .news-price-board-header h1,
+.finance-news-page .n-titlebar h1,
+.finance-news-page .n-feature h2,
+.finance-news-page .n-row h3,
+.finance-news-page .n-pm h4,
+.advisory-page .fertilizer-hero h1,
+.fertilizer-page .fertilizer-hero h1,
+.advisory-standard-page .advisory-standard-hero h1,
+.advisory-standard-page .advisory-tool-head h2,
+.advisory-standard-page .advisory-auth-gate h2,
+.fertilizer-page .fertilizer-form h2,
+.fertilizer-page .fertilizer-panel h3,
+.fertilizer-page .fertilizer-empty h2 {
+  font-family: var(--serif) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+.advisory-page .fertilizer-hero h1,
+.fertilizer-page .fertilizer-hero h1,
+.advisory-standard-page .advisory-standard-hero h1 {
+  max-width: 22ch;
+  font-size: clamp(34px, 3.4vw, 42px) !important;
+  line-height: 1.04 !important;
+}
+
+.advisory-standard-page .fertilizer-hero,
+.advisory-page .fertilizer-hero,
+.fertilizer-page .fertilizer-hero {
+  border-bottom: 2px solid var(--ink, #14181a) !important;
+}
+
+.advisory-auth-gate .input-section-heading p,
+.advisory-standard-page .input-section-heading p,
+.advisory-standard-page .advisory-tool-head p,
+.fertilizer-page .fertilizer-hero p,
+.fertilizer-page .fertilizer-section-title p,
+.fertilizer-page .fertilizer-panel p {
+  color: var(--ink-soft, var(--color-text-soft));
+  font-family: var(--sans) !important;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0 !important;
+  line-height: 1.55;
+  text-transform: none !important;
+}
+
+.advisory-auth-gate .input-section-heading p {
+  max-width: 70ch;
+}
+
+.finance-news-page .news-price-board {
+  padding: 22px 0 42px !important;
+  color: var(--ink);
+  background: var(--bg);
+  font-family: var(--sans);
+}
+
+.finance-news-page .news-price-board-header {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 24px !important;
+  align-items: end !important;
+  margin: 0 !important;
+  padding: 0 0 20px !important;
+  border: 0 !important;
+  border-bottom: 2px solid var(--ink) !important;
+  background: transparent !important;
+}
+
+.finance-news-page .news-price-board-header h1 {
+  max-width: 15ch !important;
+  margin: 0 !important;
+  color: var(--ink) !important;
+  font-size: clamp(42px, 6vw, 72px) !important;
+  line-height: 1.02 !important;
+  text-wrap: balance;
+}
+
+.finance-news-page .news-price-board-meta {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 12px !important;
+  align-items: center;
+  margin-top: 14px;
+  color: var(--ink-mute);
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.finance-news-page .price-board-kpis {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(112px, 1fr)) !important;
+  gap: 0 !important;
+  min-width: 360px;
+  border: 1px solid var(--line) !important;
+  background: transparent !important;
+}
+
+.finance-news-page .price-board-kpis span {
+  display: grid !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+  padding: 14px 16px !important;
+  border-right: 1px solid var(--line) !important;
+  background: var(--bg) !important;
+  color: var(--ink-mute) !important;
+  font-family: var(--sans);
+  font-size: 11px !important;
+  font-weight: var(--fw-bold) !important;
+  letter-spacing: 0.07em !important;
+  text-transform: uppercase;
+}
+
+.finance-news-page .price-board-kpis span:last-child {
+  border-right: 0 !important;
+}
+
+.finance-news-page .price-board-kpis strong {
+  color: var(--ink) !important;
+  font-family: var(--mono) !important;
+  font-size: 24px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+}
+
+.finance-news-page .price-report-notice {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 20px !important;
+  align-items: center !important;
+  margin: 20px 0 !important;
+  padding: 18px !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 2px !important;
+  background: var(--bg-1) !important;
+  box-shadow: none !important;
+}
+
+.finance-news-page .price-report-notice strong {
+  color: var(--brand-deep) !important;
+  font-family: var(--sans);
+  font-size: 12px !important;
+  font-weight: var(--fw-bold) !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase;
+}
+
+.finance-news-page .price-report-notice p,
+.finance-news-page .price-report-notice details {
+  color: var(--ink-soft) !important;
+  font-family: var(--sans);
+  letter-spacing: 0 !important;
+  line-height: 1.5;
+  text-transform: none !important;
+}
+
+.finance-news-page .news-price-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--line) !important;
+  background: var(--bg);
+}
+
+.finance-news-page .news-price-table {
+  width: 100%;
+  min-width: 980px;
+  border-collapse: collapse;
+  background: var(--bg) !important;
+  font-family: var(--sans) !important;
+}
+
+.finance-news-page .news-price-table thead th,
+.finance-news-page .news-price-table th {
+  position: static !important;
+  padding: 11px 14px !important;
+  border-right: 1px solid var(--line) !important;
+  border-bottom: 1px solid var(--line-2) !important;
+  background: var(--bg-2) !important;
+  color: var(--ink-mute) !important;
+  font-family: var(--sans) !important;
+  font-size: 10.5px !important;
+  font-weight: var(--fw-bold) !important;
+  letter-spacing: 0.08em !important;
+  text-align: left !important;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.finance-news-page .news-price-card,
+.finance-news-page .mobile-price-cards article {
+  border: 1px solid var(--line) !important;
+  border-radius: 2px !important;
+  background: var(--bg) !important;
+  box-shadow: none !important;
+  color: var(--ink-soft) !important;
+  font-family: var(--sans) !important;
+}
+
+.finance-news-page .news-price-table tbody tr {
+  border-bottom: 1px solid var(--line) !important;
+  background: var(--bg) !important;
+}
+
+.finance-news-page .news-price-table tbody tr:nth-child(even) {
+  background: var(--bg-1) !important;
+}
+
+.finance-news-page .news-price-table tbody tr:hover {
+  background: var(--bg-2) !important;
+}
+
+.finance-news-page .news-price-table td {
+  padding: 11px 14px !important;
+  border-right: 1px solid var(--line) !important;
+  border-bottom: 1px solid var(--line) !important;
+  color: var(--ink-soft) !important;
+  font-family: var(--sans);
+  font-size: 13.5px !important;
+  vertical-align: top !important;
+  white-space: normal !important;
+}
+
+.finance-news-page .news-price-table td.num,
+.finance-news-page .news-price-table td:nth-child(4),
+.finance-news-page .news-price-table td:nth-child(5),
+.finance-news-page .news-price-table td:nth-child(6),
+.finance-news-page .news-price-card .num {
+  color: var(--ink) !important;
+  font-family: var(--mono) !important;
+  font-variant-numeric: tabular-nums slashed-zero;
+  font-feature-settings: "tnum" 1, "zero" 1;
+  letter-spacing: 0 !important;
+  text-align: right !important;
+}
+
+.finance-news-page .news-price-table td strong {
+  display: block;
+  color: var(--ink) !important;
+  font-family: var(--sans);
+  font-weight: var(--fw-semi);
+}
+
+.finance-news-page .news-price-table td small {
+  display: block;
+  margin-top: 3px;
+  color: var(--ink-mute) !important;
+  font-family: var(--sans);
+  font-size: 11px !important;
+}
+
+@media (max-width: 900px) {
+  .finance-news-page .news-price-board-header {
+    grid-template-columns: 1fr !important;
+  }
+
+  .finance-news-page .price-board-kpis {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .finance-news-page .price-report-notice {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .advisory-page .fertilizer-hero h1,
+  .fertilizer-page .fertilizer-hero h1,
+  .advisory-standard-page .advisory-standard-hero h1 {
+    font-size: clamp(30px, 10vw, 38px) !important;
+  }
+
+  .finance-news-page .news-price-board-header h1 {
+    font-size: clamp(36px, 12vw, 52px) !important;
+  }
+
+  .finance-news-page .price-board-kpis {
+    grid-template-columns: 1fr !important;
+  }
+
+  .finance-news-page .price-board-kpis span {
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--line) !important;
+  }
+}

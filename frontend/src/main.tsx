@@ -35,6 +35,40 @@ import "./styles/cookie-consent.css";
 const SERVICE_WORKER_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
 const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
 
+function swallowServiceWorkerError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error ?? "");
+  if (import.meta.env.DEV && message) {
+    console.warn("Service worker update skipped:", message);
+  }
+}
+
+async function unregisterUnavailableServiceWorker() {
+  if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
+  const registrations = await navigator.serviceWorker.getRegistrations();
+  await Promise.all(registrations.map((registration) => registration.unregister()));
+}
+
+async function canRegisterServiceWorker() {
+  if (typeof window === "undefined" || !("serviceWorker" in navigator)) return false;
+  try {
+    const response = await fetch("/sw.js", { cache: "no-store" });
+    if (!response.ok) {
+      await unregisterUnavailableServiceWorker().catch(swallowServiceWorkerError);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    await unregisterUnavailableServiceWorker().catch(swallowServiceWorkerError);
+    swallowServiceWorkerError(error);
+    return false;
+  }
+}
+
+function updateRegistrationSafely(registration?: ServiceWorkerRegistration) {
+  if (!registration) return;
+  void registration.update().catch(swallowServiceWorkerError);
+}
+
 if (sentryDsn) {
   Sentry.init({
     dsn: sentryDsn,
@@ -80,21 +114,24 @@ if (typeof window !== "undefined") {
 }
 
 if (import.meta.env.PROD) {
-  let updateServiceWorker: ((reloadPage?: boolean) => Promise<void>) | undefined;
-  updateServiceWorker = registerSW({
-    immediate: true,
-    onNeedRefresh() {
-      void updateServiceWorker?.(true);
-    },
-    onRegisteredSW(_swUrl, registration) {
-      void registration?.update();
-      window.setInterval(() => {
-        void registration?.update();
-      }, SERVICE_WORKER_UPDATE_INTERVAL_MS);
-    },
-    onOfflineReady() {
-    }
-  });
+  void canRegisterServiceWorker().then((available) => {
+    if (!available) return;
+    let updateServiceWorker: ((reloadPage?: boolean) => Promise<void>) | undefined;
+    updateServiceWorker = registerSW({
+      immediate: true,
+      onNeedRefresh() {
+        void updateServiceWorker?.(true).catch(swallowServiceWorkerError);
+      },
+      onRegisteredSW(_swUrl, registration) {
+        updateRegistrationSafely(registration);
+        window.setInterval(() => {
+          updateRegistrationSafely(registration);
+        }, SERVICE_WORKER_UPDATE_INTERVAL_MS);
+      },
+      onOfflineReady() {
+      }
+    });
+  }).catch(swallowServiceWorkerError);
 }
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
