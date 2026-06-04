@@ -10,8 +10,8 @@ export default defineConfig({
       includeAssets: ["favicon.svg", "robots.txt", "og-cover.jpg", "og-cover.webp", "manifest.webmanifest"],
       manifest: false,
       workbox: {
-        globPatterns: ["**/*.{js,css,html,svg,ico,png,webp}"],
-        navigateFallback: "/index.html",
+        globPatterns: ["**/*.{js,css,svg,ico,png,webp}"],
+        navigateFallback: null,
         navigateFallbackDenylist: [/^\/api\//, /^\/seo\//, /\.[^/]+$/],
         runtimeCaching: [
           {

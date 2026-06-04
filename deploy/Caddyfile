@@ -60,7 +60,7 @@
 	@seoHtml {
 		path / /tin-tuc /huong-dan /khuyen-nghi-bon-phan /roi-uoc-tinh /thoi-diem-ban /chenh-lech-vung /so-sanh-cay-trong /bao-cao-nang-suat /thuat-toan-du-bao /khuyen-nghi-bon-phan/logic /tin-tuc/* /huong-dan/* /en/huong-dan/* /du-bao-gia/*
 	}
-	header @seoHtml Cache-Control "public, max-age=300, stale-while-revalidate=60"
+	header @seoHtml Cache-Control "no-cache, must-revalidate"
 
 	redir /api/v1/sitemap.xml /sitemap.xml permanent
 
@@ -205,7 +205,7 @@
 		@html {
 			path *.html
 		}
-		header @html Cache-Control "public, max-age=300, must-revalidate"
+		header @html Cache-Control "no-cache, must-revalidate"
 
 		@images {
 			path *.jpg *.jpeg *.png *.webp *.svg
