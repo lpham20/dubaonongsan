@@ -4,11 +4,8 @@ import {
   Bell,
   BookOpenCheck,
   ChevronDown,
-  Clock3,
   Coffee,
-  Newspaper,
   Search,
-  ShieldAlert,
   Sprout,
   TrendingDown,
   TrendingUp
@@ -409,7 +406,14 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
 
       <section className="home-intel-grid">
         <article className="lead-market-story">
-          <div className="lead-market-image">
+          <div className="lead-market-copy">
+            <span className="story-label">
+              {copy.featured}{lead.category ? ` · ${lead.category}` : ""}
+            </span>
+            <h2>{displayTitle(lead.title, 96)}</h2>
+            <p>{displayTitle(lead.summary || lead.excerpt || copy.updating, 190)}</p>
+          </div>
+          <Link className="lead-market-image" to={withLanguagePrefix(lead.source_url === "#" ? "/tin-tuc" : newsPath(lead), language)}>
             <picture>
               {leadWebpUrl ? <source srcSet={leadWebpUrl} type="image/webp" /> : null}
               <img
@@ -429,30 +433,19 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
                 }}
               />
             </picture>
-          </div>
-          <div className="lead-market-copy">
-            <span className="story-label">
-              <Newspaper size={16} />
-              {copy.featured}
-            </span>
-            <h2>{displayTitle(lead.title, 96)}</h2>
-            <p>{displayTitle(lead.summary || lead.excerpt || copy.updating, 190)}</p>
-            <div className="story-meta">
-              <Clock3 size={15} />
-              <span>{formatDate(lead.published_at || lead.scraped_at, language)}</span>
-              <span>{lead.source_name}</span>
-            </div>
-            <Link className="story-link" to={withLanguagePrefix(lead.source_url === "#" ? "/tin-tuc" : newsPath(lead), language)}>
-              {copy.readNews}
-              <ArrowRight size={16} />
-            </Link>
+          </Link>
+          <div className="lead-market-byline">
+            <b>{language === "en" ? "Market bulletin" : "Bản tin thị trường"}</b>
+            <span className="dot" />
+            <span>{lead.source_name}</span>
+            <span className="dot" />
+            <span>{formatDate(lead.published_at || lead.scraped_at, language)}</span>
           </div>
         </article>
 
         <aside className="market-alert-panel">
           <div className="panel-heading">
-            <ShieldAlert size={18} />
-            <h2>{copy.alerts}</h2>
+            <h2>{language === "en" ? "Worth watching" : "Đáng chú ý"}</h2>
           </div>
           <div className="alert-list">
             {marketAlerts.map((item) => (
