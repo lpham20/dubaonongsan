@@ -532,6 +532,7 @@
 .site-head .sh-logo .wd {
   letter-spacing: 0 !important;
   font-kerning: normal;
+  font-optical-sizing: auto;
   text-rendering: optimizeLegibility;
 }
 

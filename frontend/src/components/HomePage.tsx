@@ -321,7 +321,7 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
             <Sprout size={18} />
             {copy.kicker}
           </span>
-          <h1>{copy.heroTitle}</h1>
+          <h1>{normalizeDisplayText(copy.heroTitle)}</h1>
 
           <form className="home-quick-search" role="search" onSubmit={handleSearch}>
             <Search size={19} />
@@ -707,8 +707,12 @@ function articleTime(article: NewsArticle) {
   return Number.isFinite(value) ? value : 0;
 }
 
+function normalizeDisplayText(value: string | null | undefined) {
+  return (value || "").normalize("NFC");
+}
+
 function displayTitle(title: string, maxLength: number) {
-  const cleaned = title.replace(/\s+/g, " ").trim();
+  const cleaned = normalizeDisplayText(title).replace(/\s+/g, " ").trim();
   if (cleaned.length <= maxLength) return cleaned;
   const boundary = cleaned.lastIndexOf(" ", maxLength - 1);
   return `${cleaned.slice(0, boundary > 42 ? boundary : maxLength).trim()}...`;
