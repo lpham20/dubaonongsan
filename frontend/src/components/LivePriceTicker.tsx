@@ -44,7 +44,7 @@ function LivePriceTickerComponent() {
   const [tickerData, setTickerData] = useState<Record<CropType, PricePoint[]>>(EMPTY_TICKER_DATA);
   const [ureaForecast, setUreaForecast] = useState<WorldFertilizerForecast | null>(null);
   const items = useMemo(() => buildLiveTicker(tickerData, language, ureaForecast), [language, tickerData, ureaForecast]);
-  const repeated = [...items, ...items, ...items];
+  const repeated = [...items, ...items];
 
   useEffect(() => {
     let active = true;
@@ -76,18 +76,18 @@ function LivePriceTickerComponent() {
   }, []);
 
   return (
-    <div className="p-strip paper" aria-label={language === "en" ? "Today agricultural price ticker" : "Dải băng giá nông sản hôm nay"}>
-      <div className="lab">{language === "en" ? "Today prices" : "Giá hôm nay"}</div>
-      <div className="items">
-        {repeated.map((item, index) => (
-          <div className="it" key={`${item.label}-${index}`}>
-            <span className="s">{item.label}</span>
-            <span className="pr">
-              <b className="num">{item.value}</b>
-              <em className={item.tone === "up" ? "pos" : "neg"}>{item.change}</em>
+    <div className="t-ticker term" aria-label={language === "en" ? "Live agricultural and fertilizer price ticker" : "Dải băng giá nông sản và phân bón hôm nay"}>
+      <div className="tk-label">{language === "en" ? "Live prices" : "Giá hôm nay"}</div>
+      <div className="tk-track">
+        <div className="tk-row">
+          {repeated.map((item, index) => (
+            <span className="tk-item" key={`${item.label}-${index}`}>
+              <span className="sym">{item.label}</span>
+              <span className="px num">{item.value}</span>
+              <span className={`ch ${item.tone === "up" ? "pos" : "neg"}`}>{item.change}</span>
             </span>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

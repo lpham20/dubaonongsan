@@ -317,7 +317,8 @@
 }
 
 @media (max-width: 860px) {
-  body.mobile-drawer-locked .live-price-ticker {
+  body.mobile-drawer-locked .live-price-ticker,
+  body.mobile-drawer-locked .t-ticker {
     display: none !important;
   }
 
@@ -371,5 +372,14 @@
 
   .live-price-ticker-content > span:nth-child(n + 6) {
     display: none;
+  }
+}
+
+@media (max-width: 1180px) {
+  body.mobile-drawer-locked #mobile-nav-drawer.mobile-nav-drawer.open {
+    right: 0 !important;
+    left: auto !important;
+    transform: none !important;
+    translate: none !important;
   }
 }

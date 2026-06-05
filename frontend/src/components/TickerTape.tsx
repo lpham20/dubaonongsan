@@ -20,8 +20,8 @@ function TickerTapeComponent({ points }: Props) {
   const repeated = [...items, ...items];
 
   return (
-    <div className="t-ticker term" aria-label={isEnglish ? "Live agricultural price ticker" : "Dải băng giá nông sản"}>
-      <div className="tk-label">{isEnglish ? "Live" : "Live"}</div>
+    <div className="t-ticker term" aria-label={isEnglish ? "Live agricultural price ticker" : "Dải băng giá nông sản hôm nay"}>
+      <div className="tk-label">{isEnglish ? "Live prices" : "Giá hôm nay"}</div>
       <div className="tk-track">
         <div className="tk-row">
           {repeated.map((item, index) => (

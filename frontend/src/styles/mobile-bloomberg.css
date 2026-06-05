@@ -4843,7 +4843,8 @@
   }
 
   .mobile-nav-drawer.open {
-    transform: translateX(0) !important;
+    transform: none !important;
+    translate: none !important;
   }
 
   .mobile-drawer-head {

@@ -85,6 +85,7 @@
   overflow: hidden;
   background: var(--bg-1);
   border-bottom: 1px solid var(--line);
+  font-family: var(--sans);
 }
 
 .p-strip .lab {
@@ -146,6 +147,14 @@
   font-size: 12px;
   font-style: normal;
   font-weight: 600;
+}
+
+.p-strip .it .pr em.pos {
+  color: var(--up);
+}
+
+.p-strip .it .pr em.neg {
+  color: var(--down);
 }
 
 @media (max-width: 768px) {
