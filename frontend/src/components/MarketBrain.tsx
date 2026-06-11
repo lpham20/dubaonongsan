@@ -14,21 +14,21 @@ const money = (value: number, language: "vi" | "en") => `${Math.round(value).toL
 function MarketBrainComponent({ marketIndex, explanation, comparison }: Props) {
   const { language } = useLanguage();
   return (
-    <section className="brain-grid">
-      <article className="brain-panel index-panel">
-        <div className="panel-heading">
+    <section className="terminal-intel brain-grid">
+      <article className="terminal-panel brain-panel index-panel">
+        <div className="terminal-panel-head panel-heading">
           <BarChart3 size={18} />
           <h3>{marketIndex?.name ?? "Chỉ số thị trường"}</h3>
         </div>
         <strong className="brain-number">{money(marketIndex?.latest_value_vnd ?? 0, language)}</strong>
-        <span className={(marketIndex?.change_pct_7d ?? 0) >= 0 ? "positive" : "negative"}>
+        <span className={(marketIndex?.change_pct_7d ?? 0) >= 0 ? "pos num" : "neg num"}>
           {(marketIndex?.change_pct_7d ?? 0) >= 0 ? "+" : ""}
           {marketIndex?.change_pct_7d ?? 0}% / 7 ngày
         </span>
       </article>
 
-      <article className="brain-panel explanation-panel">
-        <div className="panel-heading">
+      <article className="terminal-panel brain-panel explanation-panel">
+        <div className="terminal-panel-head panel-heading">
           <Brain size={18} />
           <h3>Vì sao giá biến động?</h3>
         </div>
@@ -45,8 +45,8 @@ function MarketBrainComponent({ marketIndex, explanation, comparison }: Props) {
         <div className="recommendation">{explanation?.recommendation}</div>
       </article>
 
-      <article className="brain-panel compare-panel">
-        <div className="panel-heading">
+      <article className="terminal-panel brain-panel compare-panel">
+        <div className="terminal-panel-head panel-heading">
           <GitCompareArrows size={18} />
           <h3>So sánh vùng cùng giống</h3>
         </div>
@@ -55,7 +55,7 @@ function MarketBrainComponent({ marketIndex, explanation, comparison }: Props) {
             <div className="compare-row" key={peer.label}>
               <span>{peer.label}</span>
               <strong>{money(peer.avg_price_vnd, language)}</strong>
-              <em className={peer.premium_pct >= 0 ? "positive" : "negative"}>
+              <em className={peer.premium_pct >= 0 ? "pos num" : "neg num"}>
                 {peer.premium_pct >= 0 ? "+" : ""}
                 {peer.premium_pct}%
               </em>

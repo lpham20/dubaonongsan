@@ -39,15 +39,15 @@ function MetricsDashboardComponent({ metrics }: Props) {
   ];
 
   return (
-    <section className="metrics-grid" aria-label={language === "en" ? "Model metrics" : "Chỉ số mô hình"}>
+    <section className="terminal-metrics metrics-grid" aria-label={language === "en" ? "Model metrics" : "Chỉ số mô hình"}>
       {values.map((item) => {
         const Icon = item.icon;
         return (
-          <article className="metric-card" key={item.label}>
+          <article className="terminal-metric metric-card" key={item.label}>
             <Icon size={20} />
-            <span>{item.label}</span>
-            <strong className="num">{item.value}</strong>
-            <small>{item.suffix}</small>
+            <span className="k">{item.label}</span>
+            <strong className="v num">{item.value}</strong>
+            <small className="s">{item.suffix}</small>
           </article>
         );
       })}

@@ -33,11 +33,6 @@
 }
 
 @media (min-width: 861px) {
-  .app-shell:has(> .paper-mast) .live-price-ticker {
-    position: relative;
-    top: auto;
-    z-index: 20;
-  }
 
   .app-shell.paper-frame-shell .live-price-ticker {
     align-items: stretch;
@@ -165,55 +160,6 @@
   .app-shell.paper-frame-shell .home-price-track::after {
     display: none;
     content: none;
-  }
-
-  .app-shell.paper-frame-shell .home-price-content {
-    gap: 0;
-    height: auto;
-    padding: 0;
-    animation: none;
-  }
-
-  .app-shell.paper-frame-shell .home-price-content > span {
-    flex: 0 0 auto;
-    display: grid;
-    grid-template-columns: auto auto;
-    gap: 2px 8px;
-    align-content: center;
-    align-items: baseline;
-    min-width: 168px;
-    min-height: 58px;
-    padding: 9px 20px;
-    color: var(--ink, #14181a);
-    border-right: 1px solid var(--line, #e3e1d9);
-    font-family: var(--sans);
-  }
-
-  .app-shell.paper-frame-shell .home-price-content strong {
-    grid-column: 1 / -1;
-    color: var(--ink-mute, #767c7e);
-    font-size: 10.5px;
-  }
-
-  .app-shell.paper-frame-shell .home-price-content b {
-    color: var(--ink, #14181a);
-    font-family: var(--mono);
-    font-size: 15px;
-    font-weight: 600;
-  }
-
-  .app-shell.paper-frame-shell .home-price-content em {
-    font-family: var(--mono);
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  .app-shell.paper-frame-shell .home-price-content em.up {
-    color: var(--up-light, #0a7d4e);
-  }
-
-  .app-shell.paper-frame-shell .home-price-content em.down {
-    color: var(--down-light, #c5303a);
   }
 }
 

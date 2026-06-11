@@ -539,20 +539,6 @@
     transform: none;
   }
 
-  .news-lead,
-  .news-market-layout,
-  .news-row-card,
-  .news-toolbar,
-  .guide-grid,
-  .guide-layout,
-  .guide-browser,
-  .home-hero,
-  .home-modules,
-  .home-split,
-  .portal-split {
-    grid-template-columns: 1fr;
-  }
-
   .quick-panel {
     position: static;
   }
@@ -575,22 +561,8 @@
     white-space: normal;
   }
 
-  .news-topic-tabs {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    padding-bottom: 4px;
-  }
-
-  .news-topic-tabs button {
-    white-space: nowrap;
-  }
-
   .news-hero h1 {
     white-space: normal;
-  }
-
-  .news-row-card .news-thumb {
-    min-height: 170px;
   }
 
   .auth-box {
@@ -671,18 +643,5 @@
 
   .chart-wrap {
     min-height: 390px;
-  }
-
-  .news-lead h2 {
-    font-size: 23px;
-  }
-
-  .news-row-card h3 {
-    font-size: 18px;
-  }
-
-  .news-source-row {
-    align-items: flex-start;
-    flex-direction: column;
   }
 }

@@ -886,6 +886,9 @@ function LeadNewsCard({ item }: { item: RankedArticle }) {
   const { language } = useLanguage();
   return (
     <article className="n-feature">
+      <div className="n-feature-image">
+        <NewsImage article={item.article} variant="feature" />
+      </div>
       <div className="n-meta">
         <span className="n-cat">
           {language === "en" ? "Feature" : "Tiêu điểm"} · {topicLabel(item.topic, language)}
@@ -893,9 +896,6 @@ function LeadNewsCard({ item }: { item: RankedArticle }) {
       </div>
       <h2><Link to={withLanguagePrefix(newsPath(item.article), language)}>{displayTitle(item.article.title, 96)}</Link></h2>
       <p className="dek">{displayTitle(item.article.summary, 190)}</p>
-      <div className="n-feature-image">
-        <NewsImage article={item.article} variant="feature" />
-      </div>
       <div className="n-src">
         <b>{language === "en" ? "Market bulletin" : "Bản tin thị trường"}</b>
         <span className="dot" />

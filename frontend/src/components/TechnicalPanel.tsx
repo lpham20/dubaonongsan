@@ -30,7 +30,7 @@ function TechnicalPanelComponent({ points, signals }: Props) {
   const SignalIcon = trendScore >= 2 ? TrendingUp : trendScore <= -2 ? TrendingDown : Activity;
 
   return (
-    <section className="technical-panel">
+    <section className="terminal-technical technical-panel">
       <div className="technical-summary">
         <span>
           <Gauge size={17} />

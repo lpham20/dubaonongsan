@@ -548,3 +548,441 @@
 .data-section {
   padding-top: var(--space-5);
 }
+
+/* Terminal redesign pass: scoped so fertilizer/advisory tools keep their own UI. */
+.app-shell.forecast-shell.term {
+  --bg: #0a0d0c;
+  --bg-1: #0e1311;
+  --bg-2: #121916;
+  --bg-3: #18211d;
+  --line: rgba(255, 255, 255, 0.09);
+  --line-2: rgba(255, 255, 255, 0.16);
+  --ink: #eef3f0;
+  --ink-soft: #a7b2ac;
+  --ink-mute: #6c766f;
+  --ink-faint: #4b544e;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.app-shell.forecast-shell.term .pos {
+  color: var(--up);
+}
+
+.app-shell.forecast-shell.term .neg {
+  color: var(--down);
+}
+
+.app-shell.forecast-shell.term .market-quote-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  background: var(--line);
+  border: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.app-shell.forecast-shell.term .quote-main,
+.app-shell.forecast-shell.term .quote-side {
+  background: var(--bg-1);
+  padding: 22px 24px;
+}
+
+.app-shell.forecast-shell.term .quote-title-row {
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.app-shell.forecast-shell.term .quote-title-row svg {
+  margin-top: 5px;
+  color: var(--brand-bright);
+}
+
+.app-shell.forecast-shell.term .quote-title-row h1 {
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(30px, 3.4vw, 46px);
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.05;
+}
+
+.app-shell.forecast-shell.term .quote-meta {
+  color: var(--ink-mute);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.app-shell.forecast-shell.term .quote-price-row strong {
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: clamp(38px, 4.6vw, 58px);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.app-shell.forecast-shell.term .quote-change.positive,
+.app-shell.forecast-shell.term .quote-change.pos {
+  color: var(--up);
+}
+
+.app-shell.forecast-shell.term .quote-change.negative,
+.app-shell.forecast-shell.term .quote-change.neg {
+  color: var(--down);
+}
+
+.app-shell.forecast-shell.term .quote-main p,
+.app-shell.forecast-shell.term .quote-price-row small,
+.app-shell.forecast-shell.term .quote-range span {
+  color: var(--ink-mute);
+}
+
+.app-shell.forecast-shell.term .quote-refresh-button,
+.app-shell.forecast-shell.term .quote-side-action {
+  border-radius: 0;
+  border-color: var(--brand-deep);
+  background: var(--brand-deep);
+  box-shadow: none;
+}
+
+.app-shell.forecast-shell.term .quote-range {
+  width: 100%;
+  border-bottom: 1px solid var(--line);
+}
+
+.app-shell.forecast-shell.term .quote-range strong {
+  color: var(--ink);
+  font-family: var(--mono);
+  font-weight: 600;
+}
+
+.app-shell.forecast-shell.term .market-subnav {
+  gap: 0;
+  margin: 0;
+  padding: 0 12px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+
+.app-shell.forecast-shell.term .market-subnav button {
+  min-height: 42px;
+  padding: 0 16px;
+  color: var(--ink-mute);
+  border-bottom: 2px solid transparent;
+  font-size: 12px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.app-shell.forecast-shell.term .market-subnav button.active {
+  color: var(--ink);
+  border-bottom-color: var(--brand-bright);
+}
+
+.app-shell.forecast-shell.term .market-subnav button.active::after {
+  display: none;
+}
+
+.app-shell.forecast-shell.term .control-band,
+.app-shell.forecast-shell.term .chart-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 18px;
+  margin: 0;
+  padding: 12px 16px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+
+.app-shell.forecast-shell.term .filter-group,
+.app-shell.forecast-shell.term .chart-control-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.app-shell.forecast-shell.term .control-label,
+.app-shell.forecast-shell.term .filter-group label {
+  color: var(--ink-mute);
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.app-shell.forecast-shell.term .filter-group label {
+  display: grid;
+  gap: 5px;
+}
+
+.app-shell.forecast-shell.term .filter-group select,
+.app-shell.forecast-shell.term .segmented,
+.app-shell.forecast-shell.term .layer-toggles {
+  min-height: 32px;
+  border: 1px solid var(--line-2);
+  border-radius: 0;
+  background: var(--bg-2);
+  color: var(--ink);
+}
+
+.app-shell.forecast-shell.term .filter-group select {
+  padding: 0 12px;
+  font-family: var(--sans);
+}
+
+.app-shell.forecast-shell.term .segmented button,
+.app-shell.forecast-shell.term .layer-toggles button {
+  min-height: 30px;
+  border-right: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-mute);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.app-shell.forecast-shell.term .segmented button.active,
+.app-shell.forecast-shell.term .layer-toggles button.active {
+  background: var(--brand);
+  color: #fff;
+}
+
+.app-shell.forecast-shell.term .market-status,
+.app-shell.forecast-shell.term .pin-button {
+  border: 1px solid var(--line-2);
+  border-radius: 0;
+  background: var(--bg-2);
+  color: var(--ink-soft);
+  box-shadow: none;
+}
+
+.app-shell.forecast-shell.term .pin-button {
+  border-color: var(--brand);
+  background: var(--brand-deep);
+  color: #fff;
+}
+
+.app-shell.forecast-shell.term .chart-wrap {
+  min-height: 500px;
+  padding: 12px 8px 0;
+  border-color: var(--line);
+  border-radius: 0;
+  background: var(--bg-1);
+  box-shadow: none;
+}
+
+.app-shell.forecast-shell.term .signal-chip {
+  border-radius: 0;
+}
+
+.app-shell.forecast-shell.term .terminal-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+
+.app-shell.forecast-shell.term .terminal-metric {
+  min-height: 88px;
+  padding: 13px 16px;
+  border: 0;
+  border-radius: 0;
+  background: var(--bg-1);
+  box-shadow: none;
+}
+
+.app-shell.forecast-shell.term .terminal-metric svg {
+  display: none;
+}
+
+.app-shell.forecast-shell.term .terminal-metric .k,
+.app-shell.forecast-shell.term .terminal-metric span {
+  color: var(--ink-mute);
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.app-shell.forecast-shell.term .terminal-metric .v,
+.app-shell.forecast-shell.term .terminal-metric strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.app-shell.forecast-shell.term .terminal-metric .s,
+.app-shell.forecast-shell.term .terminal-metric small,
+.app-shell.forecast-shell.term .metric-note {
+  color: var(--ink-mute);
+  font-size: 11px;
+}
+
+.app-shell.forecast-shell.term .terminal-intel {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin: 18px 0 0;
+  padding: 0;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+
+.app-shell.forecast-shell.term .terminal-panel {
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--bg-1);
+  box-shadow: none;
+}
+
+.app-shell.forecast-shell.term .terminal-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-start;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.app-shell.forecast-shell.term .terminal-panel-head svg {
+  color: var(--brand-bright);
+}
+
+.app-shell.forecast-shell.term .terminal-panel-head h3 {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.app-shell.forecast-shell.term .brain-number,
+.app-shell.forecast-shell.term .quality-score {
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.app-shell.forecast-shell.term .terminal-panel p,
+.app-shell.forecast-shell.term .driver-row p,
+.app-shell.forecast-shell.term .alert-row p {
+  color: var(--ink-soft);
+}
+
+.app-shell.forecast-shell.term .driver-row,
+.app-shell.forecast-shell.term .compare-row,
+.app-shell.forecast-shell.term .heatmap-row,
+.app-shell.forecast-shell.term .mover-row,
+.app-shell.forecast-shell.term .alert-row {
+  border-bottom: 1px solid var(--line);
+}
+
+.app-shell.forecast-shell.term .quality-tags span,
+.app-shell.forecast-shell.term .risk-flags span,
+.app-shell.forecast-shell.term .watchlist-item,
+.app-shell.forecast-shell.term .export-link {
+  border-radius: 0;
+  border-color: var(--line-2);
+  background: var(--bg-2);
+  color: var(--ink-soft);
+}
+
+.app-shell.forecast-shell.term .terminal-technical {
+  display: grid;
+  gap: 1px;
+  margin-top: 18px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+
+.app-shell.forecast-shell.term .terminal-technical .technical-summary,
+.app-shell.forecast-shell.term .terminal-technical .technical-cards article,
+.app-shell.forecast-shell.term .terminal-technical .technical-levels article {
+  border: 0;
+  border-radius: 0;
+  background: var(--bg-1);
+  box-shadow: none;
+}
+
+.app-shell.forecast-shell.term .terminal-technical .technical-summary {
+  padding: 18px;
+}
+
+.app-shell.forecast-shell.term .terminal-technical .technical-summary > span,
+.app-shell.forecast-shell.term .terminal-technical .technical-cards svg {
+  color: var(--brand-bright);
+}
+
+.app-shell.forecast-shell.term .terminal-technical .technical-summary h2 {
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.app-shell.forecast-shell.term .terminal-technical .technical-summary p,
+.app-shell.forecast-shell.term .terminal-technical .technical-cards small,
+.app-shell.forecast-shell.term .terminal-technical .technical-levels span {
+  color: var(--ink-soft);
+}
+
+.app-shell.forecast-shell.term .terminal-technical .technical-cards,
+.app-shell.forecast-shell.term .terminal-technical .technical-levels {
+  gap: 1px;
+}
+
+.app-shell.forecast-shell.term .terminal-technical .technical-cards strong,
+.app-shell.forecast-shell.term .terminal-technical .technical-levels strong {
+  color: var(--ink);
+  font-family: var(--mono);
+  font-weight: 600;
+}
+
+@media (max-width: 1024px) {
+  .app-shell.forecast-shell.term .market-quote-header,
+  .app-shell.forecast-shell.term .analysis-brief {
+    grid-template-columns: 1fr;
+  }
+
+  .app-shell.forecast-shell.term .terminal-intel,
+  .app-shell.forecast-shell.term .terminal-metrics,
+  .app-shell.forecast-shell.term .terminal-technical .technical-cards,
+  .app-shell.forecast-shell.term .terminal-technical .technical-levels {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .app-shell.forecast-shell.term .quote-main,
+  .app-shell.forecast-shell.term .quote-side {
+    padding: 18px 14px;
+  }
+
+  .app-shell.forecast-shell.term .quote-title-row h1 {
+    font-size: 30px;
+  }
+
+  .app-shell.forecast-shell.term .terminal-intel,
+  .app-shell.forecast-shell.term .terminal-metrics,
+  .app-shell.forecast-shell.term .terminal-technical .technical-cards,
+  .app-shell.forecast-shell.term .terminal-technical .technical-levels {
+    grid-template-columns: 1fr;
+  }
+}

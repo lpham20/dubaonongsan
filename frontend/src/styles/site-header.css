@@ -37,6 +37,9 @@
 .sh-util a,
 .sh-link-button,
 .sh-lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   border: 0;
   background: transparent;
   color: var(--ink-soft);
@@ -142,6 +145,7 @@
 
 .sh-nav {
   display: flex;
+  min-width: 0;
   align-items: stretch;
 }
 
@@ -190,6 +194,7 @@
 .sh-auth {
   position: relative;
   display: flex;
+  align-items: stretch;
 }
 
 .sh-menu,
@@ -228,6 +233,20 @@
   gap: 1px;
 }
 
+.sh-menu-row {
+  display: grid;
+  gap: 1px;
+}
+
+.sh-menu-section {
+  padding: 8px 10px 3px;
+  color: var(--ink-mute);
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .sh-menu button {
   display: flex;
   align-items: center;
@@ -250,8 +269,14 @@
   background: var(--bg-1);
 }
 
+.sh-menu button.dropdown-child-item {
+  padding-left: 26px;
+  color: var(--ink-soft);
+}
+
 .sh-tools {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 10px;
 }

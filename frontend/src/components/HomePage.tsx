@@ -1,17 +1,8 @@
 import {
   ArrowRight,
-  BarChart3,
-  Bell,
-  BookOpenCheck,
-  ChevronDown,
-  Coffee,
-  Search,
-  Sprout,
-  TrendingDown,
-  TrendingUp
 } from "./icons";
-import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { FreshnessBanner } from "./FreshnessBanner";
 import { SeoHead } from "./SeoHead";
 import {
@@ -23,7 +14,7 @@ import {
   type PricePoint,
   type UsdVndRate
 } from "../lib/api";
-import { newsPath } from "../lib/seo";
+import { guidePath, newsPath } from "../lib/seo";
 import { useLanguage } from "../contexts/LanguageContext";
 import { withLanguagePrefix } from "../lib/localizedRoutes";
 
@@ -241,18 +232,19 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
         commodityList: "Cà phê, sầu riêng, hồ tiêu, lúa",
         livePrices: "Giá hôm nay"
       };
-  const navigate = useNavigate();
   const [liveTicker, setLiveTicker] = useState<HomeTickerState>({ coffee: [], durian: [], pepper: [], rice: [] });
   const [usdVndRate, setUsdVndRate] = useState<UsdVndRate | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
   const articles = useMemo(() => rankHomeArticles(news.length ? news : fallbackNews), [news]);
   const lead = articles[0];
   const leadImageUrl = lead.image_url || "/coffee-hero-photo.jpg";
   const leadWebpUrl = localWebpSource(leadImageUrl);
-  const marketAlerts = articles.slice(1, 6);
+  const marketAlerts = articles.slice(1, 5);
   const guidePreview = guides.slice(0, 3);
   const tickerItems = useMemo(() => buildTickerItems(liveTicker, usdVndRate, language), [language, liveTicker, usdVndRate]);
   const dataCards = useMemo(() => buildMarketCards(liveTicker, language), [language, liveTicker]);
+  const boardCards = dataCards.slice(0, 4);
+  const movers = useMemo(() => splitMovers(dataCards), [dataCards]);
+  const newsColumns = useMemo(() => buildNewsColumns(articles.slice(1, 7)), [articles]);
 
   useEffect(() => {
     let active = true;
@@ -289,14 +281,8 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
     };
   }, []);
 
-  function handleSearch(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const query = searchQuery.trim();
-    navigate(withLanguagePrefix(query ? `/tin-tuc?q=${encodeURIComponent(query)}` : "/tin-tuc", language));
-  }
-
   return (
-    <section className="home-page finance-home paper">
+    <section className="home-page paper">
       <SeoHead
         title={copy.seoTitle}
         description={copy.seoDescription}
@@ -309,203 +295,189 @@ export function HomePage({ news, guides, onOpenAnalytics, onOpenNews, onOpenGuid
           description: copy.schemaDescription,
           speakable: {
             "@type": "SpeakableSpecification",
-            cssSelector: [".home-market-hero h1", ".home-market-hero p"]
+            cssSelector: [".p-lead .p-headline", ".p-lead .p-dek"]
           }
         }}
       />
+
       <PriceTicker items={tickerItems} />
 
-      <section className="home-market-hero">
-        <div className="home-hero-copy">
-          <span className="home-kicker">
-            <Sprout size={18} />
-            {copy.kicker}
-          </span>
-          <h1>{normalizeDisplayText(copy.heroTitle)}</h1>
-
-          <form className="home-quick-search" role="search" onSubmit={handleSearch}>
-            <Search size={19} />
-            <input
-              name="q"
-              aria-label={copy.searchLabel}
-              placeholder={copy.searchPlaceholder}
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-            />
-            <button className="home-search-filter" type="submit">
-              {copy.searchButton}
-            </button>
-            <button className="home-search-filter" type="button" onClick={onOpenNews}>
-              {copy.marketNews}
-              <ChevronDown size={15} />
-            </button>
-          </form>
-
-          <div className="home-hero-actions">
-            <button type="button" onClick={() => onOpenAnalytics("sau_rieng")}>
-              {copy.forecastDurian}
-              <ArrowRight size={17} />
-            </button>
-            <button type="button" onClick={() => onOpenAnalytics("ca_phe")}>
-              {copy.forecastCoffee}
-              <ArrowRight size={17} />
-            </button>
-            <button type="button" onClick={() => onOpenAnalytics("ho_tieu")}>
-              {copy.forecastPepper}
-              <ArrowRight size={17} />
-            </button>
-            <button type="button" onClick={() => onOpenAnalytics("lua")}>
-              {copy.forecastRice}
-              <ArrowRight size={17} />
-            </button>
-          </div>
-        </div>
-
-        <aside className="home-hero-terminal" aria-label="Tóm tắt thị trường">
-          <div>
-            <span>{copy.dataDesk}</span>
-            <strong>{copy.trackedGroups}</strong>
-          </div>
-          <dl>
-            <div>
-              <dt>{copy.agriPrices}</dt>
-              <dd>Cà phê, sầu riêng, hồ tiêu, lúa</dd>
-            </div>
-            <div>
-              <dt>{copy.inputs}</dt>
-              <dd>{copy.fertilizerAndCosts}</dd>
-            </div>
-            <div>
-              <dt>{copy.impactNews}</dt>
-              <dd>{copy.impactNewsDesc}</dd>
-            </div>
-          </dl>
-        </aside>
-      </section>
-
-      <div className="market-card-freshness">
-        <FreshnessBanner />
-      </div>
-
-      <section className="market-card-grid" aria-label="Biến động giá nông sản">
-        {dataCards.map((card) => (
-          <article className={`market-data-card ${card.tone}`} key={card.label}>
-            <div className="market-card-head">
-              <span>{card.label}</span>
-              {card.tone === "up" ? <TrendingUp size={18} /> : <TrendingDown size={18} />}
-            </div>
-            <strong className="num">{card.value}</strong>
-            <div className="market-card-meta">
-              <small>{card.sublabel}</small>
-              <em className="num">{card.change}</em>
-            </div>
-            <Sparkline points={card.points} tone={card.tone} />
-          </article>
-        ))}
-      </section>
-
-      <section className="home-intel-grid">
-        <article className="lead-market-story">
-          <div className="lead-market-copy">
-            <span className="story-label">
+      <div className="p-wrap">
+        <section className="p-lead">
+          <article className="main">
+            <div className="p-kicker">
+              <span className="bar" />
               {copy.featured}{lead.category ? ` · ${lead.category}` : ""}
-            </span>
-            <h2>{displayTitle(lead.title, 96)}</h2>
-            <p>{displayTitle(lead.summary || lead.excerpt || copy.updating, 190)}</p>
-          </div>
-          <Link className="lead-market-image" to={withLanguagePrefix(lead.source_url === "#" ? "/tin-tuc" : newsPath(lead), language)}>
-            <picture>
-              {leadWebpUrl ? <source srcSet={leadWebpUrl} type="image/webp" /> : null}
-              <img
-                src={leadImageUrl}
-                alt={`Ảnh minh họa: ${lead.title}`}
-                fetchPriority="high"
-                decoding="async"
-                width="800"
-                height="450"
-                onError={(event) => {
-                  if (event.currentTarget.dataset.fallbackApplied === "true") {
-                    event.currentTarget.style.display = "none";
-                    return;
-                  }
-                  event.currentTarget.dataset.fallbackApplied = "true";
-                  event.currentTarget.src = "/coffee-hero-photo.jpg";
-                }}
-              />
-            </picture>
-          </Link>
-          <div className="lead-market-byline">
-            <b>{language === "en" ? "Market bulletin" : "Bản tin thị trường"}</b>
-            <span className="dot" />
-            <span>{lead.source_name}</span>
-            <span className="dot" />
-            <span>{formatDate(lead.published_at || lead.scraped_at, language)}</span>
-          </div>
-        </article>
+            </div>
+            <h1 className="p-headline">{displayTitle(lead.title || copy.heroTitle, 110)}</h1>
+            <p className="p-dek">{displayTitle(lead.summary || lead.excerpt || copy.updating, 210)}</p>
+            <Link to={withLanguagePrefix(lead.source_url === "#" ? "/tin-tuc" : newsPath(lead), language)}>
+              <picture>
+                {leadWebpUrl ? <source srcSet={leadWebpUrl} type="image/webp" /> : null}
+                <img
+                  className="p-figure"
+                  src={leadImageUrl}
+                  alt={`Ảnh minh họa: ${lead.title}`}
+                  fetchPriority="high"
+                  decoding="async"
+                  width="960"
+                  height="480"
+                  onError={(event) => {
+                    if (event.currentTarget.dataset.fallbackApplied === "true") {
+                      event.currentTarget.style.display = "none";
+                      return;
+                    }
+                    event.currentTarget.dataset.fallbackApplied = "true";
+                    event.currentTarget.src = "/coffee-hero-photo.jpg";
+                  }}
+                />
+              </picture>
+            </Link>
+            <div className="p-byline">
+              <b>{language === "en" ? "Market bulletin" : "Bản tin thị trường"}</b>
+              <span className="dot" />
+              <span>{lead.source_name}</span>
+              <span className="dot" />
+              <span>{formatDate(lead.published_at || lead.scraped_at, language)}</span>
+            </div>
+          </article>
 
-        <aside className="market-alert-panel">
-          <div className="panel-heading">
-            <h2>{language === "en" ? "Worth watching" : "Đáng chú ý"}</h2>
-          </div>
-          <div className="alert-list">
+          <aside className="rail">
+            <div className="rail-h">{language === "en" ? "Worth watching" : "Đáng chú ý"}</div>
             {marketAlerts.map((item) => (
-              <Link to={withLanguagePrefix(item.source_url === "#" ? "/tin-tuc" : newsPath(item), language)} key={item.article_id}>
-                <span>{item.category || copy.market}</span>
-                <strong>{displayTitle(item.title, 74)}</strong>
-                <small>{formatDate(item.published_at || item.scraped_at, language)}</small>
+              <Link className="rail-item" to={withLanguagePrefix(item.source_url === "#" ? "/tin-tuc" : newsPath(item), language)} key={item.article_id}>
+                <div className="rk">{item.category || copy.market}</div>
+                <h4>{displayTitle(item.title, 84)}</h4>
+                <span className="tm">{formatDate(item.published_at || item.scraped_at, language)}</span>
               </Link>
             ))}
-          </div>
-          <button type="button" onClick={onOpenNews}>
-            {copy.allNews}
-            <ArrowRight size={16} />
-          </button>
-        </aside>
-      </section>
+          </aside>
+        </section>
 
-      <section className="home-ops-strip">
-        <button type="button" onClick={() => onOpenAnalytics("sau_rieng")}>
-          <BarChart3 size={20} />
-          <span>{copy.priceForecast}</span>
-          <strong>{copy.forecastModel}</strong>
-        </button>
-        <button type="button" onClick={onOpenNews}>
-          <Bell size={20} />
-          <span>{copy.marketBrief}</span>
-          <strong>{copy.fertilizerAndCosts}</strong>
-        </button>
-        <button type="button" onClick={onOpenGuides}>
-          <BookOpenCheck size={20} />
-          <span>{copy.guideWorkflows}</span>
-          <strong>{copy.newGuides(guidePreview.length)}</strong>
-        </button>
-        <button type="button" onClick={() => onOpenAnalytics("ca_phe")}>
-          <Coffee size={20} />
-          <span>{copy.commodityProfiles}</span>
-          <strong>{copy.commodityList}</strong>
-        </button>
-      </section>
+        <section className="p-section">
+          <div className="p-sec-head">
+            <h2>{language === "en" ? "Market price board" : "Bảng giá thị trường"}</h2>
+            <button type="button" className="more p-action-link" onClick={() => onOpenAnalytics("sau_rieng")}>
+              {language === "en" ? "Open analysis" : "Mở phân tích"} <ArrowRight size={13} />
+            </button>
+          </div>
+          <div className="home-freshness-line">
+            <FreshnessBanner />
+          </div>
+          <div className="board">
+            {boardCards.map((card) => (
+              <article className="cell" key={`${card.label}-${card.sublabel}`}>
+                <div className="cm">
+                  {card.label} <small>{card.sublabel}</small>
+                </div>
+                <div className="cp">{stripUnit(card.value)}</div>
+                <div className={`cc ${card.tone === "up" ? "pos" : "neg"}`}>
+                  {card.tone === "up" ? "▲" : "▼"} {card.change}
+                </div>
+                <Sparkline points={card.points} tone={card.tone} />
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="p-section">
+          <div className="p-sec-head">
+            <h2>{language === "en" ? "Strongest market moves" : "Biến động mạnh nhất"}</h2>
+            <button type="button" className="more p-action-link" onClick={() => onOpenAnalytics("ca_phe")}>
+              {copy.priceForecast} <ArrowRight size={13} />
+            </button>
+          </div>
+          <div className="movers">
+            <div className="col">
+              <h3 className="pos">{language === "en" ? "▲ Biggest gainers" : "▲ Vùng tăng giá mạnh nhất"}</h3>
+              {movers.gainers.map((card) => (
+                <MoverRow card={card} key={`gain-${card.label}-${card.sublabel}`} />
+              ))}
+            </div>
+            <div className="col">
+              <h3 className="neg">{language === "en" ? "▼ Biggest decliners" : "▼ Vùng giảm giá mạnh nhất"}</h3>
+              {movers.decliners.map((card) => (
+                <MoverRow card={card} key={`drop-${card.label}-${card.sublabel}`} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="p-section">
+          <div className="p-sec-head">
+            <h2>{language === "en" ? "Latest agricultural news" : "Tin nông nghiệp mới nhất"}</h2>
+            <button type="button" className="more p-action-link" onClick={onOpenNews}>
+              {copy.allNews} <ArrowRight size={13} />
+            </button>
+          </div>
+          <div className="river">
+            {newsColumns.map((column, columnIndex) => (
+              <div className="art" key={`news-col-${columnIndex}`}>
+                {column.map((item, itemIndex) => (
+                  <div key={item.article_id}>
+                    <Link to={withLanguagePrefix(item.source_url === "#" ? "/tin-tuc" : newsPath(item), language)}>
+                      <div className="rk">{item.category || copy.market}</div>
+                      <h3>{displayTitle(item.title, itemIndex === 0 ? 82 : 70)}</h3>
+                    </Link>
+                    {itemIndex === 0 ? <p>{displayTitle(item.summary || item.excerpt || copy.updating, 128)}</p> : null}
+                    <span className="tm">{formatDate(item.published_at || item.scraped_at, language)}</span>
+                    {itemIndex < column.length - 1 ? <div className="divider" /> : null}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="p-section p-section-last">
+          <div className="p-sec-head">
+            <h2>{language === "en" ? "Field guides" : "Hướng dẫn sử dụng"}</h2>
+            <button type="button" className="more p-action-link" onClick={onOpenGuides}>
+              {language === "en" ? "Guide library" : "Thư viện hướng dẫn"} <ArrowRight size={13} />
+            </button>
+          </div>
+          <div className="guides">
+            {guidePreview.length
+              ? guidePreview.map((guide, index) => (
+                  <Link className="guide" to={withLanguagePrefix(guidePath(guide.slug), language)} key={guide.slug}>
+                    <div className="step">{String(index + 1).padStart(2, "0")}</div>
+                    <h4>{displayTitle(guide.title, 74)}</h4>
+                    <p>{displayTitle(guide.summary, 132)}</p>
+                    <span className="read">{language === "en" ? "Read guide" : "Xem hướng dẫn"} →</span>
+                  </Link>
+                ))
+              : fallbackHomeGuides(language).map((guide, index) => (
+                  <Link className="guide" to={withLanguagePrefix("/huong-dan", language)} key={guide.title}>
+                    <div className="step">{String(index + 1).padStart(2, "0")}</div>
+                    <h4>{guide.title}</h4>
+                    <p>{guide.summary}</p>
+                    <span className="read">{language === "en" ? "Open library" : "Mở thư viện"} →</span>
+                  </Link>
+                ))}
+          </div>
+        </section>
+      </div>
     </section>
   );
 }
 
 function PriceTicker({ items }: { items: TickerItem[] }) {
   const { language } = useLanguage();
-  const repeated = [...items, ...items];
+  const visible = items.slice(0, 6);
 
   return (
-    <div className="t-ticker term" aria-label={language === "en" ? "Live agricultural price ticker" : "Dải băng giá nông sản hôm nay"}>
-      <div className="tk-label">{language === "en" ? "Live prices" : "Giá hôm nay"}</div>
-      <div className="tk-track">
-        <div className="tk-row">
-          {repeated.map((item, index) => (
-            <span className="tk-item" key={`${item.label}-${index}`}>
-              <span className="sym">{item.label}</span>
-              <span className="px num">{item.value}</span>
-              <span className={`ch ${item.tone === "up" ? "pos" : "neg"}`}>{item.change}</span>
+    <div className="p-strip" aria-label={language === "en" ? "Live agricultural price strip" : "Bảng giá nông sản hôm nay"}>
+      <div className="lab">{language === "en" ? "Today prices" : "Giá hôm nay"}</div>
+      <div className="items">
+        {visible.map((item) => (
+          <div className="it" key={`${item.label}-${item.value}`}>
+            <span className="s">{item.label}</span>
+            <span className="pr">
+              <b>{item.value}</b>
+              <em className={item.tone === "up" ? "pos" : "neg"}>{item.change}</em>
             </span>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -525,10 +497,23 @@ function Sparkline({ points, tone }: { points: number[]; tone: "up" | "down" }) 
   const area = `0,42 ${coords} 120,42`;
 
   return (
-    <svg className={`sparkline ${tone}`} viewBox="0 0 120 42" role="img" aria-label="Biểu đồ biến động nhỏ">
+    <svg className={`spark ${tone}`} viewBox="0 0 120 42" preserveAspectRatio="none" role="img" aria-label="Biểu đồ biến động nhỏ">
       <polygon points={area} />
       <polyline points={coords} />
     </svg>
+  );
+}
+
+function MoverRow({ card }: { card: MarketCard }) {
+  return (
+    <div className="mv">
+      <div className="nm">
+        {card.label}
+        <small>{card.sublabel}</small>
+      </div>
+      <div className="px">{stripUnit(card.value)}</div>
+      <div className={`ch ${card.tone === "up" ? "pos" : "neg"}`}>{card.change}</div>
+    </div>
   );
 }
 
@@ -571,6 +556,64 @@ function buildMarketCards(live: HomeTickerState, language: "vi" | "en" = "vi"): 
     pointToCard(live.pepper, fallbackMarketCards[6], ["Tiêu đen"], language),
     pointToCard(live.pepper, fallbackMarketCards[7], ["Tiêu trắng"], language)
   ];
+}
+
+function splitMovers(cards: MarketCard[]) {
+  const ranked = [...cards].sort((left, right) => Math.abs(parseChangeNumber(right.change)) - Math.abs(parseChangeNumber(left.change)));
+  const gainers = ranked.filter((card) => card.tone === "up").slice(0, 5);
+  const decliners = ranked.filter((card) => card.tone === "down").slice(0, 5);
+
+  return {
+    gainers: gainers.length ? gainers : ranked.slice(0, 5),
+    decliners: decliners.length ? decliners : ranked.slice(0, 5)
+  };
+}
+
+function parseChangeNumber(value: string) {
+  const normalized = value.replace("%", "").replace(",", ".").replace(/[^\d.+-]/g, "");
+  const parsed = Number.parseFloat(normalized);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function buildNewsColumns(items: NewsArticle[]) {
+  const source = items.length ? items : fallbackNews;
+  return [source.slice(0, 2), source.slice(2, 4), source.slice(4, 6)].map((column) => (column.length ? column : source.slice(0, 1)));
+}
+
+function fallbackHomeGuides(language: "vi" | "en") {
+  return language === "en"
+    ? [
+        {
+          title: "Read price charts and forecast bands",
+          summary: "Understand actual prices, ML forecasts and confidence bands before deciding when to sell."
+        },
+        {
+          title: "Compare prices by growing region",
+          summary: "Filter by crop, variety and province to spot regional price gaps and timing differences."
+        },
+        {
+          title: "Estimate profit from input costs",
+          summary: "Combine expected yield, selling price and fertilizer cost to frame a practical farm budget."
+        }
+      ]
+    : [
+        {
+          title: "Đọc biểu đồ giá và dải dự báo",
+          summary: "Phân biệt giá thực tế, dự báo ML và dải tin cậy trước khi quyết định thời điểm bán."
+        },
+        {
+          title: "So sánh giá theo vùng trồng",
+          summary: "Lọc theo cây, giống và tỉnh để nhìn nhanh chênh lệch vùng và nhịp thu hoạch."
+        },
+        {
+          title: "Ước tính lợi nhuận nông vụ",
+          summary: "Kết hợp năng suất, giá bán kỳ vọng và chi phí đầu vào để lập ngân sách thực tế."
+        }
+      ];
+}
+
+function stripUnit(value: string) {
+  return value.replace(/\s+(đ\/kg|VND\/kg)$/i, "");
 }
 
 function pointToTicker(points: PricePoint[], fallbackLabel: string, keywords: string[], language: "vi" | "en"): TickerItem | null {

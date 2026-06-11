@@ -35,9 +35,9 @@ function IntelligencePanelsComponent({
 }: Props) {
   const { language } = useLanguage();
   return (
-    <section className="intel-grid">
-      <article className="intel-panel data-quality">
-        <div className="panel-heading">
+    <section className="terminal-intel intel-grid">
+      <article className="terminal-panel intel-panel data-quality">
+        <div className="terminal-panel-head panel-heading">
           <BadgeCheck size={18} />
           <h3>{language === "en" ? "Data confidence" : "Độ tin cậy dữ liệu"}</h3>
         </div>
@@ -70,8 +70,8 @@ function IntelligencePanelsComponent({
         </div>
       </article>
 
-      <article className="intel-panel">
-        <div className="panel-heading">
+      <article className="terminal-panel intel-panel">
+        <div className="terminal-panel-head panel-heading">
           <Pin size={18} />
           <h3>{language === "en" ? "Watchlist" : "Danh sách ghim"}</h3>
         </div>
@@ -102,24 +102,24 @@ function IntelligencePanelsComponent({
         )}
       </article>
 
-      <article className="intel-panel movers-panel">
-        <div className="panel-heading">
+      <article className="terminal-panel intel-panel movers-panel">
+        <div className="terminal-panel-head panel-heading">
           <ArrowUpRight size={18} />
           <h3>{language === "en" ? "Strong gainers" : "Tăng mạnh"}</h3>
         </div>
         <MoverList rows={gainers} positive />
       </article>
 
-      <article className="intel-panel movers-panel">
-        <div className="panel-heading">
+      <article className="terminal-panel intel-panel movers-panel">
+        <div className="terminal-panel-head panel-heading">
           <ArrowDownRight size={18} />
           <h3>{language === "en" ? "Strong decliners" : "Giảm mạnh"}</h3>
         </div>
         <MoverList rows={losers} />
       </article>
 
-      <article className="intel-panel heatmap-panel">
-        <div className="panel-heading">
+      <article className="terminal-panel intel-panel heatmap-panel">
+        <div className="terminal-panel-head panel-heading">
           <MapPinned size={18} />
           <h3>{language === "en" ? "Regional heatmap" : "Bản đồ nhiệt vùng"}</h3>
         </div>
@@ -128,7 +128,7 @@ function IntelligencePanelsComponent({
             <div className="heatmap-row" key={`${cell.region_id}-${cell.province}`}>
               <span>{displayProvince(cell.province, cell.region)}</span>
               <strong className="num">{money(cell.avg_price_vnd, language)}</strong>
-              <em className={cell.change_pct >= 0 ? "positive num" : "negative num"}>
+              <em className={cell.change_pct >= 0 ? "pos num" : "neg num"}>
                 {cell.change_pct >= 0 ? "+" : ""}
                 {cell.change_pct}%
               </em>
@@ -137,8 +137,8 @@ function IntelligencePanelsComponent({
         </div>
       </article>
 
-      <article className="intel-panel alerts-panel">
-        <div className="panel-heading">
+      <article className="terminal-panel intel-panel alerts-panel">
+        <div className="terminal-panel-head panel-heading">
           <AlertTriangle size={18} />
           <h3>{language === "en" ? "Strategy alerts" : "Cảnh báo chiến lược"}</h3>
         </div>
@@ -167,7 +167,7 @@ function MoverList({ rows, positive = false }: { rows: Mover[]; positive?: boole
             <strong>{displayProvince(row.province, row.region)}</strong>
             <span>{row.variety}</span>
           </div>
-          <em className={positive ? "positive num" : "negative num"}>
+          <em className={positive ? "pos num" : "neg num"}>
             {row.change_pct >= 0 ? "+" : ""}
             {row.change_pct}%
           </em>

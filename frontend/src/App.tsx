@@ -1080,7 +1080,7 @@ function RoutedApp() {
   const showErrorBanner = Boolean(error && (authOpen || section === "analytics"));
   const baseAppShellClassName =
     section === "analytics"
-      ? `app-shell forecast-shell crop-${crop} analytics-tab-${analyticsTab}`
+      ? `app-shell forecast-shell term crop-${crop} analytics-tab-${analyticsTab}`
       : section === "inputPrices"
         ? "app-shell forecast-shell input-prices-shell"
       : "app-shell";
