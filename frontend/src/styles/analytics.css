@@ -606,7 +606,8 @@
   font-size: clamp(30px, 3.4vw, 46px);
   font-weight: 600;
   letter-spacing: 0;
-  line-height: 1.05;
+  line-height: 1.12;
+  padding-top: 0.03em;
 }
 
 .app-shell.forecast-shell.term .quote-meta {
@@ -935,6 +936,7 @@
   font-size: 26px;
   font-weight: 600;
   letter-spacing: 0;
+  line-height: 1.2;
 }
 
 .app-shell.forecast-shell.term .terminal-technical .technical-summary p,

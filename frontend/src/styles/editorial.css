@@ -67,7 +67,8 @@
   font-size: clamp(38px, 5vw, 50px);
   font-weight: 600;
   letter-spacing: 0;
-  line-height: 1.04;
+  line-height: 1.1;
+  padding-top: 0.03em;
   text-wrap: balance;
 }
 
@@ -241,7 +242,7 @@
   font-size: 18px;
   font-weight: 600;
   letter-spacing: 0;
-  line-height: 1.22;
+  line-height: 1.28;
 }
 
 .rail-item:hover h4 {
@@ -278,6 +279,7 @@
   font-size: 26px;
   font-weight: 600;
   letter-spacing: 0;
+  line-height: 1.22;
 }
 
 .p-sec-head .more,
@@ -477,7 +479,7 @@
   font-size: 20px;
   font-weight: 600;
   letter-spacing: 0;
-  line-height: 1.2;
+  line-height: 1.27;
 }
 
 .river .art a {
@@ -544,7 +546,7 @@
   font-size: 18px;
   font-weight: 600;
   letter-spacing: 0;
-  line-height: 1.25;
+  line-height: 1.3;
 }
 
 .guide p {
