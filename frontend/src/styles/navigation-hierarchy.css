@@ -1060,11 +1060,11 @@
 }
 
 .finance-news-page .news-price-board-header h1 {
-  max-width: 15ch !important;
+  max-width: min(760px, 100%) !important;
   margin: 0 !important;
   color: var(--ink) !important;
-  font-size: clamp(42px, 6vw, 72px) !important;
-  line-height: 1.02 !important;
+  font-size: clamp(44px, 4.7vw, 60px) !important;
+  line-height: 1.08 !important;
   text-wrap: balance;
 }
 

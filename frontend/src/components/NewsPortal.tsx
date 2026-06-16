@@ -549,7 +549,19 @@ function PriceBoardSection({
     <section className="news-price-board">
       <div className="news-price-board-header">
         <div>
-          <h1>{language === "en" ? `${cropName} prices today, ${formatDate(latestDate, language)}` : `${meta.title} hôm nay ngày ${formatDate(latestDate, language)}`}</h1>
+          <h1 className="news-price-board-title">
+            {language === "en" ? (
+              <>
+                <span>{cropName} prices today</span>
+                <span className="news-price-board-title-date">{formatDate(latestDate, language)}</span>
+              </>
+            ) : (
+              <>
+                <span>{meta.title} hôm nay</span>
+                <span className="news-price-board-title-date">ngày {formatDate(latestDate, language)}</span>
+              </>
+            )}
+          </h1>
           <div className="news-price-board-meta">
             <span>{language === "en" ? "Agricultural price board" : "Bảng giá nông sản"}</span>
             <FreshnessBanner />
