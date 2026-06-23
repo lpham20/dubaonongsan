@@ -405,23 +405,25 @@ h5 {
 }
 
 .market-quote-header h1 {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: block;
+  max-width: var(--maxw-page-title);
   color: var(--color-text);
-  font-family: var(--font-sans);
-  font-size: var(--type-h1);
-  font-weight: var(--fw-black);
-  letter-spacing: -0.02em;
-  line-height: var(--lh-tight);
+  font-family: var(--serif);
+  font-size: var(--type-page-title);
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: var(--lh-page-title);
+  text-wrap: balance;
 }
 
 .quote-h1-line1 {
-  font-weight: var(--fw-black);
+  display: inline;
+  font-weight: 600;
 }
 
 .quote-h1-line2 {
+  display: block;
+  margin-top: 4px;
   color: var(--color-text-muted);
   font-size: 0.7em;
   font-weight: var(--fw-bold);
@@ -1476,9 +1478,8 @@ h5 {
   }
 
   .market-quote-header h1 {
-    flex-direction: column;
-    gap: 0;
-    font-size: var(--type-h1-mobile);
+    max-width: 100%;
+    font-size: var(--type-page-title-mobile);
   }
 
   .quote-h1-line2 {

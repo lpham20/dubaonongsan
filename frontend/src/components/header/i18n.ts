@@ -1,5 +1,6 @@
 import type { AppLanguage } from "../../contexts/LanguageContext";
 import type { CropType } from "../../lib/api";
+import { toNFC } from "../../lib/text";
 import type { MainSection, NewsView } from "./types";
 
 export const headerText = {
@@ -116,22 +117,22 @@ const fertilizerLabels: Record<AppLanguage, Partial<Record<MainSection, string>>
 };
 
 export function mainSectionLabel(language: AppLanguage, value: MainSection, fallback: string) {
-  return mainSectionLabels[language][value] ?? fallback;
+  return toNFC(mainSectionLabels[language][value] ?? fallback);
 }
 
 export function newsItemLabel(language: AppLanguage, value: NewsView) {
-  return newsLabels[language][value];
+  return toNFC(newsLabels[language][value]);
 }
 
 export function cropItemLabel(language: AppLanguage, value: CropType) {
-  return cropLabels[language][value];
+  return toNFC(cropLabels[language][value]);
 }
 
 export function fertilizerItemLabel(language: AppLanguage, value: MainSection, fallback: string) {
-  return fertilizerLabels[language][value] ?? fallback;
+  return toNFC(fertilizerLabels[language][value] ?? fallback);
 }
 
 export function fertilizerGroupLabel(language: AppLanguage, fallback?: string) {
   if (!fallback) return "";
-  return language === "en" ? "Decision tools" : fallback;
+  return toNFC(language === "en" ? "Decision tools" : fallback);
 }

@@ -5,7 +5,7 @@
 /* ---------- shared tool title bar ---------- */
 .tool-titlebar { border-bottom: 2px solid var(--ink); padding: 22px 0 18px; display:flex; align-items:flex-end; justify-content:space-between; gap:24px; }
 .tool-titlebar .p-kicker { margin-bottom: 10px; }
-.tool-titlebar h1 { font-family: var(--serif); font-weight: 600; font-size: 40px; line-height: 1.12; letter-spacing: 0; margin: 0; max-width: 22ch; padding-top: 0.03em; }
+.tool-titlebar h1 { font-family: var(--serif); font-weight: 600; font-size: var(--type-page-title); line-height: var(--lh-page-title); letter-spacing: 0; margin: 0; max-width: var(--maxw-page-title); padding-top: 0.03em; text-wrap: balance; }
 .tool-titlebar .lead { font-size: 14px; color: var(--ink-soft); max-width: 40ch; line-height:1.5; }
 
 /* ============================================================
@@ -349,6 +349,7 @@
   .tool-titlebar h1 {
     max-width: 100%;
     overflow-wrap: anywhere;
+    text-wrap: balance;
     white-space: normal;
   }
 
@@ -434,8 +435,8 @@
   }
 
   .tool-titlebar h1 {
-    font-size: clamp(28px, 8vw, 32px);
-    line-height: 1.06;
+    font-size: var(--type-page-title-mobile);
+    line-height: var(--lh-page-title);
   }
 
   .g-browser,
@@ -471,19 +472,19 @@
   .tool-titlebar h1 {
     width: 100%;
     max-width: calc(100vw - 80px);
-    font-size: clamp(27px, 7.4vw, 31px);
-    line-height: 1.08;
+    font-size: var(--type-page-title-mobile);
+    line-height: var(--lh-page-title);
     overflow-wrap: break-word;
-    text-wrap: auto;
+    text-wrap: balance;
     white-space: normal;
   }
 
   .guide-workspace.paper .tool-titlebar h1 {
     width: auto !important;
-    max-width: 12ch !important;
-    font-size: clamp(25px, 6.8vw, 28px) !important;
-    line-height: 1.1;
-    text-wrap: auto;
+    max-width: var(--maxw-page-title) !important;
+    font-size: var(--type-page-title-mobile) !important;
+    line-height: var(--lh-page-title);
+    text-wrap: balance;
   }
 
   .guide-workspace.paper .tool-titlebar .lead {
@@ -493,10 +494,10 @@
 
   .roi-page.paper .tool-titlebar h1 {
     width: auto !important;
-    max-width: 12ch !important;
-    font-size: clamp(27px, 7.2vw, 31px) !important;
-    line-height: 1.1;
-    text-wrap: auto;
+    max-width: var(--maxw-page-title) !important;
+    font-size: var(--type-page-title-mobile) !important;
+    line-height: var(--lh-page-title);
+    text-wrap: balance;
   }
 
   .g-families {

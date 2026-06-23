@@ -67,6 +67,7 @@ import { displayProvince } from "./lib/displayLabels";
 import { splitLanguagePath, withLanguagePrefix } from "./lib/localizedRoutes";
 import { messageFromError, safeErrorMessage } from "./lib/errorMessages";
 import { trackEvent, trackPageView } from "./lib/analytics";
+import { toNFC } from "./lib/text";
 
 const DataGrid = lazy(() => import("./components/DataGrid").then(({ DataGrid }) => ({ default: DataGrid })));
 const AnalysisBrief = lazy(() => import("./components/AnalysisBrief").then(({ AnalysisBrief }) => ({ default: AnalysisBrief })));
@@ -118,10 +119,10 @@ const NEWS_REFRESH_INTERVAL_MS = 15 * 60 * 1000;
 const MAX_WATCHLIST_ITEMS = 8;
 
 const cropLabels: Record<CropType, string> = {
-  sau_rieng: "sầu riêng",
-  ca_phe: "cà phê",
-  ho_tieu: "hồ tiêu",
-  lua: "lúa"
+  sau_rieng: toNFC("sầu riêng"),
+  ca_phe: toNFC("cà phê"),
+  ho_tieu: toNFC("hồ tiêu"),
+  lua: toNFC("lúa")
 };
 
 const cropLabelsEn: Record<CropType, string> = {
@@ -155,11 +156,11 @@ const appCopy = {
     retry: "Thử lại",
     loadingMarket: "Đang tải dữ liệu thị trường...",
     loadingUi: "Đang tải giao diện...",
-    forecastTitle: (cropName: string) => `Giá ${cropName} hôm nay & dự báo 30 ngày`,
+    forecastTitle: (cropName: string) => toNFC(`Giá ${cropName} hôm nay & dự báo 30 ngày`),
     forecastDescription: (cropName: string) =>
-      `Cập nhật giá ${cropName} mới nhất theo tỉnh, vùng trồng và giống. Xem biểu đồ lịch sử, dự báo 30 ngày, cảnh báo bán và độ tin cậy dữ liệu.`,
-    quoteTitleToday: (cropName: string) => `Giá ${cropName} hôm nay`,
-    quoteForecast: (province?: string | null) => `Dự báo 30 ngày${province ? ` tại ${province}` : ""}`,
+      toNFC(`Cập nhật giá ${cropName} mới nhất theo tỉnh, vùng trồng và giống. Xem biểu đồ lịch sử, dự báo 30 ngày, cảnh báo bán và độ tin cậy dữ liệu.`),
+    quoteTitleToday: (cropName: string) => toNFC(`Giá ${cropName} hôm nay`),
+    quoteForecast: (province?: string | null) => toNFC(`Dự báo 30 ngày${province ? ` tại ${province}` : ""}`),
     timeRange: "Khoảng thời gian",
     days: "ngày",
     dataLayers: "Lớp dữ liệu",
@@ -1135,9 +1136,9 @@ function RoutedApp() {
               <div className="quote-title-row">
                 <ActiveIcon size={20} />
                 <h1>
-                  <span className="quote-h1-line1">{copy.quoteTitleToday(cropLabel)}{"\u00a0"}</span>
+                  <span className="quote-h1-line1">{toNFC(copy.quoteTitleToday(cropLabel))}{"\u00a0"}</span>
                   <span className="quote-h1-line2">
-                    {copy.quoteForecast(displayProvince(selectedRegion?.province, selectedRegion?.region_name) || null)}
+                    {toNFC(copy.quoteForecast(displayProvince(selectedRegion?.province, selectedRegion?.region_name) || null))}
                   </span>
                 </h1>
               </div>
@@ -1459,9 +1460,9 @@ function buildPriceSchema({
   return {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: `${varietyLabel} ${regionLabel}`,
-      description: `Giá ${cropLabel} hôm nay tại ${regionLabel}, kèm lịch sử giá và dự báo 30 ngày.`,
-      category: `Nông sản / ${cropLabel}`,
+    name: toNFC(`${varietyLabel} ${regionLabel}`),
+      description: toNFC(`Giá ${cropLabel} hôm nay tại ${regionLabel}, kèm lịch sử giá và dự báo 30 ngày.`),
+      category: toNFC(`Nông sản / ${cropLabel}`),
     offers: {
       "@type": "AggregateOffer",
       priceCurrency: "VND",

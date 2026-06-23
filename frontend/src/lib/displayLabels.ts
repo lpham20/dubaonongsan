@@ -1,5 +1,6 @@
 import type { AppLanguage } from "../contexts/LanguageContext";
 import type { CropType, FertilizerCrop, FertilizerStage, SoilTexture } from "./api";
+import { toNFC } from "./text";
 
 export function cropLabel(value: CropType | "", language: AppLanguage) {
   const labels: Record<AppLanguage, Record<CropType | "", string>> = {
@@ -18,7 +19,7 @@ export function cropLabel(value: CropType | "", language: AppLanguage) {
       lua: "Rice"
     }
   };
-  return labels[language][value] ?? value;
+  return toNFC(labels[language][value] ?? value);
 }
 
 export function fertilizerCropLabel(value: FertilizerCrop, language: AppLanguage) {
@@ -34,7 +35,7 @@ export function fertilizerCropLabel(value: FertilizerCrop, language: AppLanguage
       durian: "Durian"
     }
   };
-  return labels[language][value];
+  return toNFC(labels[language][value]);
 }
 
 export function fertilizerStageLabel(value: FertilizerStage, language: AppLanguage) {
@@ -60,7 +61,7 @@ export function fertilizerStageLabel(value: FertilizerStage, language: AppLangua
       fruit_fill: "Durian fruit filling"
     }
   };
-  return labels[language][value];
+  return toNFC(labels[language][value]);
 }
 
 export function soilTextureLabel(value: SoilTexture, language: AppLanguage) {
@@ -80,15 +81,15 @@ export function soilTextureLabel(value: SoilTexture, language: AppLanguage) {
       alluvial: "Alluvial soil"
     }
   };
-  return labels[language][value];
+  return toNFC(labels[language][value]);
 }
 
 export function provinceLabel(value: string | null | undefined) {
-  return value || "";
+  return toNFC(value || "");
 }
 
 export function displayProvince(province: string | null | undefined, region?: string | null) {
-  return province || region || "";
+  return toNFC(province || region || "");
 }
 
 export function translateFertilizerProduct(value: string, language: AppLanguage) {

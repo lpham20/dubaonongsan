@@ -272,18 +272,22 @@
 }
 
 .app-shell.forecast-shell .market-quote-header h1 {
+  display: block;
+  max-width: var(--maxw-page-title);
   font-family: var(--serif);
-  font-size: clamp(27px, 2.2vw, 34px);
+  font-size: var(--type-page-title);
   font-weight: 600;
-  line-height: 1.08;
+  line-height: var(--lh-page-title);
+  text-wrap: balance;
 }
 
-.app-shell.forecast-shell .quote-h1-line1,
-.app-shell.forecast-shell .quote-h1-line2 {
+.app-shell.forecast-shell .quote-h1-line1 {
   display: inline;
 }
 
 .app-shell.forecast-shell .quote-h1-line2 {
+  display: block;
+  margin-top: 4px;
   color: var(--color-text-muted);
   font-family: var(--font-sans);
   font-size: 0.46em;

@@ -603,11 +603,13 @@
 .app-shell.forecast-shell.term .quote-title-row h1 {
   color: var(--ink);
   font-family: var(--serif);
-  font-size: clamp(30px, 3.4vw, 46px);
+  font-size: var(--type-page-title);
   font-weight: 600;
   letter-spacing: 0;
-  line-height: 1.12;
+  line-height: var(--lh-page-title);
+  max-width: var(--maxw-page-title);
   padding-top: 0.03em;
+  text-wrap: balance;
 }
 
 .app-shell.forecast-shell.term .quote-meta {
@@ -978,7 +980,7 @@
   }
 
   .app-shell.forecast-shell.term .quote-title-row h1 {
-    font-size: 30px;
+    font-size: var(--type-page-title-mobile);
   }
 
   .app-shell.forecast-shell.term .terminal-intel,

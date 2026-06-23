@@ -64,10 +64,11 @@
   margin: 0 0 16px;
   color: var(--ink);
   font-family: var(--serif);
-  font-size: clamp(38px, 5vw, 50px);
+  font-size: var(--type-page-title);
   font-weight: 600;
   letter-spacing: 0;
-  line-height: 1.1;
+  line-height: var(--lh-page-title);
+  max-width: var(--maxw-page-title);
   padding-top: 0.03em;
   text-wrap: balance;
 }
@@ -571,7 +572,8 @@
   }
 
   .p-headline {
-    font-size: 34px;
+    font-size: var(--type-page-title-mobile);
+    max-width: 100%;
   }
 
   .p-lead,

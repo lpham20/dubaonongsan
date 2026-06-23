@@ -447,18 +447,21 @@ body.mobile-drawer-locked {
 
 @media (max-width: 860px) {
   .market-quote-header h1 {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    font-size: 22px;
-    line-height: 1.15;
+    display: block;
+    max-width: 100%;
+    font-size: var(--type-page-title-mobile);
+    line-height: var(--lh-page-title);
+    text-wrap: balance;
   }
 
   .quote-h1-line1 {
-    font-weight: 800;
+    display: inline;
+    font-weight: 600;
   }
 
   .quote-h1-line2 {
+    display: block;
+    margin-top: 4px;
     color: var(--color-text-soft);
     font-size: 14px;
     font-weight: 600;
@@ -635,17 +638,23 @@ body.mobile-drawer-locked {
 @media (min-width: 861px) {
   .market-quote-header h1 {
     display: block;
-    font-size: clamp(26px, 2.4vw, 34px);
-    line-height: 1.15;
+    font-size: var(--type-page-title);
+    line-height: var(--lh-page-title);
+    max-width: var(--maxw-page-title);
+    text-wrap: balance;
   }
 
   .market-quote-header h1 .quote-h1-line1::after {
-    content: " ";
+    content: none;
   }
 
-  .market-quote-header h1 .quote-h1-line1,
-  .market-quote-header h1 .quote-h1-line2 {
+  .market-quote-header h1 .quote-h1-line1 {
     display: inline;
+  }
+
+  .market-quote-header h1 .quote-h1-line2 {
+    display: block;
+    margin-top: 4px;
   }
 
   .site-footer-section summary {

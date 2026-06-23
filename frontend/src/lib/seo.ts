@@ -1,14 +1,15 @@
 import type { CropType, NewsArticle } from "./api";
+import { toNFC } from "./text";
 
 export const SITE_ORIGIN = "https://dubaonongsan.com";
 export const SITE_NAME = "Dự báo nông sản";
 export const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}/og-cover.jpg`;
 
 export const cropSeoLabels: Record<CropType, string> = {
-  sau_rieng: "sầu riêng",
-  ca_phe: "cà phê",
-  ho_tieu: "hồ tiêu",
-  lua: "lúa"
+  sau_rieng: toNFC("sầu riêng"),
+  ca_phe: toNFC("cà phê"),
+  ho_tieu: toNFC("hồ tiêu"),
+  lua: toNFC("lúa")
 };
 
 export function slugFromText(value: string) {

@@ -22,6 +22,7 @@ import { LivePriceTicker } from "./LivePriceTicker";
 import { LoadingSkeleton } from "./LoadingSkeleton";
 import { messageFromError } from "../lib/errorMessages";
 import { trackEvent } from "../lib/analytics";
+import { toNFC } from "../lib/text";
 
 type Props = {
   articles: NewsArticle[];
@@ -61,19 +62,19 @@ type PriceNewsCrop = Exclude<NewsView, "latest">;
 
 const PRICE_VIEW_META: Record<PriceNewsCrop, { title: string; cropName: string; forecastLabel: string }> = {
   sau_rieng: {
-    title: "Giá sầu riêng",
-    cropName: "sầu riêng",
-    forecastLabel: "dự báo giá sầu riêng"
+    title: toNFC("Giá sầu riêng"),
+    cropName: toNFC("sầu riêng"),
+    forecastLabel: toNFC("dự báo giá sầu riêng")
   },
   ca_phe: {
-    title: "Giá cà phê",
-    cropName: "cà phê",
-    forecastLabel: "dự báo giá cà phê"
+    title: toNFC("Giá cà phê"),
+    cropName: toNFC("cà phê"),
+    forecastLabel: toNFC("dự báo giá cà phê")
   },
   ho_tieu: {
-    title: "Giá hồ tiêu",
-    cropName: "hồ tiêu",
-    forecastLabel: "dự báo giá hồ tiêu"
+    title: toNFC("Giá hồ tiêu"),
+    cropName: toNFC("hồ tiêu"),
+    forecastLabel: toNFC("dự báo giá hồ tiêu")
   }
 };
 
@@ -355,7 +356,7 @@ export function NewsPortal({ articles, canScrape, busy, onScrape, activeView, on
               <span className="bar" />
               {pageCopy.heroKicker}
             </span>
-            <h1>{pageCopy.heroTitle}</h1>
+            <h1>{toNFC(pageCopy.heroTitle)}</h1>
           </div>
           {canScrape ? (
             <button type="button" className="news-refresh-button" onClick={onScrape} disabled={busy}>
@@ -557,7 +558,7 @@ function PriceBoardSection({
               </>
             ) : (
               <>
-                <span>{meta.title} hôm nay</span>
+                <span>{toNFC(`${meta.title} hôm nay`)}</span>
                 <span className="news-price-board-title-date">ngày {formatDate(latestDate, language)}</span>
               </>
             )}
@@ -1199,7 +1200,7 @@ function sourceInitials(sourceName: string) {
 }
 
 function displayTitle(title: string, maxLength = 90) {
-  const cleaned = title
+  const cleaned = toNFC(title)
     .replace(/\s+/g, " ")
     .replace(/\s+(Đây là|Trong đó|Với vai trò|Việt Nam và|Theo đó)\b.*$/i, "")
     .trim();

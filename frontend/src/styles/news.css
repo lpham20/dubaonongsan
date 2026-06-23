@@ -6,14 +6,14 @@
 .n-titlebar { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; border-bottom: 2px solid var(--ink); padding: 22px 0 16px; }
 .n-titlebar .p-kicker { margin-bottom: 10px; }
 .n-titlebar h1 {
-  max-width: min(860px, 76vw);
+  max-width: var(--maxw-page-title);
   margin: 0;
   padding-top: 0.03em;
   font-family: var(--serif);
-  font-size: clamp(42px, 4.2vw, 56px);
+  font-size: var(--type-page-title);
   font-weight: 600;
   letter-spacing: 0;
-  line-height: 1.1;
+  line-height: var(--lh-page-title);
   overflow-wrap: normal;
   text-wrap: balance;
 }
@@ -259,14 +259,14 @@
 }
 
 .news-price-board-header h1 {
-  max-width: min(760px, 100%);
+  max-width: var(--maxw-page-title);
   margin: 0;
   color: var(--ink);
   font-family: var(--serif);
-  font-size: clamp(44px, 4.7vw, 60px);
+  font-size: var(--type-page-title);
   font-weight: 600;
   letter-spacing: 0;
-  line-height: 1.08;
+  line-height: var(--lh-page-title);
   overflow-wrap: normal;
   text-wrap: balance;
 }
@@ -558,7 +558,7 @@
   }
 
   .n-titlebar h1 {
-    font-size: clamp(30px, 8vw, 34px);
+    font-size: var(--type-page-title-mobile);
     max-width: 100%;
     overflow-wrap: anywhere;
     text-wrap: balance;
@@ -664,7 +664,7 @@
 
   .news-price-board-header h1 {
     max-width: none;
-    font-size: 42px;
+    font-size: var(--type-page-title-mobile);
   }
 
   .price-board-kpis {

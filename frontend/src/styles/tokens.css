@@ -85,6 +85,10 @@
   --type-h1-mobile: 24px;
   --type-display: 56px;
   --type-display-mobile: 36px;
+  --type-page-title: clamp(32px, 3.6vw, 46px);
+  --type-page-title-mobile: clamp(28px, 7.4vw, 34px);
+  --lh-page-title: 1.12;
+  --maxw-page-title: 22ch;
 
   --text-xs: var(--type-label);
   --text-sm: var(--type-data);

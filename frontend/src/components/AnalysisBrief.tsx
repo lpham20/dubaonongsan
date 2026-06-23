@@ -1,6 +1,7 @@
 import { Brain, LineChart, Sparkles } from "./icons";
 import { useLanguage } from "../contexts/LanguageContext";
 import type { ChangeExplanation, ForecastPoint, PricePoint } from "../lib/api";
+import { toNFC } from "../lib/text";
 
 type Props = {
   cropLabel: string;
@@ -17,6 +18,9 @@ export function AnalysisBrief({ cropLabel, regionLabel, varietyLabel, historical
   const { language } = useLanguage();
   const locale = language === "en" ? "en-US" : "vi-VN";
   const money = (value: number) => `${Math.round(value).toLocaleString(locale)} VND/kg`;
+  const displayCropLabel = toNFC(cropLabel);
+  const displayRegionLabel = toNFC(regionLabel);
+  const displayVarietyLabel = toNFC(varietyLabel);
   const prices = historical
     .filter((point) => typeof point.max_price_vnd === "number")
     .map((point) => Number(point.max_price_vnd));
@@ -31,7 +35,7 @@ export function AnalysisBrief({ cropLabel, regionLabel, varietyLabel, historical
   const outlookPct = latest ? ((forecastEnd - latest) / latest) * 100 : 0;
   const volatility = volatilityPct(prices.slice(-30));
   const tone = classifyTone(changePct, dayPct, latest, sma7, sma30, volatility, outlookPct);
-  const toneText = toneCopy(tone, cropLabel, regionLabel, language);
+  const toneText = toneCopy(tone, displayCropLabel, displayRegionLabel, language);
   const drivers = language === "en" ? [] : (explanation?.drivers.slice(0, 6) ?? []);
 
   return (
@@ -46,7 +50,7 @@ export function AnalysisBrief({ cropLabel, regionLabel, varietyLabel, historical
         {language === "en" ? (
           <>
             <p>
-              For {varietyLabel}, the latest price is {money(latest)}. Across the selected data window, the price is
+              For {displayVarietyLabel}, the latest price is {money(latest)}. Across the selected data window, the price is
               {changePct >= 0 ? " up " : " down "}
               {Math.abs(changePct).toFixed(2)}%, while the latest session {dayPct >= 0 ? "edged up" : "moved lower"} by {Math.abs(dayPct).toFixed(2)}%.
               It is now {latest >= sma7 ? "above" : "below"} the 7-day average and {latest >= sma30 ? "above" : "below"} the 30-day average,
@@ -62,7 +66,7 @@ export function AnalysisBrief({ cropLabel, regionLabel, varietyLabel, historical
         ) : (
           <>
             <p>
-              Với giống {varietyLabel}, giá hiện ở mức {money(latest)}. Trong khung dữ liệu đang xem, giá
+              Với giống {displayVarietyLabel}, giá hiện ở mức {money(latest)}. Trong khung dữ liệu đang xem, giá
               {changePct >= 0 ? " tăng " : " giảm "}
               {Math.abs(changePct).toFixed(2)}%, phiên gần nhất {dayPct >= 0 ? "nhích lên" : "lùi lại"} {Math.abs(dayPct).toFixed(2)}%.
               Giá hiện {latest >= sma7 ? "cao hơn mặt bằng 7 ngày gần đây" : "thấp hơn mặt bằng 7 ngày gần đây"} và
@@ -163,27 +167,27 @@ function toneCopy(tone: MarketTone, cropLabel: string, regionLabel: string, lang
   }
   const byTone = {
     breakout: {
-      title: `Giá ${cropLabel} tại ${regionLabel} đang lên nhanh so với mặt bằng gần đây`,
+        title: toNFC(`Giá ${cropLabel} tại ${regionLabel} đang lên nhanh so với mặt bằng gần đây`),
       marketRead: "bên thu mua đang chấp nhận trả cao hơn để gom đủ hàng đạt chuẩn",
       forwardRead: "Nếu lượng hàng đạt chuẩn không tăng nhanh, mặt bằng giá hiện tại có thể còn được giữ."
     },
     uptrend: {
-      title: `Giá ${cropLabel} tại ${regionLabel} đang nhích lên nhưng chưa quá nóng`,
+      title: toNFC(`Giá ${cropLabel} tại ${regionLabel} đang nhích lên nhưng chưa quá nóng`),
       marketRead: "giá được đỡ bởi nhu cầu mua đều, nhưng lượng hàng ra vườn vẫn đủ để thị trường không bị căng",
       forwardRead: "Giá còn cơ hội giữ tốt, nhưng cần theo dõi phản ứng của thương lái khi lượng hàng mới ra nhiều hơn."
     },
     sideways: {
-      title: `Giá ${cropLabel} tại ${regionLabel} đang đi ngang trong biên hẹp`,
+      title: toNFC(`Giá ${cropLabel} tại ${regionLabel} đang đi ngang trong biên hẹp`),
       marketRead: "người bán và bên thu mua đang khá cân bằng, chưa bên nào tạo được ưu thế rõ",
       forwardRead: "Kịch bản cơ sở là giá giữ quanh vùng hiện tại, chỉ thay đổi mạnh khi có tin mới về sản lượng, thời tiết hoặc đầu ra."
     },
     pullback: {
-      title: `Giá ${cropLabel} tại ${regionLabel} đang hạ nhiệt sau nhịp trước đó`,
+      title: toNFC(`Giá ${cropLabel} tại ${regionLabel} đang hạ nhiệt sau nhịp trước đó`),
       marketRead: "nguồn hàng ngắn hạn hoặc tâm lý bán ra đang nhỉnh hơn nhu cầu mua",
       forwardRead: "Cần quan sát phản ứng của thương lái ở vùng giá thấp hơn; nếu đơn mua quay lại, giá có thể ổn định thay vì giảm sâu."
     },
     downtrend: {
-      title: `Giá ${cropLabel} tại ${regionLabel} đang chịu sức ép giảm rõ hơn`,
+      title: toNFC(`Giá ${cropLabel} tại ${regionLabel} đang chịu sức ép giảm rõ hơn`),
       marketRead: "giá thấp hơn mặt bằng nhiều ngày gần đây, cho thấy bên mua đang thận trọng hơn",
       forwardRead: "Rủi ro giảm còn hiện hữu nếu nhu cầu mua không cải thiện hoặc lượng hàng ra thị trường tiếp tục dày lên."
     }

@@ -1,0 +1,66 @@
+/* Final title rhythm guard: keep page titles consistent after legacy overrides. */
+.paper .p-headline,
+.finance-news-page .n-titlebar h1,
+.finance-news-page .news-price-board-header h1,
+.paper .tool-titlebar h1,
+.app-shell.forecast-shell .market-quote-header h1,
+.app-shell.forecast-shell.term .quote-title-row h1 {
+  max-width: var(--maxw-page-title) !important;
+  font-family: var(--serif) !important;
+  font-size: var(--type-page-title) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  line-height: var(--lh-page-title) !important;
+  padding-top: 0.03em;
+  overflow: visible !important;
+  text-wrap: balance !important;
+}
+
+.paper .p-headline,
+.finance-news-page .n-titlebar h1,
+.finance-news-page .news-price-board-header h1,
+.paper .tool-titlebar h1 {
+  color: var(--ink) !important;
+}
+
+.app-shell.forecast-shell .market-quote-header h1,
+.app-shell.forecast-shell.term .quote-title-row h1 {
+  display: block !important;
+}
+
+.app-shell.forecast-shell .quote-h1-line1,
+.app-shell.forecast-shell.term .quote-h1-line1 {
+  display: inline !important;
+  max-width: 100% !important;
+  font-weight: 600 !important;
+  overflow-wrap: normal !important;
+  white-space: normal !important;
+}
+
+.app-shell.forecast-shell .quote-h1-line2,
+.app-shell.forecast-shell.term .quote-h1-line2 {
+  display: block !important;
+  max-width: 100% !important;
+  margin-top: 4px !important;
+  overflow-wrap: normal !important;
+  white-space: normal !important;
+}
+
+.market-quote-header h1 .quote-h1-line1::after {
+  content: none !important;
+}
+
+@media (max-width: 860px) {
+  .paper .p-headline,
+  .finance-news-page .n-titlebar h1,
+  .finance-news-page .news-price-board-header h1,
+  .paper .tool-titlebar h1,
+  .app-shell.forecast-shell .market-quote-header h1,
+  .app-shell.forecast-shell.term .quote-title-row h1 {
+    max-width: 100% !important;
+    font-size: var(--type-page-title-mobile) !important;
+    line-height: var(--lh-page-title) !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+}
