@@ -23,7 +23,14 @@
   --soil: #7c5b36;
   --paper: #fffdf8;
   --line: #cddbd1;
+  --line-2: #cbc8bd;
   --muted: #5a6b64;
+
+  --bg: #ffffff;
+  --bg-1: #faf9f6;
+  --ink: #14181a;
+  --ink-soft: #3f464a;
+  --ink-mute: #767c7e;
 
   --ink-black: #0a0e0c;
   --ink-black-2: #11161a;
@@ -161,6 +168,13 @@
 }
 
 .forecast-shell {
+  --bg: var(--ink-black);
+  --bg-1: #0e1311;
+  --line: rgba(255, 255, 255, 0.09);
+  --line-2: rgba(255, 255, 255, 0.16);
+  --ink: #eef3f0;
+  --ink-soft: #a7b2ac;
+  --ink-mute: #6c766f;
   --color-bg: var(--ink-black);
   --color-bg-band: var(--ink-black-2);
   --color-surface: #131918;

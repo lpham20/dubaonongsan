@@ -29,6 +29,7 @@ import "./styles/mobile-bloomberg.css";
 import "./styles/live-ticker.css";
 import "./styles/cookie-consent.css";
 import "./styles/title-fixes.css";
+import "./styles/header-panel-fixes.css";
 
 const SERVICE_WORKER_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
 const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
